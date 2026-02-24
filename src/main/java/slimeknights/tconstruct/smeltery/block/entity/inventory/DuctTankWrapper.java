@@ -1,8 +1,8 @@
 package slimeknights.tconstruct.smeltery.block.entity.inventory;
 
 import lombok.AllArgsConstructor;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 @AllArgsConstructor
 public class DuctTankWrapper implements IFluidHandler {

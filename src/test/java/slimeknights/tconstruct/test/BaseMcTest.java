@@ -2,10 +2,10 @@ package slimeknights.tconstruct.test;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.server.Bootstrap;
-import net.minecraftforge.common.TierSortingRegistry;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.network.NetworkHooks;
-import net.minecraftforge.network.NetworkRegistry;
+import net.neoforged.neoforge.common.TierSortingRegistry;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.neoforge.network.NetworkHooks;
+import net.neoforged.neoforge.network.NetworkRegistry;
 import org.junit.jupiter.api.BeforeAll;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
