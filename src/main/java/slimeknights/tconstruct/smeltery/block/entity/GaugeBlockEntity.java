@@ -6,7 +6,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.neoforged.neoforge.common.capabilities.ForgeCapabilities;
+import net.neoforged.neoforge.common.capabilities.Capabilities;
 import net.neoforged.neoforge.common.util.LazyOptional;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.EmptyFluidHandler;
@@ -33,7 +33,7 @@ public class GaugeBlockEntity extends BlockEntity {
       Direction side = getBlockState().getValue(BlockStateProperties.FACING);
       BlockEntity te = level.getBlockEntity(getBlockPos().relative(side.getOpposite()));
       if (te != null) {
-        neighbor = te.getCapability(ForgeCapabilities.FLUID_HANDLER, side);
+        neighbor = te.getCapability(Capabilities.FLUID_HANDLER, side);
       } else {
         neighbor = LazyOptional.empty();
       }

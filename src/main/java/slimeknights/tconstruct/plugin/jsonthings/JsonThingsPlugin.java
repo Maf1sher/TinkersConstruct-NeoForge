@@ -1,6 +1,6 @@
 package slimeknights.tconstruct.plugin.jsonthings;
 
-import net.neoforged.neoforge.api.distmarker.Dist;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
 
 /** This plugin is referenced in the main class, so it may not directly access JSON Things classes. It may access classes that access them however */

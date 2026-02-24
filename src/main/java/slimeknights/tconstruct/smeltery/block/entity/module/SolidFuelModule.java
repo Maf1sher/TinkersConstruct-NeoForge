@@ -6,7 +6,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.common.ForgeHooks;
-import net.neoforged.neoforge.common.capabilities.ForgeCapabilities;
+import net.neoforged.neoforge.common.capabilities.Capabilities;
 import net.neoforged.neoforge.common.util.LazyOptional;
 import net.neoforged.neoforge.common.util.NonNullConsumer;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -115,11 +115,11 @@ public class SolidFuelModule extends FuelModule {
     if (te != null) {
       // first, identify a capability that has what we need
       // on the chance both are present, we prioritize fluid; we don't expect that to change
-      fluidHandler = te.getCapability(ForgeCapabilities.FLUID_HANDLER);
+      fluidHandler = te.getCapability(Capabilities.FLUID_HANDLER);
       if (fluidHandler.isPresent()) {
         fluidHandler.addListener(fluidListener);
       }
-      itemHandler = te.getCapability(ForgeCapabilities.ITEM_HANDLER);
+      itemHandler = te.getCapability(Capabilities.ITEM_HANDLER);
       if (itemHandler.isPresent()) {
         itemHandler.addListener(itemListener);
       }

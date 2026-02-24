@@ -3,7 +3,7 @@ package slimeknights.tconstruct.library.tools.capability;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.neoforged.neoforge.common.capabilities.Capability;
-import net.neoforged.neoforge.common.capabilities.ForgeCapabilities;
+import net.neoforged.neoforge.common.capabilities.Capabilities;
 import net.neoforged.neoforge.common.util.LazyOptional;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 import slimeknights.tconstruct.TConstruct;
@@ -128,7 +128,7 @@ public record ToolEnergyCapability(Supplier<? extends IToolStackView> tool) impl
 
     @Override
     public <T> LazyOptional<T> getCapability(IToolStackView tool, Capability<T> cap) {
-      if (cap == ForgeCapabilities.ENERGY && tool.getStats().getInt(MAX_STAT) > 0) {
+      if (cap == Capabilities.ENERGY && tool.getStats().getInt(MAX_STAT) > 0) {
         return energyCap.cast();
       }
       return LazyOptional.empty();

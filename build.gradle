@@ -151,7 +151,7 @@ neoForge {
 
 dependencies {
     // Mantle dependency - use local build from Mantle-NeoForge
-    implementation "slimeknights.mantle:Mantle:${minecraft_version}-${mantle_version}"
+    implementation fileTree(dir: '../Mantle-NeoForge/build/libs', include: 'Mantle-*.jar')
 
     // compile against the JEI API but do not include it at runtime
     compileOnly "mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"
