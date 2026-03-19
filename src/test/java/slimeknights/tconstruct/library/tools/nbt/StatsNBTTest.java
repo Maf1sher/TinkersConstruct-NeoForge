@@ -5,7 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.Tiers;
-import net.neoforged.neoforge.common.TierSortingRegistry;
+import slimeknights.tconstruct.library.utils.TierRegistry;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -90,7 +90,7 @@ class StatsNBTTest extends BaseMcTest {
     CompoundTag nbt = testStatsNBT.serializeToNBT();
     
     assertThat(nbt.getInt(ToolStats.DURABILITY.getName().toString())).isEqualTo(1);
-    assertThat(nbt.getString(ToolStats.HARVEST_TIER.getName().toString())).isEqualTo(Objects.requireNonNull(TierSortingRegistry.getName(Tiers.NETHERITE)).toString());
+    assertThat(nbt.getString(ToolStats.HARVEST_TIER.getName().toString())).isEqualTo(Objects.requireNonNull(TierRegistry.getName(Tiers.NETHERITE)).toString());
     assertThat(nbt.getFloat(ToolStats.ATTACK_DAMAGE.getName().toString())).isEqualTo(3);
     assertThat(nbt.getFloat(ToolStats.MINING_SPEED.getName().toString())).isEqualTo(4);
     assertThat(nbt.getFloat(ToolStats.ATTACK_SPEED.getName().toString())).isEqualTo(5);
@@ -107,7 +107,7 @@ class StatsNBTTest extends BaseMcTest {
   void deserialize() {
     CompoundTag nbt = new CompoundTag();
     nbt.putInt(ToolStats.DURABILITY.getName().toString(), 6);
-    nbt.putString(ToolStats.HARVEST_TIER.getName().toString(), Objects.requireNonNull(TierSortingRegistry.getName(Tiers.GOLD)).toString());
+    nbt.putString(ToolStats.HARVEST_TIER.getName().toString(), Objects.requireNonNull(TierRegistry.getName(Tiers.GOLD)).toString());
     nbt.putFloat(ToolStats.ATTACK_DAMAGE.getName().toString(), 4);
     nbt.putFloat(ToolStats.MINING_SPEED.getName().toString(), 3.5f);
     nbt.putFloat(ToolStats.ATTACK_SPEED.getName().toString(), 2);

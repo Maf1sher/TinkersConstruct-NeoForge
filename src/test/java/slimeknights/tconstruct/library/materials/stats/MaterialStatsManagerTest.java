@@ -1,8 +1,9 @@
 package slimeknights.tconstruct.library.materials.stats;
 
+import net.minecraft.resources.ResourceLocation;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import slimeknights.mantle.data.listener.MergingJsonFileLoader;
+import slimeknights.tconstruct.test.MergingJsonFileLoader;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.test.BaseMcTest;
@@ -114,7 +115,7 @@ class MaterialStatsManagerTest extends BaseMcTest {
   @Test
   void loadMissingFile_ignored() {
     MaterialId material = new MaterialId(TConstruct.getResource("nonexistant"));
-    fileLoader.loadAndParseFiles(null);
+    fileLoader.loadAndParseFiles(null, new ResourceLocation[0]);
 
     // ensure that we get this far and that querying the missing material causes no errors
     Optional<ComplexTestStats> optionalStats = materialStatsManager.getStats(material, STATS_ID_DONT_CARE);

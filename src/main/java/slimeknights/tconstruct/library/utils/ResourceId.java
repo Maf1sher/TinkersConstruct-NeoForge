@@ -9,7 +9,7 @@ import java.util.function.BiFunction;
  * Helper for type safety in IDs. Uses composition instead of inheritance since ResourceLocation is final in 1.21.1.
  * @see IdParser
  */
-public abstract class ResourceId {
+public abstract class ResourceId implements Comparable<ResourceId> {
   private final ResourceLocation location;
 
   protected ResourceId(ResourceLocation location) {
@@ -76,6 +76,7 @@ public abstract class ResourceId {
   }
 
   /** Compare with another ResourceId */
+  @Override
   public int compareTo(ResourceId other) {
     return location.compareTo(other.location);
   }

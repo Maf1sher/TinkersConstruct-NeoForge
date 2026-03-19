@@ -3,9 +3,11 @@ package slimeknights.tconstruct.library.tools.layout;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import io.netty.buffer.Unpooled;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -66,7 +68,7 @@ class LayoutIconTest extends BaseMcTest {
   void item_bufferReadWrite() {
     ItemStack original = new ItemStack(Items.DIAMOND_PICKAXE);
     LayoutIcon itemIcon = LayoutIcon.ofItem(original);
-    FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
+    RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY));
     itemIcon.write(buffer);
 
     LayoutIcon decoded = LayoutIcon.read(buffer);
@@ -81,10 +83,9 @@ class LayoutIconTest extends BaseMcTest {
     ItemStack original = new ItemStack(Items.DIAMOND_PICKAXE);
     LayoutIcon itemIcon = LayoutIcon.ofItem(original);
     JsonObject json = itemIcon.toJson();
-    assertThat(json.entrySet()).hasSize(2);
+    // In 1.21, items no longer have NBT tags by default - only "item" key is present for plain stacks
+    assertThat(json.entrySet()).hasSize(1);
     assertThat(GsonHelper.getAsString(json, "item")).isEqualTo(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_PICKAXE).toString());
-    assert original.getTag() != null;
-    assertThat(GsonHelper.getAsString(json, "nbt")).isEqualTo(original.getTag().toString());
   }
 
   @Test
@@ -97,8 +98,9 @@ class LayoutIconTest extends BaseMcTest {
     ItemStack stack = icon.getValue(ItemStack.class);
     assertThat(stack).isNotNull();
     assertThat(stack.getItem()).isEqualTo(Items.DIAMOND);
-    CompoundTag nbt = stack.getTag();
-    assertThat(nbt).isNotNull();
+    net.minecraft.world.item.component.CustomData customData = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+    assertThat(customData).isNotNull();
+    CompoundTag nbt = customData.copyTag();
     assertThat(nbt.getInt("test")).isEqualTo(1);
   }
 

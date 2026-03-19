@@ -56,8 +56,10 @@ public class ToolItemDurabilityTest extends ToolItemTest {
 
     testItemStack.setDamageValue(99999999);
 
-    assertThat(tool.getDamage()).isEqualTo(statDurability);
-    assertThat(tool.isBroken()).isTrue();
+    // In 1.21 DataComponents, re-read from the stack since CustomData returns copies
+    ToolStack toolAfter = ToolStack.from(testItemStack);
+    assertThat(toolAfter.getDamage()).isEqualTo(statDurability);
+    assertThat(toolAfter.isBroken()).isTrue();
   }
 
   /*

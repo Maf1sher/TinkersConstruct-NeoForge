@@ -2,52 +2,35 @@ package slimeknights.tconstruct.test;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.server.Bootstrap;
-import net.neoforged.neoforge.common.TierSortingRegistry;
 import net.neoforged.fml.ModLoadingContext;
-import net.neoforged.neoforge.network.NetworkHooks;
-import net.neoforged.neoforge.network.NetworkRegistry;
 import org.junit.jupiter.api.BeforeAll;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
-import static org.mockito.ArgumentMatchers.any;
 
 public class BaseMcTest {
 
   @SuppressWarnings({"ResultOfMethodCallIgnored", "unused"})
   @BeforeAll
   static void setUpRegistries() {
-    SharedConstants.setVersion(TestWorldVersion.INSTANCE);
-    try (MockedStatic<NetworkHooks> mockNetwork = Mockito.mockStatic(NetworkHooks.class)) {
-      Bootstrap.bootStrap();
+    // In NeoForge 1.21.1 test environment, SharedConstants and Bootstrap are already
+    // initialized by the mod loading framework. Only set them if not already done.
+    try {
+      SharedConstants.getCurrentVersion();
+      // Version is already set, skip initialization
+    } catch (NullPointerException e) {
+      SharedConstants.setVersion(TestWorldVersion.INSTANCE);
     }
+    Bootstrap.bootStrap();
     ModLoadingContext.get().setActiveContainer(new TestModContainer(TestModInfo.INSTANCE));
-
-    // ensure during static initialization, we don't load channel stuff that we lack access to
-    try (MockedStatic<NetworkRegistry> mockNetwork = Mockito.mockStatic(NetworkRegistry.class)) {
-      mockNetwork.when(() -> NetworkRegistry.newSimpleChannel(any(), any(), any(), any())).thenReturn(null);
-      TierSortingRegistry.getSortedTiers();
-    }
   }
 
   /** No need to set it up multiple times */
   private static boolean setupTiers = false;
 
-  /** Sets up the forge tier sorting registry */
+  /** Sets up the tier sorting registry */
   public static void setupTierSorting() {
     if (setupTiers) {
       return;
     }
     setupTiers = true;
-    try {
-      Method method = TierSortingRegistry.class.getDeclaredMethod("recalculateItemTiers");
-      method.setAccessible(true);
-      method.invoke(TierSortingRegistry.class);
-    } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-      e.printStackTrace();
-    }
+    // TierSortingRegistry was removed in NeoForge 1.21.1, tiers are handled by vanilla now
   }
 }

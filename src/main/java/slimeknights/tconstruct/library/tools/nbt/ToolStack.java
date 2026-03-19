@@ -88,6 +88,9 @@ public class ToolStack implements IToolStackView {
   private CompoundTag nbt;
   /** Public view of the internal NBT, to give to modifier hooks */
   private RestrictedCompoundTag restrictedNBT;
+  /** Reference to the source ItemStack, used to sync nbt changes back via DataComponents */
+  @Nullable
+  private ItemStack sourceStack;
 
   // durability
   /** Current damage of the tool, -1 means unloaded */
@@ -141,9 +144,26 @@ public class ToolStack implements IToolStackView {
 
   /* Creating */
   private ToolStack(Item item, ToolDefinition definition, CompoundTag nbt) {
+    this(item, definition, nbt, null);
+  }
+
+  private ToolStack(Item item, ToolDefinition definition, CompoundTag nbt, @Nullable ItemStack sourceStack) {
     this.item = item;
     this.definition = definition;
     this.nbt = nbt;
+    this.sourceStack = sourceStack;
+  }
+
+  /**
+   * Syncs the internal nbt back to the source ItemStack's DataComponents.
+   * In 1.21, CustomData.copyTag() returns a copy, so modifications to the CompoundTag
+   * do not automatically flow back to the ItemStack. This method must be called after
+   * any modification to the nbt field to keep the ItemStack in sync.
+   */
+  protected void markDirty() {
+    if (sourceStack != null) {
+      setTagOnStack(sourceStack, nbt);
+    }
   }
 
 
@@ -190,7 +210,8 @@ public class ToolStack implements IToolStackView {
     } else if (copyNbt) {
       nbt = nbt.copy();
     }
-    return from(item, definition, nbt);
+    ToolStack toolStack = new ToolStack(item, definition, nbt, copyNbt ? null : stack);
+    return toolStack;
   }
 
   /**
@@ -269,6 +290,7 @@ public class ToolStack implements IToolStackView {
       setTagOnStack(stack, tag);
     }
     this.nbt = tag;
+    this.sourceStack = stack;
     clearCache();
   }
 
@@ -371,6 +393,7 @@ public class ToolStack implements IToolStackView {
   protected void setBrokenRaw(boolean broken) {
     this.broken = broken;
     nbt.putBoolean(TAG_BROKEN, broken);
+    markDirty();
   }
 
   /**
@@ -434,6 +457,7 @@ public class ToolStack implements IToolStackView {
     }
     this.damage = damage;
     nbt.putInt(TAG_DAMAGE, damage);
+    markDirty();
   }
 
   /* Stats */
@@ -457,6 +481,7 @@ public class ToolStack implements IToolStackView {
   protected void setStats(StatsNBT stats) {
     this.stats = stats;
     nbt.put(TAG_STATS, stats.serializeToNBT());
+    markDirty();
     // if we no longer have enough durability, decrease the damage and mark it broken
     int newMax = getStats().getInt(ToolStats.DURABILITY);
     if (getDamageRaw() >= newMax) {
@@ -484,6 +509,7 @@ public class ToolStack implements IToolStackView {
       this.multipliers = multipliers;
       nbt.put(TAG_MULTIPLIERS, multipliers.serializeToNBT());
     }
+    markDirty();
   }
 
 
@@ -511,6 +537,7 @@ public class ToolStack implements IToolStackView {
     } else {
       this.nbt.put(TAG_MATERIALS, materials.serializeToNBT());
     }
+    markDirty();
   }
 
   /**
@@ -565,6 +592,7 @@ public class ToolStack implements IToolStackView {
   public void setUpgrades(ModifierNBT modifiers) {
     this.upgrades = modifiers;
     nbt.put(TAG_UPGRADES, modifiers.serializeToNBT());
+    markDirty();
     rebuildStats();
   }
 
@@ -607,6 +635,7 @@ public class ToolStack implements IToolStackView {
     ModifierNBT newModifiers = getUpgrades().withoutModifier(modifier, level);
     this.upgrades = newModifiers;
     nbt.put(TAG_UPGRADES, newModifiers.serializeToNBT());
+    markDirty();
     rebuildStats();
   }
 
@@ -625,6 +654,7 @@ public class ToolStack implements IToolStackView {
   protected void setModifiers(ModifierNBT modifiers) {
     this.modifiers = modifiers;
     nbt.put(TAG_MODIFIERS, this.modifiers.serializeToNBT());
+    markDirty();
   }
 
 
@@ -640,6 +670,7 @@ public class ToolStack implements IToolStackView {
         // if no tag exists, create it
         CompoundTag tag = new CompoundTag();
         nbt.put(TAG_PERSISTENT_MOD_DATA, tag);
+        markDirty();
         persistentModData = ToolDataNBT.readFromNBT(tag);
       }
     }
@@ -673,6 +704,7 @@ public class ToolStack implements IToolStackView {
       volatileModData = modData;
       nbt.put(TAG_VOLATILE_MOD_DATA, data);
     }
+    markDirty();
   }
 
 

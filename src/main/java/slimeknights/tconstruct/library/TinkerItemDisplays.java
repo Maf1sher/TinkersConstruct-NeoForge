@@ -19,31 +19,32 @@ public class TinkerItemDisplays {
 
   // EnumProxy fields - these are populated by the NeoForge enum extension system at class load time.
   // Each proxy references an ItemDisplayContext enum value defined in enumextensions.json.
-  // The constructor params in the proxy must match: (int id, String serializedName)
+  // The constructor params must match: (int id, String serializedName, @Nullable String fallbackName)
+  // id=-1 is a sentinel replaced by the actual ordinal at runtime.
 
   /** Proxy for MELTER display context */
   public static final EnumProxy<ItemDisplayContext> MELTER_PROXY = new EnumProxy<>(
-    ItemDisplayContext.class, -1, "tconstruct:melter"
+    ItemDisplayContext.class, -1, "tconstruct:melter", null
   );
   /** Proxy for TABLE display context */
   public static final EnumProxy<ItemDisplayContext> TABLE_PROXY = new EnumProxy<>(
-    ItemDisplayContext.class, -1, "tconstruct:table"
+    ItemDisplayContext.class, -1, "tconstruct:table", null
   );
   /** Proxy for CASTING_TABLE display context */
   public static final EnumProxy<ItemDisplayContext> CASTING_TABLE_PROXY = new EnumProxy<>(
-    ItemDisplayContext.class, -1, "tconstruct:casting_table"
+    ItemDisplayContext.class, -1, "tconstruct:casting_table", null
   );
   /** Proxy for CASTING_BASIN display context */
   public static final EnumProxy<ItemDisplayContext> CASTING_BASIN_PROXY = new EnumProxy<>(
-    ItemDisplayContext.class, -1, "tconstruct:casting_basin"
+    ItemDisplayContext.class, -1, "tconstruct:casting_basin", null
   );
   /** Proxy for FLUID_CANNON display context */
   public static final EnumProxy<ItemDisplayContext> FLUID_CANNON_PROXY = new EnumProxy<>(
-    ItemDisplayContext.class, -1, "tconstruct:fluid_cannon"
+    ItemDisplayContext.class, -1, "tconstruct:fluid_cannon", null
   );
   /** Proxy for THROWN display context */
   public static final EnumProxy<ItemDisplayContext> THROWN_PROXY = new EnumProxy<>(
-    ItemDisplayContext.class, -1, "tconstruct:thrown"
+    ItemDisplayContext.class, -1, "tconstruct:thrown", null
   );
 
   /** Used by the melter and smeltery for display of items its melting */

@@ -9,8 +9,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.neoforged.neoforge.common.crafting.CraftingHelper;
-import net.neoforged.neoforge.common.crafting.VanillaIngredientSerializer;
+// CraftingHelper and VanillaIngredientSerializer removed in NeoForge 1.21
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import slimeknights.tconstruct.TConstruct;
@@ -29,11 +28,7 @@ class StationSlotLayoutLoaderTest extends BaseMcTest {
 
   @BeforeAll
   static void setup() {
-    try {
-      CraftingHelper.register(new ResourceLocation("minecraft", "item"), VanillaIngredientSerializer.INSTANCE);
-    } catch (Exception e) {
-      // just need to ensure its registered
-    }
+    // VanillaIngredientSerializer was removed in NeoForge 1.21, vanilla ingredients are handled natively now
   }
 
   @Test
@@ -93,7 +88,7 @@ class StationSlotLayoutLoaderTest extends BaseMcTest {
     ItemStack[] stacks = ingredient.getItems();
     assertThat(stacks).hasSize(1);
     assertThat(stacks[0].getItem()).isEqualTo(item);
-    assertThat(stacks[0].getTag()).isNull();
+    assertThat(stacks[0].get(net.minecraft.core.component.DataComponents.CUSTOM_DATA)).isNull();
   }
 
   @Test
@@ -108,8 +103,9 @@ class StationSlotLayoutLoaderTest extends BaseMcTest {
     ItemStack stack = layout.getIcon().getValue(ItemStack.class);
     assertThat(stack).isNotNull();
     assertThat(stack.getItem()).isEqualTo(Items.IRON_INGOT);
-    CompoundTag nbt = stack.getTag();
-    assertThat(nbt).isNotNull();
+    net.minecraft.world.item.component.CustomData customData = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+    assertThat(customData).isNotNull();
+    CompoundTag nbt = customData.copyTag();
     assertThat(nbt.getAllKeys()).hasSize(1);
     assertThat(nbt.getInt("test")).isEqualTo(1);
     // sort key

@@ -1,7 +1,7 @@
 {
   "modules": [
     {
-      "type": "test:part_stats",
+      "type": "tconstruct:part_stats",
       "parts": [
         "test:test_head"
       ],

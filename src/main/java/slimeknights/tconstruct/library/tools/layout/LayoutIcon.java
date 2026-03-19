@@ -164,6 +164,16 @@ public abstract class LayoutIcon {
         Item item = BuiltInRegistries.ITEM.get(itemId);
         int count = GsonHelper.getAsInt(object, "count", 1);
         ItemStack stack = new ItemStack(item, count);
+        // handle legacy "nbt" field by storing it as custom data
+        if (object.has("nbt")) {
+          try {
+            String nbtString = GsonHelper.getAsString(object, "nbt");
+            net.minecraft.nbt.CompoundTag nbtTag = net.minecraft.nbt.TagParser.parseTag(nbtString);
+            stack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(nbtTag));
+          } catch (Exception e) {
+            throw new JsonParseException("Failed to parse nbt for item icon", e);
+          }
+        }
         return new ItemStackIcon(stack);
       }
       // not sure why this would be needed, but might as well

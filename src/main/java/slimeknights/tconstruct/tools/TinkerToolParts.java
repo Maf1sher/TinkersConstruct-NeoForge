@@ -91,7 +91,9 @@ public final class TinkerToolParts extends TinkerModule {
   public static final ItemObject<ToolPartItem> toolHandle = ITEMS.register("tool_handle", () -> new ToolPartItem(ITEM_PROPS, HandleMaterialStats.ID));
   public static final ItemObject<ToolPartItem> toughHandle = ITEMS.register("tough_handle", () -> new ToolPartItem(ITEM_PROPS, HandleMaterialStats.ID));
   // armor
-  public static final EnumObject<ArmorItem.Type,ToolPartItem> plating = ITEMS.registerEnum(ArmorItem.Type.values(), "plating", type -> new ToolPartItem(ITEM_PROPS, PlatingMaterialStats.TYPES.get(type.ordinal()).getStatId()));
+  /** Standard wearable armor slots (excludes BODY which is for animal armor) */
+  private static final ArmorItem.Type[] WEARABLE_ARMOR_TYPES = {ArmorItem.Type.HELMET, ArmorItem.Type.CHESTPLATE, ArmorItem.Type.LEGGINGS, ArmorItem.Type.BOOTS};
+  public static final EnumObject<ArmorItem.Type,ToolPartItem> plating = ITEMS.registerEnum(WEARABLE_ARMOR_TYPES, "plating", type -> new ToolPartItem(ITEM_PROPS, PlatingMaterialStats.TYPES.get(type.ordinal()).getStatId()));
   public static final ItemObject<ToolPartItem> maille = ITEMS.register("maille", () -> new ToolPartItem(ITEM_PROPS, StatlessMaterialStats.MAILLE.getIdentifier()));
   public static final ItemObject<ToolPartItem> shieldCore = ITEMS.register("shield_core", () -> new ToolPartItem(ITEM_PROPS, StatlessMaterialStats.SHIELD_CORE.getIdentifier()));
 
@@ -129,7 +131,7 @@ public final class TinkerToolParts extends TinkerModule {
     accept(output, arrowShaft);
     accept(output, fletching);
     // plating, pair each one with the dummy plating item
-    for (ArmorItem.Type type : ArmorItem.Type.values()) {
+    for (ArmorItem.Type type : WEARABLE_ARMOR_TYPES) {
       tab.accept(TinkerSmeltery.dummyPlating.get(type));
       plating.get(type).addVariants(output, "");
     }

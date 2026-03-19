@@ -1,7 +1,7 @@
 {
   "modules": [
     {
-      "type": "test:base_stats",
+      "type": "tconstruct:base_stats",
       "stats": {
         "tconstruct:durability": 100.0,
         "tconstruct:attack_damage": 2.5,
@@ -10,7 +10,7 @@
       }
     },
     {
-      "type": "test:multiply_stats",
+      "type": "tconstruct:multiply_stats",
       "multipliers": {
         "tconstruct:durability": 1.5,
         "tconstruct:attack_damage": 2,
@@ -18,7 +18,7 @@
       }
     },
     {
-      "type": "test:part_stats",
+      "type": "tconstruct:part_stats",
       "parts": [
         { "item": "test:test_extra",  "scale": 2 },
         { "item": "test:test_head",   "scale": 1 },
@@ -27,7 +27,7 @@
       "stat_provider": "tconstruct:melee_harvest"
     },
     {
-      "type": "test:modifier_slots",
+      "type": "tconstruct:modifier_slots",
       "slots": {
         "upgrades": 3,
         "defense": 2,
@@ -35,29 +35,29 @@
       }
     },
     {
-      "type": "test:traits",
+      "type": "tconstruct:traits",
       "traits": [
         { "name": "test:modifier_1", "level": 1 },
         { "name": "test:modifier_2", "level": 3 }
       ]
     },
     {
-      "type": "test:actions",
+      "type": "tconstruct:tool_actions",
       "tool_actions": [ "axe_dig", "custom_action" ]
     },
     {
-      "type": "test:is_effective",
+      "type": "tconstruct:is_effective",
       "predicate_type": "mantle:set",
       "blocks": ["minecraft:diamond_block"],
       "ignore_tier": true
     },
     {
-      "type": "test:circle",
+      "type": "tconstruct:circle_aoe",
       "diameter": 3,
       "3D": true
     },
     {
-      "type": "test:sweep",
+      "type": "tconstruct:sweep_melee",
       "range": 5.0
     }
   ]

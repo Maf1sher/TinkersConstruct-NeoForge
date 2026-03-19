@@ -3,7 +3,7 @@
     {
       "enum": "net/minecraft/world/item/ItemDisplayContext",
       "name": "TCONSTRUCT_MELTER",
-      "constructor": "(ILjava/lang/String;)V",
+      "constructor": "(ILjava/lang/String;Ljava/lang/String;)V",
       "parameters": {
         "class": "slimeknights/tconstruct/library/TinkerItemDisplays",
         "field": "MELTER_PROXY"
@@ -12,7 +12,7 @@
     {
       "enum": "net/minecraft/world/item/ItemDisplayContext",
       "name": "TCONSTRUCT_TABLE",
-      "constructor": "(ILjava/lang/String;)V",
+      "constructor": "(ILjava/lang/String;Ljava/lang/String;)V",
       "parameters": {
         "class": "slimeknights/tconstruct/library/TinkerItemDisplays",
         "field": "TABLE_PROXY"
@@ -21,7 +21,7 @@
     {
       "enum": "net/minecraft/world/item/ItemDisplayContext",
       "name": "TCONSTRUCT_CASTING_TABLE",
-      "constructor": "(ILjava/lang/String;)V",
+      "constructor": "(ILjava/lang/String;Ljava/lang/String;)V",
       "parameters": {
         "class": "slimeknights/tconstruct/library/TinkerItemDisplays",
         "field": "CASTING_TABLE_PROXY"
@@ -30,7 +30,7 @@
     {
       "enum": "net/minecraft/world/item/ItemDisplayContext",
       "name": "TCONSTRUCT_CASTING_BASIN",
-      "constructor": "(ILjava/lang/String;)V",
+      "constructor": "(ILjava/lang/String;Ljava/lang/String;)V",
       "parameters": {
         "class": "slimeknights/tconstruct/library/TinkerItemDisplays",
         "field": "CASTING_BASIN_PROXY"
@@ -39,7 +39,7 @@
     {
       "enum": "net/minecraft/world/item/ItemDisplayContext",
       "name": "TCONSTRUCT_FLUID_CANNON",
-      "constructor": "(ILjava/lang/String;)V",
+      "constructor": "(ILjava/lang/String;Ljava/lang/String;)V",
       "parameters": {
         "class": "slimeknights/tconstruct/library/TinkerItemDisplays",
         "field": "FLUID_CANNON_PROXY"
@@ -48,7 +48,7 @@
     {
       "enum": "net/minecraft/world/item/ItemDisplayContext",
       "name": "TCONSTRUCT_THROWN",
-      "constructor": "(ILjava/lang/String;)V",
+      "constructor": "(ILjava/lang/String;Ljava/lang/String;)V",
       "parameters": {
         "class": "slimeknights/tconstruct/library/TinkerItemDisplays",
         "field": "THROWN_PROXY"

@@ -108,13 +108,16 @@ public class TConstruct {
     TinkerItemDisplays.init();
     MaterialRegistry.init();
 
+    // init deferred registers first - must be before module constructors as they may use TinkerModule.getModEventBus()
+    TinkerModule.initRegisters(bus);
+
     // initialize modules, done this way rather than with annotations to give us control over the order
     // MissingMappingsEvent removed in NeoForge 1.21.1
     // NeoForge.EVENT_BUS.addListener(TConstruct::missingMappings);
     // base
     bus.register(new TinkerCommons());
     bus.register(new TinkerMaterials());
-    bus.register(new TinkerEffects());
+    new TinkerEffects(); // No @SubscribeEvent methods, just needs constructor for registration
     bus.register(new TinkerGadgets());
     bus.register(new TinkerAttributes());
     // world
@@ -123,14 +126,11 @@ public class TConstruct {
     // tools
     bus.register(new TinkerTables());
     bus.register(new TinkerModifiers());
-    bus.register(new TinkerToolParts());
+    new TinkerToolParts(); // No @SubscribeEvent methods, just needs class loading for static registrations
     bus.register(new TinkerTools());
     // smeltery
     bus.register(new TinkerSmeltery());
     bus.register(new TinkerFluids());
-
-    // init deferred registers
-    TinkerModule.initRegisters(bus);
     TinkerDataAttachments.ATTACHMENT_TYPES.register(bus);
     TinkerNetwork.setup();
     bus.addListener(TinkerNetwork::registerPayloads);

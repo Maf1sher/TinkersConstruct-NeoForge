@@ -6,10 +6,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.neoforged.neoforge.common.crafting.CraftingHelper;
-import net.neoforged.neoforge.common.conditions.FalseCondition;
-import net.neoforged.neoforge.common.conditions.IConditionSerializer;
-import net.neoforged.neoforge.common.conditions.TrueCondition;
+// IConditionSerializer and CraftingHelper removed in NeoForge 1.21, conditions use Codec-based system now
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import slimeknights.tconstruct.TConstruct;
@@ -27,20 +24,10 @@ class MaterialManagerTest extends BaseMcTest {
   private static MaterialManager materialManager;
   private final JsonFileLoader fileLoader = new JsonFileLoader(MaterialManager.GSON, MaterialManager.FOLDER);
 
-  /** Ensures the given condition serializer is registered */
-  private static void ensureSerializerRegistered(IConditionSerializer<?> serializer) {
-    try {
-      CraftingHelper.register(serializer);
-    } catch (Exception e) {
-      // NO-OP
-    }
-  }
-
   @BeforeAll
   static void setUp() {
     materialManager = new MaterialManager();
-    ensureSerializerRegistered(FalseCondition.Serializer.INSTANCE);
-    ensureSerializerRegistered(TrueCondition.Serializer.INSTANCE);
+    // Conditions use Codec-based system in 1.21, no explicit serializer registration needed
   }
 
   @Test
@@ -52,7 +39,7 @@ class MaterialManagerTest extends BaseMcTest {
     Collection<IMaterial> allMaterials = materialManager.getAllMaterials();
     assertThat(allMaterials).hasSize(1);
     IMaterial testMaterial = allMaterials.iterator().next();
-    assertThat(testMaterial.getIdentifier()).isEqualByComparingTo(new MaterialId("tconstruct", "full"));
+    assertThat(testMaterial.getIdentifier()).isEqualTo(new MaterialId("tconstruct", "full"));
     assertThat(testMaterial.isCraftable()).isTrue();
     assertThat(testMaterial.getTier()).isEqualTo(15);
     assertThat(testMaterial.getSortOrder()).isEqualTo(4);
@@ -68,7 +55,7 @@ class MaterialManagerTest extends BaseMcTest {
     Collection<IMaterial> allMaterials = materialManager.getAllMaterials();
     assertThat(allMaterials).hasSize(1);
     IMaterial testMaterial = allMaterials.iterator().next();
-    assertThat(testMaterial.getIdentifier()).isEqualByComparingTo(new MaterialId("tconstruct", "minimal"));
+    assertThat(testMaterial.getIdentifier()).isEqualTo(new MaterialId("tconstruct", "minimal"));
     assertThat(testMaterial.isCraftable()).isFalse();
     assertThat(testMaterial.getTier()).isEqualTo(0);
     assertThat(testMaterial.getSortOrder()).isEqualTo(100);

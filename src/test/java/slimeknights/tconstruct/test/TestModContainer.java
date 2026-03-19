@@ -1,21 +1,18 @@
 package slimeknights.tconstruct.test;
 
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
-import net.neoforged.neoforge.forgespi.language.IModInfo;
+import net.neoforged.neoforgespi.language.IModInfo;
+import org.jetbrains.annotations.Nullable;
 
 public class TestModContainer extends ModContainer {
   public TestModContainer(IModInfo info) {
     super(info);
-    this.contextExtension = () -> null;
   }
 
+  @Nullable
   @Override
-  public boolean matches(Object mod) {
-    return mod == this;
-  }
-
-  @Override
-  public Object getMod() {
-    return this;
+  public IEventBus getEventBus() {
+    return null;
   }
 }
