@@ -3,7 +3,8 @@ package slimeknights.tconstruct.library.recipe.tinkerstation.building;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -16,8 +17,8 @@ import slimeknights.tconstruct.library.materials.definition.IMaterial;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 import slimeknights.tconstruct.library.tools.part.IToolPart;
 
+import javax.annotation.Nullable;
 import java.util.BitSet;
-import java.util.function.Consumer;
 
 /** Builder for {@link FixedMaterialSwappingRecipe} and {@link PartSwappingOverrideRecipe}. */
 @Accessors(fluent = true)
@@ -71,23 +72,24 @@ public class MaterialSwappingRecipeBuilder extends AbstractRecipeBuilder<Materia
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer) {
+  public void save(RecipeOutput consumer) {
     save(consumer, Loadables.ITEM.getKey(tools.getItems()[0].getItem()));
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer, ResourceLocation id) {
+  public void save(RecipeOutput consumer, ResourceLocation id) {
     int[] indices = this.indices.stream().toArray();
     if (indices.length == 0) {
       throw new IllegalStateException("Must set index");
     }
+    @Nullable AdvancementHolder advancement = null;
     if (part != null) {
       if (ingredient != SizedIngredient.EMPTY) {
         throw new IllegalStateException("Cannot set both part and ingredient");
       }
-      consumer.accept(new LoadableFinishedRecipe<>(new PartSwappingOverrideRecipe(id, tools, maxStackSize, part, indices), PartSwappingOverrideRecipe.LOADER, null));
+      saveRecipe(consumer, id, new PartSwappingOverrideRecipe(id, tools, maxStackSize, part, indices), advancement);
     } else {
-      consumer.accept(new LoadableFinishedRecipe<>(new FixedMaterialSwappingRecipe(id, tools, maxStackSize, ingredient, material, indices, repairValue), FixedMaterialSwappingRecipe.LOADER, null));
+      saveRecipe(consumer, id, new FixedMaterialSwappingRecipe(id, tools, maxStackSize, ingredient, material, indices, repairValue), advancement);
     }
   }
 }

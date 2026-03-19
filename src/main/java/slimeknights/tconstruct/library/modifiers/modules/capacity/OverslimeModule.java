@@ -68,7 +68,7 @@ public class OverslimeModule extends CapacityBarHook.PersistentDataCapacityBar {
 
   /** Gets the boost to apply from overworked */
   public static int getOverworkedBonus(IToolStackView tool) {
-    return (1 + tool.getModifierLevel(TinkerModifiers.overworked.getId()));
+    return (1 + tool.getModifierLevel(TinkerModifiers.overworked.getModifierId()));
   }
 
   @Override

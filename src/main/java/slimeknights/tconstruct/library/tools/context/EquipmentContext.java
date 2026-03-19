@@ -6,7 +6,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.util.LazyOptional;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability;
 import slimeknights.tconstruct.library.tools.context.EquipmentIterator.EquipmentEntry;
@@ -31,8 +30,10 @@ public class EquipmentContext {
   protected final boolean[] fetchedTool = new boolean[6];
   /** Array of tools currently on the entity */
   protected final IToolStackView[] toolsInSlots = new IToolStackView[6];
-  /** Cached tinker data capability, saves capability lookup times slightly */
-  private LazyOptional<TinkerDataCapability.Holder> tinkerData = null;
+  /** Cached tinker data capability, saves capability lookup times slightly. Use Boolean to distinguish "not yet fetched" (null) from "fetched but absent". */
+  private boolean tinkerDataFetched = false;
+  @Nullable
+  private TinkerDataCapability.Holder tinkerData = null;
 
   /** Creates a context with an existing tool instance */
   public static EquipmentContext withTool(LivingEntity living, IToolStackView tool, EquipmentSlot slot) {
@@ -93,10 +94,12 @@ public class EquipmentContext {
     return hasModifiableArmor(EquipmentSlot.values());
   }
 
-  /** Gets the tinker data capability */
-  public LazyOptional<TinkerDataCapability.Holder> getTinkerData() {
-    if (tinkerData == null) {
+  /** Gets the tinker data capability, or null if not present */
+  @Nullable
+  public TinkerDataCapability.Holder getTinkerData() {
+    if (!tinkerDataFetched) {
       tinkerData = entity.getCapability(TinkerDataCapability.CAPABILITY);
+      tinkerDataFetched = true;
     }
     return tinkerData;
   }

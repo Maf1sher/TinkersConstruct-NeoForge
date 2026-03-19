@@ -2,14 +2,11 @@ package slimeknights.tconstruct.smeltery.block.entity.inventory;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.tconstruct.library.recipe.casting.ICastingContainer;
 import slimeknights.tconstruct.smeltery.block.entity.CastingBlockEntity;
-
-import javax.annotation.Nullable;
 
 /**
  * Provides read only access to the input of a casting table. Prevents extra data from leaking
@@ -35,10 +32,9 @@ public class CastingContainerWrapper implements ICastingContainer {
     return fluid.getFluid();
   }
 
-  @Nullable
-  @Override
-  public CompoundTag getFluidTag() {
-    return fluid.getTag();
+  /** Gets the fluid stack held by this container */
+  public FluidStack getFluidStack() {
+    return fluid;
   }
 
   /** Uses the input for input (default) */

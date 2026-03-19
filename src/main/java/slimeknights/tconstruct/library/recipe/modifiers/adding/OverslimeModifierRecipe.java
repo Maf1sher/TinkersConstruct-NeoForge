@@ -78,7 +78,7 @@ public class OverslimeModifierRecipe implements ITinkerStationRecipe, IDisplayMo
   @Override
   public RecipeResult<LazyToolStack> getValidatedResult(ITinkerStationContainer inv, RegistryAccess access) {
     ToolStack tool = inv.getTinkerable();
-    ModifierId overslime = TinkerModifiers.overslime.getId();
+    ModifierId overslime = TinkerModifiers.overslime.getModifierId();
     // if the tool lacks true overslime, add overslime
     if (tool.getUpgrades().getLevel(overslime) == 0) {
       // however, if we have overslime though a trait and reached our cap, also do nothing

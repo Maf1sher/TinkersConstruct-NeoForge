@@ -6,10 +6,9 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.common.capabilities.Capabilities;
-import net.neoforged.neoforge.common.util.LazyOptional;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.wrapper.EmptyHandler;
+import net.neoforged.neoforge.items.wrapper.EmptyItemHandler;
 import slimeknights.mantle.inventory.BaseContainerMenu;
 import slimeknights.mantle.inventory.SmartItemHandlerSlot;
 
@@ -21,7 +20,7 @@ public class SideInventoryContainer<TILE extends BlockEntity> extends BaseContai
   private final int columns;
   @Getter
   private final int slotCount;
-  protected final LazyOptional<IItemHandler> itemHandler;
+  protected final IItemHandler itemHandler;
 
   public SideInventoryContainer(MenuType<?> containerType, int windowId, Inventory inv, @Nullable TILE tile, int x, int y, int columns) {
     this(containerType, windowId, inv, tile, null, x, y, columns);
@@ -31,14 +30,16 @@ public class SideInventoryContainer<TILE extends BlockEntity> extends BaseContai
     super(containerType, windowId, inv, tile);
 
     // must have a TE
-    if (tile == null) {
-      this.itemHandler = LazyOptional.of(() -> EmptyHandler.INSTANCE);
+    IItemHandler handler;
+    if (tile == null || tile.getLevel() == null) {
+      handler = EmptyItemHandler.INSTANCE;
     } else {
-      this.itemHandler = tile.getCapability(Capabilities.ITEM_HANDLER, inventoryDirection);
+      IItemHandler queried = tile.getLevel().getCapability(Capabilities.ItemHandler.BLOCK, tile.getBlockPos(), inventoryDirection);
+      handler = queried != null ? queried : EmptyItemHandler.INSTANCE;
     }
+    this.itemHandler = handler;
 
     // slot properties
-    IItemHandler handler = itemHandler.orElse(EmptyHandler.INSTANCE);
     this.slotCount = handler.getSlots();
     this.columns = columns;
     int rows = this.slotCount / columns;

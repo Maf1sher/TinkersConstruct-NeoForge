@@ -9,7 +9,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock.Action;
-import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.BlockDropsEvent;
 import net.neoforged.bus.api.EventPriority;
 
 import java.util.HashMap;
@@ -33,7 +33,7 @@ public class BlockSideHitListener {
     }
     init = true;
     NeoForge.EVENT_BUS.addListener(BlockSideHitListener::onLeftClickBlock);
-    NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, BlockSideHitListener::breakBlock);
+    NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, false, BlockDropsEvent.class, BlockSideHitListener::onBlockDrops);
     NeoForge.EVENT_BUS.addListener(BlockSideHitListener::onLeaveServer);
   }
 
@@ -49,9 +49,11 @@ public class BlockSideHitListener {
     }
   }
 
-  /** Called on block break to store the last break XP */
-  private static void breakBlock(BlockEvent.BreakEvent event) {
-    LAST_XP.put(event.getPlayer().getUUID(), event.getExpToDrop());
+  /** Called on block drops to store the last break XP */
+  private static void onBlockDrops(BlockDropsEvent event) {
+    if (event.getBreaker() instanceof Player player) {
+      LAST_XP.put(player.getUUID(), event.getDroppedExperience());
+    }
   }
 
   /** Called when a player leaves the server to clear the face */

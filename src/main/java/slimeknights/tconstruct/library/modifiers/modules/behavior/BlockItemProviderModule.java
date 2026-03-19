@@ -1,10 +1,15 @@
 package slimeknights.tconstruct.library.modifiers.modules.behavior;
 
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.registries.Registries;
 import slimeknights.mantle.data.loadable.common.ItemStackLoadable;
 import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;

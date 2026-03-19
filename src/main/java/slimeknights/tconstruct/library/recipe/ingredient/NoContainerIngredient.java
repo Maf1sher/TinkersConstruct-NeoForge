@@ -1,21 +1,20 @@
 package slimeknights.tconstruct.library.recipe.ingredient;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import net.minecraft.network.FriendlyByteBuf;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
-import net.neoforged.neoforge.common.crafting.CraftingHelper;
-import net.neoforged.neoforge.common.crafting.IIngredientSerializer;
-import net.neoforged.neoforge.common.crafting.VanillaIngredientSerializer;
+import net.neoforged.neoforge.common.crafting.IngredientType;
 import slimeknights.tconstruct.TConstruct;
-import slimeknights.tconstruct.library.utils.JsonUtils;
 
 import javax.annotation.Nullable;
+import java.util.stream.Stream;
 
 /** Ingredient matching an item with no container item, used to ensure NBT fluid items are empty */
 public class NoContainerIngredient extends NestedIngredient {
@@ -36,49 +35,43 @@ public class NoContainerIngredient extends NestedIngredient {
   }
 
   @Override
-  public JsonElement toJson() {
-    JsonElement nestedElement = nested.toJson();
-    // if we are a vanilla ingredient, and not an array ingredient, serialize into the ingredient directly
-    if (nested.isVanilla() && nestedElement.isJsonObject()) {
-      JsonObject nestedObject = nestedElement.getAsJsonObject();
-      nestedObject.addProperty("type", ID.toString());
-      return nestedObject;
+  public IngredientType<?> getType() {
+    return TYPE;
+  }
+
+  /** MapCodec for JSON serialization */
+  public static final MapCodec<NoContainerIngredient> CODEC = RecordCodecBuilder.mapCodec(instance ->
+    instance.group(
+      Ingredient.CODEC_NONEMPTY.fieldOf("match").forGetter(i -> i.nested)
+    ).apply(instance, NoContainerIngredient::new)
+  );
+
+  /** StreamCodec for network serialization */
+  public static final StreamCodec<RegistryFriendlyByteBuf, NoContainerIngredient> STREAM_CODEC = new StreamCodec<>() {
+    @Override
+    public NoContainerIngredient decode(RegistryFriendlyByteBuf buffer) {
+      return new NoContainerIngredient(Ingredient.CONTENTS_STREAM_CODEC.decode(buffer));
     }
-    // if we have an array or a type, then serialize nested
-    JsonObject json = JsonUtils.withType(ID);
-    json.add("match", nestedElement);
-    return json;
+
+    @Override
+    public void encode(RegistryFriendlyByteBuf buffer, NoContainerIngredient ingredient) {
+      Ingredient.CONTENTS_STREAM_CODEC.encode(buffer, ingredient.nested);
+    }
+  };
+
+  /** IngredientType instance - must be registered to NeoForgeRegistries.INGREDIENT_TYPES */
+  public static final IngredientType<NoContainerIngredient> TYPE = new IngredientType<>(CODEC, STREAM_CODEC);
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof NoContainerIngredient that)) return false;
+    return nested.equals(that.nested);
   }
 
   @Override
-  public IIngredientSerializer<? extends Ingredient> getSerializer() {
-    return Serializer.INSTANCE;
-  }
-
-  public enum Serializer implements IIngredientSerializer<NoContainerIngredient> {
-    INSTANCE;
-
-    @Override
-    public NoContainerIngredient parse(JsonObject json) {
-      // if we have match, parse as a nested object. Without match, just parse the object as vanilla
-      Ingredient ingredient;
-      if (json.has("match")) {
-        ingredient = CraftingHelper.getIngredient(json.get("match"), false);
-      } else {
-        ingredient = VanillaIngredientSerializer.INSTANCE.parse(json);
-      }
-      return new NoContainerIngredient(ingredient);
-    }
-
-    @Override
-    public NoContainerIngredient parse(FriendlyByteBuf buffer) {
-      return new NoContainerIngredient(Ingredient.fromNetwork(buffer));
-    }
-
-    @Override
-    public void write(FriendlyByteBuf buffer, NoContainerIngredient ingredient) {
-      ingredient.nested.toNetwork(buffer);
-    }
+  public int hashCode() {
+    return nested.hashCode() * 31 + 1;
   }
 
 

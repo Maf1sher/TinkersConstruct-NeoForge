@@ -10,7 +10,6 @@ import net.minecraft.resources.ResourceLocation;
 import slimeknights.mantle.client.model.util.MantleItemLayerModel;
 import slimeknights.mantle.util.ItemLayerPixels;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
-import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.tools.nbt.IModDataView;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
@@ -41,7 +40,7 @@ public class DyedModifierModel implements IBakedModifierModel {
   @Nullable
   @Override
   public Object getCacheKey(IToolStackView tool, ModifierEntry entry) {
-    ModifierId modifier = entry.getId();
+    ResourceLocation modifier = entry.getId().location();
     IModDataView data = tool.getPersistentData();
     int color = -1;
     if (data.contains(modifier, Tag.TAG_INT)) {
@@ -55,7 +54,7 @@ public class DyedModifierModel implements IBakedModifierModel {
     Material texture = isLarge ? large : small;
     if (texture != null) {
       IModDataView data = tool.getPersistentData();
-      ResourceLocation key = modifier.getId();
+      ResourceLocation key = modifier.getId().location();
       if (data.contains(key, Tag.TAG_INT)) {
         quadConsumer.accept(MantleItemLayerModel.getQuadsForSprite(0xFF000000 | data.getInt(key), -1, spriteGetter.apply(texture), transforms, 0, pixels));
       }
@@ -63,5 +62,5 @@ public class DyedModifierModel implements IBakedModifierModel {
   }
 
   /** Data class to cache a colored texture */
-  private record CacheKey(ModifierId modifier, int color) {}
+  private record CacheKey(ResourceLocation modifier, int color) {}
 }

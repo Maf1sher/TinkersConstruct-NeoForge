@@ -5,6 +5,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -15,7 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.BlockHitResult;
-import net.neoforged.bus.api.Event.Result;
+import slimeknights.tconstruct.library.events.TinkerToolEvent;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.data.loadable.record.SingletonLoader;
 import slimeknights.tconstruct.common.TinkerTags;
@@ -75,7 +76,7 @@ public enum HarvestModule implements ModifierModule, BlockInteractionModifierHoo
       return false;
     }
     BlockHitResult trace = new BlockHitResult(context.getClickLocation(), context.getClickedFace(), pos, false);
-    InteractionResult result = state.use(world, player, context.getHand(), trace);
+    InteractionResult result = state.useWithoutItem(world, player, trace);
     return result.consumesAction();
   }
 
@@ -203,9 +204,9 @@ public enum HarvestModule implements ModifierModule, BlockInteractionModifierHoo
     }
     // try harvest event
     boolean didHarvest = false;
-    Result result = new ToolHarvestEvent(tool, context, world, state, pos, source).fire();
-    if (result != Result.DEFAULT) {
-      didHarvest = result == Result.ALLOW;
+    TinkerToolEvent.Result result = new ToolHarvestEvent(tool, context, world, state, pos, source).fire();
+    if (result != TinkerToolEvent.Result.DEFAULT) {
+      didHarvest = result == TinkerToolEvent.Result.ALLOW;
 
       // crops that work based on right click interact (berry bushes)
     } else if (holder.is(TinkerTags.Blocks.HARVESTABLE_INTERACT)) {
@@ -278,7 +279,7 @@ public enum HarvestModule implements ModifierModule, BlockInteractionModifierHoo
             player.sweepAttack();
           }
           if (broken) {
-            player.broadcastBreakEvent(context.getHand());
+            player.onEquippedItemBroken(context.getItemInHand().getItem(), LivingEntity.getSlotForHand(context.getHand()));
           }
         }
       }

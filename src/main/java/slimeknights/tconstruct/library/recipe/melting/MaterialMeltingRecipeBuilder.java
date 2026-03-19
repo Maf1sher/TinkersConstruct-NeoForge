@@ -2,7 +2,8 @@ package slimeknights.tconstruct.library.recipe.melting;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -11,9 +12,9 @@ import slimeknights.mantle.recipe.helper.FluidOutput;
 import slimeknights.mantle.registration.object.FluidObject;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 import static slimeknights.tconstruct.library.recipe.melting.IMeltingRecipe.getTemperature;
 
@@ -75,13 +76,13 @@ public class MaterialMeltingRecipeBuilder extends AbstractRecipeBuilder<Material
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer) {
-    save(consumer, inputId.getId());
+  public void save(RecipeOutput consumer) {
+    save(consumer, inputId.getId().location());
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer, ResourceLocation id) {
-    ResourceLocation advancementID = this.buildOptionalAdvancement(id, "melting");
-    consumer.accept(new LoadableFinishedRecipe<>(new MaterialMeltingRecipe(id, inputId, temperature, result, byproducts), MaterialMeltingRecipe.LOADER, advancementID));
+  public void save(RecipeOutput consumer, ResourceLocation id) {
+    @Nullable AdvancementHolder advancement = this.buildOptionalAdvancement(consumer, id, "melting");
+    saveRecipe(consumer, id, new MaterialMeltingRecipe(id, inputId, temperature, result, byproducts), advancement);
   }
 }

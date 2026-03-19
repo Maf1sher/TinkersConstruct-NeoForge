@@ -1,14 +1,12 @@
 package slimeknights.tconstruct.tables.recipe;
 
-import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -83,7 +81,7 @@ public class PartBuilderToolRecycle implements IPartBuilderRecipe, IMultiRecipe<
   private final Ingredient pattern;
   private final List<IMaterialItem> parts;
 
-  /** @deprecated use {@link FinishedRecipe} */
+  /** @deprecated use {@link slimeknights.tconstruct.library.recipe.partbuilder.recycle.PartBuilderToolRecycleBuilder} */
   @Deprecated(forRemoval = true)
   public PartBuilderToolRecycle(ResourceLocation id, SizedIngredient toolRequirement, Ingredient pattern) {
     this(id, toolRequirement, pattern, List.of());
@@ -128,7 +126,7 @@ public class PartBuilderToolRecycle implements IPartBuilderRecipe, IMultiRecipe<
   }
 
   @Override
-  public ItemStack assemble(IPartBuilderContainer inv, RegistryAccess access, Pattern pattern) {
+  public ItemStack assemble(IPartBuilderContainer inv, HolderLookup.Provider access, Pattern pattern) {
     ToolStack tool = ToolStack.from(inv.getStack());
     // find our parts list, either set or override
     ToolDefinition definition = tool.getDefinition();
@@ -202,10 +200,10 @@ public class PartBuilderToolRecycle implements IPartBuilderRecipe, IMultiRecipe<
     return parts.get(index).withMaterial(tool.getMaterial(indices.getInt(index)).getVariant());
   }
 
-  /** @deprecated use {@link IPartBuilderRecipe#assemble(IPartBuilderContainer, RegistryAccess, Pattern)} */
+  /** @deprecated use {@link IPartBuilderRecipe#assemble(IPartBuilderContainer, HolderLookup.Provider, Pattern)} */
   @Deprecated
   @Override
-  public ItemStack getResultItem(RegistryAccess access) {
+  public ItemStack getResultItem(HolderLookup.Provider access) {
     return ItemStack.EMPTY;
   }
 
@@ -236,13 +234,14 @@ public class PartBuilderToolRecycle implements IPartBuilderRecipe, IMultiRecipe<
     Collection<PartIndex> displayParts = IntStream.range(0, parts.size()).mapToObj(i -> new PartIndex(parts.get(i), i)).collect(Collectors.toMap(PartIndex::part, Function.identity(), (a, b) -> a)).values();
     return displayParts.stream().map(pi -> {
       ItemStack part = pi.part.withMaterialForDisplay(ToolBuildHandler.getRenderMaterial(pi.index));
-      part.getOrCreateTag().putBoolean(TooltipUtil.KEY_DISPLAY, true);
+      // Mark as display tool for tooltip suppression
+      net.minecraft.world.item.component.CustomData.update(net.minecraft.core.component.DataComponents.CUSTOM_DATA, part, tag -> tag.putBoolean(TooltipUtil.KEY_DISPLAY, true));
       return new DisplayPartRecipe(id, MaterialVariant.UNKNOWN, new Pattern(Loadables.ITEM.getKey(pi.part.asItem())), patternItems, 0, tool, List.of(part));
     });
   }
 
   @Override
-  public List<DisplayPartRecipe> getRecipes(RegistryAccess access) {
+  public List<DisplayPartRecipe> getRecipes(HolderLookup.Provider access) {
     if (displayRecipes == null) {
       List<ItemStack> patternItems = List.of(this.pattern.getItems());
       // if we have parts, will be using the same list for all tools, so make just 1 recipe per part
@@ -262,30 +261,4 @@ public class PartBuilderToolRecycle implements IPartBuilderRecipe, IMultiRecipe<
     return displayRecipes;
   }
 
-  /** @deprecated use {@link slimeknights.tconstruct.library.recipe.partbuilder.recycle.PartBuilderToolRecycleBuilder} */
-  @Deprecated(forRemoval = true)
-  public record Finished(ResourceLocation getId, SizedIngredient tools, Ingredient pattern) implements FinishedRecipe {
-    @Override
-    public void serializeRecipeData(JsonObject json) {
-      json.add("tools", SizedIngredient.LOADABLE.serialize(tools));
-      json.add("pattern", pattern.toJson());
-    }
-
-    @Override
-    public RecipeSerializer<?> getType() {
-      return TinkerTables.partBuilderToolRecycling.get();
-    }
-
-    @Nullable
-    @Override
-    public JsonObject serializeAdvancement() {
-      return null;
-    }
-
-    @Nullable
-    @Override
-    public ResourceLocation getAdvancementId() {
-      return null;
-    }
-  }
 }

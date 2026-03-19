@@ -3,13 +3,27 @@ package slimeknights.tconstruct.library.tools.helper;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 
-import static net.minecraft.world.damagesource.CombatRules.getDamageAfterAbsorb;
-
 /**
- * Utinet.minecraft.world.damagesource.CombatRulesation logic
+ * Utility class for armor damage calculation logic
  */
 public class ArmorUtil {
   private ArmorUtil() {}
+
+  /**
+   * Computes the damage after armor absorption using the vanilla formula.
+   * In 1.21, {@link net.minecraft.world.damagesource.CombatRules#getDamageAfterAbsorb} added entity and damage source parameters
+   * for enchantment-based armor effectiveness. This method implements the raw formula without enchantment effects,
+   * which is what we need for our inverse calculations.
+   * @param damage     Original damage
+   * @param armor      Armor value
+   * @param toughness  Armor toughness
+   * @return  Damage after armor absorption
+   */
+  private static float getDamageAfterArmorAbsorb(float damage, float armor, float toughness) {
+    float f = 2.0F + toughness / 4.0F;
+    float f1 = Mth.clamp(armor - damage / f, armor * 0.2F, 20.0F);
+    return damage * (1.0F - f1 / 25.0F);
+  }
 
   /**
    * Inverse of {@link net.minecraft.world.damagesource.CombatRules#getDamageAfterAbsorb(float, float, float)}  with respect to damage
@@ -71,7 +85,7 @@ public class ArmorUtil {
   }
 
   /**
-   * Calculates the final damage for use in {@link net.neoforged.neoforge.event.entity.living.LivingHurtEvent}. Requires applying several inverse functions to cancel out vanilla formulas that are applied later
+   * Calculates the final damage for use in {@link net.neoforged.neoforge.event.entity.living.LivingDamageEvent.Pre}. Requires applying several inverse functions to cancel out vanilla formulas that are applied later
    * @param originalDamage     Original damage to be dealt
    * @param armor              Armor amount on the player
    * @param toughness          Armor toughness attribute
@@ -92,7 +106,7 @@ public class ArmorUtil {
     float damage = originalDamage;
     // if there is no armor value though, no work is needed
     if (armor > 0) {
-      damage = getDamageAfterAbsorb(damage, armor, toughness);
+      damage = getDamageAfterArmorAbsorb(damage, armor, toughness);
     }
 
     // next, we want to apply our modifiers bonus M(x), it works out to be a reduction between 0 and 80%

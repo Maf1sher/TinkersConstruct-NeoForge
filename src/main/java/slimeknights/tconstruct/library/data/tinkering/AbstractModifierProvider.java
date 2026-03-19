@@ -2,10 +2,10 @@ package slimeknights.tconstruct.library.data.tinkering;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
-import net.neoforged.neoforge.common.crafting.CraftingHelper;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.tconstruct.library.json.JsonRedirect;
@@ -57,7 +57,7 @@ public abstract class AbstractModifierProvider extends GenericDataProvider {
 
   /** Sets up a builder for a composable modifier */
   protected ComposableModifier.Builder buildModifier(DynamicModifier modifier, @Nullable ICondition condition, JsonRedirect... redirects) {
-    return buildModifier(modifier.getId(), condition, redirects);
+    return buildModifier(modifier.getModifierId(), condition, redirects);
   }
 
   /** Sets up a builder for a composable modifier */
@@ -80,7 +80,7 @@ public abstract class AbstractModifierProvider extends GenericDataProvider {
 
   /** Makes a conditional redirect to the given ID */
   protected JsonRedirect conditionalRedirect(ModifierId id, @Nullable ICondition condition) {
-    return new JsonRedirect(id, condition);
+    return new JsonRedirect(id.location(), condition);
   }
 
   /** Makes an unconditional redirect to the given ID */
@@ -91,7 +91,7 @@ public abstract class AbstractModifierProvider extends GenericDataProvider {
   @Override
   public CompletableFuture<?> run(CachedOutput cache) {
     addModifiers();
-    return allOf(composableModifiers.entrySet().stream().map(entry -> saveJson(cache, entry.getKey(), entry.getValue().serialize())));
+    return allOf(composableModifiers.entrySet().stream().map(entry -> saveJson(cache, entry.getKey().location(), entry.getValue().serialize())));
   }
 
   /** Result for composable too */
@@ -112,7 +112,7 @@ public abstract class AbstractModifierProvider extends GenericDataProvider {
         json.add("redirects", array);
       }
       if (condition != null) {
-        json.add("condition", CraftingHelper.serialize(condition));
+        json.add("condition", ICondition.CODEC.encodeStart(JsonOps.INSTANCE, condition).getOrThrow(IllegalStateException::new));
       }
       return json;
     }

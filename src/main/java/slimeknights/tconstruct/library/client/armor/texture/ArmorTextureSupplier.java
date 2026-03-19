@@ -40,10 +40,10 @@ public interface ArmorTextureSupplier extends IHaveLoader {
   /** Pair of texture and color */
   interface ArmorTexture {
     /** Empty instance since caches don't support caching null. */
-    ArmorTexture EMPTY = (model, matrices, bufferSource, packedLight, packedOverlay, red, green, blue, alpha, hasGlint) -> {};
+    ArmorTexture EMPTY = (model, matrices, bufferSource, packedLight, packedOverlay, color, hasGlint) -> {};
 
     /** Renders this texture to the given model */
-    void renderTexture(Model model, PoseStack matrices, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float red, float green, float blue, float alpha, boolean hasGlint);
+    void renderTexture(Model model, PoseStack matrices, MultiBufferSource bufferSource, int packedLight, int packedOverlay, int color, boolean hasGlint);
   }
 
   /** Texture variants, armor is used for helmet, chestplate, and boots, while leggings is leggings and wings is on chest for elytra */
@@ -60,6 +60,6 @@ public interface ArmorTextureSupplier extends IHaveLoader {
    * Gets a texture using the named format
    */
   static ResourceLocation getTexturePath(ResourceLocation name) {
-    return new ResourceLocation(name.getNamespace(), FOLDER + '/' + name.getPath() + ".png");
+    return ResourceLocation.fromNamespaceAndPath(name.getNamespace(), FOLDER + '/' + name.getPath() + ".png");
   }
 }

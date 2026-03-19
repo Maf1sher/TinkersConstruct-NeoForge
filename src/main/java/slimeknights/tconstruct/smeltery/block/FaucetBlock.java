@@ -7,7 +7,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -76,9 +75,8 @@ public class FaucetBlock extends Block implements EntityBlock {
     return SHAPES.get(state.getValue(FACING));
   }
 
-  @SuppressWarnings("deprecation")
   @Override
-  public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+  protected boolean isPathfindable(BlockState state, PathComputationType type) {
     return false;
   }
 
@@ -97,9 +95,8 @@ public class FaucetBlock extends Block implements EntityBlock {
     return BlockEntityHelper.serverTicker(pLevel, type, TinkerSmeltery.faucet.get(), FaucetBlockEntity.SERVER_TICKER);
   }
 
-  @SuppressWarnings("deprecation")
   @Override
-  public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+  protected InteractionResult useWithoutItem(BlockState state, Level worldIn, BlockPos pos, Player player, BlockHitResult hit) {
     if (player.isShiftKeyDown()) {
       return InteractionResult.PASS;
     }

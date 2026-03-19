@@ -5,37 +5,22 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.capabilities.Capability;
-import net.neoforged.neoforge.common.util.LazyOptional;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
 import javax.annotation.Nullable;
-import java.util.function.Supplier;
 
 /** A hook used to provide BlockItems through the {@link BlockItemProviderCapability}, for modifiers such as exchanging */
 public interface ToolBlockItemProviderHook {
     /**
-     * Get a {@link BlockItem} to provide, wrapped as an ItemStack with any required placement NBT data. Can be randomised, if desired.
-     * <br>
-     * <br>
-     * <b>The returned stack must have {@link ItemStack#getItem} return an instance of {@link BlockItem}, or be {@link ItemStack#EMPTY}!</b>
-     * @param tool      The tool that this hook is attached to, as a tool stack view
-     * @param modifier  The modifier that provided this hook
-     * @param entity    The entity holding this tool. May be null if there is no entity
-     * @return stack containing a {@link BlockItem} that this provides, or {@link ItemStack#EMPTY} if this cannot provide more block items (for example if the stack has been depleted)
+     * Get a {@link BlockItem} to provide, wrapped as an ItemStack with any required placement NBT data.
      */
     ItemStack getBlockItemStack(IToolStackView tool, ModifierEntry modifier, @Nullable LivingEntity entity);
 
     /**
-     * Consume a block from this provider. For example may decrease a contained stacks size or remove fluid from the stack's tank.
-     *
-     * @param tool         The tool that this hook is attached to, as a tool stack view
-     * @param modifier     The modifier that provided this hook
-     * @param backingStack Stack that was returned by {@link #getBlockItemStack(IToolStackView, ModifierEntry, LivingEntity)}. Should be validated to be your stack before you consume.
-     * @param entity       The entity holding this tool. May be null if there is no entity
+     * Consume a block from this provider.
      * @return {@code true} if this hook consumed, otherwise {@code false} indicating that another modifier needs to consume.
      */
     boolean consumeBlockItem(IToolStackView tool, ModifierEntry modifier, ItemStack backingStack, @Nullable LivingEntity entity);
@@ -65,19 +50,7 @@ public interface ToolBlockItemProviderHook {
                     return;
                 }
             }
-            TConstruct.LOG.warn("Could not find a modifier to consume {} from after providing it from ToolBlockItemProviderHook. This is likely causing a duplication glitch! Stack nbt: {}", BuiltInRegistries.ITEM.getKey(backingStack.getItem()), backingStack.getTag());
-        }
-    }
-
-    class Provider implements ToolCapabilityProvider.IToolCapabilityProvider {
-        private final LazyOptional<BlockItemProviderCapability> lazy;
-        public Provider(Supplier<? extends IToolStackView> tool) {
-            lazy = LazyOptional.of(() -> new CapabilityImpl(tool.get()));
-        }
-
-        @Override
-        public <T> LazyOptional<T> getCapability(IToolStackView tool, Capability<T> cap) {
-            return BlockItemProviderCapability.CAPABILITY.orEmpty(cap, lazy);
+            TConstruct.LOG.warn("Could not find a modifier to consume {} from after providing it from ToolBlockItemProviderHook. This is likely causing a duplication glitch! Stack nbt: {}", BuiltInRegistries.ITEM.getKey(backingStack.getItem()), backingStack.getComponents());
         }
     }
 }

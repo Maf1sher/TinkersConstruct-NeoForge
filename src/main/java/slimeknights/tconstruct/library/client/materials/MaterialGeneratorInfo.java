@@ -1,11 +1,10 @@
 package slimeknights.tconstruct.library.client.materials;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.resources.ResourceLocation;
-import slimeknights.mantle.data.gson.ResourceLocationSerializer;
+import net.minecraft.util.GsonHelper;
 import slimeknights.mantle.data.loadable.common.GsonLoadable;
 import slimeknights.mantle.data.loadable.field.LegacyField;
 import slimeknights.mantle.data.loadable.primitive.BooleanLoadable;
@@ -25,7 +24,7 @@ public class MaterialGeneratorInfo {
   /** GSON adapter for generator deserializing. TODO: migrate ISpriteTransformer to loadables? */
   private static final Gson GSON = (new GsonBuilder())
     .registerTypeAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
-    .registerTypeAdapter(MaterialStatsId.class, new ResourceLocationSerializer<>(MaterialStatsId::new, TConstruct.MOD_ID))
+    .registerTypeAdapter(MaterialStatsId.class, new MaterialStatsIdGsonAdapter())
     .registerTypeHierarchyAdapter(ISpriteTransformer.class, ISpriteTransformer.SERIALIZER)
     .registerTypeHierarchyAdapter(IColorMapping.class, IColorMapping.SERIALIZER)
     .create();
@@ -54,5 +53,22 @@ public class MaterialGeneratorInfo {
   /** If true, this stat type is supported */
   public boolean supportStatType(MaterialStatsId statType) {
     return supportedStats.contains(statType);
+  }
+
+  /** GSON adapter for MaterialStatsId since it no longer extends ResourceLocation */
+  private static class MaterialStatsIdGsonAdapter implements JsonSerializer<MaterialStatsId>, JsonDeserializer<MaterialStatsId> {
+    @Override
+    public JsonElement serialize(MaterialStatsId src, java.lang.reflect.Type typeOfSrc, JsonSerializationContext context) {
+      return new JsonPrimitive(src.toString());
+    }
+
+    @Override
+    public MaterialStatsId deserialize(JsonElement json, java.lang.reflect.Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+      String loc = GsonHelper.convertToString(json, "location");
+      if (!loc.contains(":")) {
+        loc = TConstruct.MOD_ID + ":" + loc;
+      }
+      return new MaterialStatsId(loc);
+    }
   }
 }

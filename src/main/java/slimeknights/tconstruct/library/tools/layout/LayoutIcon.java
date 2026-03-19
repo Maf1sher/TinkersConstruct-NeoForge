@@ -12,11 +12,12 @@ import com.google.gson.JsonSyntaxException;
 import io.netty.handler.codec.DecoderException;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.crafting.CraftingHelper;
 import slimeknights.mantle.util.JsonHelper;
 import slimeknights.tconstruct.library.recipe.partbuilder.Pattern;
 
@@ -66,7 +67,7 @@ public abstract class LayoutIcon {
     switch (type) {
       case EMPTY: return EMPTY;
       case ITEM: {
-        ItemStack stack = buffer.readItem();
+        ItemStack stack = ItemStack.OPTIONAL_STREAM_CODEC.decode((RegistryFriendlyByteBuf) buffer);
         return new ItemStackIcon(stack);
       }
       case PATTERN: {
@@ -100,16 +101,15 @@ public abstract class LayoutIcon {
     @Override
     public void write(FriendlyByteBuf buffer) {
       buffer.writeEnum(Type.ITEM);
-      buffer.writeItem(stack);
+      ItemStack.OPTIONAL_STREAM_CODEC.encode((RegistryFriendlyByteBuf) buffer, stack);
     }
 
     @Override
     public JsonObject toJson() {
       JsonObject json = new JsonObject();
       json.addProperty("item", BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
-      CompoundTag tag = stack.getTag();
-      if (tag != null) {
-        json.addProperty("nbt", tag.toString());
+      if (stack.getCount() > 1) {
+        json.addProperty("count", stack.getCount());
       }
       return json;
     }
@@ -132,7 +132,7 @@ public abstract class LayoutIcon {
     @Override
     public void write(FriendlyByteBuf buffer) {
       buffer.writeEnum(Type.PATTERN);
-      buffer.writeResourceLocation(pattern);
+      buffer.writeResourceLocation(pattern.location());
     }
 
     @Override
@@ -160,7 +160,10 @@ public abstract class LayoutIcon {
         return new PatternIcon(pattern);
       }
       if (object.has("item")) {
-        ItemStack stack = CraftingHelper.getItemStack(object, true);
+        ResourceLocation itemId = ResourceLocation.parse(GsonHelper.getAsString(object, "item"));
+        Item item = BuiltInRegistries.ITEM.get(itemId);
+        int count = GsonHelper.getAsInt(object, "count", 1);
+        ItemStack stack = new ItemStack(item, count);
         return new ItemStackIcon(stack);
       }
       // not sure why this would be needed, but might as well

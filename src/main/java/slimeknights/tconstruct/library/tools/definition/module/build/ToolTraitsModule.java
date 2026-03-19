@@ -52,7 +52,7 @@ public record ToolTraitsModule(List<ModifierEntry> traits) implements ToolTraitH
 
     /** Adds a base trait to the tool */
     public Builder trait(LazyModifier modifier, int level) {
-      return trait(modifier.getId(), level);
+      return trait(modifier.getModifierId(), level);
     }
 
     /** Adds a base trait to the tool */

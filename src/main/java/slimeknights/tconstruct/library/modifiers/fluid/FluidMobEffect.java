@@ -2,12 +2,13 @@ package slimeknights.tconstruct.library.modifiers.fluid;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.network.chat.Component;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.primitive.IntLoadable;
@@ -19,7 +20,6 @@ import slimeknights.tconstruct.library.modifiers.fluid.entity.MobEffectFluidEffe
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 /**
  * Common logic for effects between {@link slimeknights.tconstruct.library.modifiers.fluid.entity.MobEffectFluidEffect} and {@link slimeknights.tconstruct.library.modifiers.fluid.block.MobEffectCloudFluidEffect}
@@ -51,13 +51,16 @@ public record FluidMobEffect(MobEffect effect, int time, int level, @Nullable Li
     return time == MobEffectInstance.INFINITE_DURATION;
   }
 
+  /** Gets the effect wrapped as a holder for use with 1.21 APIs */
+  public Holder<MobEffect> effectHolder() {
+    return BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effect);
+  }
+
   /** Creates the final effect */
   public MobEffectInstance effectWithTime(int time) {
-    MobEffectInstance instance = new MobEffectInstance(effect, time, this.level - 1);
-    if (curativeItems != null) {
-      instance.setCurativeItems(curativeItems.stream().map(ItemStack::new).collect(Collectors.toList()));
-    }
-    return instance;
+    // Note: In 1.21 NeoForge, per-instance curative items were replaced by EffectCure system on MobEffect.
+    // The curativeItems field is retained for JSON compatibility but no longer applied per-instance.
+    return new MobEffectInstance(effectHolder(), time, this.level - 1);
   }
 
   /** Creates the final effect */
@@ -84,7 +87,7 @@ public record FluidMobEffect(MobEffect effect, int time, int level, @Nullable Li
       used = 1;
     } else {
       // add and set both have distinct behavior under an existing effect, same otherwise
-      MobEffectInstance existingInstance = target.getEffect(effect);
+      MobEffectInstance existingInstance = target.getEffect(effectHolder());
       int amplifier = amplifier();
       if (existingInstance != null && existingInstance.getAmplifier() >= amplifier) {
         // if the existing level is larger, just skip, would be a cheese to increase said level
@@ -159,15 +162,30 @@ public record FluidMobEffect(MobEffect effect, int time, int level, @Nullable Li
       return this;
     }
 
+    /** Adds an effect to the builder with the passed cures, accepting a Holder */
+    public Builder effectCure(Holder<MobEffect> effect, int time, int level, Item... curativeItems) {
+      return effectCure(effect.value(), time, level, curativeItems);
+    }
+
     /** Adds an effect to the builder with default cures */
     public Builder effect(MobEffect effect, int time, int level) {
       effects.add(new FluidMobEffect(effect, time, level, null));
       return this;
     }
 
+    /** Adds an effect to the builder with default cures, accepting a Holder */
+    public Builder effect(Holder<MobEffect> effect, int time, int level) {
+      return effect(effect.value(), time, level);
+    }
+
     /** Adds an effect to the builder */
     public Builder effect(MobEffect effect, int time) {
       return effect(effect, time, 1);
+    }
+
+    /** Adds an effect to the builder, accepting a Holder */
+    public Builder effect(Holder<MobEffect> effect, int time) {
+      return effect(effect.value(), time, 1);
     }
 
     private List<FluidMobEffect> getEffects() {

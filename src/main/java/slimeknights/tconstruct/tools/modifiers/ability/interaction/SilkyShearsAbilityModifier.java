@@ -14,6 +14,6 @@ public class SilkyShearsAbilityModifier extends ShearsAbilityModifier {
   
   @Override
   protected boolean isShears(IToolStackView tool) {
-    return tool.getModifierLevel(TinkerModifiers.silky.getId()) > 0;
+    return tool.getModifierLevel(TinkerModifiers.silky.getModifierId()) > 0;
   }
 }

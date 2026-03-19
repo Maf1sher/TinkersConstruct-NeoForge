@@ -1,11 +1,13 @@
 package slimeknights.tconstruct.tools.recipe;
 
 import lombok.Getter;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -36,9 +38,18 @@ import java.util.stream.Collectors;
 
 /** Recipe to dye travelers gear */
 public class ArmorDyeingRecipe implements ITinkerStationRecipe, IMultiRecipe<IDisplayModifierRecipe> {
+  /** Recipe ID used for display purposes */
   @Getter
   private final ResourceLocation id;
 
+  /** No-arg constructor for use with {@link slimeknights.mantle.recipe.helper.SimpleRecipeSerializer} */
+  public ArmorDyeingRecipe() {
+    this.id = TinkerModifiers.dyed.getId();
+    ModifierRecipeLookup.addRecipeModifier(null, TinkerModifiers.dyed);
+  }
+
+  /** @deprecated recipes no longer carry IDs in 1.21, use no-arg constructor */
+  @Deprecated
   public ArmorDyeingRecipe(ResourceLocation id) {
     this.id = id;
     ModifierRecipeLookup.addRecipeModifier(null, TinkerModifiers.dyed);
@@ -69,14 +80,14 @@ public class ArmorDyeingRecipe implements ITinkerStationRecipe, IMultiRecipe<IDi
     ToolStack tool = inv.getTinkerable().copy();
 
     ModDataNBT persistentData = tool.getPersistentData();
-    ModifierId key = TinkerModifiers.dyed.getId();
+    ModifierId key = TinkerModifiers.dyed.getModifierId();
     int nr = 0, nb = 0, ng = 0;
     int brightness = 0;
     int count = 0;
 
     // copy existing color
-    if (persistentData.contains(key, Tag.TAG_INT)) {
-      int color = persistentData.getInt(key);
+    if (persistentData.contains(key.location(), Tag.TAG_INT)) {
+      int color = persistentData.getInt(key.location());
       int r = color >> 16 & 255;
       int g = color >>  8 & 255;
       int b = color       & 255;
@@ -93,10 +104,10 @@ public class ArmorDyeingRecipe implements ITinkerStationRecipe, IMultiRecipe<IDi
       if (!stack.isEmpty()) {
         DyeColor dye = DyeColor.getColor(stack);
         if (dye != null) {
-          float[] color = dye.getTextureDiffuseColors();
-          int r = (int)(color[0] * 255);
-          int g = (int)(color[1] * 255);
-          int b = (int)(color[2] * 255);
+          int diffuse = dye.getTextureDiffuseColor();
+          int r = FastColor.ARGB32.red(diffuse);
+          int g = FastColor.ARGB32.green(diffuse);
+          int b = FastColor.ARGB32.blue(diffuse);
           brightness += Math.max(r, Math.max(g, b));
           nr += r;
           ng += g;
@@ -121,7 +132,7 @@ public class ArmorDyeingRecipe implements ITinkerStationRecipe, IMultiRecipe<IDi
     ng = (int)((float)ng * scaledBrightness / brightness);
     nb = (int)((float)nb * scaledBrightness / brightness);
     int finalColor = (nr << 16) | (ng << 8) | nb;
-    persistentData.putInt(key, finalColor);
+    persistentData.putInt(key.location(), finalColor);
 
     // add the modifier if missing
     if (tool.getModifierLevel(key) == 0) {
@@ -142,7 +153,7 @@ public class ArmorDyeingRecipe implements ITinkerStationRecipe, IMultiRecipe<IDi
   private List<IDisplayModifierRecipe> displayRecipes;
 
   @Override
-  public List<IDisplayModifierRecipe> getRecipes(RegistryAccess access) {
+  public List<IDisplayModifierRecipe> getRecipes(HolderLookup.Provider access) {
     if (displayRecipes == null) {
       List<ItemStack> toolInputs = RegistryHelper.getTagValueStream(BuiltInRegistries.ITEM, TinkerTags.Items.DYEABLE)
         .map(item -> {
@@ -171,8 +182,8 @@ public class ArmorDyeingRecipe implements ITinkerStationRecipe, IMultiRecipe<IDi
       boolean illegal = id >= TINT_COLORS.length;
       // taking advantage of the fact no color is pure black
       if (illegal || TINT_COLORS[id] == 0) {
-        float[] colors = color.getTextureDiffuseColors();
-        int combinedColor = ((int)(colors[0] * 255) << 16) | ((int)(colors[1] * 255) << 8) | (int)(colors[2] * 255);
+        int diffuse = color.getTextureDiffuseColor();
+        int combinedColor = (FastColor.ARGB32.red(diffuse) << 16) | (FastColor.ARGB32.green(diffuse) << 8) | FastColor.ARGB32.blue(diffuse);
         if (illegal) {
           return combinedColor;
         }
@@ -196,7 +207,7 @@ public class ArmorDyeingRecipe implements ITinkerStationRecipe, IMultiRecipe<IDi
       this.dyes = RegistryHelper.getTagValueStream(BuiltInRegistries.ITEM, color.getTag()).map(ItemStack::new).toList();
       this.variant = Component.translatable("color.minecraft." + color.getSerializedName());
 
-      ResourceLocation modID = RESULT.getId();
+      ResourceLocation modID = RESULT.getId().location();
       int tintColor = getTintColor(color);
       List<ModifierEntry> results = List.of(RESULT);
       toolWithModifier = tools.stream().map(stack -> IDisplayModifierRecipe.withModifiers(stack, DEFAULT_TOOL_STACK_SIZE, results, data -> data.putInt(modID, tintColor))).toList();

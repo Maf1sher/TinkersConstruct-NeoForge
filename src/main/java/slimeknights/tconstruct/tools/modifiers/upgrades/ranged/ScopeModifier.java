@@ -16,7 +16,7 @@ import slimeknights.tconstruct.tools.modules.ZoomModule;
 @Deprecated(forRemoval = true)
 public class ScopeModifier extends Modifier {
   @Deprecated(forRemoval = true)
-  public static final ResourceLocation SCOPE = ModifierIds.scope;
+  public static final ResourceLocation SCOPE = ModifierIds.scope.location();
 
   @Override
   protected void registerHooks(Builder hookBuilder) {
@@ -36,7 +36,10 @@ public class ScopeModifier extends Modifier {
   @Deprecated(forRemoval = true)
   public static void stopScoping(LivingEntity entity) {
     if (entity.level().isClientSide) {
-      entity.getCapability(TinkerDataCapability.CAPABILITY).ifPresent(data -> data.computeIfAbsent(TinkerDataKeys.FOV_MODIFIER).remove(SCOPE));
+      TinkerDataCapability.Holder data = TinkerDataCapability.getData(entity);
+      if (data != null) {
+        data.computeIfAbsent(TinkerDataKeys.FOV_MODIFIER).remove(SCOPE);
+      }
     }
   }
 }

@@ -44,7 +44,7 @@ public enum TrimModifierModel implements IBakedModifierModel {
   static {
     for (ArmorItem.Type type : ArmorItem.Type.values()) {
       TEXTURE_CACHE[type.ordinal()] = new HashMap<>();
-      TRIM_TEXTURES[type.ordinal()] = new ResourceLocation("trims/items/" + type.getName() + "_trim");
+      TRIM_TEXTURES[type.ordinal()] = ResourceLocation.parse("trims/items/" + type.getName() + "_trim");
     }
   }
 

@@ -5,11 +5,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.PacketDistributor.PacketTarget;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import slimeknights.mantle.command.argument.TagSource;
-import slimeknights.mantle.network.packet.ISimplePacket;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
 import slimeknights.tconstruct.library.events.MaterialsLoadedEvent;
@@ -243,30 +241,29 @@ public final class MaterialRegistry {
   }
 
   /** Sends all relevant packets to the given player */
-  private void sendPackets(ServerPlayer player, ISimplePacket[] packets) {
+  private void sendPackets(ServerPlayer player, CustomPacketPayload[] packets) {
     // on an integrated server, the material registries have a single instance on both the client and the server thread
     // this means syncing is unneeded, and has the side-effect of recreating all the material instances (which can lead to unexpected behavior)
     // as a result, integrated servers just mark fullyLoaded as true without syncing anything, side-effect is listeners may run twice on single player
 
     // on a dedicated server, the client is running a separate game instance, this is where we send packets, plus fully loaded should already be true
     // this event is not fired when connecting to a server
-    if (player.connection.connection.isMemoryConnection()) {
+    if (player.connection.getConnection().isMemoryConnection()) {
       // if the packet is being sent to ourself, skip sending, prevents recreating all material instances in the registry a second time on dedicated servers
       // note it will still send the packet if another client connects in LAN
       fullyLoaded = true;
       NeoForge.EVENT_BUS.post(new MaterialsLoadedEvent());
     } else {
       TinkerNetwork network = TinkerNetwork.getInstance();
-      PacketTarget target = PacketDistributor.PLAYER.with(() -> player);
-      for (ISimplePacket packet : packets) {
-        network.send(target, packet);
+      for (CustomPacketPayload packet : packets) {
+        network.sendTo(packet, player);
       }
     }
   }
 
   /** Called when the player logs in to send packets */
   private void onDatapackSync(OnDatapackSyncEvent event) {
-    ISimplePacket[] packets = {
+    CustomPacketPayload[] packets = {
       materialManager.getUpdatePacket(),
       materialStatsManager.getUpdatePacket(),
       materialTraitsManager.getUpdatePacket()

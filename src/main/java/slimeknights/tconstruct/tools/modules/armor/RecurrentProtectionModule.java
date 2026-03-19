@@ -3,6 +3,7 @@ package slimeknights.tconstruct.tools.modules.armor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -65,14 +66,15 @@ public record RecurrentProtectionModule(LevelingValue percent, LevelingInt durat
       int level = SlotInChargeModule.getLevel(context.getTinkerData(), SLOT_KEY, slotType);
       if (level > 0) {
         // step 1: reduce damage based on the current effect level
-        MobEffect effect = TinkerModifiers.momentumEffect.get(ToolType.ARMOR);
+        @SuppressWarnings("unchecked")
+        Holder<MobEffect> effectHolder = (Holder<MobEffect>)(Holder<?>) TinkerModifiers.momentumEffect.getSupplier(ToolType.ARMOR);
         LivingEntity entity = context.getEntity();
-        amount -= TinkerEffect.getLevel(entity, effect);
+        amount -= TinkerEffect.getLevel(entity, effectHolder);
 
         // step 2: apply momentum based on damage taken
         int reduction = (int)(percent.compute(level) * amount);
         if (reduction > 0) {
-          entity.addEffect(new MobEffectInstance(effect, duration.compute(level), reduction - 1, false, false, true));
+          entity.addEffect(new MobEffectInstance(effectHolder, duration.compute(level), reduction - 1, false, false, true));
         }
       }
     }
@@ -86,7 +88,9 @@ public record RecurrentProtectionModule(LevelingValue percent, LevelingInt durat
       TooltipModifierHook.addPercentBoost(modifier.getModifier(), PROTECTION, this.percent.compute(modifier.getLevel()), tooltip);
     } else {
       // if we have a player, use the current effect level for reduction display
-      int level = TinkerEffect.getLevel(player, TinkerModifiers.momentumEffect.get(ToolType.ARMOR));
+      @SuppressWarnings("unchecked")
+      Holder<MobEffect> momentumHolder = (Holder<MobEffect>)(Holder<?>) TinkerModifiers.momentumEffect.getSupplier(ToolType.ARMOR);
+      int level = TinkerEffect.getLevel(player, momentumHolder);
       if (level > 0) {
         TooltipModifierHook.addFlatBoost(modifier.getModifier(), PROTECTION, this.percent.compute(modifier.getLevel()), tooltip);
       }

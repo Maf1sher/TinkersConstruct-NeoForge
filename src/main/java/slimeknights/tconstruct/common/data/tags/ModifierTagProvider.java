@@ -70,66 +70,66 @@ public class ModifierTagProvider extends AbstractModifierTagProvider {
 
   @Override
   protected void addTags() {
-    tag(GEMS).add(ModifierIds.diamond, ModifierIds.emerald);
+    tag(GEMS).add(ModifierIds.diamond.location(), ModifierIds.emerald.location());
     tag(INVISIBLE_INK_BLACKLIST).add(
       TinkerModifiers.embellishment.getId(), TinkerModifiers.dyed.getId(), TinkerModifiers.trim.getId(),
       TinkerModifiers.creativeSlot.getId(), TinkerModifiers.statOverride.getId(),
-      ModifierIds.shiny, TinkerModifiers.golden.getId()
+      ModifierIds.shiny.location(), TinkerModifiers.golden.getId()
     );
     tag(REMOVE_MODIFIER_BLACKLIST).add(TinkerModifiers.creativeSlot.getId(), TinkerModifiers.statOverride.getId());
     tag(EXTRACT_MODIFIER_BLACKLIST).add(
       TinkerModifiers.embellishment.getId(), TinkerModifiers.dyed.getId(), TinkerModifiers.trim.getId(),
-      ModifierIds.rebalanced, TinkerModifiers.overslime.getId()
+      ModifierIds.rebalanced.location(), TinkerModifiers.overslime.getId()
     ).addTag(REMOVE_MODIFIER_BLACKLIST);
     // blacklist modifiers that are not really slotless, they just have a slotless recipe
-    tag(EXTRACT_SLOTLESS_BLACKLIST).add(ModifierIds.luck, ModifierIds.toolBelt);
+    tag(EXTRACT_SLOTLESS_BLACKLIST).add(ModifierIds.luck.location(), ModifierIds.toolBelt.location());
     tag(EXTRACT_UPGRADE_BLACKLIST);
 
     // modifiers in this tag support both left click and right click interaction
     tag(DUAL_INTERACTION).add(
-      ModifierIds.bucketing, ModifierIds.splashing,
-      ModifierIds.glowing, ModifierIds.firestarter,
-      ModifierIds.stripping, ModifierIds.tilling, ModifierIds.pathing,
-      ModifierIds.shears, ModifierIds.silkyShears,
-      ModifierIds.harvest, ModifierIds.fishing,
-      ModifierIds.pockets
+      ModifierIds.bucketing.location(), ModifierIds.splashing.location(),
+      ModifierIds.glowing.location(), ModifierIds.firestarter.location(),
+      ModifierIds.stripping.location(), ModifierIds.tilling.location(), ModifierIds.pathing.location(),
+      ModifierIds.shears.location(), ModifierIds.silkyShears.location(),
+      ModifierIds.harvest.location(), ModifierIds.fishing.location(),
+      ModifierIds.pockets.location()
     );
     tag(BLOCK_WHILE_CHARGING).add(
-      ModifierIds.flinging, ModifierIds.springing, ModifierIds.bonking, ModifierIds.warping,
-      ModifierIds.spitting, ModifierIds.scope, ModifierIds.zoom, ModifierIds.brushing, ModifierIds.throwing
+      ModifierIds.flinging.location(), ModifierIds.springing.location(), ModifierIds.bonking.location(), ModifierIds.warping.location(),
+      ModifierIds.spitting.location(), ModifierIds.scope.location(), ModifierIds.zoom.location(), ModifierIds.brushing.location(), ModifierIds.throwing.location()
     );
     tag(SLIME_DEFENSE).add(
-      ModifierIds.meleeProtection, ModifierIds.projectileProtection,
-      ModifierIds.fireProtection, ModifierIds.magicProtection,
-      ModifierIds.blastProtection
+      ModifierIds.meleeProtection.location(), ModifierIds.projectileProtection.location(),
+      ModifierIds.fireProtection.location(), ModifierIds.magicProtection.location(),
+      ModifierIds.blastProtection.location()
     );
     tag(OVERSLIME_FRIEND).add(
-      ModifierIds.overgrowth, ModifierIds.overcast, ModifierIds.overburn, ModifierIds.overlord, ModifierIds.overshield, ModifierIds.overwield,
-      ModifierIds.overforced, ModifierIds.overslimeFriend, TinkerModifiers.overworked.getId()
+      ModifierIds.overgrowth.location(), ModifierIds.overcast.location(), ModifierIds.overburn.location(), ModifierIds.overlord.location(), ModifierIds.overshield.location(), ModifierIds.overwield.location(),
+      ModifierIds.overforced.location(), ModifierIds.overslimeFriend.location(), TinkerModifiers.overworked.getId()
     );
-    tag(AOE_INTERACTION).add(ModifierIds.pathing, ModifierIds.stripping, ModifierIds.tilling, ModifierIds.brushing, ModifierIds.splashing, ModifierIds.harvest);
-    tag(CHARGE_EMPTY_BOW_WITH_DRAWTIME).add(ModifierIds.flinging, ModifierIds.springing, ModifierIds.bonking, ModifierIds.warping, ModifierIds.throwing);
-    tag(CHARGE_EMPTY_BOW_WITHOUT_DRAWTIME).add(ModifierIds.blocking, ModifierIds.scope, ModifierIds.zoom, ModifierIds.slurping, ModifierIds.tasty);
-    tag(DRILL_ATTACKS).add(ModifierIds.flinging, ModifierIds.springing, ModifierIds.grapple);
-    tag(SELF_KNOCKBACK_SLINGS).add(ModifierIds.flinging, ModifierIds.springing);
-    tag(TARGET_KNOCKBACK_SLINGS).add(ModifierIds.bonking);
+    tag(AOE_INTERACTION).add(ModifierIds.pathing.location(), ModifierIds.stripping.location(), ModifierIds.tilling.location(), ModifierIds.brushing.location(), ModifierIds.splashing.location(), ModifierIds.harvest.location());
+    tag(CHARGE_EMPTY_BOW_WITH_DRAWTIME).add(ModifierIds.flinging.location(), ModifierIds.springing.location(), ModifierIds.bonking.location(), ModifierIds.warping.location(), ModifierIds.throwing.location());
+    tag(CHARGE_EMPTY_BOW_WITHOUT_DRAWTIME).add(ModifierIds.blocking.location(), ModifierIds.scope.location(), ModifierIds.zoom.location(), ModifierIds.slurping.location(), ModifierIds.tasty.location());
+    tag(DRILL_ATTACKS).add(ModifierIds.flinging.location(), ModifierIds.springing.location(), ModifierIds.grapple.location());
+    tag(SELF_KNOCKBACK_SLINGS).add(ModifierIds.flinging.location(), ModifierIds.springing.location());
+    tag(TARGET_KNOCKBACK_SLINGS).add(ModifierIds.bonking.location());
     tag(KNOCKBACK_SLINGS).addTag(SELF_KNOCKBACK_SLINGS, TARGET_KNOCKBACK_SLINGS);
 
     // durability tags
     tag(BYPASS_TANNED).addTag(SECONDARY_DURABILITY);
     tag(SECONDARY_DURABILITY).add(
       // protection is used for the damage correction on armor, which tanned should prevent
-      ModifierIds.protection,
+      ModifierIds.protection.location(),
       // counter-attack
-      ModifierIds.thorns, ModifierIds.fiery, ModifierIds.freezing, ModifierIds.springy,
-      ModifierIds.pierce, ModifierIds.venom, ModifierIds.conductive, ModifierIds.shock,
+      ModifierIds.thorns.location(), ModifierIds.fiery.location(), ModifierIds.freezing.location(), ModifierIds.springy.location(),
+      ModifierIds.pierce.location(), ModifierIds.venom.location(), ModifierIds.conductive.location(), ModifierIds.shock.location(),
       // special effects
-      ModifierIds.necrotic, ModifierIds.restore, TinkerModifiers.enderporting.getId()
+      ModifierIds.necrotic.location(), ModifierIds.restore.location(), TinkerModifiers.enderporting.getId()
     );
-    tag(BYPASS_REINFORCED).add(ModifierIds.glowing);
+    tag(BYPASS_REINFORCED).add(ModifierIds.glowing.location());
     tag(BYPASS_EXTRA_DURABILITY);
-    tag(BYPASS_OVERSLIME).addTag(BYPASS_EXTRA_DURABILITY).add(ModifierIds.glowing);
-    tag(BYPASS_FROSTSHIELD).addTag(BYPASS_EXTRA_DURABILITY).add(ModifierIds.glowing);
+    tag(BYPASS_OVERSLIME).addTag(BYPASS_EXTRA_DURABILITY).add(ModifierIds.glowing.location());
+    tag(BYPASS_FROSTSHIELD).addTag(BYPASS_EXTRA_DURABILITY).add(ModifierIds.glowing.location());
 
     // book tags
     this.tag(UPGRADES).addTag(GENERAL_UPGRADES, MELEE_UPGRADES, DAMAGE_UPGRADES, HARVEST_UPGRADES, ARMOR_UPGRADES, RANGED_UPGRADES);
@@ -141,86 +141,86 @@ public class ModifierTagProvider extends AbstractModifierTagProvider {
 
     // upgrades
     this.tag(GENERAL_UPGRADES).add(
-      ModifierIds.diamond, ModifierIds.emerald, ModifierIds.netherite,
-      ModifierIds.reinforced, ModifierIds.overforced, ModifierIds.soulbound,
-      ModifierIds.experienced, ModifierIds.magnetic, ModifierIds.scope, ModifierIds.zoom,
-      ModifierIds.tank, ModifierIds.smelting, ModifierIds.fireprimer)
-        .addOptional(ModifierIds.theOneProbe);
+      ModifierIds.diamond.location(), ModifierIds.emerald.location(), ModifierIds.netherite.location(),
+      ModifierIds.reinforced.location(), ModifierIds.overforced.location(), ModifierIds.soulbound.location(),
+      ModifierIds.experienced.location(), ModifierIds.magnetic.location(), ModifierIds.scope.location(), ModifierIds.zoom.location(),
+      ModifierIds.tank.location(), ModifierIds.smelting.location(), ModifierIds.fireprimer.location())
+        .addOptional(ModifierIds.theOneProbe.location());
 
     this.tag(MELEE_UPGRADES).add(
-      ModifierIds.knockback, ModifierIds.padded,
-      TinkerModifiers.severing.getId(), ModifierIds.necrotic, ModifierIds.sweeping,
-      ModifierIds.fiery, ModifierIds.freezing);
+      ModifierIds.knockback.location(), ModifierIds.padded.location(),
+      TinkerModifiers.severing.getId(), ModifierIds.necrotic.location(), ModifierIds.sweeping.location(),
+      ModifierIds.fiery.location(), ModifierIds.freezing.location());
     this.tag(DAMAGE_UPGRADES).add(
-      ModifierIds.sharpness, ModifierIds.pierce, ModifierIds.swiftstrike,
-      ModifierIds.antiaquatic, ModifierIds.baneOfSssss, ModifierIds.cooling, ModifierIds.killager, ModifierIds.smite);
+      ModifierIds.sharpness.location(), ModifierIds.pierce.location(), ModifierIds.swiftstrike.location(),
+      ModifierIds.antiaquatic.location(), ModifierIds.baneOfSssss.location(), ModifierIds.cooling.location(), ModifierIds.killager.location(), ModifierIds.smite.location());
 
-    this.tag(HARVEST_UPGRADES).add(ModifierIds.haste, ModifierIds.blasting, ModifierIds.hydraulic, ModifierIds.lightspeed);
+    this.tag(HARVEST_UPGRADES).add(ModifierIds.haste.location(), ModifierIds.blasting.location(), ModifierIds.hydraulic.location(), ModifierIds.lightspeed.location());
 
     this.tag(GENERAL_ARMOR_UPGRADES).add(
-      ModifierIds.fiery, ModifierIds.freezing, ModifierIds.thorns,
-      ModifierIds.ricochet, ModifierIds.springy, ModifierIds.blockade);
-    this.tag(HELMET_UPGRADES).add(TinkerModifiers.itemFrame.getId(), ModifierIds.respiration, ModifierIds.minimap).addOptional(ModifierIds.headlight);
-    this.tag(CHESTPLATE_UPGRADES).add(ModifierIds.haste, ModifierIds.knockback, TinkerModifiers.sleeves.getId());
-    this.tag(LEGGING_UPGRADES).add(ModifierIds.leaping, TinkerModifiers.shieldStrap.getId(), ModifierIds.speedy, ModifierIds.swiftSneak, ModifierIds.stepUp);
-    this.tag(BOOT_UPGRADES).add(ModifierIds.depthStrider, ModifierIds.featherFalling, ModifierIds.longFall, ModifierIds.lightspeed, ModifierIds.soulspeed);
+      ModifierIds.fiery.location(), ModifierIds.freezing.location(), ModifierIds.thorns.location(),
+      ModifierIds.ricochet.location(), ModifierIds.springy.location(), ModifierIds.blockade.location());
+    this.tag(HELMET_UPGRADES).add(TinkerModifiers.itemFrame.getId(), ModifierIds.respiration.location(), ModifierIds.minimap.location()).addOptional(ModifierIds.headlight.location());
+    this.tag(CHESTPLATE_UPGRADES).add(ModifierIds.haste.location(), ModifierIds.knockback.location(), TinkerModifiers.sleeves.getId());
+    this.tag(LEGGING_UPGRADES).add(ModifierIds.leaping.location(), TinkerModifiers.shieldStrap.getId(), ModifierIds.speedy.location(), ModifierIds.swiftSneak.location(), ModifierIds.stepUp.location());
+    this.tag(BOOT_UPGRADES).add(ModifierIds.depthStrider.location(), ModifierIds.featherFalling.location(), ModifierIds.longFall.location(), ModifierIds.lightspeed.location(), ModifierIds.soulspeed.location());
 
     this.tag(RANGED_UPGRADES).add(
-      ModifierIds.pierce, ModifierIds.power, ModifierIds.punch, ModifierIds.quickCharge,
-      TinkerModifiers.sinistral.getId(), ModifierIds.trueshot,
-      ModifierIds.fiery, ModifierIds.freezing,
-      ModifierIds.arrowPierce, ModifierIds.bounce, ModifierIds.necrotic,
-      ModifierIds.lure, ModifierIds.collecting, ModifierIds.fins);
+      ModifierIds.pierce.location(), ModifierIds.power.location(), ModifierIds.punch.location(), ModifierIds.quickCharge.location(),
+      TinkerModifiers.sinistral.getId(), ModifierIds.trueshot.location(),
+      ModifierIds.fiery.location(), ModifierIds.freezing.location(),
+      ModifierIds.arrowPierce.location(), ModifierIds.bounce.location(), ModifierIds.necrotic.location(),
+      ModifierIds.lure.location(), ModifierIds.collecting.location(), ModifierIds.fins.location());
 
     // abilities
     this.tag(GENERAL_ABILITIES).add(
-      ModifierIds.expanded, ModifierIds.gilded, ModifierIds.unbreakable,
-      ModifierIds.luck, TinkerModifiers.melting.getId());
+      ModifierIds.expanded.location(), ModifierIds.gilded.location(), ModifierIds.unbreakable.location(),
+      ModifierIds.luck.location(), TinkerModifiers.melting.getId());
     this.tag(MELEE_ABILITIES).add(
-      ModifierIds.blocking, TinkerModifiers.parrying.getId(),
-      TinkerModifiers.dualWielding.getId(), ModifierIds.spilling);
-    this.tag(HARVEST_ABILITIES).add(ModifierIds.autosmelt, TinkerModifiers.exchanging.getId(), ModifierIds.silky);
+      ModifierIds.blocking.location(), TinkerModifiers.parrying.getId(),
+      TinkerModifiers.dualWielding.getId(), ModifierIds.spilling.location());
+    this.tag(HARVEST_ABILITIES).add(ModifierIds.autosmelt.location(), TinkerModifiers.exchanging.getId(), ModifierIds.silky.location());
     this.tag(RANGED_ABILITIES).add(
-      ModifierIds.bulkQuiver, ModifierIds.trickQuiver,
-      ModifierIds.crystalshot, ModifierIds.multishot, ModifierIds.ballista,
-      ModifierIds.grapple,
-      ModifierIds.channeling, ModifierIds.returning);
+      ModifierIds.bulkQuiver.location(), ModifierIds.trickQuiver.location(),
+      ModifierIds.crystalshot.location(), ModifierIds.multishot.location(), ModifierIds.ballista.location(),
+      ModifierIds.grapple.location(),
+      ModifierIds.channeling.location(), ModifierIds.returning.location());
     this.tag(INTERACTION_ABILITIES).add(
-      ModifierIds.bucketing, ModifierIds.firestarter, ModifierIds.glowing,
-      ModifierIds.pathing, ModifierIds.stripping, ModifierIds.tilling, ModifierIds.brushing,
-      ModifierIds.spitting, ModifierIds.splashing, ModifierIds.slurping,
-      ModifierIds.bonking, ModifierIds.flinging, ModifierIds.springing, ModifierIds.warping,
-      ModifierIds.throwing, ModifierIds.drillAttack);
+      ModifierIds.bucketing.location(), ModifierIds.firestarter.location(), ModifierIds.glowing.location(),
+      ModifierIds.pathing.location(), ModifierIds.stripping.location(), ModifierIds.tilling.location(), ModifierIds.brushing.location(),
+      ModifierIds.spitting.location(), ModifierIds.splashing.location(), ModifierIds.slurping.location(),
+      ModifierIds.bonking.location(), ModifierIds.flinging.location(), ModifierIds.springing.location(), ModifierIds.warping.location(),
+      ModifierIds.throwing.location(), ModifierIds.drillAttack.location());
     // armor
-    this.tag(GENERAL_ARMOR_ABILITIES).add(ModifierIds.protection, TinkerModifiers.bursting.getId(), TinkerModifiers.wetting.getId());
-    this.tag(HELMET_ABILITIES).add(ModifierIds.aquaAffinity, ModifierIds.slurping);
-    this.tag(CHESTPLATE_ABILITIES).add(TinkerModifiers.ambidextrous.getId(), ModifierIds.reach, ModifierIds.strength, ModifierIds.wings);
-    this.tag(LEGGING_ABILITIES).add(ModifierIds.pockets, ModifierIds.soulBelt, ModifierIds.toolBelt, ModifierIds.craftingTable);
+    this.tag(GENERAL_ARMOR_ABILITIES).add(ModifierIds.protection.location(), TinkerModifiers.bursting.getId(), TinkerModifiers.wetting.getId());
+    this.tag(HELMET_ABILITIES).add(ModifierIds.aquaAffinity.location(), ModifierIds.slurping.location());
+    this.tag(CHESTPLATE_ABILITIES).add(TinkerModifiers.ambidextrous.getId(), ModifierIds.reach.location(), ModifierIds.strength.location(), ModifierIds.wings.location());
+    this.tag(LEGGING_ABILITIES).add(ModifierIds.pockets.location(), ModifierIds.soulBelt.location(), ModifierIds.toolBelt.location(), ModifierIds.craftingTable.location());
     this.tag(BOOT_ABILITIES).add(
-      ModifierIds.bouncy, ModifierIds.doubleJump,
-      ModifierIds.flamewake, ModifierIds.snowdrift, ModifierIds.tilling, ModifierIds.pathing, ModifierIds.frostWalker, ModifierIds.glowing);
-    this.tag(SHIELD_ABILITIES).add(ModifierIds.boundless, ModifierIds.reflecting);
+      ModifierIds.bouncy.location(), ModifierIds.doubleJump.location(),
+      ModifierIds.flamewake.location(), ModifierIds.snowdrift.location(), ModifierIds.tilling.location(), ModifierIds.pathing.location(), ModifierIds.frostWalker.location(), ModifierIds.glowing.location());
+    this.tag(SHIELD_ABILITIES).add(ModifierIds.boundless.location(), ModifierIds.reflecting.location());
 
     // defense
     this.tag(PROTECTION_DEFENSE).add(
-      ModifierIds.blastProtection, ModifierIds.fireProtection, ModifierIds.magicProtection,
-      ModifierIds.meleeProtection, ModifierIds.projectileProtection,
-      ModifierIds.dragonborn, ModifierIds.shulking, ModifierIds.turtleShell);
-    this.tag(SPECIAL_DEFENSE).add(ModifierIds.knockbackResistance, ModifierIds.revitalizing);
+      ModifierIds.blastProtection.location(), ModifierIds.fireProtection.location(), ModifierIds.magicProtection.location(),
+      ModifierIds.meleeProtection.location(), ModifierIds.projectileProtection.location(),
+      ModifierIds.dragonborn.location(), ModifierIds.shulking.location(), ModifierIds.turtleShell.location());
+    this.tag(SPECIAL_DEFENSE).add(ModifierIds.knockbackResistance.location(), ModifierIds.revitalizing.location());
 
     // slotless
     this.tag(GENERAL_SLOTLESS).add(
-      TinkerModifiers.overslime.getId(), ModifierIds.worldbound,
-      ModifierIds.offhanded, ModifierIds.blunted, ModifierIds.workbench,
-      ModifierIds.blindshot, ModifierIds.barebow);
+      TinkerModifiers.overslime.getId(), ModifierIds.worldbound.location(),
+      ModifierIds.offhanded.location(), ModifierIds.blunted.location(), ModifierIds.workbench.location(),
+      ModifierIds.blindshot.location(), ModifierIds.barebow.location());
     this.tag(BONUS_SLOTLESS).add(
-      ModifierIds.draconic, ModifierIds.rebalanced, ModifierIds.redirected,
-      ModifierIds.harmonious, ModifierIds.recapitated, ModifierIds.forecast, ModifierIds.writable)
-      .addOptional(ModifierIds.embossed);
+      ModifierIds.draconic.location(), ModifierIds.rebalanced.location(), ModifierIds.redirected.location(),
+      ModifierIds.harmonious.location(), ModifierIds.recapitated.location(), ModifierIds.forecast.location(), ModifierIds.writable.location())
+      .addOptional(ModifierIds.embossed.location());
     this.tag(COSMETIC_SLOTLESS).add(
-      ModifierIds.shiny,
+      ModifierIds.shiny.location(),
       TinkerModifiers.dyed.getId(), TinkerModifiers.embellishment.getId(), TinkerModifiers.trim.getId(),
-      ModifierIds.farsighted, ModifierIds.nearsighted);
+      ModifierIds.farsighted.location(), ModifierIds.nearsighted.location());
   }
 
   @Override

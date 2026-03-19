@@ -1,19 +1,11 @@
 package slimeknights.tconstruct.library.tools.item.armor;
 
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
-import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
-import slimeknights.tconstruct.library.client.armor.ArmorModelManager.ArmorModelDispatcher;
 import slimeknights.tconstruct.library.tools.definition.ModifiableArmorMaterial;
 import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
-import slimeknights.tconstruct.library.tools.helper.ArmorUtil;
-
-import javax.annotation.Nullable;
-import java.util.function.Consumer;
 
 /** Armor model that applies multiple texture layers in order */
 public class MultilayerArmorItem extends ModifiableArmorItem {
@@ -24,24 +16,16 @@ public class MultilayerArmorItem extends ModifiableArmorItem {
   }
 
   @SuppressWarnings("removal")
-  public MultilayerArmorItem(ArmorMaterial material, ArmorItem.Type slot, Properties properties, ToolDefinition toolDefinition) {
+  public MultilayerArmorItem(Holder<ArmorMaterial> material, ArmorItem.Type slot, Properties properties, ToolDefinition toolDefinition) {
     super(material, slot, properties, toolDefinition);
-    this.name = new ResourceLocation(material.getName());
+    this.name = material.unwrapKey().map(key -> key.location()).orElse(ResourceLocation.withDefaultNamespace("unknown"));
   }
 
-  @Nullable
-  @Override
-  public String getArmorTexture(ItemStack stack, Entity entity, EquipmentSlot slot, String type) {
-    return ArmorUtil.getDummyArmorTexture(slot);
+  /** Gets the name of this armor for model resolution */
+  public ResourceLocation getArmorName() {
+    return name;
   }
 
-  @Override
-  public void initializeClient(Consumer<IClientItemExtensions> consumer) {
-    consumer.accept(new ArmorModelDispatcher() {
-      @Override
-      protected ResourceLocation getName() {
-        return name;
-      }
-    });
-  }
+  // Note: getArmorTexture and initializeClient were removed in NeoForge 1.21.
+  // Armor rendering is handled through ArmorModelManager and IClientItemExtensions registered via client events.
 }

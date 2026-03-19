@@ -3,6 +3,7 @@ package slimeknights.tconstruct.common.data.model;
 import net.minecraft.client.renderer.texture.atlas.sources.DirectoryLister;
 import net.minecraft.client.renderer.texture.atlas.sources.PalettedPermutations;
 import net.minecraft.client.renderer.texture.atlas.sources.SingleFile;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
@@ -15,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,16 +30,16 @@ public class TinkerSpriteSourceProvider extends SpriteSourceProvider {
     "rib", "spire", "wayfinder", "shaper", "silence", "raiser", "host"
   };
 
-  public TinkerSpriteSourceProvider(PackOutput output, ExistingFileHelper fileHelper) {
-    super(output, fileHelper, TConstruct.MOD_ID);
+  public TinkerSpriteSourceProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, ExistingFileHelper fileHelper) {
+    super(output, lookupProvider, TConstruct.MOD_ID, fileHelper);
   }
 
   @SuppressWarnings("removal")
   @Override
-  protected void addSources() {
+  protected void gather() {
     String paletteFolder = "trims/color_palettes/";
     String trimFolder = "trims/models/armor/";
-    ResourceLocation trimPalette = new ResourceLocation(paletteFolder + "trim_palette");
+    ResourceLocation trimPalette = ResourceLocation.parse(paletteFolder + "trim_palette");
     // map of material suffix to material paeltte for trims
     Map<String,ResourceLocation> materialMap = Arrays.stream(MaterialIds.TRIM_MATERIALS).collect(Collectors.toMap(id -> id.getNamespace() + "_" + id.getPath(), id -> id.withPrefix(paletteFolder)));
 
@@ -57,9 +59,9 @@ public class TinkerSpriteSourceProvider extends SpriteSourceProvider {
       blocks.addSource(new SingleFile(name, Optional.empty()));
     }
     // add armor trims in our materials
-    atlas(new ResourceLocation("armor_trims"))
+    atlas(ResourceLocation.parse("armor_trims"))
       .addSource(new PalettedPermutations(
-        Arrays.stream(TRIMS).flatMap(name -> Stream.of(new ResourceLocation(trimFolder + name), new ResourceLocation(trimFolder + name + "_leggings"))).toList(),
+        Arrays.stream(TRIMS).flatMap(name -> Stream.of(ResourceLocation.parse(trimFolder + name), ResourceLocation.parse(trimFolder + name + "_leggings"))).toList(),
         trimPalette, materialMap));
   }
 

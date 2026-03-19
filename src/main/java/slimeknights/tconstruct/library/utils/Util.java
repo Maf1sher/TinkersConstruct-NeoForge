@@ -16,7 +16,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.ForgeI18n;
+import net.minecraft.client.resources.language.I18n;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.ModLoadingContext;
@@ -72,7 +72,7 @@ public class Util {
    * @return  True if it can be translated
    */
   public static boolean canTranslate(String key) {
-    return !ForgeI18n.getPattern(key).equals(key);
+    return I18n.exists(key);
   }
 
   /**

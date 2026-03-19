@@ -4,9 +4,11 @@ import lombok.AllArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.neoforged.neoforge.network.NetworkEvent.Context;
-import slimeknights.mantle.network.packet.IThreadsafePacket;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import slimeknights.mantle.util.BlockEntityHelper;
+import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.smeltery.block.entity.controller.HeatingStructureBlockEntity;
 
 import java.util.ArrayList;
@@ -16,7 +18,10 @@ import java.util.List;
  * Packet sent when the smeltery or foundry structure changes
  */
 @AllArgsConstructor
-public class StructureUpdatePacket implements IThreadsafePacket {
+public class StructureUpdatePacket implements CustomPacketPayload {
+  public static final CustomPacketPayload.Type<StructureUpdatePacket> TYPE = new CustomPacketPayload.Type<>(TConstruct.getResource("structure_update"));
+  public static final StreamCodec<FriendlyByteBuf, StructureUpdatePacket> STREAM_CODEC = StreamCodec.ofMember(StructureUpdatePacket::encode, StructureUpdatePacket::new);
+
   private final BlockPos pos;
   private final BlockPos minPos;
   private final BlockPos maxPos;
@@ -33,7 +38,6 @@ public class StructureUpdatePacket implements IThreadsafePacket {
     }
   }
 
-  @Override
   public void encode(FriendlyByteBuf buffer) {
     buffer.writeBlockPos(pos);
     buffer.writeBlockPos(minPos);
@@ -45,8 +49,10 @@ public class StructureUpdatePacket implements IThreadsafePacket {
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
-    HandleClient.handle(this);
+  public CustomPacketPayload.Type<? extends CustomPacketPayload> type() { return TYPE; }
+
+  public static void handle(StructureUpdatePacket payload, IPayloadContext context) {
+    context.enqueueWork(() -> HandleClient.handle(payload));
   }
 
   private static class HandleClient {

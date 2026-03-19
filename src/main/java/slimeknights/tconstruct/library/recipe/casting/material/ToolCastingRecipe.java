@@ -2,7 +2,7 @@ package slimeknights.tconstruct.library.recipe.casting.material;
 
 import com.google.common.collect.Streams;
 import lombok.RequiredArgsConstructor;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -98,12 +98,12 @@ public class ToolCastingRecipe extends PartSwapCastingRecipe implements IMultiRe
   }
 
   @Override
-  public ItemStack getResultItem(RegistryAccess access) {
+  public ItemStack getResultItem(HolderLookup.Provider access) {
     return new ItemStack(result);
   }
 
   @Override
-  public ItemStack assemble(ICastingContainer inv, RegistryAccess access) {
+  public ItemStack assemble(ICastingContainer inv, HolderLookup.Provider access) {
     // if the cast is the result, we are part swapping, replace the last material
     ItemStack cast = inv.getStack();
     if (cast.getItem() == result) {
@@ -142,7 +142,7 @@ public class ToolCastingRecipe extends PartSwapCastingRecipe implements IMultiRe
   /* JEI display */
 
   @Override
-  public List<IDisplayableCastingRecipe> getRecipes(RegistryAccess access) {
+  public List<IDisplayableCastingRecipe> getRecipes(HolderLookup.Provider access) {
     if (multiRecipes == null) {
       List<MaterialStatsId> requirements = ToolMaterialHook.stats(result.getToolDefinition());
       if (requirements.isEmpty()) {
@@ -199,7 +199,7 @@ public class ToolCastingRecipe extends PartSwapCastingRecipe implements IMultiRe
 
         // build part swap tool, mark as display so tooltip does not show useless stats
         ItemStack partSwapDisplay = ToolBuildHandler.buildItemFromMaterials(result, partSwapMaterials.add(extraMaterials).build());
-        partSwapDisplay.getOrCreateTag().putBoolean(TooltipUtil.KEY_DISPLAY, true);
+        net.minecraft.world.item.component.CustomData.update(net.minecraft.core.component.DataComponents.CUSTOM_DATA, partSwapDisplay, tag -> tag.putBoolean(TooltipUtil.KEY_DISPLAY, true));
 
         List<ItemStack> casts = List.of(getCast().getItems());
         // if the cast is consumed, add the tool to the list of cast items to show that part swapping is an option

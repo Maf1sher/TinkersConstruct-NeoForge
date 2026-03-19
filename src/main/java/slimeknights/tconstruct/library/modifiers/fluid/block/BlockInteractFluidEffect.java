@@ -18,9 +18,9 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.neoforged.neoforge.common.ForgeHooks;
+import net.neoforged.neoforge.common.CommonHooks;
+import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.bus.api.Event.Result;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 import slimeknights.mantle.data.loadable.record.SingletonLoader;
@@ -45,9 +45,12 @@ public enum BlockInteractFluidEffect implements FluidEffect<FluidEffectContext.B
     // our tools we know work so ignore them
     if (!level.isClientSide && context.getPlayer() == null && stack.isDamageableItem() && !stack.is(TinkerTags.Items.MODIFIABLE)) {
       // unable to call Forge damageItem as that needs entity access, but its just vanilla broken anyways, right?
-      stack.hurt(1, level.getRandom(), null);
+      // In 1.21, ItemStack.hurt was replaced by hurtAndBreak which requires ServerLevel
+      // Manually damage the stack since we have no entity context
+      int newDamage = stack.getDamageValue() + 1;
+      stack.setDamageValue(newDamage);
       // calling methods again instead of using return as return may be incorrect for custom broken stacks
-      if (stack.getDamageValue() >= stack.getMaxDamage()) {
+      if (newDamage >= stack.getMaxDamage()) {
         // but that won't happen, right? will need to consider another workaround in that case.
         stack.shrink(1);
         stack.setDamageValue(0);
@@ -100,10 +103,10 @@ public enum BlockInteractFluidEffect implements FluidEffect<FluidEffectContext.B
       }
 
       // try the event
-      Result useItem = Result.DEFAULT;
-      Result useBlock = Result.DEFAULT;
+      TriState useItem = TriState.DEFAULT;
+      TriState useBlock = TriState.DEFAULT;
       if (player != null) {
-        PlayerInteractEvent.RightClickBlock event = ForgeHooks.onRightClickBlock(player, hand, pos, hitResult);
+        PlayerInteractEvent.RightClickBlock event = CommonHooks.onRightClickBlock(player, hand, pos, hitResult);
         if (event.isCanceled()) {
           // if successful, swing hand
           if (event.getCancellationResult().consumesAction()) {
@@ -121,7 +124,7 @@ public enum BlockInteractFluidEffect implements FluidEffect<FluidEffectContext.B
 
       // use the item
       UseOnContext useContext = new UseOnContext(world, player, hand, heldItem, hitResult);
-      if (useItem != Result.DENY && !heldItem.isEmpty()) {
+      if (useItem != TriState.FALSE && !heldItem.isEmpty()) {
         InteractionResult result = heldItem.onItemUseFirst(useContext);
         if (result != InteractionResult.PASS) {
           if (result.consumesAction()) {
@@ -137,8 +140,8 @@ public enum BlockInteractFluidEffect implements FluidEffect<FluidEffectContext.B
 
       // click the block
       ItemStack original = heldItem.copy();
-      if (player != null && (useBlock == Result.ALLOW || (useItem == Result.DEFAULT && !skipBlock))) {
-        InteractionResult result = state.use(world, player, hand, hitResult);
+      if (player != null && (useBlock == TriState.TRUE || (useItem == TriState.DEFAULT && !skipBlock))) {
+        InteractionResult result = state.useWithoutItem(world, player, hitResult);
         if (result.consumesAction()) {
           if (player instanceof ServerPlayer serverPlayer) {
             CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, pos, original);
@@ -149,7 +152,7 @@ public enum BlockInteractFluidEffect implements FluidEffect<FluidEffectContext.B
       }
 
       // post block item usage
-      if (useItem == Result.ALLOW || (useItem == Result.DEFAULT && !heldItem.isEmpty() && (player == null || !player.getCooldowns().isOnCooldown(heldItem.getItem())))) {
+      if (useItem == TriState.TRUE || (useItem == TriState.DEFAULT && !heldItem.isEmpty() && (player == null || !player.getCooldowns().isOnCooldown(heldItem.getItem())))) {
         InteractionResult result;
         if (player != null && player.isCreative()) {
           int oldCount = heldItem.getCount();

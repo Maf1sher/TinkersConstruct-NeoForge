@@ -12,11 +12,10 @@ import slimeknights.mantle.util.BlockEntityHelper;
 import slimeknights.tconstruct.smeltery.block.entity.component.SmelteryComponentBlockEntity;
 
 import javax.annotation.Nullable;
-import java.util.function.Supplier;
 
 public class SearedStairsBlock extends StairBlock implements EntityBlock {
 
-  public SearedStairsBlock(Supplier<BlockState> state, Properties properties) {
+  public SearedStairsBlock(BlockState state, Properties properties) {
     super(state, properties);
   }
 

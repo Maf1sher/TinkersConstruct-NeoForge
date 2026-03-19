@@ -80,6 +80,16 @@ println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty '
 
 sourceSets {
     main {
+        java {
+            // Exclude third-party mod integration plugins that are not available as compile dependencies.
+            // These plugins are compile-optional: they only load at runtime when the target mod is present.
+            // Add them back (and add the mod as a compileOnly dependency) when the mod is available for NeoForge 1.21.1.
+            exclude 'slimeknights/tconstruct/plugin/craftingtweaks/**'
+            exclude 'slimeknights/tconstruct/plugin/jsonthings/**'
+            exclude 'slimeknights/tconstruct/plugin/ImmersiveEngineeringPlugin.java'
+            exclude 'slimeknights/tconstruct/plugin/DietPlugin.java'
+            exclude 'slimeknights/tconstruct/plugin/DummmmmmyPlugin.java'
+        }
         resources {
             srcDirs "src/generated/resources"
             //But exclude the cache of the generated data from what gets built

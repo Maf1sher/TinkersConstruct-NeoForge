@@ -22,6 +22,7 @@ import slimeknights.tconstruct.library.utils.Util;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -81,7 +82,7 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
   @Override
   public CompletableFuture<?> run(CachedOutput cache) {
     ensureAddMaterialsRun();
-    return allOf(allMaterials.entrySet().stream().map(entry -> saveJson(cache, entry.getKey(), convert(entry.getValue()))));
+    return allOf(allMaterials.entrySet().stream().map(entry -> saveJson(cache, entry.getKey().location(), convert(entry.getValue()))));
   }
 
   /**
@@ -141,7 +142,7 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
     ICondition condition = new OrCondition(Stream.concat(
       Stream.of(ConfigEnabledCondition.FORCE_INTEGRATION_MATERIALS),
       Arrays.stream(tagNames).map(AbstractMaterialDataProvider::tagExistsCondition)
-    ).toArray(ICondition[]::new));
+    ).toList());
     addMaterial(location, tier, order, craftable, false, condition);
   }
 
@@ -158,14 +159,14 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
 
   /** Creates a new compat alloy, enabled if its components are present */
   protected void addCompatAlloy(MaterialId location, int tier, int order, ICondition... alloyConditions) {
-    ICondition condition = new OrCondition(
+    ICondition condition = new OrCondition(List.of(
       // if forced
       ConfigEnabledCondition.FORCE_INTEGRATION_MATERIALS,
       // or we have the matching alloy ingot
       tagExistsCondition("ingots/" + location.getPath()),
       // or we allow ingotless alloys and have all alloy components
-      new AndCondition(Util.prepend(alloyConditions, ConfigEnabledCondition.ALLOW_INGOTLESS_ALLOYS))
-    );
+      new AndCondition(Arrays.asList(Util.prepend(alloyConditions, ConfigEnabledCondition.ALLOW_INGOTLESS_ALLOYS)))
+    ));
     addMaterial(location, tier, order, false, false, condition);
   }
 
@@ -179,7 +180,7 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
 
   /** Makes a conditional redirect to the given ID */
   protected JsonRedirect conditionalRedirect(MaterialId id, @Nullable ICondition condition) {
-    return new JsonRedirect(id, condition);
+    return new JsonRedirect(id.location(), condition);
   }
 
   /** Makes an unconditional redirect to the given ID */

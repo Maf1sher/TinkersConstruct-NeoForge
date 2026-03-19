@@ -1,33 +1,16 @@
 package slimeknights.tconstruct.library.tools.capability;
 
-import lombok.Getter;
-import lombok.Setter;
-import net.minecraft.core.Direction;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.capabilities.Capability;
-import net.neoforged.neoforge.common.capabilities.CapabilityManager;
-import net.neoforged.neoforge.common.capabilities.CapabilityToken;
-import net.neoforged.neoforge.common.capabilities.ICapabilitySerializable;
-import net.neoforged.neoforge.common.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.common.util.LazyOptional;
-import net.neoforged.neoforge.event.AttachCapabilitiesEvent;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
-import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.common.TinkerDataAttachments;
 import slimeknights.tconstruct.library.tools.nbt.ModifierNBT;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
 /** Capability to allow an entity to store modifiers, used on projectiles fired from modifiable items */
 public class EntityModifierCapability {
-  /** Default instance to use with orElse */
+  /** Default instance to use when no data is present */
   public static final EntityModifiers EMPTY = new EntityModifiers() {
     @Override
     public ModifierNBT getModifiers() {
@@ -48,19 +31,17 @@ public class EntityModifierCapability {
   /** List of predicates to check if the entity supports this capability */
   private static final List<Predicate<Entity>> ENTITY_PREDICATES = new ArrayList<>();
 
-  /** Capability ID */
-  private static final ResourceLocation ID = TConstruct.getResource("modifiers");
-  /** Capability type */
-  public static final Capability<EntityModifiers> CAPABILITY = CapabilityManager.get(new CapabilityToken<>() {});
-
-  /** Gets the capability for the entity or an empty instance if missing */
+  /** Gets the capability for the entity, returning stored data or EMPTY */
   public static EntityModifiers getCapability(Entity entity) {
-    return entity.getCapability(CAPABILITY).orElse(EMPTY);
+    if (entity.hasData(TinkerDataAttachments.ENTITY_MODIFIERS.get())) {
+      return entity.getData(TinkerDataAttachments.ENTITY_MODIFIERS.get());
+    }
+    return EMPTY;
   }
 
   /** Gets the data or an empty instance if missing */
   public static ModifierNBT getOrEmpty(Entity entity) {
-    return entity.getCapability(CAPABILITY).orElse(EMPTY).getModifiers();
+    return getCapability(entity).getModifiers();
   }
 
   /** Checks if the given entity supports this capability */
@@ -73,58 +54,14 @@ public class EntityModifierCapability {
     return false;
   }
 
-  /** Registers a predicate of entites that need this capability */
+  /** Registers a predicate of entities that need this capability */
   public static void registerEntityPredicate(Predicate<Entity> predicate) {
     ENTITY_PREDICATES.add(predicate);
   }
 
-  /** Registers this capability with relevant busses*/
+  /** Registers this capability - data attachment handles persistence automatically */
   public static void register() {
-    FMLJavaModLoadingContext.get().getModEventBus().addListener(EventPriority.NORMAL, false, RegisterCapabilitiesEvent.class, event -> event.register(ModifierNBT.class));
-    NeoForge.EVENT_BUS.addGenericListener(Entity.class, EntityModifierCapability::attachCapability);
-  }
-
-  /** Event listener to attach the capability */
-  private static void attachCapability(AttachCapabilitiesEvent<Entity> event) {
-    if (supportCapability(event.getObject())) {
-      Provider provider = new Provider();
-      event.addCapability(ID, provider);
-      event.addListener(provider);
-    }
-  }
-
-  /** Capability provider instance */
-  private static class Provider implements ICapabilitySerializable<ListTag>, Runnable, EntityModifiers {
-    @Getter @Setter
-    private ModifierNBT modifiers = ModifierNBT.EMPTY;
-    private LazyOptional<EntityModifiers> capability;
-    private Provider() {
-      this.capability = LazyOptional.of(() -> this);
-    }
-
-    @Nonnull
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
-      return CAPABILITY.orEmpty(cap, capability);
-    }
-
-    @Override
-    public void run() {
-      // called when capabilities invalidate, create a new cap just in case they are revived later
-      capability.invalidate();
-      capability = LazyOptional.of(() -> this);
-    }
-
-    @Override
-    public ListTag serializeNBT() {
-      return modifiers.serializeToNBT();
-    }
-
-    @Override
-    public void deserializeNBT(ListTag nbt) {
-      modifiers = ModifierNBT.readFromNBT(nbt);
-      run();
-    }
+    // Data attachment registration is handled by TinkerDataAttachments DeferredRegister.
   }
 
   /** Interface for callers to use */

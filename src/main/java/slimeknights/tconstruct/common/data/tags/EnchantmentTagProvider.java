@@ -54,9 +54,15 @@ public class EnchantmentTagProvider extends TagsProvider<Enchantment> {
   /** Creates a builder for a tag for the given modifier */
   @SuppressWarnings("removal")
   private void modifierTag(ModifierId modifier, String... ids) {
+    modifierTag(modifier.location(), ids);
+  }
+
+  /** Creates a builder for a tag for the given modifier using a ResourceLocation */
+  @SuppressWarnings("removal")
+  private void modifierTag(ResourceLocation modifier, String... ids) {
     TagsProvider.TagAppender<Enchantment> appender = tag(TagKey.create(Registries.ENCHANTMENT, TConstruct.getResource("modifier_like/" + modifier.getPath())));
     for (String id : ids) {
-      appender.addOptional(new ResourceLocation(id));
+      appender.addOptional(ResourceLocation.parse(id));
     }
   }
 

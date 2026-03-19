@@ -11,6 +11,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent.BreakSpeed;
 import slimeknights.mantle.client.TooltipKey;
 import slimeknights.tconstruct.TConstruct;
+import net.minecraft.core.registries.BuiltInRegistries;
 import slimeknights.tconstruct.common.TinkerEffect;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.Modifier;
@@ -51,13 +52,13 @@ public class MomentumModifier extends Modifier implements ProjectileLaunchModifi
 
   /** Gets the bonus for the modifier */
   private static float getBonus(LivingEntity living, ToolType type, ModifierEntry modifier) {
-    return modifier.getEffectiveLevel() * (TinkerEffect.getLevel(living, TinkerModifiers.momentumEffect.get(type)));
+    return modifier.getEffectiveLevel() * (TinkerEffect.getLevel(living, BuiltInRegistries.MOB_EFFECT.wrapAsHolder(TinkerModifiers.momentumEffect.get(type))));
   }
 
   /** Applies the effect to the target */
   private static void applyEffect(LivingEntity living, ToolType type, int duration, int maxLevel) {
     TinkerEffect effect = TinkerModifiers.momentumEffect.get(type);
-    effect.apply(living, duration, Math.min(maxLevel, TinkerEffect.getAmplifier(living, effect) + 1), true);
+    effect.apply(living, duration, Math.min(maxLevel, TinkerEffect.getAmplifier(living, BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effect)) + 1), true);
   }
 
   @Override

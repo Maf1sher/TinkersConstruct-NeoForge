@@ -10,8 +10,9 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent.BreakSpeed;
 import org.jetbrains.annotations.ApiStatus.Internal;
@@ -73,9 +74,14 @@ public sealed interface BreakSpeedContext {
         default -> modifier *= 8.1E-4F;
       }
     }
-    // water
-    if (entity.isEyeInFluid(FluidTags.WATER) && !EnchantmentHelper.hasAquaAffinity(entity)) {
-      modifier /= 5.0F;
+    // water - in 1.21, aqua affinity modifies SUBMERGED_MINING_SPEED attribute instead of a boolean check
+    if (entity.isEyeInFluid(FluidTags.WATER)) {
+      AttributeInstance submergedSpeed = entity.getAttribute(Attributes.SUBMERGED_MINING_SPEED);
+      if (submergedSpeed != null) {
+        modifier *= (float) submergedSpeed.getValue();
+      } else {
+        modifier /= 5.0F;
+      }
     }
     if (!entity.onGround()) {
       modifier /= 5.0F;

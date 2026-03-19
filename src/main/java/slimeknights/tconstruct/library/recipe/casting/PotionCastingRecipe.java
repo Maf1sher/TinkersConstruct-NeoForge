@@ -1,19 +1,20 @@
 package slimeknights.tconstruct.library.recipe.casting;
 
 import lombok.Getter;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.common.IngredientLoadable;
 import slimeknights.mantle.data.loadable.field.ContextKey;
@@ -97,10 +98,24 @@ public class PotionCastingRecipe implements ICastingRecipe, IMultiRecipe<Display
     return coolingTime;
   }
 
+  /** Key used to store potion ID in fluid NBT */
+  public static final String TAG_POTION = "Potion";
+
   @Override
-  public ItemStack assemble(ICastingContainer inv, RegistryAccess access) {
+  public ItemStack assemble(ICastingContainer inv, HolderLookup.Provider access) {
     ItemStack result = new ItemStack(this.result);
-    result.setTag(inv.getFluidTag());
+    // In 1.21, fluid NBT is no longer part of FluidStack.
+    // The potion info is obtained from the casting container's fluid tag if available.
+    var fluidTag = inv.getFluidTag();
+    if (fluidTag != null && fluidTag.contains(TAG_POTION)) {
+      ResourceLocation potionId = ResourceLocation.tryParse(fluidTag.getString(TAG_POTION));
+      if (potionId != null) {
+        Potion potion = BuiltInRegistries.POTION.get(potionId);
+        if (potion != null) {
+          result.set(DataComponents.POTION_CONTENTS, new PotionContents(BuiltInRegistries.POTION.wrapAsHolder(potion)));
+        }
+      }
+    }
     return result;
   }
 
@@ -109,17 +124,17 @@ public class PotionCastingRecipe implements ICastingRecipe, IMultiRecipe<Display
   protected List<DisplayCastingRecipe> displayRecipes = null;
 
   @Override
-  public List<DisplayCastingRecipe> getRecipes(RegistryAccess access) {
+  public List<DisplayCastingRecipe> getRecipes(HolderLookup.Provider access) {
     if (displayRecipes == null) {
       // create a subrecipe for every potion variant
       List<ItemStack> bottles = List.of(bottle.getItems());
-      displayRecipes = ForgeRegistries.POTIONS.getValues().stream()
-        .filter(potion -> potion != Potions.EMPTY)
-        .map(potion -> {
-          ItemStack result = PotionUtils.setPotion(new ItemStack(this.result), potion);
-          return new DisplayCastingRecipe(getId(), getType(), bottles, fluid.getFluids().stream()
-                                                              .map(fluid -> new FluidStack(fluid.getFluid(), fluid.getAmount(), result.getTag()))
-                                                              .toList(),
+      displayRecipes = BuiltInRegistries.POTION.holders()
+        .filter(holder -> !holder.is(Potions.WATER))
+        .map(holder -> {
+          ItemStack result = new ItemStack(this.result);
+          result.set(DataComponents.POTION_CONTENTS, new PotionContents(holder));
+          // In 1.21, FluidStack no longer supports NBT tags, so just use the base fluid
+          return new DisplayCastingRecipe(getId(), getType(), bottles, fluid.getFluids(),
                                           result, coolingTime, true);
         }).toList();
     }
@@ -134,10 +149,10 @@ public class PotionCastingRecipe implements ICastingRecipe, IMultiRecipe<Display
     return NonNullList.of(Ingredient.EMPTY, bottle);
   }
 
-  /** @deprecated use {@link #assemble(Container, RegistryAccess)} */
+  /** @deprecated use {@link #assemble(ICastingContainer, HolderLookup.Provider)} */
   @Deprecated
   @Override
-  public ItemStack getResultItem(RegistryAccess access) {
+  public ItemStack getResultItem(HolderLookup.Provider access) {
     return new ItemStack(this.result);
   }
 }

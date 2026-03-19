@@ -6,11 +6,12 @@ import io.netty.handler.codec.DecoderException;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.neoforged.neoforge.network.NetworkEvent.Context;
-import net.neoforged.neoforge.registries.NeoForgeRegistries;
-import slimeknights.mantle.network.packet.IThreadsafePacket;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.impl.ComposableModifier;
 import slimeknights.tconstruct.library.utils.GenericTagUtil;
@@ -23,7 +24,10 @@ import java.util.Map.Entry;
 
 /** Packet to sync modifiers */
 @RequiredArgsConstructor
-public class UpdateModifiersPacket implements IThreadsafePacket {
+public class UpdateModifiersPacket implements CustomPacketPayload {
+  public static final CustomPacketPayload.Type<UpdateModifiersPacket> TYPE = new CustomPacketPayload.Type<>(TConstruct.getResource("update_modifiers"));
+  public static final StreamCodec<FriendlyByteBuf, UpdateModifiersPacket> STREAM_CODEC = StreamCodec.ofMember(UpdateModifiersPacket::encode, UpdateModifiersPacket::new);
+
   /** Collection of all modifiers */
   private final Map<ModifierId,Modifier> allModifiers;
   /** Map of all modifier tags */
@@ -32,8 +36,8 @@ public class UpdateModifiersPacket implements IThreadsafePacket {
   private Collection<ComposableModifier> modifiers;
   /** Map of modifier redirect ID pairs */
   private Map<ModifierId,ModifierId> redirects;
-  /** Map of enchantment to modifier pair */
-  private final Map<Enchantment,Modifier> enchantmentMap;
+  /** Map of enchantment ID to modifier pair. In 1.21+ enchantments are data-driven, so we use ResourceLocation keys */
+  private final Map<ResourceLocation,Modifier> enchantmentMap;
   /** Collection of all enchantment tag mappings */
   private final Map<TagKey<Enchantment>, Modifier> enchantmentTagMappings;
 
@@ -80,7 +84,7 @@ public class UpdateModifiersPacket implements IThreadsafePacket {
     Map<ModifierId,Modifier> modifiers = new HashMap<>();
     for (int i = 0; i < size; i++) {
       ModifierId id = new ModifierId(buffer.readUtf(Short.MAX_VALUE));
-      Modifier modifier = ComposableModifier.LOADER.decode(buffer, ModifierManager.contextBuilder(id).build());
+      Modifier modifier = ComposableModifier.LOADER.decode(buffer, ModifierManager.contextBuilder(id.location()).build());
       // need cast to call package private method
       modifier.setId(id);
       modifiers.put(id, modifier);
@@ -94,12 +98,12 @@ public class UpdateModifiersPacket implements IThreadsafePacket {
     this.allModifiers = modifiers;
     this.tags = GenericTagUtil.decodeTags(buffer, ModifierManager.REGISTRY_KEY, id -> getModifier(modifiers, new ModifierId(id)));
 
-    // read in enchantment to modifier mapping
-    ImmutableMap.Builder<Enchantment,Modifier> enchantmentBuilder = ImmutableMap.builder();
+    // read in enchantment to modifier mapping - uses ResourceLocation keys in 1.21+
+    ImmutableMap.Builder<ResourceLocation,Modifier> enchantmentBuilder = ImmutableMap.builder();
     size = buffer.readVarInt();
     for (int i = 0; i < size; i++) {
       enchantmentBuilder.put(
-        buffer.readRegistryIdUnsafe(ForgeRegistries.ENCHANTMENTS),
+        buffer.readResourceLocation(),
         getModifier(modifiers, new ModifierId(buffer.readResourceLocation())));
     }
     enchantmentMap = enchantmentBuilder.build();
@@ -113,38 +117,39 @@ public class UpdateModifiersPacket implements IThreadsafePacket {
     enchantmentTagMappings = enchantmentTagBuilder.build();
   }
 
-  @Override
   public void encode(FriendlyByteBuf buffer) {
     ensureCalculated();
     // write modifiers
     buffer.writeVarInt(modifiers.size());
     for (ComposableModifier modifier : modifiers) {
-      buffer.writeResourceLocation(modifier.getId());
+      buffer.writeResourceLocation(modifier.getId().location());
       ComposableModifier.LOADER.encode(buffer, modifier);
     }
     // write redirects
     buffer.writeVarInt(redirects.size());
     for (Entry<ModifierId,ModifierId> entry : redirects.entrySet()) {
-      buffer.writeResourceLocation(entry.getKey());
-      buffer.writeResourceLocation(entry.getValue());
+      buffer.writeResourceLocation(entry.getKey().location());
+      buffer.writeResourceLocation(entry.getValue().location());
     }
-    GenericTagUtil.encodeTags(buffer, Modifier::getId, this.tags);
+    GenericTagUtil.encodeTags(buffer, m -> m.getId().location(), this.tags);
 
-    // enchantment mapping
+    // enchantment mapping - write ResourceLocation keys in 1.21+
     buffer.writeVarInt(enchantmentMap.size());
-    for (Entry<Enchantment,Modifier> entry : enchantmentMap.entrySet()) {
-      buffer.writeRegistryIdUnsafe(ForgeRegistries.ENCHANTMENTS, entry.getKey());
-      buffer.writeResourceLocation(entry.getValue().getId());
+    for (Entry<ResourceLocation,Modifier> entry : enchantmentMap.entrySet()) {
+      buffer.writeResourceLocation(entry.getKey());
+      buffer.writeResourceLocation(entry.getValue().getId().location());
     }
     buffer.writeVarInt(enchantmentTagMappings.size());
     for (Entry<TagKey<Enchantment>, Modifier> entry : enchantmentTagMappings.entrySet()) {
       buffer.writeResourceLocation(entry.getKey().location());
-      buffer.writeResourceLocation(entry.getValue().getId());
+      buffer.writeResourceLocation(entry.getValue().getId().location());
     }
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
-    ModifierManager.INSTANCE.updateModifiersFromServer(allModifiers, tags, enchantmentMap, enchantmentTagMappings);
+  public CustomPacketPayload.Type<? extends CustomPacketPayload> type() { return TYPE; }
+
+  public static void handle(UpdateModifiersPacket payload, IPayloadContext context) {
+    context.enqueueWork(() -> ModifierManager.INSTANCE.updateModifiersFromServer(payload.allModifiers, payload.tags, payload.enchantmentMap, payload.enchantmentTagMappings));
   }
 }

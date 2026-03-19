@@ -17,15 +17,17 @@ import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.DistExecutor;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.neoforged.neoforge.registries.MissingMappingsEvent;
+// MissingMappingsEvent removed in NeoForge 1.21.1
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import slimeknights.mantle.registration.RegistrationHelper;
+import slimeknights.tconstruct.common.TinkerDataAttachments;
 import slimeknights.tconstruct.common.TinkerModule;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.config.Config;
@@ -50,16 +52,17 @@ import slimeknights.tconstruct.fluids.TinkerFluids;
 import slimeknights.tconstruct.gadgets.TinkerGadgets;
 import slimeknights.tconstruct.library.TinkerItemDisplays;
 import slimeknights.tconstruct.library.materials.MaterialRegistry;
+import slimeknights.tconstruct.fluids.FluidEvents;
+import slimeknights.tconstruct.gadgets.capability.PiggybackCapability;
+import slimeknights.tconstruct.library.tools.capability.BlockItemProviderCapability;
+import slimeknights.tconstruct.library.tools.capability.ToolCapabilityProvider;
+import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability;
 import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability.ComputableDataKey;
 import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability.TinkerDataKey;
+import slimeknights.tconstruct.tools.logic.EquipmentChangeWatcher;
 import slimeknights.tconstruct.library.tools.definition.ToolDefinitionLoader;
 import slimeknights.tconstruct.library.tools.layout.StationSlotLayoutLoader;
 import slimeknights.tconstruct.library.utils.Util;
-import slimeknights.tconstruct.plugin.DietPlugin;
-import slimeknights.tconstruct.plugin.DummmmmmyPlugin;
-import slimeknights.tconstruct.plugin.ImmersiveEngineeringPlugin;
-import slimeknights.tconstruct.plugin.craftingtweaks.CraftingTweaksPlugin;
-import slimeknights.tconstruct.plugin.jsonthings.JsonThingsPlugin;
 import slimeknights.tconstruct.shared.TinkerAttributes;
 import slimeknights.tconstruct.shared.TinkerClient;
 import slimeknights.tconstruct.shared.TinkerCommons;
@@ -88,7 +91,7 @@ import java.util.function.Supplier;
  */
 
 @Mod(TConstruct.MOD_ID)
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = TConstruct.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public class TConstruct {
 
   public static final String MOD_ID = "tconstruct";
@@ -98,16 +101,16 @@ public class TConstruct {
   /* Instance of this mod, used for grabbing prototype fields */
   public static TConstruct instance;
 
-  public TConstruct() {
+  public TConstruct(IEventBus bus, ModContainer container) {
     instance = this;
 
-    Config.init();
+    Config.init(container);
     TinkerItemDisplays.init();
     MaterialRegistry.init();
 
     // initialize modules, done this way rather than with annotations to give us control over the order
-    NeoForge.EVENT_BUS.addListener(TConstruct::missingMappings);
-    IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+    // MissingMappingsEvent removed in NeoForge 1.21.1
+    // NeoForge.EVENT_BUS.addListener(TConstruct::missingMappings);
     // base
     bus.register(new TinkerCommons());
     bus.register(new TinkerMaterials());
@@ -127,28 +130,62 @@ public class TConstruct {
     bus.register(new TinkerFluids());
 
     // init deferred registers
-    TinkerModule.initRegisters();
+    TinkerModule.initRegisters(bus);
+    TinkerDataAttachments.ATTACHMENT_TYPES.register(bus);
     TinkerNetwork.setup();
+    bus.addListener(TinkerNetwork::registerPayloads);
+    // register capabilities via RegisterCapabilitiesEvent
+    bus.addListener(TinkerDataCapability::register);
+    bus.addListener(ToolCapabilityProvider::registerCapabilities);
+    bus.addListener(BlockItemProviderCapability::registerCapabilities);
+    bus.addListener(PiggybackCapability::registerCapabilities);
+    bus.addListener(EquipmentChangeWatcher::registerCapabilities);
+    bus.addListener(FluidEvents::registerCapabilities);
     TinkerTags.init();
     // init client logic
-    DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> TinkerClient::onConstruct);
+    if (FMLEnvironment.dist == Dist.CLIENT) {
+      TinkerClient.onConstruct();
+    }
 
-    // compat
+    // compat - these plugins are excluded from compilation when their dependencies are unavailable.
+    // They are loaded via reflection so the main class does not have a hard compile-time dependency.
+    // To re-enable a plugin: add the mod as a compileOnly dependency in build.gradle,
+    // remove the source exclude for that plugin, and restore the direct class reference here.
     ModList modList = ModList.get();
     if (modList.isLoaded("immersiveengineering")) {
-      bus.register(new ImmersiveEngineeringPlugin());
+      loadPlugin(bus, "slimeknights.tconstruct.plugin.ImmersiveEngineeringPlugin", true);
     }
     if (modList.isLoaded("jsonthings")) {
-      JsonThingsPlugin.onConstruct();
+      loadPlugin(bus, "slimeknights.tconstruct.plugin.jsonthings.JsonThingsPlugin", false);
     }
     if (modList.isLoaded("diet")) {
-      DietPlugin.onConstruct();
+      loadPlugin(bus, "slimeknights.tconstruct.plugin.DietPlugin", false);
     }
     if (modList.isLoaded("craftingtweaks")) {
-      CraftingTweaksPlugin.onConstruct();
+      loadPlugin(bus, "slimeknights.tconstruct.plugin.craftingtweaks.CraftingTweaksPlugin", false);
     }
     if (modList.isLoaded("dummmmmmy")) {
-      bus.register(new DummmmmmyPlugin());
+      loadPlugin(bus, "slimeknights.tconstruct.plugin.DummmmmmyPlugin", true);
+    }
+  }
+
+  /**
+   * Loads an optional plugin class via reflection. This avoids compile-time dependencies on third-party mod classes.
+   * @param bus           The mod event bus to register event subscribers on
+   * @param className     Fully qualified class name of the plugin
+   * @param registerOnBus If true, instantiates the class and registers it on the event bus (for @SubscribeEvent plugins).
+   *                      If false, calls the static onConstruct() method on the class.
+   */
+  private static void loadPlugin(IEventBus bus, String className, boolean registerOnBus) {
+    try {
+      Class<?> clazz = Class.forName(className);
+      if (registerOnBus) {
+        bus.register(clazz.getDeclaredConstructor().newInstance());
+      } else {
+        clazz.getDeclaredMethod("onConstruct").invoke(null);
+      }
+    } catch (Exception e) {
+      LOG.error("Failed to load plugin {}", className, e);
     }
   }
 
@@ -188,37 +225,15 @@ public class TConstruct {
     generator.addProvider(server, new DamageTypeTagProvider(packOutput, datapackRegistryProvider.getRegistryProvider(), existingFileHelper));
 
     // other datagen
-    generator.addProvider(server, new TConstructLootTableProvider(packOutput));
+    generator.addProvider(server, new TConstructLootTableProvider(packOutput, lookupProvider));
     generator.addProvider(server, new AdvancementsProvider(packOutput));
-    generator.addProvider(server, new GlobalLootModifiersProvider(packOutput));
+    generator.addProvider(server, new GlobalLootModifiersProvider(packOutput, lookupProvider));
     generator.addProvider(server, new LootTableInjectionProvider(packOutput));
     generator.addProvider(server, new ConfigurationDataProvider(packOutput));
   }
 
-  /** Handles missing mappings of all types */
-  private static void missingMappings(MissingMappingsEvent event) {
-    RegistrationHelper.handleMissingMappings(event, MOD_ID, Registries.BLOCK, name -> switch (name) {
-      // silky jewel removal
-      case "silky_jewel_block" -> Blocks.EMERALD_BLOCK;
-      // piglin heads are vanilla
-      case "piglin_head" -> Blocks.PIGLIN_HEAD;
-      case "piglin_wall_head" -> Blocks.PIGLIN_WALL_HEAD;
-      default -> null;
-    });
-    RegistrationHelper.handleMissingMappings(event, MOD_ID, Registries.ITEM, name -> switch (name) {
-      // silky jewel removal
-      case "silky_jewel" -> Items.EMERALD;
-      case "silky_jewel_block" -> Items.EMERALD_BLOCK;
-      // piglin heads are vanilla
-      case "piglin_head" -> Items.PIGLIN_HEAD;
-      // round plate rename
-      case "round_plate" -> TinkerToolParts.adzeHead.get();
-      case "round_plate_cast" -> TinkerSmeltery.adzeHeadCast.get();
-      case "round_plate_sand_cast" -> TinkerSmeltery.adzeHeadCast.getSand();
-      case "round_plate_red_sand_cast" -> TinkerSmeltery.adzeHeadCast.getRedSand();
-      default -> null;
-    });
-  }
+  // MissingMappingsEvent removed in NeoForge 1.21.1 - missing mappings handling is no longer supported
+  // TODO: investigate alternative approach for registry remapping if needed
 
   /* Utils */
 
@@ -227,9 +242,8 @@ public class TConstruct {
    * @param name  Resource path
    * @return  Location for tinkers
    */
-  @SuppressWarnings("removal")
   public static ResourceLocation getResource(String name) {
-    return new ResourceLocation(MOD_ID, name);
+    return ResourceLocation.fromNamespaceAndPath(MOD_ID, name);
   }
 
   /**

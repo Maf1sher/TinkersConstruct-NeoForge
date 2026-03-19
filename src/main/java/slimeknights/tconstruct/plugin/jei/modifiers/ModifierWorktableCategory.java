@@ -94,8 +94,5 @@ public class ModifierWorktableCategory implements IRecipeCategory<IModifierWorkt
     }
   }
 
-  @Override
-  public ResourceLocation getRegistryName(IModifierWorktableRecipe recipe) {
-    return recipe.getId();
-  }
+  // getRegistryName no longer needed — recipe.getId() was removed in 1.21
 }

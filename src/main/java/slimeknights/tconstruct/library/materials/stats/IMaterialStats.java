@@ -24,14 +24,14 @@ public interface IMaterialStats {
    */
   @NonExtendable
   default MaterialStatsId getIdentifier() {
-    return getType().getId();
+    return getType().getStatId();
   }
 
   /**
    * Returns the name of the stat type, to be displayed to the player.
    */
   default MutableComponent getLocalizedName() {
-    return Component.translatable(Util.makeTranslationKey("stat", getIdentifier()));
+    return Component.translatable(Util.makeTranslationKey("stat", getIdentifier().location()));
   }
 
   /**

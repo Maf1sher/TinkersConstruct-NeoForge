@@ -1,4 +1,4 @@
-# Reporting issues
+0.# Reporting issues
 
 Before reporting an issue, search to see if anyone has the same issue. Make sure to check closed issues as well as there is a chance one of them has the solution.
 

@@ -5,6 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
@@ -15,11 +16,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.ItemStack;
+import javax.annotation.Nullable;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.event.ForgeEventFactory;
+import net.neoforged.neoforge.event.EventHooks;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.Sounds;
 import slimeknights.tconstruct.common.TinkerTags;
@@ -88,6 +90,11 @@ public class ModifiableBowItem extends ModifiableLauncherItem {
   }
 
   @Override
+  protected void shootProjectile(LivingEntity shooter, Projectile projectile, int index, float velocity, float inaccuracy, float angle, @Nullable LivingEntity target) {
+    projectile.shootFromRotation(shooter, shooter.getXRot(), shooter.getYRot(), 0.0F, velocity, inaccuracy);
+  }
+
+  @Override
   public UseAnim getUseAnimation(ItemStack stack) {
     return ModifierUtil.blockWhileCharging(ToolStack.from(stack), UseAnim.BOW);
   }
@@ -113,7 +120,7 @@ public class ModifiableBowItem extends ModifiableLauncherItem {
     boolean isBallista = isBallista(tool);
     ItemStack ammo = BowAmmoModifierHook.getAmmo(tool, bow, player, isBallista ? getSupportedBallistaAmmo() : getSupportedHeldProjectiles());
     // ask forge if it has any different opinions
-    InteractionResultHolder<ItemStack> override = ForgeEventFactory.onArrowNock(bow, level, player, hand, !ammo.isEmpty());
+    InteractionResultHolder<ItemStack> override = EventHooks.onArrowNock(bow, level, player, hand, !ammo.isEmpty());
     if (override != null) {
       return override;
     }
@@ -131,7 +138,7 @@ public class ModifiableBowItem extends ModifiableLauncherItem {
     // store either ammo or boolean as requested
     if (!ammo.isEmpty()) {
       if (storeDrawingItem) {
-        tool.getPersistentData().put(KEY_DRAWBACK_AMMO, ammo.save(new CompoundTag()));
+        tool.getPersistentData().put(KEY_DRAWBACK_AMMO, ammo.saveOptional(level.registryAccess()));
       } else {
         // boolean is enough to get detected by the property override, but won't bother the model
         tool.getPersistentData().putBoolean(KEY_DRAWBACK_AMMO, true);
@@ -158,7 +165,7 @@ public class ModifiableBowItem extends ModifiableLauncherItem {
   public void releaseUsing(ItemStack bow, Level level, LivingEntity living, int timeLeft) {
     // call the stop using hook
     ToolStack tool = ToolStack.from(bow);
-    int duration = getUseDuration(bow);
+    int duration = getUseDuration(bow, living);
     for (ModifierEntry entry : tool.getModifiers()) {
       entry.getHook(ModifierHooks.TOOL_USING).beforeReleaseUsing(tool, entry, living, duration, timeLeft, ModifierEntry.EMPTY);
     }
@@ -185,7 +192,7 @@ public class ModifiableBowItem extends ModifiableLauncherItem {
     // ask forge its thoughts on shooting
     int chargeTime = duration - timeLeft;
     if (player != null) {
-      chargeTime = ForgeEventFactory.onArrowLoose(bow, level, player, chargeTime, hasAmmo);
+      chargeTime = EventHooks.onArrowLoose(bow, level, player, chargeTime, hasAmmo);
     }
 
     // no ammo? no charge? nothing to do
@@ -238,7 +245,7 @@ public class ModifiableBowItem extends ModifiableLauncherItem {
       float waterInertia = 0.6f;
       SoundEvent sound = SoundEvents.ARROW_SHOOT;
       if (thrownTool) {
-        sound = SoundEvents.TRIDENT_THROW;
+        sound = SoundEvents.TRIDENT_THROW.value();
         IToolStackView thrown = ToolStack.from(ammo);
         float thrownVelocity = ConditionalStatModifierHook.getModifiedStat(thrown, living, ToolStats.VELOCITY);
         power *= thrownVelocity * ConditionalStatModifierHook.getModifiedStat(thrown, living, ToolStats.DRAW_SPEED) / 1.5f;
@@ -258,7 +265,7 @@ public class ModifiableBowItem extends ModifiableLauncherItem {
           thrown.setOriginalSlot(originalSlot);
           arrow = thrown;
         } else {
-          arrow = arrowItem.createArrow(level, ammo, living);
+          arrow = arrowItem.createArrow(level, ammo, living, bow);
         }
         float angle = startAngle + (10 * arrowIndex);
         arrow.shootFromRotation(living, living.getXRot() + angle, living.getYRot(), 0, power * 3.0F, inaccuracy);

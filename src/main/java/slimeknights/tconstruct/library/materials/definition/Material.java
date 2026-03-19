@@ -37,7 +37,20 @@ public class Material implements IMaterial {
     this.hidden = hidden;
   }
 
+  /** Constructor that accepts a MaterialId directly */
+  public Material(MaterialId identifier, int tier, int order, boolean craftable, boolean hidden) {
+    this.identifier = identifier;
+    this.tier = tier;
+    this.sortOrder = order;
+    this.craftable = craftable;
+    this.hidden = hidden;
+  }
+
   protected Material(ResourceLocation identifier, boolean craftable, boolean hidden) {
+    this(identifier, 0, -1, craftable, hidden);
+  }
+
+  protected Material(MaterialId identifier, boolean craftable, boolean hidden) {
     this(identifier, 0, -1, craftable, hidden);
   }
 

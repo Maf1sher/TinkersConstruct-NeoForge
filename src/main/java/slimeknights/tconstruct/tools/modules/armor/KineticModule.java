@@ -8,6 +8,8 @@ import net.minecraft.world.item.TooltipFlag;
 import slimeknights.mantle.client.TooltipKey;
 import slimeknights.mantle.data.loadable.record.SingletonLoader;
 import slimeknights.tconstruct.TConstruct;
+import net.minecraft.core.Holder;
+import net.minecraft.world.effect.MobEffect;
 import slimeknights.tconstruct.common.TinkerEffect;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
@@ -69,7 +71,9 @@ public enum KineticModule implements ModifierModule, OnAttackedModifierHook, Too
     float bonus = modifier.getLevel();
     if (player != null && tooltipKey == TooltipKey.SHIFT) {
       // armor does not scale the effect level for its bonus
-      bonus = TinkerEffect.getLevel(player, TinkerModifiers.insatiableEffect.get(ToolType.ARMOR));
+      @SuppressWarnings("unchecked")
+      Holder<MobEffect> holder = (Holder<MobEffect>)(Holder<?>) TinkerModifiers.insatiableEffect.getSupplier(ToolType.ARMOR);
+      bonus = TinkerEffect.getLevel(player, holder);
     }
     if (bonus > 0) {
       TooltipModifierHook.addFlatBoost(modifier.getModifier(), TooltipModifierHook.statName(modifier.getModifier(), ToolStats.ATTACK_DAMAGE), bonus, tooltip);

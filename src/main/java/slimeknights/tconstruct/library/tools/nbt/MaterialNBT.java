@@ -20,7 +20,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Spliterator;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNullElse;
 
@@ -152,9 +151,11 @@ public class MaterialNBT implements Iterable<MaterialVariant> {
    * @return  List of materials
    */
   public ListTag serializeToNBT() {
-    return list.stream()
-               .map(lazy -> StringTag.valueOf(lazy.getVariant().toString()))
-               .collect(Collectors.toCollection(ListTag::new));
+    ListTag listTag = new ListTag();
+    for (MaterialVariant lazy : list) {
+      listTag.add(StringTag.valueOf(lazy.getVariant().toString()));
+    }
+    return listTag;
   }
 
 

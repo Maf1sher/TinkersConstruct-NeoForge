@@ -28,7 +28,7 @@ public class FirebreathModifier extends NoLevelsModifier implements KeybindInter
   @Override
   public boolean startInteract(IToolStackView tool, ModifierEntry modifier, Player player, EquipmentSlot slot, TooltipKey keyModifier) {
     // stopped by water and by cooldown
-    if (keyModifier == TooltipKey.NORMAL && !player.hasEffect(TinkerModifiers.fireballCooldownEffect.get()) && !player.isInWaterRainOrBubble()) {
+    if (keyModifier == TooltipKey.NORMAL && !player.hasEffect(TinkerModifiers.fireballCooldownEffect) && !player.isInWaterRainOrBubble()) {
       // if not creative, this costs a fire charge
       boolean hasFireball = true;
       Level level = player.level();
@@ -54,7 +54,8 @@ public class FirebreathModifier extends NoLevelsModifier implements KeybindInter
         player.playNotifySound(SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 2.0F, (RANDOM.nextFloat() - RANDOM.nextFloat()) * 0.2F + 1.0F);
         if (!level.isClientSide) {
           Vec3 lookVec = player.getLookAngle().multiply(2.0f, 2.0f, 2.0f);
-          SmallFireball fireball = new SmallFireball(level, player, lookVec.x + player.getRandom().nextGaussian() / 16, lookVec.y, lookVec.z + player.getRandom().nextGaussian() / 16);
+          Vec3 movement = new Vec3(lookVec.x + player.getRandom().nextGaussian() / 16, lookVec.y, lookVec.z + player.getRandom().nextGaussian() / 16);
+          SmallFireball fireball = new SmallFireball(level, player, movement);
           fireball.setPos(fireball.getX(), player.getY(0.5D) + 0.5D, fireball.getZ());
           level.addFreshEntity(fireball);
           TinkerModifiers.fireballCooldownEffect.get().apply(player, 100, 0, true);

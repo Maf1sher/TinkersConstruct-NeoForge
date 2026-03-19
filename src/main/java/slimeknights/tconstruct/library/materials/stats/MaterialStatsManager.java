@@ -84,7 +84,7 @@ public class MaterialStatsManager extends MergingJsonDataLoader<Map<ResourceLoca
   @SuppressWarnings("unchecked")
   @Nullable
   public <T extends IMaterialStats> MaterialStatType<T> getStatType(MaterialStatsId id) {
-    return (MaterialStatType<T>) statTypes.getValue(id);
+    return (MaterialStatType<T>) statTypes.getValue(id.location());
   }
 
   /**
@@ -190,7 +190,7 @@ public class MaterialStatsManager extends MergingJsonDataLoader<Map<ResourceLoca
 
     log.debug("Loaded stats for materials:{}",
               Util.toIndentedStringList(materialToStatsPerType.entrySet().stream()
-                .sorted(Entry.comparingByKey())
+                .sorted(Entry.comparingByKey((a, b) -> a.location().compareTo(b.location())))
                 .map(entry -> String.format("%s - [%s]", entry.getKey(), entry.getValue().keySet().stream().sorted().map(Object::toString).collect(Collectors.joining(", "))))
                 .collect(Collectors.toList())));
     onLoaded.run();

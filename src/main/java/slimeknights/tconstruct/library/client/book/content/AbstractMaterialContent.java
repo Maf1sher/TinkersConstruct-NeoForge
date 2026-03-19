@@ -3,16 +3,25 @@ package slimeknights.tconstruct.library.client.book.content;
 import com.google.common.collect.Lists;
 import com.google.gson.annotations.SerializedName;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.ForgeI18n;
+import net.minecraft.core.registries.Registries;
 import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.mantle.client.book.data.BookData;
 import slimeknights.mantle.client.book.data.content.PageContent;
@@ -421,8 +430,7 @@ public abstract class AbstractMaterialContent extends PageContent {
     // inspirational quote, or boring description text
     String textKey = getTextKey(materialVariant.getId());
     if (I18n.exists(textKey)) {
-      // using forge instead of I18n.format as that prevents % from being interpreted as a format key
-      String translated = ForgeI18n.getPattern(textKey);
+      String translated = I18n.get(textKey);
       if (!detailed) {
         translated = '"' + translated + '"';
       }

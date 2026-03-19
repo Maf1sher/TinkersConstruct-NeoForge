@@ -1,9 +1,8 @@
 package slimeknights.tconstruct.gadgets.item;
 
 import lombok.RequiredArgsConstructor;
-import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Position;
+import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
@@ -11,6 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.LevelEvent;
+import net.minecraft.world.phys.Vec3;
 
 /** Entity type based projectile shooting dispenser behavior */
 @RequiredArgsConstructor
@@ -25,11 +25,11 @@ public class ShootProjectileDispenserBehavior extends DefaultDispenseItemBehavio
 
   @Override
   public ItemStack execute(BlockSource source, ItemStack stack) {
-    Level level = source.getLevel();
+    Level level = source.level();
     ThrowableItemProjectile projectile = entity.create(level);
     if (projectile != null) {
-      Position position = DispenserBlock.getDispensePosition(source);
-      Direction direction = source.getBlockState().getValue(DispenserBlock.FACING);
+      Vec3 position = source.center();
+      Direction direction = source.state().getValue(DispenserBlock.FACING);
       projectile.setPos(position.x(), position.y(), position.z());
       projectile.setItem(stack);
       projectile.shoot(direction.getStepX(), ((float)direction.getStepY() + 0.1F), direction.getStepZ(), power, inaccuracy);
@@ -41,6 +41,6 @@ public class ShootProjectileDispenserBehavior extends DefaultDispenseItemBehavio
 
   @Override
   protected void playSound(BlockSource pSource) {
-    pSource.getLevel().levelEvent(LevelEvent.SOUND_DISPENSER_PROJECTILE_LAUNCH, pSource.getPos(), 0);
+    pSource.level().levelEvent(LevelEvent.SOUND_DISPENSER_PROJECTILE_LAUNCH, pSource.pos(), 0);
   }
 }

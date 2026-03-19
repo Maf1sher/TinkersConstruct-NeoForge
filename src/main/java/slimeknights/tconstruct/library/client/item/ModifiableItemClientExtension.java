@@ -42,7 +42,7 @@ public class ModifiableItemClientExtension implements IClientItemExtensions {
         case DRINK:
           // start: applyEatTransform
           float timeLeft = player.getUseItemRemainingTicks() - partialTicks + 1;
-          float percentage = timeLeft / stack.getUseDuration();
+          float percentage = timeLeft / stack.getUseDuration(player);
           if (percentage < 0.8f) {
             poseStack.translate(0, Mth.abs(Mth.cos(timeLeft / 4f * PI) * 0.1f), 0);
           }
@@ -63,7 +63,7 @@ public class ModifiableItemClientExtension implements IClientItemExtensions {
           poseStack.mulPose(Axis.XP.rotationDegrees(-13.935f));
           poseStack.mulPose(Axis.YP.rotationDegrees(sideOffset * 35.3f));
           poseStack.mulPose(Axis.ZP.rotationDegrees(sideOffset * -9.785f));
-          float remainingTime = (float) stack.getUseDuration() - ((float) player.getUseItemRemainingTicks() - partialTicks + 1);
+          float remainingTime = (float) stack.getUseDuration(player) - ((float) player.getUseItemRemainingTicks() - partialTicks + 1);
           // change: scale charge by drawtime instead of a flat 20f
           float charge = remainingTime / ModifierUtil.getPersistentInt(stack, GeneralInteractionModifierHook.KEY_DRAWTIME, 20);
           charge = (charge * charge + charge * 2) / 3;
@@ -88,7 +88,7 @@ public class ModifiableItemClientExtension implements IClientItemExtensions {
           poseStack.mulPose(Axis.XP.rotationDegrees(-90));
           poseStack.mulPose(Axis.YP.rotationDegrees(sideOffset * 35.3f));
           poseStack.mulPose(Axis.ZP.rotationDegrees(sideOffset * -9.785f));
-          float sRemainingTime = stack.getUseDuration() - (player.getUseItemRemainingTicks() - partialTicks + 1);
+          float sRemainingTime = stack.getUseDuration(player) - (player.getUseItemRemainingTicks() - partialTicks + 1);
           // change: scale charge by drawtime instead of a flat 10f, tridents have 2.0 drawspeed I decided
           float sCharge = sRemainingTime / ModifierUtil.getPersistentInt(stack, GeneralInteractionModifierHook.KEY_DRAWTIME, 20);
           if (sCharge > 1) {

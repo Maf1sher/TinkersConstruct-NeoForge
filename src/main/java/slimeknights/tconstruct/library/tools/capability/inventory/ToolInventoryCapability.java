@@ -2,6 +2,7 @@ package slimeknights.tconstruct.library.tools.capability.inventory;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import lombok.RequiredArgsConstructor;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -10,13 +11,9 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.capabilities.Capability;
-import net.neoforged.neoforge.common.capabilities.Capabilities;
-import net.neoforged.neoforge.common.util.LazyOptional;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
-import net.neoforged.neoforge.network.NetworkHooks;
 import slimeknights.mantle.inventory.EmptyItemHandler;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
@@ -26,7 +23,6 @@ import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
 import slimeknights.tconstruct.library.module.ModuleHook;
 import slimeknights.tconstruct.library.recipe.partbuilder.Pattern;
-import slimeknights.tconstruct.library.tools.capability.ToolCapabilityProvider.IToolCapabilityProvider;
 import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
 import slimeknights.tconstruct.library.tools.definition.module.display.ToolNameHook;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
@@ -113,7 +109,7 @@ public class ToolInventoryCapability extends InventoryModifierHookIterator<Modif
 
   /** If true, the given stack is blacklisted from being stored in a tool */
   public static boolean isBlacklisted(ItemStack stack) {
-    return !stack.getItem().canFitInsideContainerItems() || stack.is(TinkerTags.Items.TOOL_INVENTORY_BLACKLIST) || stack.getCapability(Capabilities.ITEM_HANDLER).isPresent();
+    return !stack.getItem().canFitInsideContainerItems() || stack.is(TinkerTags.Items.TOOL_INVENTORY_BLACKLIST) || stack.getCapability(Capabilities.ItemHandler.ITEM) != null;
   }
 
   @Override
@@ -251,7 +247,7 @@ public class ToolInventoryCapability extends InventoryModifierHookIterator<Modif
       int canInsert = Math.min(stack.getCount(), Math.min(stack.getMaxStackSize(), slotLimit));
       leftover = stack.getCount() - canInsert;
       if (!simulate) {
-        setAndCache(inventory, localSlot, slot, ItemHandlerHelper.copyStackWithSize(stack, canInsert));
+        setAndCache(inventory, localSlot, slot, stack.copyWithCount(canInsert));
       }
     } else {
       // space leftover? does it match?
@@ -273,7 +269,7 @@ public class ToolInventoryCapability extends InventoryModifierHookIterator<Modif
     if (leftover == 0) {
       return ItemStack.EMPTY;
     }
-    return ItemHandlerHelper.copyStackWithSize(stack, leftover);
+    return stack.copyWithCount(leftover);
   }
 
   @Nonnull
@@ -301,7 +297,7 @@ public class ToolInventoryCapability extends InventoryModifierHookIterator<Modif
       amount = current.getCount();
     }
     // get the result before modifying current
-    ItemStack result = ItemHandlerHelper.copyStackWithSize(current, amount);
+    ItemStack result = current.copyWithCount(amount);
     if (!simulate) {
       if (amount == current.getCount()) {
         setAndCache(inventory, localSlot, slot, ItemStack.EMPTY);
@@ -477,29 +473,6 @@ public class ToolInventoryCapability extends InventoryModifierHookIterator<Modif
     }
   }
 
-  /** Provider for an inventory tool capability */
-  public static class Provider implements IToolCapabilityProvider {
-    private final LazyOptional<ToolInventoryCapability> handler;
-    @SuppressWarnings("unused")
-    public Provider(ItemStack stack, Supplier<? extends IToolStackView> tool) {
-      handler = LazyOptional.of(() -> new ToolInventoryCapability(tool));
-    }
-
-    @Override
-    public <T> LazyOptional<T> getCapability(IToolStackView tool, Capability<T> cap) {
-      if (cap == Capabilities.ITEM_HANDLER && tool.getVolatileData().getInt(TOTAL_SLOTS) > 0) {
-        return handler.cast();
-      }
-      return LazyOptional.empty();
-    }
-
-    @Override
-    public void clearCache() {
-      handler.ifPresent(ToolInventoryCapability::clearCache);
-    }
-  }
-
-
   /* Helpers */
 
   /** Adds the given number of slots to the data */
@@ -527,11 +500,12 @@ public class ToolInventoryCapability extends InventoryModifierHookIterator<Modif
 
   /** Opens the tool inventory container if an inventory is present on the given tool */
   public static InteractionResult tryOpenContainer(ItemStack stack, @Nullable IToolStackView tool, ToolDefinition definition, Player player, int slotIndex) {
-    IItemHandler handler = stack.getCapability(Capabilities.ITEM_HANDLER).filter(cap -> cap instanceof IItemHandlerModifiable).orElse(EmptyItemHandler.INSTANCE);
+    IItemHandler cap = stack.getCapability(Capabilities.ItemHandler.ITEM);
+    IItemHandler handler = (cap instanceof IItemHandlerModifiable) ? cap : EmptyItemHandler.INSTANCE;
     // open if we have any slots or we have a crafting table
     if (handler.getSlots() > 0 || ModifierUtil.checkVolatileFlag(stack, CRAFTING_TABLE) || ModifierUtil.checkVolatileFlag(stack, INVENTORY_CRAFTING)) {
       if (player instanceof ServerPlayer serverPlayer) {
-        NetworkHooks.openScreen(serverPlayer, new SimpleMenuProvider(
+        serverPlayer.openMenu(new SimpleMenuProvider(
           (id, inventory, p) -> new ToolContainerMenu(id, inventory, stack, handler, slotIndex),
           ToolNameHook.getName(definition, stack, tool)
         ), buf -> {
@@ -539,7 +513,7 @@ public class ToolInventoryCapability extends InventoryModifierHookIterator<Modif
           ToolSyncType syncType = Config.COMMON.toolInventorySync.get();
           buf.writeEnum(syncType);
           if (syncType == ToolSyncType.FULL_STACK) {
-            buf.writeItem(stack);
+            ItemStack.OPTIONAL_STREAM_CODEC.encode((RegistryFriendlyByteBuf) buf, stack);
           } else if (syncType == ToolSyncType.MINIMAL) {
             buf.writeVarInt(ModifierUtil.getVolatileInt(stack, TOTAL_SLOTS));
             buf.writeEnum(CraftingType.fromStack(stack));

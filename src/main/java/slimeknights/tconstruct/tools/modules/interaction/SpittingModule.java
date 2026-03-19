@@ -110,7 +110,7 @@ public record SpittingModule(LevelingInt shots) implements ModifierModule, Gener
               float startAngle = ModifiableLauncherItem.getAngleStart(shots);
               int primaryIndex = shots / 2;
               for (int shotIndex = 0; shotIndex < shots; shotIndex++) {
-                FluidEffectProjectile spit = new FluidEffectProjectile(world, entity, new FluidStack(fluid, amount), power);
+                FluidEffectProjectile spit = new FluidEffectProjectile(world, entity, fluid.copyWithAmount(amount), power);
 
                 // setup projectile target
                 Vec3 upVector = entity.getUpVector(1.0f);

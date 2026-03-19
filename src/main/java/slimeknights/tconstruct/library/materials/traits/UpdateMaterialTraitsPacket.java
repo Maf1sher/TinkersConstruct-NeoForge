@@ -3,8 +3,10 @@ package slimeknights.tconstruct.library.materials.traits;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.minecraft.network.FriendlyByteBuf;
-import net.neoforged.neoforge.network.NetworkEvent.Context;
-import slimeknights.mantle.network.packet.IThreadsafePacket;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.materials.MaterialRegistry;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 
@@ -13,7 +15,10 @@ import java.util.Map;
 
 @Getter
 @AllArgsConstructor
-public class UpdateMaterialTraitsPacket implements IThreadsafePacket {
+public class UpdateMaterialTraitsPacket implements CustomPacketPayload {
+  public static final CustomPacketPayload.Type<UpdateMaterialTraitsPacket> TYPE = new CustomPacketPayload.Type<>(TConstruct.getResource("update_material_traits"));
+  public static final StreamCodec<FriendlyByteBuf, UpdateMaterialTraitsPacket> STREAM_CODEC = StreamCodec.ofMember(UpdateMaterialTraitsPacket::encode, UpdateMaterialTraitsPacket::new);
+
   protected final Map<MaterialId,MaterialTraits> materialToTraits;
 
   public UpdateMaterialTraitsPacket(FriendlyByteBuf buffer) {
@@ -26,17 +31,18 @@ public class UpdateMaterialTraitsPacket implements IThreadsafePacket {
     }
   }
 
-  @Override
   public void encode(FriendlyByteBuf buffer) {
     buffer.writeInt(materialToTraits.size());
     materialToTraits.forEach((materialId, traits) -> {
-      buffer.writeResourceLocation(materialId);
+      buffer.writeResourceLocation(materialId.location());
       traits.write(buffer);
     });
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
-    MaterialRegistry.updateMaterialTraitsFromServer(this);
+  public CustomPacketPayload.Type<? extends CustomPacketPayload> type() { return TYPE; }
+
+  public static void handle(UpdateMaterialTraitsPacket payload, IPayloadContext context) {
+    context.enqueueWork(() -> MaterialRegistry.updateMaterialTraitsFromServer(payload));
   }
 }

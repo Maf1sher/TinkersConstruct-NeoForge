@@ -49,7 +49,7 @@ public class SwappableModifierRecipe extends ModifierRecipe {
   public static final RecordLoadable<SwappableModifierRecipe> LOADER = RecordLoadable.create(
     ContextKey.ID.requiredField(),
     INPUTS_FIELD, TOOLS_FIELD, MAX_TOOL_SIZE_FIELD,
-    new MergingField<>(ModifierId.PARSER.requiredField("name", r -> r.result.getId()), "result", MissingMode.DISALLOWED),
+    new MergingField<>(ModifierId.PARSER.requiredField("name", r -> r.result.getModifierId()), "result", MissingMode.DISALLOWED),
     new MergingField<>(StringLoadable.DEFAULT.requiredField("value", r -> r.value), "result", MissingMode.DISALLOWED),
     VariantFormatter.LOADER.defaultField("variant_formatter", VariantFormatter.DEFAULT, r -> r.variantFormatter),
     SLOTS_FIELD, ALLOW_CRYSTAL_FIELD,
@@ -75,7 +75,7 @@ public class SwappableModifierRecipe extends ModifierRecipe {
     ToolStack tool = inv.getTinkerable();
 
     // if the tool has the modifier already, can skip most requirements
-    ModifierId modifier = result.getId();
+    ModifierId modifier = result.getModifierId();
 
     boolean needsModifier;
     int level = tool.getUpgrades().getLevel(modifier);
@@ -90,7 +90,7 @@ public class SwappableModifierRecipe extends ModifierRecipe {
     }
 
     // do not allow adding the modifier if this variant is already present
-    if (level > 0 && tool.getPersistentData().getString(modifier).equals(value)) {
+    if (level > 0 && tool.getPersistentData().getString(modifier.location()).equals(value)) {
       return RecipeResult.failure(ALREADY_PRESENT, result.get().getDisplayName(), variant);
     }
 
@@ -105,11 +105,11 @@ public class SwappableModifierRecipe extends ModifierRecipe {
     }
 
     // set the new value to the modifier
-    persistentData.putString(modifier, value);
+    persistentData.putString(modifier.location(), value);
 
     // add modifier if needed
     if (needsModifier) {
-      tool.addModifier(result.getId(), 1);
+      tool.addModifier(result.getModifierId(), 1);
     } else {
       tool.rebuildStats();
     }
@@ -161,10 +161,10 @@ public class SwappableModifierRecipe extends ModifierRecipe {
 
     /* Formatters */
     /** Formats using the modifier ID as a base translation key */
-    VariantFormatter DEFAULT = LOADER.register(getResource("default"), (modifier, variant) -> Component.translatable(Util.makeTranslationKey("modifier", modifier) + "." + variant));
+    VariantFormatter DEFAULT = LOADER.register(getResource("default"), (modifier, variant) -> Component.translatable(Util.makeTranslationKey("modifier", modifier.location()) + "." + variant));
     /** Formats using the material translation key */
     VariantFormatter MATERIAL = LOADER.register(getResource("material"), (modifier, variant) -> MaterialTooltipCache.getDisplayName(Objects.requireNonNullElse(MaterialVariantId.tryParse(variant), IMaterial.UNKNOWN_ID)));
     /** Formats using the modifier ID as the base with the variant as a parameter */
-    VariantFormatter PARAMETER = LOADER.register(getResource("parameter"), (modifier, variant) -> Component.translatable(Util.makeTranslationKey("modifier", modifier) + ".variant", variant));
+    VariantFormatter PARAMETER = LOADER.register(getResource("parameter"), (modifier, variant) -> Component.translatable(Util.makeTranslationKey("modifier", modifier.location()) + ".variant", variant));
   }
 }

@@ -4,28 +4,34 @@ import lombok.RequiredArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.network.NetworkEvent.Context;
-import slimeknights.mantle.network.packet.IThreadsafePacket;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.tools.capability.PersistentDataCapability;
 
 /** Packet to sync player persistent data to the client */
 @RequiredArgsConstructor
-public class SyncPersistentDataPacket implements IThreadsafePacket {
+public class SyncPersistentDataPacket implements CustomPacketPayload {
+  public static final CustomPacketPayload.Type<SyncPersistentDataPacket> TYPE = new CustomPacketPayload.Type<>(TConstruct.getResource("sync_persistent_data"));
+  public static final StreamCodec<FriendlyByteBuf, SyncPersistentDataPacket> STREAM_CODEC = StreamCodec.ofMember(SyncPersistentDataPacket::encode, SyncPersistentDataPacket::new);
+
   private final CompoundTag data;
 
   public SyncPersistentDataPacket(FriendlyByteBuf buffer) {
     data = buffer.readNbt();
   }
 
-  @Override
   public void encode(FriendlyByteBuf buffer) {
     buffer.writeNbt(data);
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
-    HandleClient.handle(this);
+  public CustomPacketPayload.Type<? extends CustomPacketPayload> type() { return TYPE; }
+
+  public static void handle(SyncPersistentDataPacket payload, IPayloadContext context) {
+    context.enqueueWork(() -> HandleClient.handle(payload));
   }
 
   /** Handles client side only code safely */
@@ -33,7 +39,7 @@ public class SyncPersistentDataPacket implements IThreadsafePacket {
     private static void handle(SyncPersistentDataPacket packet) {
       Player player = Minecraft.getInstance().player;
       if (player != null) {
-        player.getCapability(PersistentDataCapability.CAPABILITY).ifPresent(data -> data.copyFrom(packet.data));
+        PersistentDataCapability.getOrWarn(player).copyFrom(packet.data);
       }
     }
   }

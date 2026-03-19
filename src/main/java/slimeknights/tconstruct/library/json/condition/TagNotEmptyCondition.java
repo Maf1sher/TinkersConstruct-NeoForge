@@ -1,29 +1,39 @@
 package slimeknights.tconstruct.library.json.condition;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.Serializer;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import net.neoforged.neoforge.common.conditions.ICondition;
-import net.neoforged.neoforge.common.conditions.IConditionSerializer;
-import slimeknights.mantle.util.JsonHelper;
 import slimeknights.mantle.util.RegistryHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.shared.TinkerCommons;
+
+import net.minecraft.core.registries.Registries;
 
 /** @deprecated use {@link slimeknights.mantle.recipe.condition.TagFilledCondition} */
 @Deprecated(forRemoval = true)
 @RequiredArgsConstructor
 public class TagNotEmptyCondition<T> implements LootItemCondition, ICondition {
   private static final ResourceLocation NAME = TConstruct.getResource("tag_not_empty");
+
+  /** MapCodec for serialization - supports any registry type, defaulting to items */
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  public static final MapCodec<TagNotEmptyCondition<?>> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
+    ResourceLocation.CODEC.optionalFieldOf("registry", Registries.ITEM.location())
+      .forGetter(c -> c.tag.registry().location()),
+    ResourceLocation.CODEC.fieldOf("tag")
+      .forGetter(c -> c.tag.location())
+  ).apply(builder, (registry, tag) -> new TagNotEmptyCondition(
+    TagKey.create(ResourceKey.createRegistryKey(registry), tag)
+  )));
+
   private final TagKey<T> tag;
 
   @SuppressWarnings("removal")
@@ -33,8 +43,8 @@ public class TagNotEmptyCondition<T> implements LootItemCondition, ICondition {
   }
 
   @Override
-  public ResourceLocation getID() {
-    return NAME;
+  public MapCodec<? extends ICondition> codec() {
+    return CODEC;
   }
 
   @Override
@@ -46,39 +56,5 @@ public class TagNotEmptyCondition<T> implements LootItemCondition, ICondition {
   public boolean test(LootContext context) {
     Registry<T> registry = RegistryHelper.getRegistry(tag.registry());
     return registry != null && registry.getTagOrEmpty(tag).iterator().hasNext();
-  }
-
-  public static class ConditionSerializer implements Serializer<TagNotEmptyCondition<?>>, IConditionSerializer<TagNotEmptyCondition<?>> {
-    /** Helper to deal with generics */
-    private static <T> TagKey<T> createKey(JsonObject json) {
-      ResourceKey<? extends Registry<T>> registry = ResourceKey.createRegistryKey(JsonHelper.getResourceLocation(json, "registry"));
-      return TagKey.create(registry, JsonHelper.getResourceLocation(json, "tag"));
-    }
-
-    @Override
-    public void write(JsonObject json, TagNotEmptyCondition<?> value) {
-      json.addProperty("registry", value.tag.registry().location().toString());
-      json.addProperty("tag", value.tag.location().toString());
-    }
-
-    @Override
-    public void serialize(JsonObject json, TagNotEmptyCondition<?> value, JsonSerializationContext context) {
-      write(json, value);
-    }
-
-    @Override
-    public TagNotEmptyCondition<?> read(JsonObject json) {
-      return new TagNotEmptyCondition<>(createKey(json));
-    }
-
-    @Override
-    public TagNotEmptyCondition<?> deserialize(JsonObject json, JsonDeserializationContext context) {
-      return read(json);
-    }
-
-    @Override
-    public ResourceLocation getID() {
-      return NAME;
-    }
   }
 }

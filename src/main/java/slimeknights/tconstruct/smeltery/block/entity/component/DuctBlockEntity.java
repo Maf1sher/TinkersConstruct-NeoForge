@@ -3,6 +3,7 @@ package slimeknights.tconstruct.smeltery.block.entity.component;
 import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
@@ -13,9 +14,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.model.data.ModelData;
-import net.neoforged.neoforge.common.capabilities.Capability;
-import net.neoforged.neoforge.common.capabilities.Capabilities;
-import net.neoforged.neoforge.common.util.LazyOptional;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
 import slimeknights.mantle.util.RetexturedHelper;
@@ -39,7 +37,6 @@ public class DuctBlockEntity extends SmelteryFluidIO implements MenuProvider {
 
   @Getter
   private final DuctItemHandler itemHandler = new DuctItemHandler(this);
-  private final LazyOptional<IItemHandler> itemCapability = LazyOptional.of(() -> itemHandler);
 
   public DuctBlockEntity(BlockPos pos, BlockState state) {
     this(TinkerSmeltery.duct.get(), pos, state);
@@ -66,24 +63,14 @@ public class DuctBlockEntity extends SmelteryFluidIO implements MenuProvider {
 
   /* Capability */
 
-  @Nonnull
-  @Override
-  public <C> LazyOptional<C> getCapability(Capability<C> capability, @Nullable Direction facing) {
-    if (capability == Capabilities.ITEM_HANDLER) {
-      return itemCapability.cast();
-    }
-    return super.getCapability(capability, facing);
+  /** Gets the item handler for capability registration */
+  public IItemHandler getCapabilityItemHandler(@Nullable Direction direction) {
+    return itemHandler;
   }
 
   @Override
-  public void invalidateCaps() {
-    super.invalidateCaps();
-    itemCapability.invalidate();
-  }
-
-  @Override
-  protected LazyOptional<IFluidHandler> makeWrapper(LazyOptional<IFluidHandler> capability) {
-    return LazyOptional.of(() -> new DuctTankWrapper(capability.orElse(emptyInstance), itemHandler));
+  protected IFluidHandler wrapHandler(IFluidHandler handler) {
+    return new DuctTankWrapper(handler, itemHandler);
   }
 
   @Nonnull
@@ -109,24 +96,24 @@ public class DuctBlockEntity extends SmelteryFluidIO implements MenuProvider {
   }
 
   @Override
-  public void load(CompoundTag tags) {
-    super.load(tags);
+  public void loadAdditional(CompoundTag tags, HolderLookup.Provider registries) {
+    super.loadAdditional(tags, registries);
     if (tags.contains(TAG_ITEM, Tag.TAG_COMPOUND)) {
-      itemHandler.readFromNBT(tags.getCompound(TAG_ITEM));
+      itemHandler.readFromNBT(tags.getCompound(TAG_ITEM), registries);
     }
   }
 
   @Override
-  public void handleUpdateTag(CompoundTag tag) {
-    super.handleUpdateTag(tag);
+  public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
+    super.handleUpdateTag(tag, registries);
     if (level != null && level.isClientSide) {
       updateFluid();
     }
   }
 
   @Override
-  public void saveSynced(CompoundTag tags) {
-    super.saveSynced(tags);
-    tags.put(TAG_ITEM, itemHandler.writeToNBT());
+  public void saveSynced(CompoundTag tags, HolderLookup.Provider registries) {
+    super.saveSynced(tags, registries);
+    tags.put(TAG_ITEM, itemHandler.writeToNBT(registries));
   }
 }

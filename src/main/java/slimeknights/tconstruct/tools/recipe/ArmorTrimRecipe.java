@@ -1,8 +1,9 @@
 package slimeknights.tconstruct.tools.recipe;
 
 import lombok.Getter;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Holder.Reference;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -44,9 +45,18 @@ public class ArmorTrimRecipe implements ITinkerStationRecipe, IMultiRecipe<IDisp
   protected static final String KEY_INVALID_PATTERN = TConstruct.makeTranslationKey("recipe", "modifier.armor_trim.invalid_pattern");
 
 
+  /** Recipe ID used for display purposes */
   @Getter
   private final ResourceLocation id;
 
+  /** No-arg constructor for use with {@link slimeknights.mantle.recipe.helper.SimpleRecipeSerializer} */
+  public ArmorTrimRecipe() {
+    this.id = TinkerModifiers.trim.getId();
+    ModifierRecipeLookup.addRecipeModifier(null, TinkerModifiers.trim);
+  }
+
+  /** @deprecated recipes no longer carry IDs in 1.21, use no-arg constructor */
+  @Deprecated
   public ArmorTrimRecipe(ResourceLocation id) {
     this.id = id;
     ModifierRecipeLookup.addRecipeModifier(null, TinkerModifiers.trim);
@@ -96,14 +106,14 @@ public class ArmorTrimRecipe implements ITinkerStationRecipe, IMultiRecipe<IDisp
   }
 
   @Override
-  public RecipeResult<LazyToolStack> getValidatedResult(ITinkerStationContainer inv, RegistryAccess access) {
+  public RecipeResult<LazyToolStack> getValidatedResult(ITinkerStationContainer inv, net.minecraft.core.RegistryAccess access) {
     // first need to find our trim and material instances
     TrimItems trimItems = findInputs(inv);
     // should never happen
     if (trimItems == null) {
       return RecipeResult.pass();
     }
-    // validate the material nad pattern items
+    // validate the material and pattern items
     Optional<Reference<TrimMaterial>> material = TrimMaterials.getFromIngredient(access, trimItems.material);
     if (material.isEmpty()) {
       return RecipeResult.failure(KEY_INVALID_MATERIAL, trimItems.material.getDisplayName());
@@ -116,7 +126,7 @@ public class ArmorTrimRecipe implements ITinkerStationRecipe, IMultiRecipe<IDisp
     // store into tool NBT
     ToolStack tool = inv.getTinkerable().copy();
     ModDataNBT persistentData = tool.getPersistentData();
-    ModifierId modifier = TinkerModifiers.trim.getId();
+    ModifierId modifier = TinkerModifiers.trim.getModifierId();
     persistentData.putString(TrimModule.materialKey(modifier), material.get().key().location().toString());
     persistentData.putString(TrimModule.patternKey(modifier), pattern.get().key().location().toString());
 
@@ -139,14 +149,16 @@ public class ArmorTrimRecipe implements ITinkerStationRecipe, IMultiRecipe<IDisp
 
   @SuppressWarnings("deprecation")
   @Override
-  public List<IDisplayModifierRecipe> getRecipes(RegistryAccess access) {
+  public List<IDisplayModifierRecipe> getRecipes(HolderLookup.Provider access) {
     if (displayRecipes == null) {
       List<ItemStack> trims = RegistryHelper.getTagValueStream(BuiltInRegistries.ITEM, ItemTags.TRIM_TEMPLATES)
                                             .map(ItemStack::new).toList();
       List<ItemStack> toolInputs = RegistryHelper.getTagValueStream(BuiltInRegistries.ITEM, TinkerTags.Items.TRIM)
                                                  .map(IModifiableDisplay::getDisplayStack).toList();
       ResourceLocation id = getId();
-      displayRecipes = access.registryOrThrow(Registries.TRIM_MATERIAL).holders()
+      // RegistryAccess extends HolderLookup.Provider, but we receive HolderLookup.Provider here
+      // Use lookupOrThrow to get the trim material registry
+      displayRecipes = access.lookupOrThrow(Registries.TRIM_MATERIAL).listElements()
                              .map(material -> new DisplayRecipe(id, toolInputs, trims, material))
                              .collect(Collectors.toList());
     }
@@ -170,15 +182,15 @@ public class ArmorTrimRecipe implements ITinkerStationRecipe, IMultiRecipe<IDisp
 
     public DisplayRecipe(ResourceLocation id, List<ItemStack> tools, List<ItemStack> trim, Reference<TrimMaterial> holder) {
       this.recipeId = id;
-      TrimMaterial material = holder.get();
+      TrimMaterial material = holder.value();
       toolWithoutModifier = tools;
       this.trim = trim;
-      this.material = List.of(new ItemStack(material.ingredient().get()));
+      this.material = List.of(new ItemStack(material.ingredient().value()));
       this.variant = material.description().plainCopy();
 
       String materialName = holder.key().location().toString();
       List<ModifierEntry> results = List.of(RESULT);
-      ResourceLocation key = TrimModule.materialKey(TinkerModifiers.trim.getId());
+      ResourceLocation key = TrimModule.materialKey(TinkerModifiers.trim.getModifierId());
       toolWithModifier = tools.stream().map(stack -> IDisplayModifierRecipe.withModifiers(stack, results, data -> data.putString(key, materialName))).toList();
 
     }

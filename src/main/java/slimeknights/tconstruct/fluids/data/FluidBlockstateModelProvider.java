@@ -2,10 +2,15 @@ package slimeknights.tconstruct.fluids.data;
 
 import com.google.gson.JsonObject;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.CachedOutput;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput.Target;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.core.registries.Registries;
 import slimeknights.mantle.data.GenericDataProvider;
 
 import java.util.concurrent.CompletableFuture;

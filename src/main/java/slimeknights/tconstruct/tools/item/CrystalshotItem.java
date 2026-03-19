@@ -1,5 +1,8 @@
 package slimeknights.tconstruct.tools.item;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -9,17 +12,21 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import slimeknights.tconstruct.common.Sounds;
 import slimeknights.tconstruct.tools.TinkerTools;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /** Internal item used by crystalshot modifier */
 public class CrystalshotItem extends ArrowItem {
@@ -41,11 +48,12 @@ public class CrystalshotItem extends ArrowItem {
   }
 
   @Override
-  public AbstractArrow createArrow(Level pLevel, ItemStack pStack, LivingEntity pShooter) {
+  public AbstractArrow createArrow(Level pLevel, ItemStack pStack, LivingEntity pShooter, @Nullable ItemStack weapon) {
     CrystalshotEntity arrow = new CrystalshotEntity(pLevel, pShooter);
     String variant = "random";
-    CompoundTag tag = pStack.getTag();
-    if (tag != null && tag.contains(TAG_VARIANT, Tag.TAG_STRING)) {
+    CustomData customData = pStack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+    CompoundTag tag = customData.copyTag();
+    if (tag.contains(TAG_VARIANT, Tag.TAG_STRING)) {
       variant = tag.getString(TAG_VARIANT);
     }
     if ("random".equals(variant)) {
@@ -56,14 +64,17 @@ public class CrystalshotItem extends ArrowItem {
   }
 
   @Override
-  public boolean isInfinite(ItemStack stack, ItemStack bow, Player player) {
-    return bow.getEnchantmentLevel(Enchantments.INFINITY_ARROWS) > 0;
+  public boolean isInfinite(ItemStack stack, ItemStack bow, LivingEntity shooter) {
+    Optional<Holder.Reference<Enchantment>> infinityHolder = shooter.registryAccess()
+      .registryOrThrow(Registries.ENCHANTMENT)
+      .getHolder(Enchantments.INFINITY);
+    return infinityHolder.isPresent() && EnchantmentHelper.getItemEnchantmentLevel(infinityHolder.get(), bow) > 0;
   }
 
   /** Creates a crystal shot with the given variant */
   public static ItemStack withVariant(String variant, int size) {
     ItemStack stack = new ItemStack(TinkerTools.crystalshotItem, size);
-    stack.getOrCreateTag().putString(TAG_VARIANT, variant);
+    CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.putString(TAG_VARIANT, variant));
     return stack;
   }
 
@@ -76,7 +87,7 @@ public class CrystalshotItem extends ArrowItem {
     }
 
     public CrystalshotEntity(Level level, LivingEntity shooter) {
-      super(TinkerTools.crystalshotEntity.get(), shooter, level);
+      super(TinkerTools.crystalshotEntity.get(), shooter, level, ItemStack.EMPTY, null);
       soundEvent = Sounds.CRYSTALSHOT.getSound();
     }
 
@@ -88,9 +99,14 @@ public class CrystalshotItem extends ArrowItem {
     }
 
     @Override
-    protected void defineSynchedData() {
-      super.defineSynchedData();
-      this.entityData.define(SYNC_VARIANT, "");
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+      super.defineSynchedData(builder);
+      builder.define(SYNC_VARIANT, "");
+    }
+
+    @Override
+    protected ItemStack getDefaultPickupItem() {
+      return withVariant(getVariant(), 1);
     }
 
     /** Gets the texture variant of this shot */

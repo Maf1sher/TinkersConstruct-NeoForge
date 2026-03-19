@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.world.block;
 
 import com.google.common.collect.Lists;
+import com.mojang.serialization.MapCodec;
 import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
@@ -12,15 +13,21 @@ import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.neoforge.common.IForgeShearable;
-import net.neoforged.neoforge.common.PlantType;
+import net.neoforged.neoforge.common.IShearable;
 import slimeknights.tconstruct.world.TinkerWorld;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class SlimeTallGrassBlock extends BushBlock implements IForgeShearable {
+public class SlimeTallGrassBlock extends BushBlock implements IShearable {
+
+  public static final MapCodec<SlimeTallGrassBlock> CODEC = simpleCodec(p -> new SlimeTallGrassBlock(p, FoliageType.EARTH));
+
+  @Override
+  public MapCodec<? extends BushBlock> codec() {
+    return CODEC;
+  }
 
   private static final VoxelShape SHAPE = Block.box(2.0D, 0.0D, 2.0D, 14.0D, 13.0D, 14.0D);
 
@@ -37,16 +44,9 @@ public class SlimeTallGrassBlock extends BushBlock implements IForgeShearable {
     return SHAPE;
   }
 
-  /* Forge/MC callbacks */
   @Nonnull
   @Override
-  public PlantType getPlantType(BlockGetter world, BlockPos pos) {
-    return TinkerWorld.SLIME_PLANT_TYPE;
-  }
-
-  @Nonnull
-  @Override
-  public List<ItemStack> onSheared(@Nullable Player player, ItemStack item, Level world, BlockPos pos, int fortune) {
+  public List<ItemStack> onSheared(@Nullable Player player, ItemStack item, Level world, BlockPos pos) {
     return Lists.newArrayList(new ItemStack(this, 1));
   }
 

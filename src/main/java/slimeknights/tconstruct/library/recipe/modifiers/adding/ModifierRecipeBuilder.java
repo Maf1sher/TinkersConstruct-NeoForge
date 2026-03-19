@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.library.recipe.modifiers.adding;
 
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -11,6 +12,7 @@ import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.modifiers.util.LazyModifier;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -37,7 +39,7 @@ public class ModifierRecipeBuilder extends AbstractModifierRecipeBuilder<Modifie
    * @return  Recipe for 1 level of the modifier
    */
   public static ModifierRecipeBuilder modifier(LazyModifier modifier) {
-    return modifier(modifier.getId());
+    return modifier(modifier.getModifierId());
   }
 
 
@@ -104,11 +106,11 @@ public class ModifierRecipeBuilder extends AbstractModifierRecipeBuilder<Modifie
   /* Building */
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer, ResourceLocation id) {
+  public void save(RecipeOutput consumer, ResourceLocation id) {
     if (inputs.isEmpty() && !allowCrystal) {
       throw new IllegalStateException("Must have at least 1 input");
     }
-    ResourceLocation advancementId = buildOptionalAdvancement(id, "modifiers");
-    consumer.accept(new LoadableFinishedRecipe<>(new ModifierRecipe(id, inputs, tools, maxToolSize, result, ModifierEntry.VALID_LEVEL.range(minLevel, maxLevel), slots, allowCrystal, checkTraitLevel), ModifierRecipe.LOADER, advancementId));
+    @Nullable AdvancementHolder advancement = buildOptionalAdvancement(consumer, id, "modifiers");
+    saveRecipe(consumer, id, new ModifierRecipe(id, inputs, tools, maxToolSize, result, ModifierEntry.VALID_LEVEL.range(minLevel, maxLevel), slots, allowCrystal, checkTraitLevel), advancement);
   }
 }

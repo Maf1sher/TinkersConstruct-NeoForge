@@ -1,10 +1,14 @@
 package slimeknights.tconstruct.library.modifiers.fluid.block;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.entity.Entity;
@@ -32,20 +36,26 @@ import slimeknights.tconstruct.library.modifiers.fluid.FluidEffect;
 import slimeknights.tconstruct.library.modifiers.fluid.FluidEffectContext;
 
 import java.util.Map;
+import java.util.Optional;
 
-/** Breaks a block using a fluid */
-public record BreakBlockFluidEffect(float hardness, Map<Enchantment,Integer> enchantments) implements FluidEffect<FluidEffectContext.Block> {
+/**
+ * Breaks a block using a fluid.
+ * Enchantments are stored by ResourceLocation for compatibility with 1.21 data-driven enchantments.
+ * They are resolved to Holder<Enchantment> at runtime when the enchantment registry is available.
+ */
+public record BreakBlockFluidEffect(float hardness, Map<ResourceLocation,Integer> enchantments) implements FluidEffect<FluidEffectContext.Block> {
   public static final RecordLoadable<BreakBlockFluidEffect> LOADER = RecordLoadable.create(
     FloatLoadable.FROM_ZERO.defaultField("hardness", 0f, false, BreakBlockFluidEffect::hardness),
-    Loadables.ENCHANTMENT.mapWithValues(IntLoadable.FROM_ONE, 0).defaultField("enchantments", Map.of(), BreakBlockFluidEffect::enchantments),
+    Loadables.RESOURCE_LOCATION.mapWithValues(IntLoadable.FROM_ONE, 0).defaultField("enchantments", Map.of(), BreakBlockFluidEffect::enchantments),
     BreakBlockFluidEffect::new);
 
   public BreakBlockFluidEffect(float hardness) {
     this(hardness, Map.of());
   }
 
-  public BreakBlockFluidEffect(float hardness, Enchantment enchantment, int level) {
-    this(hardness, Map.of(enchantment, level));
+  /** Constructor accepting a ResourceKey for datagen compatibility with 1.21 data-driven enchantments */
+  public BreakBlockFluidEffect(float hardness, ResourceKey<Enchantment> enchantmentKey, int level) {
+    this(hardness, Map.of(enchantmentKey.location(), level));
   }
 
   @Override
@@ -86,7 +96,16 @@ public record BreakBlockFluidEffect(float hardness, Map<Enchantment,Integer> enc
         ItemStack fakeTool = ItemStack.EMPTY;
         if (!enchantments.isEmpty()) {
           fakeTool = new ItemStack(Items.STICK);
-          EnchantmentHelper.setEnchantments(enchantments, fakeTool);
+          // in 1.21, enchantments are data-driven, resolve from registry and apply via updateEnchantments
+          var enchantmentRegistry = server.registryAccess().registryOrThrow(Registries.ENCHANTMENT);
+          final ItemStack finalFakeTool = fakeTool;
+          EnchantmentHelper.updateEnchantments(finalFakeTool, mutable -> {
+            for (Map.Entry<ResourceLocation, Integer> entry : enchantments.entrySet()) {
+              ResourceKey<Enchantment> key = ResourceKey.create(Registries.ENCHANTMENT, entry.getKey());
+              Optional<Holder.Reference<Enchantment>> holder = enchantmentRegistry.getHolder(key);
+              holder.ifPresent(ref -> mutable.set(ref, entry.getValue()));
+            }
+          });
         }
 
         // ensures tile entity is fetched so its around for afterBlockBreak
@@ -139,13 +158,20 @@ public record BreakBlockFluidEffect(float hardness, Map<Enchantment,Integer> enc
       return Component.translatable(translationKey + ".hardness", hardness);
     } else {
       translationKey += ".enchanted";
+      var enchantmentRegistry = registryAccess.registryOrThrow(Registries.ENCHANTMENT);
       Component enchantments = enchantments().entrySet().stream().<Component>map(entry -> {
-        Enchantment enchantment = entry.getKey();
-        MutableComponent component = Component.translatable(enchantment.getDescriptionId());
-        if (enchantment.getMaxLevel() != 1) {
-          component.append(CommonComponents.SPACE).append(Component.translatable("enchantment.level." + entry.getValue()));
+        ResourceKey<Enchantment> key = ResourceKey.create(Registries.ENCHANTMENT, entry.getKey());
+        Optional<Holder.Reference<Enchantment>> holder = enchantmentRegistry.getHolder(key);
+        if (holder.isPresent()) {
+          Enchantment enchantment = holder.get().value();
+          MutableComponent component = enchantment.description().copy();
+          if (enchantment.getMaxLevel() != 1) {
+            component.append(CommonComponents.SPACE).append(Component.translatable("enchantment.level." + entry.getValue()));
+          }
+          return component;
         }
-        return component;
+        // fallback: use the resource location as description
+        return (Component) Component.literal(entry.getKey().toString());
       }).reduce(MERGE_COMPONENT_LIST).orElse(Component.empty());
       if (hardness == 0) {
         return Component.translatable(translationKey, enchantments);

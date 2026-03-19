@@ -32,9 +32,10 @@ import java.util.Map;
 
 /** Handles fetching textures for armor trims */
 public record TrimArmorTextureSupplier(ModifierId modifier, ResourceLocation patternKey, ResourceLocation materialKey) implements ArmorTextureSupplier {
+  private static final ModifierId DEFAULT_TRIM_MODIFIER = new ModifierId(TinkerModifiers.trim.getId());
   /** Default instant using the tinkers modifier */
-  public static TrimArmorTextureSupplier INSTANCE = new TrimArmorTextureSupplier(TinkerModifiers.trim.getId());
-  public static final RecordLoadable<TrimArmorTextureSupplier> LOADER = RecordLoadable.create(ModifierId.PARSER.defaultField("modifier", TinkerModifiers.trim.getId(), TrimArmorTextureSupplier::modifier), TrimArmorTextureSupplier::new);
+  public static TrimArmorTextureSupplier INSTANCE = new TrimArmorTextureSupplier(DEFAULT_TRIM_MODIFIER);
+  public static final RecordLoadable<TrimArmorTextureSupplier> LOADER = RecordLoadable.create(ModifierId.PARSER.defaultField("modifier", DEFAULT_TRIM_MODIFIER, TrimArmorTextureSupplier::modifier), TrimArmorTextureSupplier::new);
 
   /* Caches */
   private static final Map<String,ArmorTexture> ARMOR_CACHE = new HashMap<>();
@@ -118,10 +119,10 @@ public record TrimArmorTextureSupplier(ModifierId modifier, ResourceLocation pat
     }
 
     @Override
-    public void renderTexture(Model model, PoseStack matrices, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float red, float green, float blue, float alpha, boolean hasGlint) {
+    public void renderTexture(Model model, PoseStack matrices, MultiBufferSource bufferSource, int packedLight, int packedOverlay, int color, boolean hasGlint) {
       // ignoring glint as odds are very low trim texture is the first one
-      VertexConsumer buffer = trimSprite.wrap(bufferSource.getBuffer(Sheets.armorTrimsSheet()));
-      model.renderToBuffer(matrices, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+      VertexConsumer buffer = trimSprite.wrap(bufferSource.getBuffer(Sheets.armorTrimsSheet(false)));
+      model.renderToBuffer(matrices, buffer, packedLight, packedOverlay, color);
     }
   }
 }

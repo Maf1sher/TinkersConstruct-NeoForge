@@ -78,7 +78,7 @@ public class ModifierRecipeLookup {
   public static void addRecipeModifier(@Nullable SlotType slotType, LazyModifier modifier) {
     LISTENER.checkClear();
     RECIPE_MODIFIERS.put(slotType, modifier);
-    RECIPE_MODIFIER_IDS.put(slotType, modifier.getId());
+    RECIPE_MODIFIER_IDS.put(slotType, modifier.getModifierId());
   }
 
   /** Gets a stream of all modifiers obtainable via recipes */

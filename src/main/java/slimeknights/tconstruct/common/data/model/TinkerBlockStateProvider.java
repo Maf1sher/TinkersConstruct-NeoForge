@@ -1,24 +1,43 @@
 package slimeknights.tconstruct.common.data.model;
 
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.Direction.Axis;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.ButtonBlock;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.FenceBlock;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.IronBarsBlock;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.PipeBlock;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.PressurePlateBlock;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.TrapDoorBlock;
+import net.minecraft.core.registries.Registries;
 import net.neoforged.neoforge.client.model.generators.BlockModelBuilder;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
 import net.neoforged.neoforge.client.model.generators.ItemModelBuilder;
@@ -90,7 +109,7 @@ public class TinkerBlockStateProvider extends BlockStateProvider {
     glassBlock(TinkerSmeltery.scorchedSoulGlass.get(), TinkerSmeltery.scorchedSoulGlassPane.get(), "foundry/soul_glass/",
                getResource("block/foundry/soul_glass"), getResource("block/foundry/glass_top"), -1, true, translucent);
     // obsidian pane
-    ResourceLocation obsidian = new ResourceLocation("block/obsidian");
+    ResourceLocation obsidian = ResourceLocation.parse("block/obsidian");
     paneBlock(TinkerCommons.obsidianPane.get(), "obsidian_pane/", obsidian, obsidian, false, -1, false, RenderType.solid());
 
     // shards
@@ -109,7 +128,7 @@ public class TinkerBlockStateProvider extends BlockStateProvider {
     basicBlock(TinkerSmeltery.scorchedLamp.get(), "block/foundry/scorched/lamp", blockTexture("foundry/scorched/lamp"));
 
     // heads
-    ModelFile skull = models().getExistingFile(new ResourceLocation("block/skull"));
+    ModelFile skull = models().getExistingFile(ResourceLocation.parse("block/skull"));
     TinkerWorld.heads.forEach(head -> simpleBlock(head, skull));
     TinkerWorld.wallHeads.forEach(head -> simpleBlock(head, skull));
   }

@@ -64,14 +64,14 @@ public abstract class SlingModifier extends NoLevelsModifier implements GeneralI
     // if using knockback, boost projectile damage by 0.5 per level, that is a 25% boost, same as power
     float knockback = 0;
     if (applyKnockback) {
-      knockback = tool.getModifierLevel(TinkerModifiers.knockback.getId()) / 2f;
+      knockback = tool.getModifierLevel(TinkerModifiers.knockback.getModifierId()) / 2f;
     }
     float force = charge
                   * (ConditionalStatModifierHook.getModifiedStat(tool, living, ToolStats.PROJECTILE_DAMAGE) + knockback) / 2f
                   * ConditionalStatModifierHook.getModifiedStat(tool, living, ToolStats.VELOCITY);
     // knockback also means we should apply padded, divide per level
     if (applyKnockback) {
-      force /= Math.pow(2, tool.getModifierLevel(TinkerModifiers.padded.getId()));
+      force /= Math.pow(2, tool.getModifierLevel(TinkerModifiers.padded.getModifierId()));
     }
     return force;
   }

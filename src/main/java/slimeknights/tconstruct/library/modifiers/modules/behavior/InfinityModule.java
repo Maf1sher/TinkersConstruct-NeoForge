@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.library.modifiers.modules.behavior;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
@@ -7,6 +8,7 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.AbstractArrow.Pickup;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import slimeknights.mantle.data.loadable.common.ItemStackLoadable;
 import slimeknights.mantle.data.loadable.primitive.BooleanLoadable;
 import slimeknights.mantle.data.loadable.primitive.IntLoadable;
@@ -66,16 +68,17 @@ public record InfinityModule(ItemStack ammo, String variantTag, int durabilityUs
     // our available count is based on how many arrows we can create from the remaining durability, though round up to be nice
     int count = durabilityUsage <= 0 ? 64 : Math.min(64, (tool.getCurrentDurability() + durabilityUsage - 1) / durabilityUsage);
     ItemStack ammo = this.ammo.copyWithCount(count);
-    CompoundTag tag = ammo.getOrCreateTag();
     // mark the arrow as infinity for the projectile launch hook
-    tag.putBoolean(INFINITY, true);
+    CompoundTag customTag = new CompoundTag();
+    customTag.putBoolean(INFINITY, true);
     // if a variant is requested, set that on the stack
     if (!variantTag.isEmpty()) {
-      String variant = tool.getPersistentData().getString(modifier.getId());
+      String variant = tool.getPersistentData().getString(modifier.getId().location());
       if (!variant.isEmpty()) {
-        tag.putString(variantTag, variant);
+        customTag.putString(variantTag, variant);
       }
     }
+    CustomData.set(DataComponents.CUSTOM_DATA, ammo, customTag);
     return ammo;
   }
 
@@ -84,8 +87,8 @@ public record InfinityModule(ItemStack ammo, String variantTag, int durabilityUs
     // for arrows fired by this module, set them to creative only pickup
     // not an issue if you have multiple types of infinity, they all agree on the goal here
     if (arrow != null && arrow.pickup != Pickup.CREATIVE_ONLY) {
-      CompoundTag tag = ammo.getTag();
-      if (tag != null && tag.getBoolean(INFINITY)) {
+      CustomData customData = ammo.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+      if (customData.contains("tic_infinity")) {
         arrow.pickup = Pickup.CREATIVE_ONLY;
       }
     }
@@ -102,7 +105,7 @@ public record InfinityModule(ItemStack ammo, String variantTag, int durabilityUs
   @Override
   public Component onRemoved(IToolStackView tool, Modifier modifier) {
     if (!variantTag.isEmpty()) {
-      tool.getPersistentData().remove(modifier.getId());
+      tool.getPersistentData().remove(modifier.getId().location());
     }
     return null;
   }

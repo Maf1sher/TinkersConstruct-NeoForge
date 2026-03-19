@@ -26,16 +26,12 @@ public class Pattern extends ResourceId {
     super(location);
   }
 
-  private Pattern(String namespace, String path, @Nullable Dummy pDummy) {
-    super(namespace, path, pDummy);
-  }
-
   /**
    * Gets the translation key for this pattern
    * @return  Translation key
    */
   public String getTranslationKey() {
-    return Util.makeTranslationKey("pattern", this);
+    return Util.makeTranslationKey("pattern", this.location());
   }
 
   /**
@@ -51,19 +47,19 @@ public class Pattern extends ResourceId {
    * @return  Pattern texture
    */
   public ResourceLocation getTexture() {
-    return new ResourceLocation(getNamespace(), "gui/tinker_pattern/" + getPath());
+    return ResourceLocation.fromNamespaceAndPath(getNamespace(), "gui/tinker_pattern/" + getPath());
   }
 
 
   /** {@return Pattern ID, or null if invalid} */
   @Nullable
   public static Pattern tryParse(String string) {
-    return tryParse(string, (namespace, path) -> new Pattern(namespace, path, null));
+    return ResourceId.tryParse(string, Pattern::new);
   }
 
   /** {@return Pattern ID, or null if invalid} */
   @Nullable
   public static Pattern tryBuild(String namespace, String path) {
-    return tryBuild(namespace, path, (n, p) -> new Pattern(namespace, path, null));
+    return ResourceId.tryBuild(namespace, path, Pattern::new);
   }
 }

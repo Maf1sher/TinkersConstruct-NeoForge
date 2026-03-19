@@ -335,7 +335,7 @@ public class ToolModel implements IUnbakedGeometry<ToolModel> {
   }
 
   /**
-   * Same as {@link #bake(IGeometryBakingContext, ModelBaker, Function, ModelState, ItemOverrides, ResourceLocation)}, but uses fewer arguments and does not require an instance
+   * Same as {@link #bake(IGeometryBakingContext, ModelBaker, Function, ModelState, ItemOverrides)}, but uses fewer arguments and does not require an instance
    * @param owner           Model configuration
    * @param spriteGetter    Sprite getter function
    * @param largeTransforms Transform to apply to the large parts. If null, only generates small parts
@@ -479,7 +479,7 @@ public class ToolModel implements IUnbakedGeometry<ToolModel> {
   }
 
   @Override
-  public BakedModel bake(IGeometryBakingContext owner, ModelBaker baker, Function<Material,TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation) {
+  public BakedModel bake(IGeometryBakingContext owner, ModelBaker baker, Function<Material,TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides) {
     // default is just a single part named tool, no material
     List<ToolPart> toolParts = this.toolParts;
     if (toolParts.isEmpty()) {
@@ -778,11 +778,10 @@ public class ToolModel implements IUnbakedGeometry<ToolModel> {
       ItemStack ammo;
       ModDataNBT persistentData = tool.getPersistentData();
       if (ammoKey != null && persistentData.contains(ammoKey, Tag.TAG_COMPOUND)) {
-        ammo = ItemStack.of(persistentData.getCompound(ammoKey));
+        ammo = ItemStack.parseOptional(Minecraft.getInstance().level.registryAccess(), persistentData.getCompound(ammoKey));
         builder.add(ammo.getItem());
-        CompoundTag tag = ammo.getTag();
-        if (tag != null) {
-          builder.add(tag);
+        if (!ammo.getComponentsPatch().isEmpty()) {
+          builder.add(ammo.getComponentsPatch());
         }
       } else {
         ammo = ItemStack.EMPTY;

@@ -3,14 +3,15 @@ package slimeknights.tconstruct.library.recipe.partbuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Ingredient;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
 import slimeknights.tconstruct.library.tools.part.IMaterialItem;
 
-import java.util.function.Consumer;
+import javax.annotation.Nullable;
 
 /**
  * Builder for a material item part crafting recipe
@@ -39,12 +40,12 @@ public class PartRecipeBuilder extends AbstractRecipeBuilder<PartRecipeBuilder> 
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumerIn) {
+  public void save(RecipeOutput consumerIn) {
     this.save(consumerIn, BuiltInRegistries.ITEM.getKey(this.output.asItem()));
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumerIn, ResourceLocation id) {
+  public void save(RecipeOutput consumerIn, ResourceLocation id) {
     if (this.outputAmount <= 0) {
       throw new IllegalStateException("recipe " + id + " must output at least 1");
     }
@@ -54,7 +55,7 @@ public class PartRecipeBuilder extends AbstractRecipeBuilder<PartRecipeBuilder> 
     if (this.pattern == null) {
       throw new IllegalStateException("recipe " + id + " has no pattern associated with it");
     }
-    ResourceLocation advancementId = this.buildOptionalAdvancement(id, "parts");
-    consumerIn.accept(new LoadableFinishedRecipe<>(new PartRecipe(id, group, new Pattern(pattern), patternItem, cost, allowUncraftable, output, outputAmount), PartRecipe.LOADER, advancementId));
+    @Nullable AdvancementHolder advancement = this.buildOptionalAdvancement(consumerIn, id, "parts");
+    saveRecipe(consumerIn, id, new PartRecipe(id, group, new Pattern(pattern), patternItem, cost, allowUncraftable, output, outputAmount), advancement);
   }
 }

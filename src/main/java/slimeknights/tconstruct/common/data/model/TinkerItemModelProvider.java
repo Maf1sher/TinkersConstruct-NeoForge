@@ -1,11 +1,17 @@
 package slimeknights.tconstruct.common.data.model;
 
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.ArmorItem;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.core.registries.Registries;
 import net.neoforged.neoforge.client.model.generators.ItemModelBuilder;
 import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
 import net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile;
@@ -140,7 +146,7 @@ public class TinkerItemModelProvider extends ItemModelProvider {
   /** Generated item with a texture */
   @SuppressWarnings("removal")
   private ItemModelBuilder generated(ResourceLocation item, String texture) {
-    return generated(item, new ResourceLocation(item.getNamespace(), texture));
+    return generated(item, ResourceLocation.fromNamespaceAndPath(item.getNamespace(), texture));
   }
 
   /** Generated item with a texture */

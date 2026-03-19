@@ -49,8 +49,8 @@ public class FluidContainerTransferProvider extends AbstractFluidContainerTransf
   /** Adds a recipe to empty an item, returning no container */
   @SuppressWarnings("removal")
   protected void addContainerlessEmpty(String name, String domain, FluidOutput fluid) {
-    ResourceLocation id = new ResourceLocation(domain, name);
-    addTransfer(domain + '_' + name, new EmptyFluidContainerTransfer(ItemNameIngredient.from(id), ItemOutput.EMPTY, fluid), new ItemExistsCondition(id));
+    ResourceLocation id = ResourceLocation.fromNamespaceAndPath(domain, name);
+    addTransfer(domain + '_' + name, new EmptyFluidContainerTransfer(ItemNameIngredient.from(id).toIngredient(), ItemOutput.EMPTY, fluid), new ItemExistsCondition(id));
   }
 
   @Override

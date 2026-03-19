@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
+// ItemHandlerHelper.copyStackWithSize removed in 1.21.1, use stack.copyWithCount() instead
 import slimeknights.mantle.recipe.helper.ItemOutput;
 
 import java.util.Random;
@@ -141,7 +141,7 @@ public abstract class RandomItem {
           return ItemStack.EMPTY;
         }
       }
-      return ItemHandlerHelper.copyStackWithSize(result, newCount);
+      return result.copyWithCount(newCount);
     }
 
     @Override

@@ -16,6 +16,7 @@ import slimeknights.tconstruct.library.modifiers.modules.util.ModifierCondition;
 import slimeknights.tconstruct.library.modifiers.modules.util.ModifierCondition.ConditionalModule;
 import slimeknights.tconstruct.library.module.HookProvider;
 import slimeknights.tconstruct.library.module.ModuleHook;
+import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability;
 import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability.ComputableDataKey;
 import slimeknights.tconstruct.library.tools.context.EquipmentChangeContext;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
@@ -55,19 +56,23 @@ public record EffectImmunityModule(MobEffect effect, ModifierCondition<IToolStac
   @Override
   public void onEquip(IToolStackView tool, ModifierEntry modifier, EquipmentChangeContext context) {
     if (!tool.isBroken() && ArmorLevelModule.validSlot(tool, context.getChangedSlot(), TinkerTags.Items.HELD_ARMOR) && condition.matches(tool, modifier)) {
-      context.getTinkerData().ifPresent(data -> data.computeIfAbsent(EFFECT_IMMUNITY).add(effect));
+      TinkerDataCapability.Holder data = context.getTinkerData();
+      if (data != null) {
+        data.computeIfAbsent(EFFECT_IMMUNITY).add(effect);
+      }
     }
   }
 
   @Override
   public void onUnequip(IToolStackView tool, ModifierEntry modifier, EquipmentChangeContext context) {
     if (!tool.isBroken() && ArmorLevelModule.validSlot(tool, context.getChangedSlot(), TinkerTags.Items.HELD_ARMOR) && condition.matches(tool, modifier)) {
-      context.getTinkerData().ifPresent(data -> {
+      TinkerDataCapability.Holder data = context.getTinkerData();
+      if (data != null) {
         Multiset<MobEffect> effects = data.get(EFFECT_IMMUNITY);
         if (effects != null) {
           effects.remove(effect);
         }
-      });
+      }
     }
   }
 }

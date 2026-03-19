@@ -32,7 +32,6 @@ import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.UUID;
 import java.util.function.Supplier;
 
 /**
@@ -44,7 +43,7 @@ import java.util.function.Supplier;
  * @param amount     Amount of the attribute to apply
  * @param condition  Standard modifier conditions
  */
-public record MeleeAttributeModule(String unique, Attribute attribute, UUID uuid, Operation operation, LevelingValue amount, IJsonPredicate<LivingEntity> target, ModifierCondition<IToolStackView> condition) implements ModifierModule, MeleeHitModifierHook, ConditionalModule<IToolStackView> {
+public record MeleeAttributeModule(String unique, Attribute attribute, ResourceLocation modifierId, Operation operation, LevelingValue amount, IJsonPredicate<LivingEntity> target, ModifierCondition<IToolStackView> condition) implements ModifierModule, MeleeHitModifierHook, ConditionalModule<IToolStackView> {
   private static final List<ModuleHook<?>> DEFAULT_HOOKS = HookProvider.<MeleeAttributeModule>defaultHooks(ModifierHooks.MELEE_HIT);
   public static final RecordLoadable<MeleeAttributeModule> LOADER = RecordLoadable.create(
     new AttributeUniqueField<>(MeleeAttributeModule::unique),
@@ -60,7 +59,7 @@ public record MeleeAttributeModule(String unique, Attribute attribute, UUID uuid
   public MeleeAttributeModule {}
 
   private MeleeAttributeModule(String unique, Attribute attribute, Operation operation, LevelingValue amount, IJsonPredicate<LivingEntity> target, ModifierCondition<IToolStackView> condition) {
-    this(unique, attribute, UUID.nameUUIDFromBytes(unique.getBytes()), operation, amount, target, condition);
+    this(unique, attribute, ResourceLocation.fromNamespaceAndPath("tconstruct", "melee_attribute/" + unique.toLowerCase().replace(' ', '_').replace('.', '/')), operation, amount, target, condition);
   }
 
   @Override
@@ -73,11 +72,11 @@ public record MeleeAttributeModule(String unique, Attribute attribute, UUID uuid
     if (condition.matches(tool, modifier)) {
       LivingEntity target = context.getLivingTarget();
       if (target != null) {
-        AttributeInstance instance = target.getAttribute(attribute);
+        AttributeInstance instance = target.getAttribute(net.minecraft.core.Holder.direct(attribute));
         if (instance != null) {
           // ensure we don't already have the modifier from someone misusing melee hooks or simultaneous attacks
-          instance.removeModifier(uuid);
-          instance.addTransientModifier(new AttributeModifier(uuid, unique, amount.compute(modifier.getEffectiveLevel()), operation));
+          instance.removeModifier(modifierId);
+          instance.addTransientModifier(new AttributeModifier(modifierId, amount.compute(modifier.getEffectiveLevel()), operation));
         }
       }
     }
@@ -86,9 +85,9 @@ public record MeleeAttributeModule(String unique, Attribute attribute, UUID uuid
 
   private void removeAttribute(@Nullable LivingEntity target) {
     if (target != null) {
-      AttributeInstance instance = target.getAttribute(attribute);
+      AttributeInstance instance = target.getAttribute(net.minecraft.core.Holder.direct(attribute));
       if (instance != null) {
-        instance.removeModifier(uuid);
+        instance.removeModifier(modifierId);
       }
     }
   }

@@ -7,10 +7,9 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.common.util.LazyOptional;
-import net.neoforged.neoforge.event.ForgeEventFactory;
+import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
@@ -61,7 +60,6 @@ public class PartBuilderBlockEntity extends RetexturedTableBlockEntity implement
   public PartBuilderBlockEntity(BlockPos pos, BlockState state) {
     super(TinkerTables.partBuilderTile.get(), pos, state, NAME, 2);
     this.itemHandler = new ConfigurableInvWrapperCapability(this, false, false);
-    this.itemHandlerCap = LazyOptional.of(() -> this.itemHandler);
     this.inventoryWrapper = new PartBuilderContainerWrapper(this);
     this.craftingResult = new LazyResultContainer(this);
   }
@@ -82,14 +80,16 @@ public class PartBuilderBlockEntity extends RetexturedTableBlockEntity implement
       } else {
         record PatternRecipe(Pattern pattern, IPartBuilderRecipe recipe) {}
         // fetch all recipes that can match these inputs, the map ensures the patterns are unique
-        recipes = level.getRecipeManager().byType(TinkerRecipeTypes.PART_BUILDER.get()).values().stream()
+        recipes = level.getRecipeManager().getAllRecipesFor(TinkerRecipeTypes.PART_BUILDER.get()).stream()
+                       .sorted(Comparator.comparing(RecipeHolder::id))
+                       .map(RecipeHolder::value)
                        .filter(r -> r.partialMatch(inventoryWrapper))
-                       .sorted(Comparator.comparing(Recipe::getId))
                        .flatMap(r -> r.getPatterns(inventoryWrapper).map(p -> new PatternRecipe(p, r)))
                        .collect(Collectors.toMap(PatternRecipe::pattern, PatternRecipe::recipe, (a, b) -> a));
         sortedButtons = recipes.entrySet()
                                .stream()
-                               .sorted(Comparator.<Entry<Pattern,IPartBuilderRecipe>>comparingInt(ent -> ent.getValue().getCost()).thenComparing(Entry::getKey))
+                               .sorted(Comparator.<Entry<Pattern,IPartBuilderRecipe>>comparingInt(ent -> ent.getValue().getCost())
+                                 .thenComparing(ent -> ent.getKey().location()))
                                .map(Entry::getKey).collect(Collectors.toList());
       }
     }
@@ -221,7 +221,7 @@ public class PartBuilderBlockEntity extends RetexturedTableBlockEntity implement
     super.setItem(slot, stack);
     if (slot == MATERIAL_SLOT) {
       // if item or NBT changed, update
-      if (!ItemStack.isSameItemSameTags(original, stack)) {
+      if (!ItemStack.isSameItemSameComponents(original, stack)) {
         this.inventoryWrapper.refreshMaterial();
         refresh(true);
         // if size changed, we are still the same material but might no longer have enough
@@ -290,7 +290,7 @@ public class PartBuilderBlockEntity extends RetexturedTableBlockEntity implement
 
     // we are definitely crafting at this point
     result.onCraftedBy(this.level, player, amount);
-    ForgeEventFactory.firePlayerCraftingEvent(player, result, this.inventoryWrapper);
+    EventHooks.firePlayerCraftingEvent(player, result, this.inventoryWrapper);
     this.playCraftSound(player);
 
     // give the player any leftovers

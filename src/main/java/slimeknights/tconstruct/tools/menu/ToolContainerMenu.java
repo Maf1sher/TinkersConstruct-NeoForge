@@ -1,7 +1,10 @@
 package slimeknights.tconstruct.tools.menu;
 
 import lombok.Getter;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -14,7 +17,7 @@ import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
@@ -96,7 +99,7 @@ public class ToolContainerMenu extends AbstractContainerMenu {
     // when syncing the full stack, overwrite the spot in the inventory
     ItemStack stack;
     if (syncType == ToolSyncType.FULL_STACK) {
-      stack = buffer.readItem();
+      stack = ItemStack.OPTIONAL_STREAM_CODEC.decode((RegistryFriendlyByteBuf) buffer);
       inventory.setItem(slotIndex, stack);
     } else {
       stack = inventory.getItem(slotIndex);
@@ -117,8 +120,9 @@ public class ToolContainerMenu extends AbstractContainerMenu {
     }
     // if the stack looks like it could be our tool, fetch the handler from it
     IItemHandler handler;
-    if (stack.hasTag() && stack.is(TinkerTags.Items.MODIFIABLE)) {
-      handler = stack.getCapability(Capabilities.ITEM_HANDLER).filter(cap -> cap instanceof IItemHandlerModifiable).orElse(EmptyItemHandler.INSTANCE);
+    if (stack.has(DataComponents.CUSTOM_DATA) && stack.is(TinkerTags.Items.MODIFIABLE)) {
+      IItemHandler rawHandler = stack.getCapability(Capabilities.ItemHandler.ITEM);
+      handler = rawHandler instanceof IItemHandlerModifiable ? rawHandler : EmptyItemHandler.INSTANCE;
       // wrong number of slots means something went wrong, use a dummy
       if (handler.getSlots() != size) {
         handler = new ItemStackHandler(size);
@@ -136,7 +140,7 @@ public class ToolContainerMenu extends AbstractContainerMenu {
     this.tool = ToolStack.from(stack);
     this.itemHandler = handler;
     this.player = playerInventory.player;
-    this.tank = new ToolFluidHandler(tool, player.level().isClientSide ? null : player);
+    this.tank = new ToolFluidHandler(tool, player instanceof ServerPlayer sp ? sp : null);
     this.slotIndex = slotIndex;
 
     // if requested, add 3x3 crafting area
@@ -272,7 +276,7 @@ public class ToolContainerMenu extends AbstractContainerMenu {
   public void slotsChanged(Container pContainer) {
     super.slotsChanged(pContainer);
     if (craftingContainer != null && resultContainer != null) {
-      CraftingMenu.slotChangedCraftingGrid(this, player.level(), player, craftingContainer, resultContainer);
+      CraftingMenu.slotChangedCraftingGrid(this, player.level(), player, craftingContainer, resultContainer, null);
     }
   }
 
@@ -327,7 +331,7 @@ public class ToolContainerMenu extends AbstractContainerMenu {
   }
 
   /** Logic handling the fluid tank in the UI */
-  private record ToolFluidHandler(IToolStackView tool, @Nullable Player player) implements SimpleFluidTank {
+  private record ToolFluidHandler(IToolStackView tool, @Nullable ServerPlayer player) implements SimpleFluidTank {
     @Nonnull
     @Override
     public FluidStack getFluid() {

@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.world.worldgen.islands;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -21,17 +22,17 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
-import net.neoforged.neoforge.registries.RegistryObject;
 import slimeknights.tconstruct.world.TinkerStructures;
 import slimeknights.tconstruct.world.TinkerWorld;
 import slimeknights.tconstruct.world.block.FoliageType;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /** Base logic for all island variants */
 public class IslandStructure extends Structure {
-  public static final Codec<IslandStructure> CODEC = RecordCodecBuilder.create(inst ->
+  public static final MapCodec<IslandStructure> CODEC = RecordCodecBuilder.mapCodec(inst ->
     inst.group(settingsCodec(inst)).and(inst.group(
           IslandPlacement.CODEC.fieldOf("placement").forGetter(s -> s.placement),
           SimpleWeightedRandomList.wrappedCodec(ResourceLocation.CODEC).fieldOf("templates").forGetter(s -> s.templates),
@@ -146,7 +147,7 @@ public class IslandStructure extends Structure {
     }
 
     /** Adds a new grass type to the builder with the given weight */
-    public Builder vines(RegistryObject<? extends Block> block) {
+    public Builder vines(Supplier<? extends Block> block) {
       return vines(block.get());
     }
 
@@ -157,7 +158,7 @@ public class IslandStructure extends Structure {
     }
 
     /** Adds a new grass type to the builder with the given weight */
-    public Builder addGrass(RegistryObject<? extends Block> block, int weight) {
+    public Builder addGrass(Supplier<? extends Block> block, int weight) {
       return addGrass(block.get(), weight);
     }
 

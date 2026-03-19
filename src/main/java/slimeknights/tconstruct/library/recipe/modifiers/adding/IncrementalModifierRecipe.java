@@ -10,7 +10,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.util.Lazy;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
+
 import slimeknights.mantle.data.loadable.common.IngredientLoadable;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.field.LoadableField;
@@ -79,7 +79,7 @@ public class IncrementalModifierRecipe extends AbstractModifierRecipe {
     ToolStack tool = inv.getTinkerable();
 
     // fetch the amount from the modifier, will be 0 if we have a full level
-    ModifierId modifier = result.getId();
+    ModifierId modifier = result.getModifierId();
     boolean crystal = matchesCrystal(inv);
     boolean isNewLevel = crystal || tool.getUpgrades().getEntry(modifier).getAmount(0) <= 0;
 
@@ -130,7 +130,7 @@ public class IncrementalModifierRecipe extends AbstractModifierRecipe {
 
     // fetch the differences
     ToolStack inputTool = inv.getTinkerable();
-    ModifierId modifier = this.result.getId();
+    ModifierId modifier = this.result.getModifierId();
     ModifierEntry inputEntry = inputTool.getUpgrades().getEntry(modifier);
     ModifierEntry resultEntry = result.getTool().getUpgrades().getEntry(modifier);
 
@@ -181,7 +181,7 @@ public class IncrementalModifierRecipe extends AbstractModifierRecipe {
       if (neededPerLevel % amountPerInput > 0) {
         needed++;
       }
-      Lazy<List<ItemStack>> fullSize = Lazy.of(() -> items.stream().map(stack -> ItemHandlerHelper.copyStackWithSize(stack, maxStackSize)).collect(Collectors.toList()));
+      Lazy<List<ItemStack>> fullSize = Lazy.of(() -> items.stream().map(stack -> stack.copyWithCount(maxStackSize)).collect(Collectors.<ItemStack>toList()));
       while (needed > maxStackSize) {
         builder.add(fullSize.get());
         needed -= maxStackSize;
@@ -189,7 +189,7 @@ public class IncrementalModifierRecipe extends AbstractModifierRecipe {
       // set proper stack size on remaining
       if (needed > 0) {
         int remaining = needed;
-        builder.add(items.stream().map(stack -> ItemHandlerHelper.copyStackWithSize(stack, remaining)).collect(Collectors.toList()));
+        builder.add(items.stream().map(stack -> stack.copyWithCount(remaining)).collect(Collectors.<ItemStack>toList()));
       }
       slotCache = builder.build();
     }
@@ -270,7 +270,7 @@ public class IncrementalModifierRecipe extends AbstractModifierRecipe {
       if (!leftover.isEmpty()) {
         // leftoverAmount refers to how many we need to that is does not fit cleanly into amountPerInput
         // but we want to return the amount we did not use, hence the subtraction
-        inv.giveItem(ItemHandlerHelper.copyStackWithSize(leftover, (amountPerInput - leftoverAmount) * leftover.getCount()));
+        inv.giveItem(leftover.copyWithCount((amountPerInput - leftoverAmount) * leftover.getCount()));
       }
     }
     for (int i = 0; i < inv.getInputCount(); i++) {

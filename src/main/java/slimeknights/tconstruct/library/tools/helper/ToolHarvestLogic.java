@@ -2,7 +2,7 @@ package slimeknights.tconstruct.library.tools.helper;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -20,8 +20,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.common.ForgeHooks;
-import net.neoforged.neoforge.common.ToolActions;
+import net.neoforged.neoforge.common.CommonHooks;
+import net.neoforged.neoforge.common.ItemAbilities;
+import net.neoforged.neoforge.event.level.BlockEvent;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
@@ -67,7 +68,7 @@ public class ToolHarvestLogic {
   public static int getDamage(IToolStackView tool, Level world, BlockPos pos, BlockState state) {
     if (state.getDestroySpeed(world, pos) == 0 || !tool.hasTag(TinkerTags.Items.HARVEST)) {
       // tools that can shear take damage from instant break for non-fire
-      return (!state.is(BlockTags.FIRE) && ModifierUtil.canPerformAction(tool, ToolActions.SHEARS_DIG)) ? 1 : 0;
+      return (!state.is(BlockTags.FIRE) && ModifierUtil.canPerformAction(tool, ItemAbilities.SHEARS_DIG)) ? 1 : 0;
     }
     // if it lacks the harvest tag, it takes double damage (swords for instance)
     return tool.hasTag(TinkerTags.Items.HARVEST_PRIMARY) ? 1 : 2;
@@ -124,17 +125,20 @@ public class ToolHarvestLogic {
    * @return  True if broken
    */
   protected static boolean breakBlock(IToolStackView tool, ItemStack stack, ToolHarvestContext context, boolean useLastXP) {
-    // have to rerun the event to get the EXP, also ensures extra blocks broken get EXP properly
+    // fire the break event to ensure extra blocks broken are properly handled
     ServerPlayer player = Objects.requireNonNull(context.getPlayer());
     ServerLevel world = context.getWorld();
     BlockPos pos = context.getPos();
+    BlockState state = context.getState();
     GameType type = player.gameMode.getGameModeForPlayer();
-    int exp = useLastXP ? BlockSideHitListener.getLastXP(player) : ForgeHooks.onBlockBreakEvent(world, type, player, pos);
-    if (exp == -1) {
-      return false;
+    if (!useLastXP) {
+      // fire the event to check if block break is allowed
+      BlockEvent.BreakEvent event = CommonHooks.fireBlockBreak(world, type, player, pos, state);
+      if (event.isCanceled()) {
+        return false;
+      }
     }
-    // checked after the Forge hook, so we have to recheck
-    // TODO: is this needed? Seems its called inside ForgeHooks.onBlockBreakEvent
+    // checked after the NeoForge hook, so we have to recheck
     if (player.blockActionRestricted(world, pos, type)) {
       return false;
     }
@@ -146,7 +150,6 @@ public class ToolHarvestLogic {
     }
 
     // determine damage to do
-    BlockState state = context.getState();
     int damage = getDamage(tool, world, pos, state);
 
     // remove the block
@@ -154,15 +157,10 @@ public class ToolHarvestLogic {
     BlockEntity te = canHarvest ? world.getBlockEntity(pos) : null; // ensures tile entity is fetched so it's around for afterBlockBreak
     boolean removed = removeBlock(tool, context);
 
-    // harvest drops
+    // harvest drops (in 1.21, XP is handled within playerDestroy/dropResources chain)
     Block block = state.getBlock();
     if (removed && canHarvest) {
       block.playerDestroy(world, player, pos, state, te, stack);
-    }
-
-    // drop XP
-    if (removed && exp > 0) {
-      block.popExperience(world, pos, exp);
     }
 
     // handle modifiers if not broken
@@ -286,7 +284,7 @@ public class ToolHarvestLogic {
     }
     // let armor change enchantments
     // TODO: should we have a hook for non-enchantment armor responses?
-    ListTag originalEnchantments = HarvestEnchantmentsModifierHook.updateHarvestEnchantments(tool, stack, context);
+    ItemEnchantments originalEnchantments = HarvestEnchantmentsModifierHook.updateHarvestEnchantments(tool, stack, context);
     // need to calculate the iterator before we break the block, as we need the reference hardness from the center
     UseOnContext useContext = new UseOnContext(world, player, InteractionHand.MAIN_HAND, stack, Util.createTraceResult(pos, sideHit, false));
     Iterable<BlockPos> extraBlocks = context.isEffective() ? tool.getHook(ToolHooks.AOE_ITERATOR).getBlocks(tool, useContext, state, AOEMatchType.BREAKING) : Collections.emptyList();

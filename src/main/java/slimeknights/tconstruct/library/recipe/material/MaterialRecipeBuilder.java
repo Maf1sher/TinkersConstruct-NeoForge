@@ -3,7 +3,8 @@ package slimeknights.tconstruct.library.recipe.material;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -13,7 +14,7 @@ import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
 import slimeknights.mantle.recipe.helper.ItemOutput;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 
-import java.util.function.Consumer;
+import javax.annotation.Nullable;
 
 /**
  * Builder for a recipe to determine the material from an input
@@ -59,12 +60,12 @@ public class MaterialRecipeBuilder extends AbstractRecipeBuilder<MaterialRecipeB
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumerIn) {
-    this.save(consumerIn, material.getId());
+  public void save(RecipeOutput consumerIn) {
+    this.save(consumerIn, material.getId().location());
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumerIn, ResourceLocation id) {
+  public void save(RecipeOutput consumerIn, ResourceLocation id) {
     if (this.material == null) {
       throw new IllegalStateException("recipe " + id + " has no material associated with it");
     }
@@ -77,7 +78,7 @@ public class MaterialRecipeBuilder extends AbstractRecipeBuilder<MaterialRecipeB
     if (this.needed <= 0) {
       throw new IllegalStateException("recipe " + id + " has no needed associated with it");
     }
-    ResourceLocation advancementId = this.buildOptionalAdvancement(id, "materials");
-    consumerIn.accept(new LoadableFinishedRecipe<>(new MaterialRecipe(id, group, ingredient, value, needed, material, leftover), MaterialRecipe.LOADER, advancementId));
+    @Nullable AdvancementHolder advancement = this.buildOptionalAdvancement(consumerIn, id, "materials");
+    saveRecipe(consumerIn, id, new MaterialRecipe(id, group, ingredient, value, needed, material, leftover), advancement);
   }
 }

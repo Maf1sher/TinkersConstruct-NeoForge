@@ -3,13 +3,11 @@ package slimeknights.tconstruct.tables.recipe;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Ingredient;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
-
-import java.util.function.Consumer;
 
 /** Builder for {@link TinkerStationPartSwapping} */
 @RequiredArgsConstructor(staticName = "tools")
@@ -21,12 +19,13 @@ public class TinkerStationPartSwappingBuilder extends AbstractRecipeBuilder<Tink
 
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer) {
+  public void save(RecipeOutput consumer) {
     save(consumer, Loadables.ITEM.getKey(tools.getItems()[0].getItem()));
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer, ResourceLocation id) {
-    consumer.accept(new LoadableFinishedRecipe<>(new TinkerStationPartSwapping(id, tools, maxStackSize), TinkerStationPartSwapping.LOADER, null));
+  public void save(RecipeOutput consumer, ResourceLocation id) {
+    TinkerStationPartSwapping recipe = new TinkerStationPartSwapping(id, tools, maxStackSize);
+    saveRecipe(consumer, id, recipe, null);
   }
 }

@@ -1,9 +1,13 @@
 package slimeknights.tconstruct.common.data.tags;
 
 import net.minecraft.core.HolderLookup.Provider;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.core.registries.Registries;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import slimeknights.mantle.data.BuiltinRegistryTagProvider;
 import slimeknights.tconstruct.TConstruct;

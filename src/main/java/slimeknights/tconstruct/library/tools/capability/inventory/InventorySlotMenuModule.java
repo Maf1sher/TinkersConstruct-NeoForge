@@ -2,11 +2,17 @@ package slimeknights.tconstruct.library.tools.capability.inventory;
 
 import lombok.Getter;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.registries.Registries;
 import slimeknights.mantle.data.loadable.record.SingletonLoader;
 import slimeknights.mantle.util.RegistryHelper;
 import slimeknights.tconstruct.common.TinkerTags;

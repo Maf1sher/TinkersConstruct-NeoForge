@@ -2,7 +2,6 @@ package slimeknights.tconstruct.world.entity;
 
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -27,10 +26,10 @@ public class EnderSlimeEntity extends TravelersPlateSlimeEntity {
   }
 
   @Override
-  public void doEnchantDamageEffects(LivingEntity slime, Entity target) {
-    super.doEnchantDamageEffects(slime, target);
-    if (target instanceof LivingEntity) {
-      TeleportHelper.randomNearbyTeleport((LivingEntity) target, teleportPredicate);
+  protected void dealDamage(LivingEntity target) {
+    super.dealDamage(target);
+    if (target.isAlive()) {
+      TeleportHelper.randomNearbyTeleport(target, teleportPredicate);
     }
   }
 

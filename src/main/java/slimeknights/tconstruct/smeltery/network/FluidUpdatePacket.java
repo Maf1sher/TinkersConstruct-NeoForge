@@ -2,13 +2,17 @@ package slimeknights.tconstruct.smeltery.network;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.network.NetworkEvent.Context;
-import slimeknights.mantle.network.packet.IThreadsafePacket;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import slimeknights.mantle.util.BlockEntityHelper;
+import slimeknights.tconstruct.TConstruct;
 
-public class FluidUpdatePacket implements IThreadsafePacket {
+public class FluidUpdatePacket implements CustomPacketPayload {
+  public static final CustomPacketPayload.Type<FluidUpdatePacket> TYPE = new CustomPacketPayload.Type<>(TConstruct.getResource("fluid_update"));
+  public static final StreamCodec<RegistryFriendlyByteBuf, FluidUpdatePacket> STREAM_CODEC = StreamCodec.ofMember(FluidUpdatePacket::encode, FluidUpdatePacket::new);
 
   protected final BlockPos pos;
   protected final FluidStack fluid;
@@ -18,20 +22,21 @@ public class FluidUpdatePacket implements IThreadsafePacket {
     this.fluid = fluid;
   }
 
-  public FluidUpdatePacket(FriendlyByteBuf buffer) {
+  public FluidUpdatePacket(RegistryFriendlyByteBuf buffer) {
     this.pos = buffer.readBlockPos();
-    this.fluid = buffer.readFluidStack();
+    this.fluid = FluidStack.STREAM_CODEC.decode(buffer);
   }
 
-  @Override
-  public void encode(FriendlyByteBuf buffer) {
+  public void encode(RegistryFriendlyByteBuf buffer) {
     buffer.writeBlockPos(pos);
-    buffer.writeFluidStack(fluid);
+    FluidStack.STREAM_CODEC.encode(buffer, fluid);
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
-    HandleClient.handle(this);
+  public CustomPacketPayload.Type<? extends CustomPacketPayload> type() { return TYPE; }
+
+  public static void handle(FluidUpdatePacket payload, IPayloadContext context) {
+    context.enqueueWork(() -> HandleClient.handle(payload));
   }
 
   /** Interface to implement for anything wishing to receive fluid updates */

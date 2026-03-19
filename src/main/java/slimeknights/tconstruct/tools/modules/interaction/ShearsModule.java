@@ -8,14 +8,17 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.IForgeShearable;
-import net.neoforged.neoforge.common.ToolAction;
-import net.neoforged.neoforge.common.ToolActions;
-import net.neoforged.bus.api.Event.Result;
+import net.neoforged.neoforge.common.IShearable;
+import net.neoforged.neoforge.common.ItemAbility;
+import net.neoforged.neoforge.common.ItemAbilities;
 import slimeknights.mantle.data.loadable.primitive.FloatLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.tconstruct.library.events.TinkerToolEvent;
 import slimeknights.tconstruct.library.events.TinkerToolEvent.ToolShearEvent;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
@@ -64,12 +67,12 @@ public record ShearsModule(float flatBonus, float perLevelBonus, float expandedB
   }
 
   @Override
-  public boolean canPerformAction(IToolStackView tool, ModifierEntry modifier, ToolAction toolAction) {
+  public boolean canPerformAction(IToolStackView tool, ModifierEntry modifier, ItemAbility toolAction) {
     return condition.matches(tool, modifier) && (
-      toolAction == ToolActions.SHEARS_DIG ||
-      toolAction == ToolActions.SHEARS_HARVEST ||
-      toolAction == ToolActions.SHEARS_CARVE ||
-      toolAction == ToolActions.SHEARS_DISARM);
+      toolAction == ItemAbilities.SHEARS_DIG ||
+      toolAction == ItemAbilities.SHEARS_HARVEST ||
+      toolAction == ItemAbilities.SHEARS_CARVE ||
+      toolAction == ItemAbilities.SHEARS_DISARM);
   }
 
   /** Runs the hook after shearing an entity */
@@ -91,14 +94,14 @@ public record ShearsModule(float flatBonus, float perLevelBonus, float expandedB
    */
   private static boolean shearEntity(ItemStack itemStack, IToolStackView tool, Level world, Player player, Entity entity, int fortune) {
     // event to override entity shearing
-    Result result = new ToolShearEvent(itemStack, tool, world, player, entity, fortune).fire();
-    if (result != Result.DEFAULT) {
-      return result == Result.ALLOW;
+    TinkerToolEvent.Result result = new ToolShearEvent(itemStack, tool, world, player, entity, fortune).fire();
+    if (result != TinkerToolEvent.Result.DEFAULT) {
+      return result == TinkerToolEvent.Result.ALLOW;
     }
     // fallback to forge shearable
-    if (entity instanceof IForgeShearable target && target.isShearable(itemStack, world, entity.blockPosition())) {
+    if (entity instanceof IShearable target && target.isShearable(player, itemStack, world, entity.blockPosition())) {
       if (!world.isClientSide) {
-        target.onSheared(player, itemStack, world, entity.blockPosition(), fortune)
+        target.onSheared(player, itemStack, world, entity.blockPosition())
           .forEach(stack -> ModifierUtil.dropItem(entity, stack));
       }
       return true;
@@ -117,7 +120,9 @@ public record ShearsModule(float flatBonus, float perLevelBonus, float expandedB
     // use looting instead of fortune, as that is our hook with entity access
     // modifier can always use tags or the nullable parameter to distinguish if needed
     LootingContext context = new LootingContext(player, target, null, Util.getSlotType(hand));
-    int looting = LootingModifierHook.getLooting(tool, context, player.getItemInHand(hand).getEnchantmentLevel(Enchantments.MOB_LOOTING));
+    int baseLooting = player.level().registryAccess().registryOrThrow(Registries.ENCHANTMENT)
+      .getHolder(Enchantments.LOOTING).map(holder -> EnchantmentHelper.getItemEnchantmentLevel(holder, player.getItemInHand(hand))).orElse(0);
+    int looting = LootingModifierHook.getLooting(tool, context, baseLooting);
     looting = ArmorLootingModifierHook.getLooting(tool, context, looting);
     Level world = player.getCommandSenderWorld();
     if (shearEntity(stack, tool, world, player, target, looting)) {

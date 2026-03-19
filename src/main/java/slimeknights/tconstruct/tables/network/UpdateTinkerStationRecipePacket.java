@@ -3,12 +3,15 @@ package slimeknights.tconstruct.tables.network;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.network.NetworkEvent.Context;
-import slimeknights.mantle.network.packet.IThreadsafePacket;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import slimeknights.mantle.recipe.helper.RecipeHelper;
 import slimeknights.mantle.util.BlockEntityHelper;
+import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.recipe.tinkerstation.ITinkerStationRecipe;
 import slimeknights.tconstruct.tables.client.inventory.TinkerStationScreen;
 import slimeknights.tconstruct.tables.block.entity.table.TinkerStationBlockEntity;
@@ -18,12 +21,15 @@ import java.util.Optional;
 /**
  * Packet to send the current crafting recipe to a player who opens the tinker station
  */
-public class UpdateTinkerStationRecipePacket implements IThreadsafePacket {
+public class UpdateTinkerStationRecipePacket implements CustomPacketPayload {
+  public static final CustomPacketPayload.Type<UpdateTinkerStationRecipePacket> TYPE = new CustomPacketPayload.Type<>(TConstruct.getResource("update_tinker_station_recipe"));
+  public static final StreamCodec<FriendlyByteBuf, UpdateTinkerStationRecipePacket> STREAM_CODEC = StreamCodec.ofMember(UpdateTinkerStationRecipePacket::encode, UpdateTinkerStationRecipePacket::new);
+
   private final BlockPos pos;
   private final ResourceLocation recipe;
-  public UpdateTinkerStationRecipePacket(BlockPos pos, ITinkerStationRecipe recipe) {
+  public UpdateTinkerStationRecipePacket(BlockPos pos, ResourceLocation recipe) {
     this.pos = pos;
-    this.recipe = recipe.getId();
+    this.recipe = recipe;
   }
 
   public UpdateTinkerStationRecipePacket(FriendlyByteBuf buffer) {
@@ -31,15 +37,16 @@ public class UpdateTinkerStationRecipePacket implements IThreadsafePacket {
     this.recipe = buffer.readResourceLocation();
   }
 
-  @Override
   public void encode(FriendlyByteBuf buffer) {
     buffer.writeBlockPos(pos);
     buffer.writeResourceLocation(recipe);
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
-    HandleClient.handle(this);
+  public CustomPacketPayload.Type<? extends CustomPacketPayload> type() { return TYPE; }
+
+  public static void handle(UpdateTinkerStationRecipePacket payload, IPayloadContext context) {
+    context.enqueueWork(() -> HandleClient.handle(payload));
   }
 
   /** Safely runs client side only code in a method only called on client */

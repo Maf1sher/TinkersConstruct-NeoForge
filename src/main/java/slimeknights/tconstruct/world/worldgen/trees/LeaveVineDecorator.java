@@ -1,18 +1,28 @@
 package slimeknights.tconstruct.world.worldgen.trees;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.Direction.Plane;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.util.RandomSource;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.VineBlock;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecoratorType;
+import net.minecraft.core.registries.Registries;
 import slimeknights.tconstruct.world.TinkerStructures;
 
 /**
@@ -21,10 +31,10 @@ import slimeknights.tconstruct.world.TinkerStructures;
 @SuppressWarnings("deprecation")
 @RequiredArgsConstructor
 public class LeaveVineDecorator extends TreeDecorator {
-  public static final Codec<LeaveVineDecorator> CODEC = RecordCodecBuilder.create(inst ->
+  public static final MapCodec<LeaveVineDecorator> CODEC = RecordCodecBuilder.mapCodec(inst ->
     inst.group(
       BuiltInRegistries.BLOCK.byNameCodec().fieldOf("vines").forGetter(d -> d.vines),
-      Codec.floatRange(0.0F, 1.0F).fieldOf("probability").forGetter(d -> d.probability)
+      com.mojang.serialization.Codec.floatRange(0.0F, 1.0F).fieldOf("probability").forGetter(d -> d.probability)
     ).apply(inst, LeaveVineDecorator::new));
 
   private final Block vines;

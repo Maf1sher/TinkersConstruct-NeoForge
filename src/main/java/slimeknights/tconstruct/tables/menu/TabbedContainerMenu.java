@@ -3,22 +3,37 @@ package slimeknights.tconstruct.tables.menu;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.util.Mth;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.Container;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.Level;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.registries.Registries;
 import net.neoforged.api.distmarker.Dist;
-import net.neoforged.neoforge.common.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import org.apache.commons.lang3.tuple.Pair;
 import slimeknights.mantle.inventory.EmptyItemHandler;
@@ -146,7 +161,8 @@ public class TabbedContainerMenu<TILE extends BlockEntity> extends TriggeringMul
 
       // if we found something, add the side inventory
       if (inventoryTE != null) {
-        int invSlots = inventoryTE.getCapability(Capabilities.ITEM_HANDLER, accessDir).orElse(EmptyItemHandler.INSTANCE).getSlots();
+        IItemHandlerModifiable handler = getItemHandler(world, inventoryTE.getBlockPos(), accessDir);
+        int invSlots = handler != null ? handler.getSlots() : 0;
         int columns = Mth.clamp((invSlots - 1) / 9 + 1, 3, 6);
         this.addSubContainer(new SideInventoryContainer<>(TinkerTables.craftingStationContainer.get(), containerId, inv, inventoryTE, accessDir, -6 - 18 * 6, 8, columns), false);
       }
@@ -173,7 +189,16 @@ public class TabbedContainerMenu<TILE extends BlockEntity> extends TriggeringMul
    * @return True if compatible.
    */
   private static boolean hasItemHandler(BlockEntity tileEntity, @Nullable Direction direction) {
-    return tileEntity.getCapability(Capabilities.ITEM_HANDLER, direction).filter(cap -> cap instanceof IItemHandlerModifiable).isPresent();
+    if (tileEntity.getLevel() == null) return false;
+    IItemHandler handler = tileEntity.getLevel().getCapability(Capabilities.ItemHandler.BLOCK, tileEntity.getBlockPos(), direction);
+    return handler instanceof IItemHandlerModifiable;
+  }
+
+  /** Helper to get item handler from a block entity via the new capability system */
+  @Nullable
+  private static IItemHandlerModifiable getItemHandler(Level world, BlockPos pos, @Nullable Direction direction) {
+    IItemHandler handler = world.getCapability(Capabilities.ItemHandler.BLOCK, pos, direction);
+    return handler instanceof IItemHandlerModifiable mod ? mod : null;
   }
 
 

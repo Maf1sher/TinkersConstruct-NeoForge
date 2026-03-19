@@ -3,20 +3,30 @@ package slimeknights.tconstruct.shared;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.Level;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.registries.Registries;
 import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.network.NetworkHooks;
+import net.neoforged.fml.common.EventBusSubscriber;
 import slimeknights.mantle.inventory.BaseContainerMenu;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.Sounds;
@@ -25,7 +35,7 @@ import slimeknights.tconstruct.world.TinkerWorld;
 
 @SuppressWarnings("unused")
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-@Mod.EventBusSubscriber(modid = TConstruct.MOD_ID)
+@EventBusSubscriber(modid = TConstruct.MOD_ID)
 public class CommonsEvents {
 
   // Slimy block jump stuff
@@ -65,7 +75,7 @@ public class CommonsEvents {
         event.setCanceled(true);
         if (provider != null) {
           if (player instanceof ServerPlayer serverPlayer) {
-            NetworkHooks.openScreen(serverPlayer, provider, pos);
+            serverPlayer.openMenu(provider, pos);
             if (player.containerMenu instanceof BaseContainerMenu<?> menu) {
               menu.syncOnOpen(serverPlayer);
             }

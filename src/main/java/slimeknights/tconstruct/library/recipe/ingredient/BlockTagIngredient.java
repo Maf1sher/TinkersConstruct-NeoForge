@@ -1,13 +1,12 @@
 package slimeknights.tconstruct.library.recipe.ingredient;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntComparators;
-import it.unimi.dsi.fastutil.ints.IntList;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -15,14 +14,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
-import net.neoforged.neoforge.common.crafting.AbstractIngredient;
-import net.neoforged.neoforge.common.crafting.IIngredientSerializer;
-import slimeknights.mantle.data.loadable.Loadables;
+import net.neoforged.neoforge.common.crafting.ICustomIngredient;
+import net.neoforged.neoforge.common.crafting.IngredientType;
 import slimeknights.mantle.util.RegistryHelper;
 import slimeknights.tconstruct.TConstruct;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -30,14 +27,54 @@ import java.util.stream.Stream;
 
 /** Item ingredient matching items with a block form in the given tag */
 @RequiredArgsConstructor
-public class BlockTagIngredient extends AbstractIngredient {
+public class BlockTagIngredient implements ICustomIngredient {
+  public static final ResourceLocation ID = TConstruct.getResource("block_tag");
+
   private final TagKey<Block> tag;
   @Nullable
   private Set<Item> matchingItems;
   @Nullable
   private ItemStack[] items;
-  @Nullable
-  private IntList stackingIds;
+
+  /** MapCodec for JSON serialization */
+  public static final MapCodec<BlockTagIngredient> CODEC = RecordCodecBuilder.mapCodec(instance ->
+    instance.group(
+      TagKey.codec(Registries.BLOCK).fieldOf("tag").forGetter(i -> i.tag)
+    ).apply(instance, BlockTagIngredient::new)
+  );
+
+  /** StreamCodec for network serialization - writes item list, becomes vanilla ingredient client side */
+  public static final StreamCodec<RegistryFriendlyByteBuf, BlockTagIngredient> STREAM_CODEC = new StreamCodec<>() {
+    @Override
+    public BlockTagIngredient decode(RegistryFriendlyByteBuf buffer) {
+      // read as item stacks - on client side, reconstruct from stacks
+      // This is a simplified approach since we can't reconstruct the block tag on client
+      int size = buffer.readVarInt();
+      Set<Item> items = new LinkedHashSet<>();
+      for (int i = 0; i < size; i++) {
+        items.add(ItemStack.STREAM_CODEC.decode(buffer).getItem());
+      }
+      // We need a tag to construct, but on client side we use the items directly
+      // Since the tag won't resolve on client, we store the items for matching
+      // For network, we just send a dummy tag and set items directly
+      BlockTagIngredient ingredient = new BlockTagIngredient(TagKey.create(Registries.BLOCK, ResourceLocation.withDefaultNamespace("air")));
+      ingredient.matchingItems = items;
+      ingredient.items = items.stream().map(ItemStack::new).toArray(ItemStack[]::new);
+      return ingredient;
+    }
+
+    @Override
+    public void encode(RegistryFriendlyByteBuf buffer, BlockTagIngredient ingredient) {
+      ItemStack[] stacks = ingredient.items != null ? ingredient.items : ingredient.getItems().toArray(ItemStack[]::new);
+      buffer.writeVarInt(stacks.length);
+      for (ItemStack stack : stacks) {
+        ItemStack.STREAM_CODEC.encode(buffer, stack);
+      }
+    }
+  };
+
+  /** IngredientType instance - must be registered to NeoForgeRegistries.INGREDIENT_TYPES */
+  public static final IngredientType<BlockTagIngredient> TYPE = new IngredientType<>(CODEC, STREAM_CODEC);
 
   @Override
   public boolean test(@Nullable ItemStack stack) {
@@ -49,17 +86,9 @@ public class BlockTagIngredient extends AbstractIngredient {
     return true;
   }
 
-  @Override
-  protected void invalidate() {
-    this.matchingItems = null;
-    this.items = null;
-    this.stackingIds = null;
-  }
-
   /** Gets the ordered matching items set */
   private Set<Item> getMatchingItems() {
-    if (matchingItems == null || checkInvalidation()) {
-      markValid();
+    if (matchingItems == null) {
       matchingItems = RegistryHelper.getTagValueStream(BuiltInRegistries.BLOCK, tag)
                                     .map(Block::asItem)
                                     .filter(item -> item != Items.AIR)
@@ -69,62 +98,32 @@ public class BlockTagIngredient extends AbstractIngredient {
   }
 
   @Override
-  public ItemStack[] getItems() {
-    if (items == null || checkInvalidation()) {
-      markValid();
+  public Stream<ItemStack> getItems() {
+    if (items == null) {
       items = getMatchingItems().stream().map(ItemStack::new).toArray(ItemStack[]::new);
     }
-    return items;
+    return Stream.of(items);
   }
 
   @Override
-  public IntList getStackingIds() {
-    if (stackingIds == null || checkInvalidation()) {
-      markValid();
-      Set<Item> items = getMatchingItems();
-      stackingIds = new IntArrayList(items.size());
-      for (Item item : items) {
-        stackingIds.add(BuiltInRegistries.ITEM.getId(item));
-      }
-      stackingIds.sort(IntComparators.NATURAL_COMPARATOR);
-    }
-    return stackingIds;
+  public IngredientType<?> getType() {
+    return TYPE;
+  }
+
+  /** Converts this custom ingredient to a vanilla Ingredient */
+  public Ingredient toIngredient() {
+    return toVanilla();
   }
 
   @Override
-  public IIngredientSerializer<? extends Ingredient> getSerializer() {
-    return Serializer.INSTANCE;
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof BlockTagIngredient that)) return false;
+    return tag.equals(that.tag);
   }
 
   @Override
-  public JsonElement toJson() {
-    JsonObject json = new JsonObject();
-    json.addProperty("type", Serializer.ID.toString());
-    json.add("tag", Loadables.BLOCK_TAG.serialize(tag));
-    return json;
-  }
-
-  /** Serializer instance */
-  public enum Serializer implements IIngredientSerializer<Ingredient> {
-    INSTANCE;
-
-    public static final ResourceLocation ID = TConstruct.getResource("block_tag");
-
-    @Override
-    public Ingredient parse(JsonObject json) {
-      return new BlockTagIngredient(Loadables.BLOCK_TAG.getIfPresent(json, "tag"));
-    }
-
-    @Override
-    public void write(FriendlyByteBuf buffer, Ingredient ingredient) {
-      // just write the item list, will become a vanilla ingredient client side
-      buffer.writeCollection(Arrays.asList(ingredient.getItems()), FriendlyByteBuf::writeItem);
-    }
-
-    @Override
-    public Ingredient parse(FriendlyByteBuf buffer) {
-      int size = buffer.readVarInt();
-      return Ingredient.fromValues(Stream.generate(() -> new Ingredient.ItemValue(buffer.readItem())).limit(size));
-    }
+  public int hashCode() {
+    return tag.hashCode();
   }
 }

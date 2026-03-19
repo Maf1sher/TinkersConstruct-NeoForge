@@ -61,7 +61,7 @@ public class ModifierPriorityCommand {
       table.header("Hooks", m -> m.getHooks().getAllModules().keySet().stream().map(ModuleHook::getId).sorted().map(ResourceLocation::toString).collect(Collectors.joining(", ")));
     }
     builder.append(":").append(System.lineSeparator());
-    List<Modifier> list = modifiers.sorted(Comparator.comparingInt(Modifier::getPriority).reversed().thenComparing(Modifier::getId)).toList();
+    List<Modifier> list = modifiers.sorted(Comparator.comparingInt(Modifier::getPriority).reversed().thenComparing(m -> m.getId().location())).toList();
     table.add(list);
 
     table.build(builder);

@@ -38,7 +38,8 @@ public class EFLNExplosion extends CustomExplosion {
     }
 
     // we do a sphere of a certain radius, and check if the blockpos is inside the radius
-    float radius = this.radius * this.radius;
+    float explosionRadius = radius();
+    float radius = explosionRadius * explosionRadius;
     int range = (int)radius + 1;
 
     Set<BlockPos> set = new HashSet<>();
@@ -55,7 +56,7 @@ public class EFLNExplosion extends CustomExplosion {
             }
 
             // explosion "strength" at the current position
-            float strength = this.radius * (1f - distance / (radius));
+            float strength = explosionRadius * (1f - distance / (radius));
             BlockState blockstate = this.level.getBlockState(blockpos);
 
             FluidState fluid = this.level.getFluidState(blockpos);
@@ -73,6 +74,6 @@ public class EFLNExplosion extends CustomExplosion {
         }
       }
     }
-    this.toBlow.addAll(set);
+    this.getToBlow().addAll(set);
   }
 }

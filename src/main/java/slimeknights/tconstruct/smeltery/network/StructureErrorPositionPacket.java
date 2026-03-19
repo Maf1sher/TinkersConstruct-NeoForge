@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.neoforged.neoforge.network.NetworkEvent.Context;
-import slimeknights.mantle.network.packet.IThreadsafePacket;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import slimeknights.mantle.util.BlockEntityHelper;
+import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.smeltery.block.entity.controller.HeatingStructureBlockEntity;
 
 import javax.annotation.Nullable;
@@ -15,7 +17,10 @@ import javax.annotation.Nullable;
  * Packet to tell a multiblock to render a specific position as the cause of the error
  */
 @RequiredArgsConstructor
-public class StructureErrorPositionPacket implements IThreadsafePacket {
+public class StructureErrorPositionPacket implements CustomPacketPayload {
+  public static final CustomPacketPayload.Type<StructureErrorPositionPacket> TYPE = new CustomPacketPayload.Type<>(TConstruct.getResource("structure_error_position"));
+  public static final StreamCodec<FriendlyByteBuf, StructureErrorPositionPacket> STREAM_CODEC = StreamCodec.ofMember(StructureErrorPositionPacket::encode, StructureErrorPositionPacket::new);
+
   private final BlockPos controllerPos;
   @Nullable
   private final BlockPos errorPos;
@@ -29,7 +34,6 @@ public class StructureErrorPositionPacket implements IThreadsafePacket {
     }
   }
 
-  @Override
   public void encode(FriendlyByteBuf buffer) {
     buffer.writeBlockPos(controllerPos);
     if (errorPos != null) {
@@ -41,8 +45,10 @@ public class StructureErrorPositionPacket implements IThreadsafePacket {
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
-    HandleClient.handle(this);
+  public CustomPacketPayload.Type<? extends CustomPacketPayload> type() { return TYPE; }
+
+  public static void handle(StructureErrorPositionPacket payload, IPayloadContext context) {
+    context.enqueueWork(() -> HandleClient.handle(payload));
   }
 
   private static class HandleClient {

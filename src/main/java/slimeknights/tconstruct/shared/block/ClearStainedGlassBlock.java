@@ -1,18 +1,23 @@
 package slimeknights.tconstruct.shared.block;
 
-import net.minecraft.world.level.block.AbstractGlassBlock;
-import net.minecraft.world.level.block.state.BlockState;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.world.level.block.BeaconBeamBlock;
+import net.minecraft.world.level.block.TransparentBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LevelReader;
 
-import javax.annotation.Nullable;
 import java.util.Locale;
 
-import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
+public class ClearStainedGlassBlock extends TransparentBlock implements BeaconBeamBlock {
 
-public class ClearStainedGlassBlock extends AbstractGlassBlock {
+  public static final MapCodec<ClearStainedGlassBlock> CODEC = RecordCodecBuilder.mapCodec(
+    instance -> instance.group(
+      GlassColor.CODEC.fieldOf("color").forGetter(b -> b.glassColor),
+      propertiesCodec()
+    ).apply(instance, (color, props) -> new ClearStainedGlassBlock(props, color))
+  );
 
   private final GlassColor glassColor;
   public ClearStainedGlassBlock(Properties properties, GlassColor glassColor) {
@@ -20,10 +25,24 @@ public class ClearStainedGlassBlock extends AbstractGlassBlock {
     this.glassColor = glassColor;
   }
 
-  @Nullable
   @Override
-  public float[] getBeaconColorMultiplier(BlockState state, LevelReader world, BlockPos pos, BlockPos beaconPos) {
-    return this.glassColor.getRgb();
+  protected MapCodec<? extends ClearStainedGlassBlock> codec() {
+    return CODEC;
+  }
+
+  @Override
+  public DyeColor getColor() {
+    return this.glassColor.getDye();
+  }
+
+  /** Gets the variant color used for tinting */
+  public int getVariantColor() {
+    return this.glassColor.getColor();
+  }
+
+  /** Gets the glass color enum for this block */
+  public GlassColor getGlassColor() {
+    return this.glassColor;
   }
 
   /** Enum used for registration of this and the pane block */
@@ -44,6 +63,8 @@ public class ClearStainedGlassBlock extends AbstractGlassBlock {
     GREEN(0x667f33, DyeColor.GREEN),
     RED(0x993333, DyeColor.RED),
     BLACK(0x191919, DyeColor.BLACK);
+
+    public static final com.mojang.serialization.Codec<GlassColor> CODEC = StringRepresentable.fromEnum(GlassColor::values);
 
     private final int color;
     private final DyeColor dye;

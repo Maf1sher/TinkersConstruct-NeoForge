@@ -4,11 +4,12 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.entity.living.LootingLevelEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
 import net.neoforged.bus.api.EventPriority;
 import slimeknights.tconstruct.common.TinkerDamageTypes;
@@ -27,26 +28,37 @@ import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.shared.TinkerEffects;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 /**
- * Logic to handle the looting event for all main tinker tools
+ * Logic to handle the looting event for all main tinker tools.
+ *
+ * In NeoForge 1.21, LootingLevelEvent was removed. The vanilla looting enchantment now operates
+ * through the enchantment effect component system (EnchantmentEffectComponents) and is applied
+ * directly during loot table evaluation. There is no event to modify the looting level.
+ *
+ * This handler now uses LivingDropsEvent (at HIGH priority) to apply TConstruct's modifier-based
+ * looting. When the computed looting level is > 0, it duplicates random drops to simulate the
+ * looting effect, similar to how EnchantedCountIncreaseFunction works in vanilla loot tables.
  */
 public class ModifierLootingHandler {
   /** If contained in the set, they should use the offhand for looting */
   private static final Map<UUID,EquipmentSlot> LOOTING_OFFHAND = new HashMap<>();
   private static boolean init = false;
 
-  /** Initializies this listener */
+  /** Initializes this listener */
   public static void init() {
     if (init) {
       return;
     }
     init = true;
-    // we overwrite looting values from vanilla in a couple cases, but mod effects that globally boost looting should still boost us
-    NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, ModifierLootingHandler::onLooting);
+    // In 1.21, LootingLevelEvent is removed. We use LivingDropsEvent to apply modifier looting.
+    NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, ModifierLootingHandler::onLivingDrops);
     NeoForge.EVENT_BUS.addListener(ModifierLootingHandler::onLeaveServer);
   }
 
@@ -68,26 +80,21 @@ public class ModifierLootingHandler {
     return entity != null ? LOOTING_OFFHAND.getOrDefault(entity.getUUID(), EquipmentSlot.MAINHAND) : EquipmentSlot.MAINHAND;
   }
 
-  /** Applies the looting bonus for modifiers */
-  private static void onLooting(LootingLevelEvent event) {
-    // must be an attacker with our tool
-    DamageSource damageSource = event.getDamageSource();
-    if (damageSource == null) {
-      return;
-    }
-    LivingEntity target = event.getEntity();
-
+  /**
+   * Computes the TConstruct looting level for the given damage context.
+   * This replaces the old LootingLevelEvent-based computation.
+   * @return the computed looting level, or -1 if not applicable
+   */
+  public static int computeLootingLevel(DamageSource damageSource, LivingEntity target) {
     // bleeding kills use the level of the effect for looting
     if (damageSource.is(TinkerDamageTypes.BLEEDING)) {
-      event.setLootingLevel(Math.max(0, TinkerEffect.getAmplifier(target, TinkerEffects.bleeding.get())));
-      return;
+      return Math.max(0, TinkerEffect.getAmplifier(target, TinkerEffects.bleeding));
     }
 
-    // otherwise, use the proper tool
     Entity source = damageSource.getEntity();
     if (source instanceof LivingEntity holder) {
       Entity direct = damageSource.getDirectEntity();
-      int level = event.getLootingLevel();
+      int level = 0;
 
       // determine who is in charge of the looting
       LootingContext context;
@@ -96,10 +103,9 @@ public class ModifierLootingHandler {
         // need to build a context from the relevant capabilities to use the modifier
         ModifierNBT modifiers = EntityModifierCapability.getOrEmpty(direct);
         context = new LootingContext(holder, target, damageSource, null);
-        // no modifiers means its not a projectile we fired, so just defer to dumb vanilla behavior of whatever looting
-        // since we don't set the enchantment on our tools, our looting modifiers won't set anything here anyways
+        // no modifiers means its not a projectile we fired, so just defer to dumb vanilla behavior
         if (!modifiers.isEmpty()) {
-          ModDataNBT persistentData = direct.getCapability(PersistentDataCapability.CAPABILITY).orElseGet(ModDataNBT::new);
+          ModDataNBT persistentData = PersistentDataCapability.getOrWarn(direct);
           level = LootingModifierHook.getLooting(new DummyToolStack(Items.AIR, modifiers, persistentData), context, 0);
         }
       } else {
@@ -113,14 +119,54 @@ public class ModifierLootingHandler {
           tool = ToolStack.from(held);
           level = LootingModifierHook.getLooting(tool, context, level);
         } else if (slotType != EquipmentSlot.MAINHAND) {
-          // if it's not modifiable, yet we have a lot marked to blame for looting, ignore the event value
+          // if it's not modifiable, yet we have a slot marked to blame for looting, ignore the event value
           level = 0;
         }
       }
-      // boost looting with armor regardless, hopefully you did not switch your pants mid arrow firing
+      // boost looting with armor regardless
       level = ArmorLootingModifierHook.getLooting(tool, context, level);
-      // we allow the hook to return negatives to cancel out looting, so ensure its at least 0
-      event.setLootingLevel(Math.max(level, 0));
+      return Math.max(level, 0);
+    }
+    return -1;
+  }
+
+  /**
+   * Handler for LivingDropsEvent. Since LootingLevelEvent was removed in NeoForge 1.21,
+   * we apply modifier-based looting by duplicating random drops when the computed looting level
+   * is positive. This simulates the vanilla looting behavior for TConstruct modifiers.
+   */
+  private static void onLivingDrops(LivingDropsEvent event) {
+    DamageSource damageSource = event.getSource();
+    if (damageSource == null) {
+      return;
+    }
+    LivingEntity target = event.getEntity();
+    int lootingLevel = computeLootingLevel(damageSource, target);
+
+    // only process if we computed a positive looting level
+    if (lootingLevel > 0) {
+      Collection<ItemEntity> drops = event.getDrops();
+      if (!drops.isEmpty()) {
+        // duplicate random items from the drops based on looting level
+        // this is a simplified version of how EnchantedCountIncreaseFunction works:
+        // for each level of looting, there's a chance to duplicate each drop
+        List<ItemEntity> bonusDrops = new ArrayList<>();
+        for (ItemEntity drop : drops) {
+          ItemStack stack = drop.getItem();
+          // add 0 to lootingLevel extra items per drop
+          int extra = target.getRandom().nextInt(lootingLevel + 1);
+          if (extra > 0) {
+            ItemStack bonus = stack.copy();
+            bonus.setCount(extra);
+            ItemEntity bonusEntity = new ItemEntity(
+              drop.level(), drop.getX(), drop.getY(), drop.getZ(), bonus
+            );
+            bonusEntity.setDefaultPickUpDelay();
+            bonusDrops.add(bonusEntity);
+          }
+        }
+        drops.addAll(bonusDrops);
+      }
     }
   }
 

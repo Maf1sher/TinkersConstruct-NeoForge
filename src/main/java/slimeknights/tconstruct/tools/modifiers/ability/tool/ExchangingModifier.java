@@ -1,7 +1,6 @@
 package slimeknights.tconstruct.tools.modifiers.ability.tool;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -80,7 +79,7 @@ public class ExchangingModifier extends NoLevelsModifier implements RemoveBlockM
     // Note that we check the mined position as the block we are placing 'against', which could be considered variance against vanilla but it is the block that make the most sense here.
     Level world = context.getWorld();
     BlockPos pos = context.getPos();
-    if (entity instanceof Player player && !player.mayBuild() && !fakeStack.hasAdventureModePlaceTagForBlock(BuiltInRegistries.BLOCK, new BlockInWorld(world, pos, false))) {
+    if (entity instanceof Player player && !player.mayBuild() && !fakeStack.canPlaceOnBlockInAdventureMode(new BlockInWorld(world, pos, false))) {
       return null;
     }
 
@@ -119,7 +118,9 @@ public class ExchangingModifier extends NoLevelsModifier implements RemoveBlockM
 
     if (success.consumesAction()) {
       if (!context.isAOE() && player != null) {
-        TinkerNetwork.getInstance().sendTo(new UpdateNeighborsPacket(state, pos), player);
+        if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+          TinkerNetwork.getInstance().sendTo(new UpdateNeighborsPacket(state, pos), serverPlayer);
+        }
       }
       context.getLiving().swing(InteractionHand.OFF_HAND, false);
       return true;

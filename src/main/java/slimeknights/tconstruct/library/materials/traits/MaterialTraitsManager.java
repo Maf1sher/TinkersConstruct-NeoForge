@@ -76,7 +76,7 @@ public class MaterialTraitsManager extends MergingJsonDataLoader<MaterialTraits.
    */
   public <T extends IMaterialStats> void registerStatTypeFallback(MaterialStatsId statType, MaterialStatsId fallback) {
     if (statTypeFallbacks.containsKey(statType)) {
-      throw TinkerAPIMaterialException.materialStatsTypeRegisteredTwice(statType);
+      throw TinkerAPIMaterialException.materialStatsTypeRegisteredTwice(statType.location());
     }
     statTypeFallbacks.put(statType, fallback);
   }
@@ -149,7 +149,7 @@ public class MaterialTraitsManager extends MergingJsonDataLoader<MaterialTraits.
                 entry.getKey(),
                 Arrays.toString(traits.getDefaultTraits().toArray()),
                 Util.toIndentedStringList(traits.getTraitsPerStats().entrySet().stream()
-                  .sorted(Entry.comparingByKey())
+                  .sorted(Entry.comparingByKey(java.util.Comparator.comparing(k -> k.location())))
                   .map(entry2 -> String.format("%s - %s", entry2.getKey(), Arrays.toString(entry2.getValue().toArray())))
                   .collect(Collectors.toList())));
     });

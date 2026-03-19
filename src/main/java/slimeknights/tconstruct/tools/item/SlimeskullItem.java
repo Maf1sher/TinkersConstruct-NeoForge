@@ -3,7 +3,6 @@ package slimeknights.tconstruct.tools.item;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.Model;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ArmorItem;
@@ -11,7 +10,6 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import slimeknights.tconstruct.library.client.armor.ArmorModelManager.ArmorModelDispatcher;
 import slimeknights.tconstruct.library.tools.definition.ModifiableArmorMaterial;
-import slimeknights.tconstruct.library.tools.helper.ArmorUtil;
 import slimeknights.tconstruct.library.tools.item.armor.ModifiableArmorItem;
 import slimeknights.tconstruct.tools.client.SlimeskullArmorModel;
 
@@ -25,12 +23,6 @@ public class SlimeskullItem extends ModifiableArmorItem {
   public SlimeskullItem(ModifiableArmorMaterial material, Properties properties) {
     super(material, ArmorItem.Type.HELMET, properties);
     this.name = material.getId();
-  }
-
-  @Nullable
-  @Override
-  public String getArmorTexture(ItemStack stack, Entity entity, EquipmentSlot slot, String type) {
-    return ArmorUtil.getDummyArmorTexture(slot);
   }
 
   @Override

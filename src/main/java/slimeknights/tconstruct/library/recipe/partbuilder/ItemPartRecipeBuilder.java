@@ -3,8 +3,9 @@ package slimeknights.tconstruct.library.recipe.partbuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Ingredient;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
@@ -12,7 +13,7 @@ import slimeknights.mantle.recipe.helper.ItemOutput;
 import slimeknights.tconstruct.library.materials.definition.IMaterial;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 
-import java.util.function.Consumer;
+import javax.annotation.Nullable;
 
 @RequiredArgsConstructor(staticName = "item")
 public class ItemPartRecipeBuilder extends AbstractRecipeBuilder<ItemPartRecipeBuilder> {
@@ -31,13 +32,13 @@ public class ItemPartRecipeBuilder extends AbstractRecipeBuilder<ItemPartRecipeB
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer) {
+  public void save(RecipeOutput consumer) {
     save(consumer, BuiltInRegistries.ITEM.getKey(result.get().getItem()));
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer, ResourceLocation id) {
-    ResourceLocation advancementId = buildOptionalAdvancement(id, "parts");
-    consumer.accept(new LoadableFinishedRecipe<>(new ItemPartRecipe(id, materialId, new Pattern(pattern), patternItem, cost, result), ItemPartRecipe.LOADER, advancementId));
+  public void save(RecipeOutput consumer, ResourceLocation id) {
+    @Nullable AdvancementHolder advancement = buildOptionalAdvancement(consumer, id, "parts");
+    saveRecipe(consumer, id, new ItemPartRecipe(id, materialId, new Pattern(pattern), patternItem, cost, result), advancement);
   }
 }

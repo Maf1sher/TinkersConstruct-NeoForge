@@ -1,13 +1,21 @@
 package slimeknights.tconstruct.smeltery.client.screen;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.core.registries.Registries;
 import slimeknights.mantle.client.screen.ElementScreen;
 import slimeknights.mantle.client.screen.MultiModuleScreen;
 import slimeknights.tconstruct.TConstruct;

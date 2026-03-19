@@ -1,10 +1,13 @@
 package slimeknights.tconstruct.tools.modifiers.traits.general;
 
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import slimeknights.tconstruct.common.TinkerTags;
+import slimeknights.tconstruct.library.tools.helper.ModifierLootingHandler;
 import slimeknights.tconstruct.library.json.LevelingInt;
 import slimeknights.tconstruct.library.json.LevelingValue;
 import slimeknights.tconstruct.library.modifiers.Modifier;
@@ -42,7 +45,12 @@ public class TastyModifier extends Modifier implements ProcessLootModifierHook {
     Entity entity = context.getParamOrNull(LootContextParams.THIS_ENTITY);
     if (entity != null && entity.getType().is(TinkerTags.EntityTypes.BACON_PRODUCER)) {
       // at tasty 1, 2, 3, and 4 its a 2%, 4.15%, 6.25%, 8% per level
-      int looting = context.getLootingModifier();
+      // compute looting from damage source - getLootingModifier() was removed in 1.21
+      DamageSource damageSource = context.getParamOrNull(LootContextParams.DAMAGE_SOURCE);
+      int looting = 0;
+      if (damageSource != null && entity instanceof LivingEntity livingTarget) {
+        looting = Math.max(0, ModifierLootingHandler.computeLootingLevel(damageSource, livingTarget));
+      }
       if (RANDOM.nextInt(48 / modifier.intEffectiveLevel()) <= looting) {
         // bacon
         generatedLoot.add(new ItemStack(TinkerCommons.bacon));

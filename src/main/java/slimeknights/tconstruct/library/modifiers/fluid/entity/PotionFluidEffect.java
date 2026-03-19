@@ -1,20 +1,29 @@
 package slimeknights.tconstruct.library.modifiers.fluid.entity;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.component.CustomData;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 import slimeknights.mantle.data.loadable.primitive.FloatLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.tconstruct.fluids.fluids.PotionFluidType;
 import slimeknights.tconstruct.library.modifiers.fluid.EffectLevel;
 import slimeknights.tconstruct.library.modifiers.fluid.FluidEffect;
 import slimeknights.tconstruct.library.modifiers.fluid.FluidEffectContext;
 import slimeknights.tconstruct.library.recipe.TagPredicate;
 
+import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /** Spilling effect that pulls the potion from a NBT potion fluid and applies it */
 public record PotionFluidEffect(float scale, TagPredicate predicate) implements FluidEffect<FluidEffectContext.Entity> {
@@ -28,12 +37,40 @@ public record PotionFluidEffect(float scale, TagPredicate predicate) implements 
     return LOADER;
   }
 
+  /** Gets the CompoundTag from a FluidStack's CustomData component, or null */
+  @Nullable
+  private static CompoundTag getFluidTag(FluidStack fluid) {
+    CustomData customData = fluid.get(DataComponents.CUSTOM_DATA);
+    if (customData != null) {
+      return customData.copyTag();
+    }
+    return null;
+  }
+
+  /** Gets the potion effects from a FluidStack */
+  private static List<MobEffectInstance> getPotionEffects(FluidStack fluid) {
+    // Try POTION_CONTENTS data component
+    PotionContents contents = fluid.get(DataComponents.POTION_CONTENTS);
+    if (contents != null) {
+      List<MobEffectInstance> effects = new ArrayList<>();
+      contents.getAllEffects().forEach(effects::add);
+      return effects;
+    }
+    // Fall back to PotionFluidType holder-based approach
+    Optional<Holder<Potion>> potionHolder = PotionFluidType.getPotionHolder(fluid);
+    if (potionHolder.isPresent()) {
+      return potionHolder.get().value().getEffects();
+    }
+    return List.of();
+  }
+
   @Override
   public float apply(FluidStack fluid, EffectLevel level, FluidEffectContext.Entity context, FluidAction action) {
     LivingEntity target = context.getLivingTarget();
     // must match the tag predicate
-    if (target != null && predicate.test(fluid.getTag())) {
-      List<MobEffectInstance> effects = PotionUtils.getPotion(fluid.getTag()).getEffects();
+    CompoundTag fluidTag = getFluidTag(fluid);
+    if (target != null && predicate.test(fluidTag)) {
+      List<MobEffectInstance> effects = getPotionEffects(fluid);
       if (!effects.isEmpty()) {
         LivingEntity attacker = context.getEntity();
         Entity directSource = context.getDirectSource();
@@ -43,13 +80,13 @@ public record PotionFluidEffect(float scale, TagPredicate predicate) implements 
         // report whichever effect used the most
         float used = 0;
         for (MobEffectInstance instance : effects) {
-          MobEffect effect = instance.getEffect();
-          if (effect.isInstantenous()) {
+          Holder<MobEffect> effect = instance.getEffect();
+          if (effect.value().isInstantenous()) {
             // instant effects just apply full value always
             used = level.value();
             if (action.execute()) {
               target.invulnerableTime = 0;
-              effect.applyInstantenousEffect(directSource, attacker, target, instance.getAmplifier(), used * scale);
+              effect.value().applyInstantenousEffect(directSource, attacker, target, instance.getAmplifier(), used * scale);
             }
           } else {
             // if the potion already exists, we scale up the existing time

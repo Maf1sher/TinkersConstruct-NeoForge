@@ -40,7 +40,7 @@ public enum DyeModule implements ModifierModule, DisplayNameModifierHook, Modifi
   @Override
   public Component getDisplayName(IToolStackView tool, ModifierEntry entry, Component name, @Nullable RegistryAccess access) {
     IModDataView persistentData = tool.getPersistentData();
-    ResourceLocation key = entry.getId();
+    ResourceLocation key = entry.getId().location();
     if (persistentData.contains(key, Tag.TAG_INT)) {
       int color = persistentData.getInt(key);
       Modifier modifier = entry.getModifier();
@@ -52,7 +52,7 @@ public enum DyeModule implements ModifierModule, DisplayNameModifierHook, Modifi
   @Nullable
   @Override
   public Component onRemoved(IToolStackView tool, Modifier modifier) {
-    tool.getPersistentData().remove(modifier.getId());
+    tool.getPersistentData().remove(modifier.getId().location());
     return null;
   }
 }

@@ -142,7 +142,7 @@ public class ModifierUsageCommand {
     logOutput.append(System.lineSeparator());
 
     // for all the modifiers (sorted), add table rows
-    Collection<Modifier> finalList = modifierStream.sorted(Comparator.comparing(Modifier::getId)).toList();
+    Collection<Modifier> finalList = modifierStream.sorted(Comparator.comparing(m -> m.getId().location())).toList();
     finalList.forEach(modifier -> {
       // determine which recipes use this by slot type
       List<String> recipeUsages = SlotType.getAllSlotTypes().stream()

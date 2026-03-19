@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.library.json;
 
+import com.google.gson.Gson;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -12,8 +13,7 @@ import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
-import net.neoforged.neoforge.common.TierSortingRegistry;
-import net.neoforged.neoforge.common.loot.LootModifierManager;
+import slimeknights.tconstruct.library.utils.TierRegistry;
 import slimeknights.mantle.client.TooltipKey;
 import slimeknights.mantle.data.loadable.Loadable;
 import slimeknights.mantle.data.loadable.Loadables;
@@ -60,15 +60,15 @@ public class TinkerLoadables {
   public static final StringLoadable<SimpleParticleType> SIMPLE_PARTICLE = instance(Loadables.PARTICLE_TYPE, SimpleParticleType.class, "Expected particle type to be instance of SimpleParticleType");
   public static final StringLoadable<BlockItem> BLOCK_ITEM = instance(Loadables.ITEM, BlockItem.class, "Expected item to be instance of BlockItem");
 
-  /** Tier loadable from the forge tier sorting registry */
+  /** Tier loadable from the tier registry */
   public static final StringLoadable<Tier> TIER = Loadables.RESOURCE_LOCATION.xmap((id, error) -> {
-    Tier tier = TierSortingRegistry.byName(id);
+    Tier tier = TierRegistry.byName(id);
     if (tier != null) {
       return tier;
     }
     throw error.create("Unknown harvest tier " + id);
   }, (tier, error) -> {
-    ResourceLocation id = TierSortingRegistry.getName(tier);
+    ResourceLocation id = TierRegistry.getName(tier);
     if (id != null) {
       return id;
     }
@@ -76,8 +76,8 @@ public class TinkerLoadables {
   });
 
   /* Loot tables */
-  /** Loadable for a loot entry instance */
-  public static final Loadable<LootPoolEntryContainer> LOOT_ENTRY = new GsonLoadable<>(LootModifierManager.GSON_INSTANCE, LootPoolEntryContainer.class);
+  /** Loadable for a loot entry instance. Uses a basic Gson since LootModifierManager.GSON_INSTANCE was removed in 1.21 (loot now uses codecs). */
+  public static final Loadable<LootPoolEntryContainer> LOOT_ENTRY = new GsonLoadable<>(new Gson(), LootPoolEntryContainer.class);
 
   /** Loadble requiring the argument to be an instance of the passed class */
   @SuppressWarnings("unchecked")  // The type works when deserializing, so it works when serializing

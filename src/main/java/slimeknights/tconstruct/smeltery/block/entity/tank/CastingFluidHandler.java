@@ -3,6 +3,7 @@ package slimeknights.tconstruct.smeltery.block.entity.tank;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -11,7 +12,6 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import slimeknights.tconstruct.smeltery.block.entity.CastingBlockEntity;
 
 import javax.annotation.Nonnull;
@@ -74,7 +74,7 @@ public class CastingFluidHandler implements IFluidHandler {
     if (fluid.isEmpty()) {
       int amount = Math.min(capacity, resource.getAmount());
       if (action.execute()) {
-        fluid = new FluidStack(resource, amount);
+        fluid = resource.copyWithAmount(amount);
         tile.onContentsChanged();
       }
       return amount;
@@ -125,7 +125,7 @@ public class CastingFluidHandler implements IFluidHandler {
       return FluidStack.EMPTY;
     }
 
-    FluidStack stack = new FluidStack(fluid, drained);
+    FluidStack stack = fluid.copyWithAmount(drained);
     if (action.execute()) {
       fluid.shrink(drained);
       if (fluid.isEmpty()) {
@@ -172,25 +172,24 @@ public class CastingFluidHandler implements IFluidHandler {
   private static final String TAG_CAPACITY = "capacity";
 
   /** Reads the tank from Tag */
-  public void readFromTag(CompoundTag nbt) {
+  public void readFromTag(CompoundTag nbt, HolderLookup.Provider registries) {
     capacity = nbt.getInt(TAG_CAPACITY);
     if (nbt.contains(TAG_FLUID, Tag.TAG_COMPOUND)) {
-      setFluid(FluidStack.loadFluidStackFromNBT(nbt.getCompound(TAG_FLUID)));
+      setFluid(FluidStack.parseOptional(registries, nbt.getCompound(TAG_FLUID)));
     }
     if (nbt.contains(TAG_FILTER, Tag.TAG_STRING)) {
-      Fluid fluid = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(nbt.getString(TAG_FILTER)));
+      Fluid fluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(nbt.getString(TAG_FILTER)));
       if (fluid != null) {
         filter = fluid;
       }
     }
   }
 
-  /** Write the tank from NBT */
-  @SuppressWarnings("deprecation")
-  public CompoundTag writeToTag(CompoundTag nbt) {
+  /** Write the tank to NBT */
+  public CompoundTag writeToTag(CompoundTag nbt, HolderLookup.Provider registries) {
     nbt.putInt(TAG_CAPACITY, capacity);
     if (!fluid.isEmpty()) {
-      nbt.put(TAG_FLUID, fluid.writeToNBT(new CompoundTag()));
+      nbt.put(TAG_FLUID, fluid.save(registries));
     }
     if (filter != Fluids.EMPTY) {
       nbt.putString(TAG_FILTER, BuiltInRegistries.FLUID.getKey(filter).toString());

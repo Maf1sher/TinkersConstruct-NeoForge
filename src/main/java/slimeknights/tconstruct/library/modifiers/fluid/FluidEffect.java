@@ -74,7 +74,7 @@ public interface FluidEffect<C extends FluidEffectContext> extends IHaveLoader, 
     BlockState state = context.getBlockState();
     if (level.isFull() && state.getBlock() instanceof WeatheringCopper copper) {
       if (action.execute() && context.getLevel() instanceof ServerLevel world) {
-        copper.applyChangeOverTime(state, world, context.getBlockPos(), world.getRandom());
+        copper.changeOverTime(state, world, context.getBlockPos(), world.getRandom());
       }
       return 1;
     }
@@ -146,7 +146,7 @@ public interface FluidEffect<C extends FluidEffectContext> extends IHaveLoader, 
       return loaderId;
     }
     Mantle.logger.error("Failed to get default description for unregistered fluid effect loader {}", loader);
-    return new ResourceLocation("missingno");
+    return ResourceLocation.parse("missingno");
   }
 
   /** Gets the string key for the given loader */

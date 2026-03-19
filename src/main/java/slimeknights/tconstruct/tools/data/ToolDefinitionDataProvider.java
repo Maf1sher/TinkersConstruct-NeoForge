@@ -6,7 +6,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Tiers;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.neoforge.common.ToolActions;
+import net.neoforged.neoforge.common.ItemAbilities;
 import slimeknights.mantle.data.predicate.block.BlockPredicate;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
@@ -123,7 +123,7 @@ public class ToolDefinitionDataProvider extends AbstractToolDefinitionDataProvid
       // traits
       .module(ToolTraitsModule.builder().trait(ModifierIds.pierce, 1).build())
       // harvest
-      .module(ToolActionsModule.of(ToolActions.PICKAXE_DIG))
+      .module(ToolActionsModule.of(ItemAbilities.PICKAXE_DIG))
       .module(IsEffectiveModule.tag(BlockTags.MINEABLE_WITH_PICKAXE))
       .module(BoxAOEIterator.builder(0, 0, 0).addDepth(2).addHeight(1).direction(IBoxExpansion.PITCH).build())
       // faster tool name logic
@@ -149,7 +149,7 @@ public class ToolDefinitionDataProvider extends AbstractToolDefinitionDataProvid
       // traits
       .module(ToolTraitsModule.builder().trait(ModifierIds.smite, 2).build())
       // harvest
-      .module(ToolActionsModule.of(ToolActions.PICKAXE_DIG))
+      .module(ToolActionsModule.of(ItemAbilities.PICKAXE_DIG))
       .module(IsEffectiveModule.tag(BlockTags.MINEABLE_WITH_PICKAXE))
       .module(BoxAOEIterator.builder(1, 1, 0).addWidth(1).addHeight(1).build())
       .module(new ParticleWeaponAttack(TinkerTools.hammerAttackParticle.get()));
@@ -174,7 +174,7 @@ public class ToolDefinitionDataProvider extends AbstractToolDefinitionDataProvid
       // traits
       .module(ToolTraitsModule.builder().trait(ModifierIds.pierce, 2).build())
       // harvest
-      .module(ToolActionsModule.of(ToolActions.PICKAXE_DIG))
+      .module(ToolActionsModule.of(ItemAbilities.PICKAXE_DIG))
       .module(IsEffectiveModule.tag(BlockTags.MINEABLE_WITH_PICKAXE))
       .module(new VeiningAOEIterator(2))
       .module(new ParticleWeaponAttack(TinkerTools.hammerAttackParticle.get()));
@@ -200,7 +200,7 @@ public class ToolDefinitionDataProvider extends AbstractToolDefinitionDataProvid
       // traits
       .module(ToolTraitsModule.builder().trait(ModifierIds.tilling).build())
       // harvest
-      .module(ToolActionsModule.of(ToolActions.AXE_DIG, ToolActions.SHOVEL_DIG))
+      .module(ToolActionsModule.of(ItemAbilities.AXE_DIG, ItemAbilities.SHOVEL_DIG))
       .module(IsEffectiveModule.tag(TinkerTags.Blocks.MINABLE_WITH_MATTOCK))
       // 200% hand speed on any axe block we do not directly target
       .module(new MiningSpeedModifierModule(2f, BlockPredicate.and(BlockPredicate.tag(BlockTags.MINEABLE_WITH_AXE), BlockPredicate.tag(TinkerTags.Blocks.MINABLE_WITH_MATTOCK).inverted())))
@@ -225,7 +225,7 @@ public class ToolDefinitionDataProvider extends AbstractToolDefinitionDataProvid
       // traits
       .module(ToolTraitsModule.builder().trait(ModifierIds.pathing).build())
       // harvest
-      .module(ToolActionsModule.of(ToolActions.PICKAXE_DIG, ToolActions.SHOVEL_DIG))
+      .module(ToolActionsModule.of(ItemAbilities.PICKAXE_DIG, ItemAbilities.SHOVEL_DIG))
       .module(IsEffectiveModule.tag(TinkerTags.Blocks.MINABLE_WITH_PICKADZE))
       .module(new MaxTierModule(Tiers.GOLD))
       .module(BoxAOEIterator.builder(0, 0, 0).addHeight(1).build());
@@ -252,7 +252,7 @@ public class ToolDefinitionDataProvider extends AbstractToolDefinitionDataProvid
         .trait(ModifierIds.knockback, 2)
         .trait(ModifierIds.pathing).build())
       // harvest
-      .module(ToolActionsModule.of(ToolActions.SHOVEL_DIG))
+      .module(ToolActionsModule.of(ItemAbilities.SHOVEL_DIG))
       .module(IsEffectiveModule.tag(BlockTags.MINEABLE_WITH_SHOVEL))
       .module(new ParticleWeaponAttack(TinkerTools.bonkAttackParticle.get()))
       .module(BoxAOEIterator.builder(1, 1, 0).addWidth(1).addHeight(1).build())
@@ -276,7 +276,7 @@ public class ToolDefinitionDataProvider extends AbstractToolDefinitionDataProvid
       // traits
       .module(ToolTraitsModule.builder().trait(ModifierIds.stripping).build())
       // harvest
-      .module(ToolActionsModule.of(ToolActions.AXE_DIG, TinkerToolActions.SHIELD_DISABLE))
+      .module(ToolActionsModule.of(ItemAbilities.AXE_DIG, TinkerToolActions.SHIELD_DISABLE))
       .module(IsEffectiveModule.tag(TinkerTags.Blocks.MINABLE_WITH_HAND_AXE))
       .module(new CircleAOEIterator(1, false))
       .module(new ParticleWeaponAttack(TinkerTools.axeAttackParticle.get()))
@@ -303,7 +303,7 @@ public class ToolDefinitionDataProvider extends AbstractToolDefinitionDataProvid
       // traits
       .module(ToolTraitsModule.builder().trait(ModifierIds.stripping).build())
       // harvest
-      .module(ToolActionsModule.of(ToolActions.AXE_DIG, TinkerToolActions.SHIELD_DISABLE))
+      .module(ToolActionsModule.of(ItemAbilities.AXE_DIG, TinkerToolActions.SHIELD_DISABLE))
       .module(IsEffectiveModule.tag(BlockTags.MINEABLE_WITH_AXE))
       .module(new ConditionalAOEIterator(
         BlockPredicate.tag(TinkerTags.Blocks.TREE_LOGS), new TreeAOEIterator(0, 0),
@@ -336,7 +336,7 @@ public class ToolDefinitionDataProvider extends AbstractToolDefinitionDataProvid
         .trait(ModifierIds.shears)
         .trait(ModifierIds.harvest).build())
       // harvest
-      .module(ToolActionsModule.of(ToolActions.HOE_DIG))
+      .module(ToolActionsModule.of(ItemAbilities.HOE_DIG))
       .module(scytheHarvest)
       .module(new CircleAOEIterator(1, true))
       .module(new CircleWeaponAttack(1))
@@ -396,7 +396,7 @@ public class ToolDefinitionDataProvider extends AbstractToolDefinitionDataProvid
         .trait(TinkerModifiers.offhandAttack)
         .trait(ModifierIds.silkyShears).build())
       // behavior
-      .module(ToolActionsModule.of(ToolActions.SWORD_DIG, ToolActions.HOE_DIG))
+      .module(ToolActionsModule.of(ItemAbilities.SWORD_DIG, ItemAbilities.HOE_DIG))
       .module(IsEffectiveModule.tag(TinkerTags.Blocks.MINABLE_WITH_DAGGER))
       .module(MiningSpeedModifierModule.blocks(7.5f, Blocks.COBWEB))
       // faster tool name logic
@@ -424,7 +424,7 @@ public class ToolDefinitionDataProvider extends AbstractToolDefinitionDataProvid
       .smallToolStartingSlots()
       // traits
       .module(ToolTraitsModule.builder().trait(ModifierIds.silkyShears).build())
-      .module(ToolActionsModule.of(ToolActions.SWORD_DIG))
+      .module(ToolActionsModule.of(ItemAbilities.SWORD_DIG))
       // behavior
       .module(swordHarvest)
       .module(new SweepWeaponAttack(1))
@@ -454,7 +454,7 @@ public class ToolDefinitionDataProvider extends AbstractToolDefinitionDataProvid
         .trait(TinkerModifiers.severing, 2)
         .trait(ModifierIds.silkyShears, 2).build())
       // behavior
-      .module(ToolActionsModule.of(ToolActions.SWORD_DIG))
+      .module(ToolActionsModule.of(ItemAbilities.SWORD_DIG))
       .module(swordHarvest)
       .module(new SweepWeaponAttack(2));
 
@@ -765,7 +765,7 @@ public class ToolDefinitionDataProvider extends AbstractToolDefinitionDataProvid
     define(ToolDefinitions.MELTING_PAN)
       // parts
       .module(MaterialStatsModule.stats()
-        .stat(PlatingMaterialStats.SHIELD.getId())
+        .stat(PlatingMaterialStats.SHIELD.getStatId())
         .stat(LimbMaterialStats.ID)
         .build())
       .module(ancientTwoParts)
@@ -805,7 +805,7 @@ public class ToolDefinitionDataProvider extends AbstractToolDefinitionDataProvid
       .smallToolStartingSlots()
       .module(ToolTraitsModule.builder().trait(ModifierIds.warCharge).build())
       // harvest
-      .module(ToolActionsModule.of(ToolActions.PICKAXE_DIG))
+      .module(ToolActionsModule.of(ItemAbilities.PICKAXE_DIG))
       .module(IsEffectiveModule.tag(BlockTags.MINEABLE_WITH_PICKAXE))
       .module(new CircleAOEIterator(1, false));
     // battlesign
@@ -816,7 +816,7 @@ public class ToolDefinitionDataProvider extends AbstractToolDefinitionDataProvid
         .build())
       .module(ancientTwoParts)
       // ancient tools when rebalanced get both heads
-      .module(new MaterialTraitsModule(PlatingMaterialStats.SHIELD.getId(), 1), ToolHooks.REBALANCED_TRAIT)
+      .module(new MaterialTraitsModule(PlatingMaterialStats.SHIELD.getStatId(), 1), ToolHooks.REBALANCED_TRAIT)
       // stats
       .module(new SetStatsModule(StatsNBT.builder()
         .set(ToolStats.ATTACK_DAMAGE, 2f)
@@ -853,7 +853,7 @@ public class ToolDefinitionDataProvider extends AbstractToolDefinitionDataProvid
         .trait(ModifierIds.spilling)
         .trait(ModifierIds.silkyShears).build())
       // behavior
-      .module(ToolActionsModule.of(ToolActions.SWORD_DIG))
+      .module(ToolActionsModule.of(ItemAbilities.SWORD_DIG))
       .module(swordHarvest)
       // faster tool name logic
       .module(FixedMaterialToolName.FIRST);
@@ -874,7 +874,7 @@ public class ToolDefinitionDataProvider extends AbstractToolDefinitionDataProvid
       .smallToolStartingSlots()
       .module(ToolTraitsModule.builder().trait(ModifierIds.chargeAttack).build())
       // harvest
-      .module(ToolActionsModule.of(ToolActions.AXE_DIG, TinkerToolActions.SHIELD_DISABLE))
+      .module(ToolActionsModule.of(ItemAbilities.AXE_DIG, TinkerToolActions.SHIELD_DISABLE))
       .module(IsEffectiveModule.tag(TinkerTags.Blocks.MINABLE_WITH_HAND_AXE))
       .module(BoxAOEIterator.builder(0, 5, 0).addWidth(1).addDepth(1).direction(IBoxExpansion.HEIGHT).build())
       .module(new ParticleWeaponAttack(TinkerTools.axeAttackParticle.get()));

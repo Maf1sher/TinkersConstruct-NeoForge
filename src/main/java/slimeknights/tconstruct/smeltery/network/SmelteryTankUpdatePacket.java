@@ -3,11 +3,13 @@ package slimeknights.tconstruct.smeltery.network;
 import lombok.AllArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.network.NetworkEvent.Context;
-import slimeknights.mantle.network.packet.IThreadsafePacket;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import slimeknights.mantle.util.BlockEntityHelper;
+import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.smeltery.block.entity.tank.ISmelteryTankHandler;
 
 import java.util.ArrayList;
@@ -17,31 +19,35 @@ import java.util.List;
  * Packet sent whenever the contents of the smeltery tank change
  */
 @AllArgsConstructor
-public class SmelteryTankUpdatePacket implements IThreadsafePacket {
+public class SmelteryTankUpdatePacket implements CustomPacketPayload {
+  public static final CustomPacketPayload.Type<SmelteryTankUpdatePacket> TYPE = new CustomPacketPayload.Type<>(TConstruct.getResource("smeltery_tank_update"));
+  public static final StreamCodec<RegistryFriendlyByteBuf, SmelteryTankUpdatePacket> STREAM_CODEC = StreamCodec.ofMember(SmelteryTankUpdatePacket::encode, SmelteryTankUpdatePacket::new);
+
   private final BlockPos pos;
   private final List<FluidStack> fluids;
 
-  public SmelteryTankUpdatePacket(FriendlyByteBuf buffer) {
+  public SmelteryTankUpdatePacket(RegistryFriendlyByteBuf buffer) {
     pos = buffer.readBlockPos();
     int size = buffer.readVarInt();
     fluids = new ArrayList<>(size);
     for (int i = 0; i < size; i++) {
-      fluids.add(buffer.readFluidStack());
+      fluids.add(FluidStack.STREAM_CODEC.decode(buffer));
     }
   }
 
-  @Override
-  public void encode(FriendlyByteBuf buffer) {
+  public void encode(RegistryFriendlyByteBuf buffer) {
     buffer.writeBlockPos(pos);
     buffer.writeVarInt(fluids.size());
     for (FluidStack fluid : fluids) {
-      buffer.writeFluidStack(fluid);
+      FluidStack.STREAM_CODEC.encode(buffer, fluid);
     }
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
-    HandleClient.handle(this);
+  public CustomPacketPayload.Type<? extends CustomPacketPayload> type() { return TYPE; }
+
+  public static void handle(SmelteryTankUpdatePacket payload, IPayloadContext context) {
+    context.enqueueWork(() -> HandleClient.handle(payload));
   }
 
   private static class HandleClient {

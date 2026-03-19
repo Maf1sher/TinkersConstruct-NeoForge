@@ -13,7 +13,6 @@ import slimeknights.tconstruct.library.client.model.tools.MaterialModel;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
-import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
 import javax.annotation.Nullable;
@@ -60,13 +59,13 @@ public class MaterialModifierModel implements IBakedModifierModel {
   @Nullable
   @Override
   public Object getCacheKey(IToolStackView tool, ModifierEntry entry) {
-    ModifierId modifier = entry.getId();
+    ResourceLocation modifier = entry.getId().location();
     return new CacheKey(modifier, tool.getPersistentData().getString(modifier));
   }
 
   @Nullable
   private static MaterialVariantId getMaterial(IToolStackView tool, Modifier modifier) {
-    String material = tool.getPersistentData().getString(modifier.getId());
+    String material = tool.getPersistentData().getString(modifier.getId().location());
     if (!material.isEmpty()) {
       return MaterialVariantId.tryParse(material);
     }
@@ -85,5 +84,5 @@ public class MaterialModifierModel implements IBakedModifierModel {
   }
 
   /** Data class to cache a mateirla texture */
-  private record CacheKey(ModifierId modifier, String material) {}
+  private record CacheKey(ResourceLocation modifier, String material) {}
 }

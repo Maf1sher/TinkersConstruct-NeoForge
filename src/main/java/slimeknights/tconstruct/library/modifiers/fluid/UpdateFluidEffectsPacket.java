@@ -1,17 +1,22 @@
 package slimeknights.tconstruct.library.modifiers.fluid;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.NetworkEvent.Context;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.ApiStatus.Internal;
-import slimeknights.mantle.network.packet.IThreadsafePacket;
+import slimeknights.tconstruct.TConstruct;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /** Packet to sync fluid predicates to the client */
 @Internal
-public record UpdateFluidEffectsPacket(List<FluidEffects.Entry> fluids) implements IThreadsafePacket {
+public record UpdateFluidEffectsPacket(List<FluidEffects.Entry> fluids) implements CustomPacketPayload {
+  public static final CustomPacketPayload.Type<UpdateFluidEffectsPacket> TYPE = new CustomPacketPayload.Type<>(TConstruct.getResource("update_fluid_effects"));
+  public static final StreamCodec<FriendlyByteBuf, UpdateFluidEffectsPacket> STREAM_CODEC = StreamCodec.ofMember(UpdateFluidEffectsPacket::encode, UpdateFluidEffectsPacket::decode);
+
   /** Clientside constructor, reading from the buffer */
   public static UpdateFluidEffectsPacket decode(FriendlyByteBuf buffer) {
     int size = buffer.readVarInt();
@@ -24,7 +29,6 @@ public record UpdateFluidEffectsPacket(List<FluidEffects.Entry> fluids) implemen
     return new UpdateFluidEffectsPacket(List.copyOf(entries));
   }
 
-  @Override
   public void encode(FriendlyByteBuf buffer) {
     buffer.writeVarInt(fluids.size());
     for (FluidEffects.Entry entry : fluids) {
@@ -34,7 +38,9 @@ public record UpdateFluidEffectsPacket(List<FluidEffects.Entry> fluids) implemen
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
-    FluidEffectManager.INSTANCE.updateFromServer(fluids);
+  public CustomPacketPayload.Type<? extends CustomPacketPayload> type() { return TYPE; }
+
+  public static void handle(UpdateFluidEffectsPacket payload, IPayloadContext context) {
+    context.enqueueWork(() -> FluidEffectManager.INSTANCE.updateFromServer(payload.fluids));
   }
 }

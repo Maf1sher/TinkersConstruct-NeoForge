@@ -5,13 +5,20 @@ import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
 import slimeknights.mantle.data.GenericDataProvider;
-import slimeknights.mantle.data.gson.ResourceLocationSerializer;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.data.material.AbstractPartSpriteProvider.PartSpriteInfo;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
@@ -29,7 +36,7 @@ public class GeneratorPartTextureJsonGenerator extends GenericDataProvider {
   /** GSON adapter for material info deserializing */
   public static final Gson GSON = (new GsonBuilder())
     .registerTypeAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
-    .registerTypeAdapter(MaterialStatsId.class, new ResourceLocationSerializer<>(MaterialStatsId::new, TConstruct.MOD_ID))
+    .registerTypeAdapter(MaterialStatsId.class, new MaterialStatsIdGsonAdapter())
     .setPrettyPrinting()
     .disableHtmlEscaping()
     .create();
@@ -57,7 +64,7 @@ public class GeneratorPartTextureJsonGenerator extends GenericDataProvider {
     if (!overrides.overrides.isEmpty()) {
       json.add("overrides", overrides.serialize());
     }
-    return saveJson(cache, new ResourceLocation(modId, "generator_part_textures"), json);
+    return saveJson(cache, ResourceLocation.fromNamespaceAndPath(modId, "generator_part_textures"), json);
   }
 
   @Override
@@ -114,6 +121,23 @@ public class GeneratorPartTextureJsonGenerator extends GenericDataProvider {
         }
         return new StatOverride(builder.build());
       }
+    }
+  }
+
+  /** GSON adapter for MaterialStatsId since it no longer extends ResourceLocation */
+  private static class MaterialStatsIdGsonAdapter implements JsonSerializer<MaterialStatsId>, JsonDeserializer<MaterialStatsId> {
+    @Override
+    public JsonElement serialize(MaterialStatsId src, java.lang.reflect.Type typeOfSrc, JsonSerializationContext context) {
+      return new JsonPrimitive(src.toString());
+    }
+
+    @Override
+    public MaterialStatsId deserialize(JsonElement json, java.lang.reflect.Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+      String loc = GsonHelper.convertToString(json, "location");
+      if (!loc.contains(":")) {
+        loc = TConstruct.MOD_ID + ":" + loc;
+      }
+      return new MaterialStatsId(loc);
     }
   }
 }

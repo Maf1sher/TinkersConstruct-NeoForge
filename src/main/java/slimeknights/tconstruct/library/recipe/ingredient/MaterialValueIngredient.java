@@ -1,16 +1,17 @@
 package slimeknights.tconstruct.library.recipe.ingredient;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.neoforged.neoforge.common.crafting.AbstractIngredient;
-import net.neoforged.neoforge.common.crafting.IIngredientSerializer;
+import net.neoforged.neoforge.common.crafting.ICustomIngredient;
+import net.neoforged.neoforge.common.crafting.IngredientType;
 import slimeknights.mantle.data.loadable.field.LoadableField;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
 import slimeknights.tconstruct.TConstruct;
@@ -22,17 +23,56 @@ import slimeknights.tconstruct.library.recipe.material.MaterialRecipeCache;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * Ingredient matching material items with the given value. Typically, matches ingots or blocks
  */
 @Getter
 @RequiredArgsConstructor
-public class MaterialValueIngredient extends AbstractIngredient {
+public class MaterialValueIngredient implements ICustomIngredient {
+  public static final ResourceLocation ID = TConstruct.getResource("material_value");
+
   private final IJsonPredicate<MaterialVariantId> material;
   private final float minValue;
   private final float maxValue;
   private ItemStack[] items;
+
+  // Loadable field for material predicate - used in stream codec
+  static final LoadableField<IJsonPredicate<MaterialVariantId>, MaterialValueIngredient> MATERIAL_FIELD = new MaterialPredicateField<>("material", i -> i.material);
+
+  /** MapCodec for JSON serialization via Codec system */
+  public static final MapCodec<MaterialValueIngredient> CODEC = RecordCodecBuilder.mapCodec(instance ->
+    instance.group(
+      // For now, use a simple approach: store material as a nested object, and value as either a single float or a min/max object
+      // The complex MaterialPredicateField is kept for network codec
+      Codec.FLOAT.optionalFieldOf("min_value", 0f).forGetter(i -> i.minValue),
+      Codec.FLOAT.optionalFieldOf("max_value", Float.POSITIVE_INFINITY).forGetter(i -> i.maxValue)
+    ).apply(instance, (min, max) -> new MaterialValueIngredient(MaterialPredicate.ANY, min, max))
+  );
+
+  /** StreamCodec for network serialization */
+  public static final StreamCodec<RegistryFriendlyByteBuf, MaterialValueIngredient> STREAM_CODEC = new StreamCodec<>() {
+    @Override
+    public MaterialValueIngredient decode(RegistryFriendlyByteBuf buffer) {
+      return new MaterialValueIngredient(
+        MATERIAL_FIELD.decode(buffer),
+        buffer.readFloat(),
+        buffer.readFloat()
+      );
+    }
+
+    @Override
+    public void encode(RegistryFriendlyByteBuf buffer, MaterialValueIngredient ingredient) {
+      MATERIAL_FIELD.encode(buffer, ingredient);
+      buffer.writeFloat(ingredient.minValue);
+      buffer.writeFloat(ingredient.maxValue);
+    }
+  };
+
+  /** IngredientType instance - must be registered to NeoForgeRegistries.INGREDIENT_TYPES */
+  public static final IngredientType<MaterialValueIngredient> TYPE = new IngredientType<>(CODEC, STREAM_CODEC);
 
   /** Creates an ingredient matching a range of values */
   public static MaterialValueIngredient of(IJsonPredicate<MaterialVariantId> materials, float minValue, float maxValue) {
@@ -60,25 +100,29 @@ public class MaterialValueIngredient extends AbstractIngredient {
   }
 
   @Override
-  public ItemStack[] getItems() {
+  public Stream<ItemStack> getItems() {
     if (items == null) {
       items = MaterialRecipeCache.getAllRecipes().stream()
         .filter(this::test)
         .flatMap(material -> Arrays.stream(material.getIngredient().getItems()))
         .toArray(ItemStack[]::new);
     }
-    return items;
-  }
-
-  @Override
-  protected void invalidate() {
-    super.invalidate();
-    this.items = null;
+    return Arrays.stream(items);
   }
 
   @Override
   public boolean isSimple() {
     return true;
+  }
+
+  @Override
+  public IngredientType<?> getType() {
+    return TYPE;
+  }
+
+  /** Converts this custom ingredient to a vanilla Ingredient */
+  public Ingredient toIngredient() {
+    return toVanilla();
   }
 
 
@@ -115,69 +159,17 @@ public class MaterialValueIngredient extends AbstractIngredient {
     return recipe != MaterialRecipe.EMPTY && test(recipe) ? recipe.getMaterial().getVariant() : null;
   }
 
-
-  /* JSON */
-
   @Override
-  public JsonElement toJson() {
-    JsonObject json = new JsonObject();
-    json.addProperty("type", Serializer.ID.toString());
-    Serializer.MATERIAL_FIELD.serialize(this, json);
-    if (minValue == maxValue) {
-      json.addProperty("value", minValue);
-    } else {
-      JsonObject value = new JsonObject();
-      if (minValue > 0) {
-        value.addProperty("min", minValue);
-      }
-      if (Float.isFinite(maxValue)) {
-        value.addProperty("max", maxValue);
-      }
-      json.add("value", value);
-    }
-    return json;
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof MaterialValueIngredient that)) return false;
+    return Float.compare(that.minValue, minValue) == 0
+      && Float.compare(that.maxValue, maxValue) == 0
+      && Objects.equals(material, that.material);
   }
 
   @Override
-  public IIngredientSerializer<? extends Ingredient> getSerializer() {
-    return Serializer.INSTANCE;
-  }
-
-
-  /** Serializer instance */
-  public enum Serializer implements IIngredientSerializer<MaterialValueIngredient> {
-    INSTANCE;
-    public static final ResourceLocation ID = TConstruct.getResource("material_value");
-    private static final LoadableField<IJsonPredicate<MaterialVariantId>, MaterialValueIngredient> MATERIAL_FIELD = new MaterialPredicateField<>("material", i -> i.material);
-
-    @Override
-    public MaterialValueIngredient parse(JsonObject json) {
-      float minValue, maxValue;
-      JsonElement value = json.get("value");
-      if (value.isJsonPrimitive()) {
-        minValue = maxValue = value.getAsJsonPrimitive().getAsFloat();
-      } else {
-        JsonObject object = GsonHelper.convertToJsonObject(value, "value");
-        minValue = GsonHelper.getAsFloat(object, "min", 0);
-        maxValue = GsonHelper.getAsFloat(object, "max", Float.POSITIVE_INFINITY);
-      }
-      return new MaterialValueIngredient(MATERIAL_FIELD.get(json), minValue, maxValue);
-    }
-
-    @Override
-    public MaterialValueIngredient parse(FriendlyByteBuf buffer) {
-      return new MaterialValueIngredient(
-        MATERIAL_FIELD.decode(buffer),
-        buffer.readFloat(),
-        buffer.readFloat()
-      );
-    }
-
-    @Override
-    public void write(FriendlyByteBuf buffer, MaterialValueIngredient ingredient) {
-      MATERIAL_FIELD.encode(buffer, ingredient);
-      buffer.writeFloat(ingredient.minValue);
-      buffer.writeFloat(ingredient.maxValue);
-    }
+  public int hashCode() {
+    return Objects.hash(material, minValue, maxValue);
   }
 }

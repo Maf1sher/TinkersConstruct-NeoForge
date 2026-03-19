@@ -1,26 +1,24 @@
 package slimeknights.tconstruct.library.recipe.material;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import lombok.Getter;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
-import slimeknights.mantle.data.loadable.Loadable;
-import slimeknights.mantle.data.loadable.field.LoadableField;
-import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 import slimeknights.tconstruct.tables.TinkerTables;
 
-import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,14 +33,10 @@ public class ShapelessMaterialsRecipe extends ShapelessRecipe implements Materia
   @Getter
   private final List<MaterialVariantId> extraMaterials;
 
-  public ShapelessMaterialsRecipe(ResourceLocation id, String group, CraftingBookCategory category, ItemStack result, NonNullList<Ingredient> ingredients, int partCount, List<MaterialVariantId> extraMaterials) {
-    super(id, group, category, result, ingredients);
+  public ShapelessMaterialsRecipe(ShapelessRecipe recipe, int partCount, List<MaterialVariantId> extraMaterials) {
+    super(recipe.getGroup(), recipe.category(), recipe.result, recipe.getIngredients());
     this.partCount = partCount;
     this.extraMaterials = extraMaterials;
-  }
-
-  public ShapelessMaterialsRecipe(ShapelessRecipe recipe, int partCount, List<MaterialVariantId> extraMaterials) {
-    this(recipe.getId(), recipe.getGroup(), recipe.category(), recipe.result, recipe.getIngredients(), partCount, extraMaterials);
   }
 
   @Override
@@ -57,7 +51,7 @@ public class ShapelessMaterialsRecipe extends ShapelessRecipe implements Materia
   }
 
   @Override
-  public ItemStack assemble(CraftingContainer inventory, RegistryAccess registryAccess) {
+  public ItemStack assemble(CraftingInput inventory, HolderLookup.Provider registryAccess) {
     return ShapedMaterialsRecipe.assemble(super.assemble(inventory, registryAccess), inventory, getIngredients(), partCount, false, extraMaterials);
   }
 
@@ -66,32 +60,67 @@ public class ShapelessMaterialsRecipe extends ShapelessRecipe implements Materia
     return TinkerTables.shapelessMaterialsRecipeSerializer.get();
   }
 
-  public static class Serializer implements LoggingRecipeSerializer<ShapelessMaterialsRecipe> {
-    static final Loadable<List<MaterialVariantId>> EXTRA_MATERIALS = ShapedMaterialsRecipe.Serializer.EXTRA_MATERIALS;
-    static final LoadableField<List<MaterialVariantId>,ShapelessMaterialsRecipe> MATERIAL_FIELD = EXTRA_MATERIALS.defaultField("extra_materials", List.of(), r -> r.extraMaterials);
+  public static class Serializer implements RecipeSerializer<ShapelessMaterialsRecipe> {
+    /** Codec for MaterialVariantId */
+    private static final Codec<MaterialVariantId> MATERIAL_VARIANT_CODEC = Codec.STRING.comapFlatMap(
+      s -> {
+        MaterialVariantId id = MaterialVariantId.tryParse(s);
+        return id != null ? DataResult.success(id) : DataResult.error(() -> "Invalid material variant ID: " + s);
+      },
+      MaterialVariantId::toString
+    );
+    private static final Codec<List<MaterialVariantId>> EXTRA_MATERIALS_CODEC = MATERIAL_VARIANT_CODEC.listOf();
+
+    /** StreamCodec for list of MaterialVariantId */
+    private static final StreamCodec<RegistryFriendlyByteBuf, List<MaterialVariantId>> EXTRA_MATERIALS_STREAM_CODEC =
+      StreamCodec.of(
+        (buf, list) -> {
+          buf.writeVarInt(list.size());
+          for (MaterialVariantId id : list) {
+            id.toNetwork(buf);
+          }
+        },
+        buf -> {
+          int size = buf.readVarInt();
+          ArrayList<MaterialVariantId> list = new ArrayList<>(size);
+          for (int i = 0; i < size; i++) {
+            list.add(MaterialVariantId.fromNetwork(buf));
+          }
+          return List.copyOf(list);
+        }
+      );
+
+    public static final MapCodec<ShapelessMaterialsRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+      RecipeSerializer.SHAPELESS_RECIPE.codec().forGetter(r -> (ShapelessRecipe) r),
+      Codec.INT.fieldOf("parts").forGetter(r -> r.partCount),
+      EXTRA_MATERIALS_CODEC.optionalFieldOf("extra_materials", List.of()).forGetter(r -> r.extraMaterials)
+    ).apply(instance, (base, parts, extra) -> new ShapelessMaterialsRecipe(base, parts, extra)));
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, ShapelessMaterialsRecipe> STREAM_CODEC = StreamCodec.of(
+      Serializer::toNetwork, Serializer::fromNetwork
+    );
 
     @Override
-    public ShapelessMaterialsRecipe fromJson(ResourceLocation recipeId, JsonObject json) {
-      ShapelessRecipe vanilla = SHAPELESS_RECIPE.fromJson(recipeId, json);
-      int parts = GsonHelper.getAsInt(json, "parts");
-      if (parts < 1 || parts > vanilla.getIngredients().size()) {
-        throw new JsonSyntaxException("Parts must be between 1 and the number of ingredients " + vanilla.getIngredients().size());
-      }
-      return new ShapelessMaterialsRecipe(vanilla, parts, MATERIAL_FIELD.get(json));
+    public MapCodec<ShapelessMaterialsRecipe> codec() {
+      return CODEC;
     }
 
     @Override
-    @Nullable
-    public ShapelessMaterialsRecipe fromNetworkSafe(ResourceLocation recipeId, FriendlyByteBuf buffer) {
-      ShapelessRecipe recipe = SHAPELESS_RECIPE.fromNetwork(recipeId, buffer);
-      return recipe == null ? null : new ShapelessMaterialsRecipe(recipe, buffer.readByte(), MATERIAL_FIELD.decode(buffer));
+    public StreamCodec<RegistryFriendlyByteBuf, ShapelessMaterialsRecipe> streamCodec() {
+      return STREAM_CODEC;
     }
 
-    @Override
-    public void toNetworkSafe(FriendlyByteBuf buffer, ShapelessMaterialsRecipe recipe) {
-      SHAPELESS_RECIPE.toNetwork(buffer, recipe);
-      buffer.writeByte(recipe.partCount);
-      MATERIAL_FIELD.encode(buffer, recipe);
+    private static ShapelessMaterialsRecipe fromNetwork(RegistryFriendlyByteBuf buffer) {
+      ShapelessRecipe base = ShapelessRecipe.Serializer.STREAM_CODEC.decode(buffer);
+      int parts = buffer.readVarInt();
+      List<MaterialVariantId> extraMaterials = EXTRA_MATERIALS_STREAM_CODEC.decode(buffer);
+      return new ShapelessMaterialsRecipe(base, parts, extraMaterials);
+    }
+
+    private static void toNetwork(RegistryFriendlyByteBuf buffer, ShapelessMaterialsRecipe recipe) {
+      ShapelessRecipe.Serializer.STREAM_CODEC.encode(buffer, recipe);
+      buffer.writeVarInt(recipe.partCount);
+      EXTRA_MATERIALS_STREAM_CODEC.encode(buffer, recipe.extraMaterials);
     }
   }
 }

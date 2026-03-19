@@ -9,6 +9,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
 import slimeknights.mantle.util.BlockEntityHelper;
 import slimeknights.tconstruct.common.multiblock.IMasterLogic;
@@ -75,7 +76,7 @@ public class MultiblockStructureData {
     innerX = maxInside.getX() - minInside.getX() + 1;
     innerY = maxInside.getY() - minInside.getY() + 1;
     innerZ = maxInside.getZ() - minInside.getZ() + 1;
-    bounds = new AABB(minInside, maxInside.offset(1, 1, 1));
+    bounds = new AABB(Vec3.atLowerCornerOf(minInside), Vec3.atLowerCornerOf(maxInside.offset(1, 1, 1)));
   }
 
   /**

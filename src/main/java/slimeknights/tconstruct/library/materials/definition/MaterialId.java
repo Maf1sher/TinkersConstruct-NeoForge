@@ -26,10 +26,6 @@ public final class MaterialId extends ResourceId implements MaterialVariantId {
     super(location);
   }
 
-  private MaterialId(String namespace, String path, @Nullable Dummy pDummy) {
-    super(namespace, path, pDummy);
-  }
-
   /** Checks if this ID matches the given material */
   public boolean matches(IMaterial material) {
     return this.equals(material.getIdentifier());
@@ -57,7 +53,7 @@ public final class MaterialId extends ResourceId implements MaterialVariantId {
 
   @Override
   public ResourceLocation getLocation(char separator) {
-    return this;
+    return this.location();
   }
 
   @Override
@@ -76,12 +72,12 @@ public final class MaterialId extends ResourceId implements MaterialVariantId {
   /** {@return Material ID, or null if invalid} */
   @Nullable
   public static MaterialId tryParse(String string) {
-    return tryParse(string, (namespace, path) -> new MaterialId(namespace, path, null));
+    return ResourceId.tryParse(string, MaterialId::new);
   }
 
   /** {@return Material ID, or null if invalid} */
   @Nullable
   public static MaterialId tryBuild(String namespace, String path) {
-    return tryBuild(namespace, path, (n, p) -> new MaterialId(namespace, path, null));
+    return ResourceId.tryBuild(namespace, path, MaterialId::new);
   }
 }

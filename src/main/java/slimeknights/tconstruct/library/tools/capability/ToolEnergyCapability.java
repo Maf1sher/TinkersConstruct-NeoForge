@@ -2,14 +2,10 @@ package slimeknights.tconstruct.library.tools.capability;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.neoforged.neoforge.common.capabilities.Capability;
-import net.neoforged.neoforge.common.capabilities.Capabilities;
-import net.neoforged.neoforge.common.util.LazyOptional;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.modules.ModifierModule;
 import slimeknights.tconstruct.library.modifiers.modules.build.ModifierTraitModule;
-import slimeknights.tconstruct.library.tools.capability.ToolCapabilityProvider.IToolCapabilityProvider;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.stat.CapacityStat;
 import slimeknights.tconstruct.library.tools.stat.ToolStatId;
@@ -26,7 +22,7 @@ public record ToolEnergyCapability(Supplier<? extends IToolStackView> tool) impl
   /** Persistent data key for fetching the current energy */
   public static final ResourceLocation ENERGY_KEY = TConstruct.getResource("energy");
   /** Include this module in a modifier adding energy capacity or functionality to ensure capacity changes are properly cleaned up */
-  public static final ModifierModule ENERGY_HANDLER = new ModifierTraitModule(TinkerModifiers.energyHandler.getId(), 1, true);
+  public static final ModifierModule ENERGY_HANDLER = new ModifierTraitModule(TinkerModifiers.energyHandler.getModifierId(), 1, true);
 
   /** Gets the energy capacity for the given tool */
   public static int getMaxEnergy(IToolStackView tool) {
@@ -119,19 +115,4 @@ public record ToolEnergyCapability(Supplier<? extends IToolStackView> tool) impl
     return true;
   }
 
-  /** Provider instance for a fluid cap */
-  public static class Provider implements IToolCapabilityProvider {
-    private final LazyOptional<IEnergyStorage> energyCap;
-    public Provider(Supplier<? extends IToolStackView> toolStack) {
-      this.energyCap = LazyOptional.of(() -> new ToolEnergyCapability(toolStack));
-    }
-
-    @Override
-    public <T> LazyOptional<T> getCapability(IToolStackView tool, Capability<T> cap) {
-      if (cap == Capabilities.ENERGY && tool.getStats().getInt(MAX_STAT) > 0) {
-        return energyCap.cast();
-      }
-      return LazyOptional.empty();
-    }
-  }
 }

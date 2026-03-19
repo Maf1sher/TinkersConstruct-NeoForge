@@ -20,9 +20,10 @@ import static slimeknights.tconstruct.library.client.armor.texture.FixedArmorTex
  * Armor texture supplier that supplies a fixed texture that is colored using the given persistent data key
  */
 public class DyedArmorTextureSupplier implements ArmorTextureSupplier {
+  private static final ModifierId DEFAULT_DYED_MODIFIER = new ModifierId(TinkerModifiers.dyed.getId());
   public static final RecordLoadable<DyedArmorTextureSupplier> LOADER = RecordLoadable.create(
     Loadables.RESOURCE_LOCATION.requiredField("prefix", s -> s.prefix),
-    ModifierId.PARSER.defaultField("modifier", TinkerModifiers.dyed.getId(), s -> s.modifier),
+    ModifierId.PARSER.defaultField("modifier", DEFAULT_DYED_MODIFIER, s -> s.modifier),
     ColorLoadable.NO_ALPHA.nullableField("default_color", s -> s.alwaysRender ? s.defaultColor : null),
     IntLoadable.range(0, 15).defaultField("luminosity", 0, false, s -> s.luminosity),
     DyedArmorTextureSupplier::new);
@@ -59,7 +60,7 @@ public class DyedArmorTextureSupplier implements ArmorTextureSupplier {
   public ArmorTexture getArmorTexture(ItemStack stack, TextureType textureType, RegistryAccess access) {
     TintedArmorTexture texture = textures[textureType.ordinal()];
     if (texture != null && (alwaysRender || ModifierUtil.getModifierLevel(stack, modifier) > 0)) {
-      int color = ModifierUtil.getPersistentInt(stack, modifier, defaultColor);
+      int color = ModifierUtil.getPersistentInt(stack, modifier.location(), defaultColor);
       return texture.color(0xFF000000 | color);
     }
     return ArmorTexture.EMPTY;

@@ -3,9 +3,11 @@ package slimeknights.tconstruct.library.tools.part.block;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.level.block.Block;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 import slimeknights.tconstruct.library.tools.part.IMaterialItem;
@@ -22,7 +24,8 @@ public class MaterialBlockItem extends BlockItem implements IMaterialItem {
 
   @Override
   public MaterialVariantId getMaterial(ItemStack stack) {
-    return MaterialItem.getMaterialId(stack.getTag());
+    CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+    return MaterialItem.getMaterialId(tag.isEmpty() ? null : tag);
   }
 
   @Override
@@ -31,9 +34,9 @@ public class MaterialBlockItem extends BlockItem implements IMaterialItem {
   }
 
   @Override
-  public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+  public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
     MaterialItem.appendHoverText(this, stack, tooltip, flag);
-    super.appendHoverText(stack, level, tooltip, flag);
+    super.appendHoverText(stack, context, tooltip, flag);
   }
 
   @Nullable
@@ -42,8 +45,6 @@ public class MaterialBlockItem extends BlockItem implements IMaterialItem {
     return MaterialItem.getCreatorModId(this, stack);
   }
 
-  @Override
-  public void verifyTagAfterLoad(CompoundTag tag) {
-    MaterialItem.verifyTag(tag);
-  }
+  // verifyTagAfterLoad was removed in 1.21 since ItemStack no longer uses NBT tags directly.
+  // Material verification is handled through DataComponents.
 }

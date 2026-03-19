@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.library.recipe.tinkerstation;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.item.ItemStack;
@@ -65,15 +66,15 @@ public interface ITinkerStationRecipe extends ICommonRecipe<ITinkerStationContai
   /** @deprecated use {@link #getValidatedResult(ITinkerStationContainer, RegistryAccess)}*/
   @Deprecated
   @Override
-  default ItemStack getResultItem(RegistryAccess pRegistryAccess) {
+  default ItemStack getResultItem(HolderLookup.Provider registries) {
     return ItemStack.EMPTY;
   }
 
   /** @deprecated use {@link #getValidatedResult(ITinkerStationContainer, RegistryAccess)}*/
   @Deprecated
   @Override
-  default ItemStack assemble(ITinkerStationContainer inv, RegistryAccess access) {
-    return getResultItem(access).copy();
+  default ItemStack assemble(ITinkerStationContainer inv, HolderLookup.Provider registries) {
+    return getResultItem(registries).copy();
   }
 
   /** @deprecated use {@link #updateInputs(LazyToolStack, IMutableTinkerStationContainer, boolean)} */

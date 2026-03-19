@@ -14,6 +14,8 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -25,7 +27,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.ForgeHooks;
+import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.entity.PartEntity;
 import net.neoforged.neoforge.event.entity.player.CriticalHitEvent;
 import slimeknights.mantle.util.CombatHelper;
@@ -51,7 +53,8 @@ import java.util.function.DoubleSupplier;
 
 public class ToolAttackUtil {
   private static final float DEGREE_TO_RADIANS = (float)Math.PI / 180F;
-  private static final AttributeModifier ANTI_KNOCKBACK_MODIFIER = new AttributeModifier(TConstruct.MOD_ID + ".anti_knockback", 1f, Operation.ADDITION);
+  private static final ResourceLocation ANTI_KNOCKBACK_ID = TConstruct.getResource("anti_knockback");
+  private static final AttributeModifier ANTI_KNOCKBACK_MODIFIER = new AttributeModifier(ANTI_KNOCKBACK_ID, 1f, Operation.ADD_VALUE);
   /** @deprecated new default for {@link ToolAttackContext.Builder} */
   @Deprecated(forRemoval = true)
   public static final DoubleSupplier NO_COOLDOWN = () -> 1.0;
@@ -66,7 +69,7 @@ public class ToolAttackUtil {
    * @param attribute  Attribute to fetch
    * @return  Base value of the attribute
    */
-  public static float getToolAttribute(IToolStackView tool, LivingEntity holder, Attribute attribute, float toolValue) {
+  public static float getToolAttribute(IToolStackView tool, LivingEntity holder, Holder<Attribute> attribute, float toolValue) {
     // fetch attribute instance
     AttributeInstance instance = holder.getAttribute(attribute);
     if (instance == null) {
@@ -83,16 +86,18 @@ public class ToolAttackUtil {
     // remove mainhand attributes
     ItemStack mainStack = CombatHelper.getMainhandAttributeStack(holder);
     if (!mainStack.isEmpty()) {
-      for (AttributeModifier modifier : mainStack.getAttributeModifiers(EquipmentSlot.MAINHAND).get(attribute)) {
-        modifiers.get(modifier.getOperation()).remove(modifier);
-      }
+      mainStack.getAttributeModifiers().forEach(EquipmentSlot.MAINHAND, (attr, modifier) -> {
+        if (attr.equals(attribute)) {
+          modifiers.get(modifier.operation()).remove(modifier);
+        }
+      });
     }
 
     // start adding in "mainhand" attributes for the given slot and attribute
     BiConsumer<Attribute, AttributeModifier> attributeConsumer = (check, modifier) -> {
-      if (check == attribute) {
-        // this will remove duplicates due to AttributeModifier equals only checking UUID
-        modifiers.get(modifier.getOperation()).add(modifier);
+      if (check == attribute.value()) {
+        // this will remove duplicates due to AttributeModifier equals only checking ID
+        modifiers.get(modifier.operation()).add(modifier);
       }
     };
     for (ModifierEntry entry : tool.getModifierList()) {
@@ -111,9 +116,9 @@ public class ToolAttackUtil {
 
     float criticalModifier = isCritical ? 1.5f : 1.0f;
     if (attackerPlayer != null) {
-      CriticalHitEvent hitResult = ForgeHooks.getCriticalHit(attackerPlayer, target, isCritical, criticalModifier);
-      if (hitResult != null) {
-        criticalModifier = hitResult.getDamageModifier();
+      CriticalHitEvent hitResult = CommonHooks.fireCriticalHit(attackerPlayer, target, isCritical, criticalModifier);
+      if (hitResult.isCriticalHit()) {
+        criticalModifier = hitResult.getDamageMultiplier();
       } else {
         criticalModifier = 1;
       }
@@ -310,8 +315,8 @@ public class ToolAttackUtil {
 
     // deal attacker thorns damage
     attackerLiving.setLastHurtMob(targetEntity);
-    if (targetLiving != null) {
-      EnchantmentHelper.doPostHurtEffects(targetLiving, attackerLiving);
+    if (targetLiving != null && level instanceof ServerLevel serverLevel) {
+      EnchantmentHelper.doPostAttackEffects(serverLevel, targetLiving, context.makeDamageSource());
     }
 
     // apply modifier effects
@@ -391,7 +396,7 @@ public class ToolAttackUtil {
   public static AttributeInstance disableKnockback(@Nullable LivingEntity living) {
     if (living != null) {
       AttributeInstance instance = living.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
-      if (instance != null && !instance.hasModifier(ANTI_KNOCKBACK_MODIFIER)) {
+      if (instance != null && !instance.hasModifier(ANTI_KNOCKBACK_ID)) {
         instance.addTransientModifier(ANTI_KNOCKBACK_MODIFIER);
         return instance;
       }
@@ -494,10 +499,10 @@ public class ToolAttackUtil {
   }
 
   /**
-   * @deprecated use {@link #getToolAttribute(IToolStackView, LivingEntity, Attribute, float)}
+   * @deprecated use {@link #getToolAttribute(IToolStackView, LivingEntity, Holder, float)}
    */
   @Deprecated(forRemoval = true)
-  public static float getSlotAttribute(IToolStackView tool, LivingEntity holder, EquipmentSlot slotType, Attribute attribute, float toolValue) {
+  public static float getSlotAttribute(IToolStackView tool, LivingEntity holder, EquipmentSlot slotType, Holder<Attribute> attribute, float toolValue) {
     if (slotType == EquipmentSlot.MAINHAND) {
       return (float) holder.getAttributeValue(attribute);
     }
@@ -519,7 +524,6 @@ public class ToolAttackUtil {
     if (holder.level().isClientSide) {
       return (float) holder.getAttributeValue(Attributes.ATTACK_DAMAGE);
     }
-    // TODO 1.21: consider inlining this method as its only used once
     return getSlotAttribute(tool, holder, slotType, Attributes.ATTACK_DAMAGE, tool.getStats().get(ToolStats.ATTACK_DAMAGE));
   }
 

@@ -1,16 +1,14 @@
 package slimeknights.tconstruct.smeltery.block.entity.tank;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
 import slimeknights.mantle.inventory.SingleItemHandler;
-import slimeknights.mantle.util.RegistryHelper;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.network.InventorySlotSyncPacket;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
@@ -30,10 +28,10 @@ public class ProxyItemTank<T extends MantleBlockEntity & IFluidTankUpdater> exte
     // can only store items that are fluid handlers, though allow blacklist in case something is really broken
     // blacklist is mostly used for items that don't support incremental filling, as this block really isn't good at working with them
     // we check the container item so we don't have to put every bucket in the tag. Not bothering with complex container items; odds are item stack sensitive just returns the same item
-    Item craftRemainingItem = stack.getItem().getCraftingRemainingItem();
+    ItemStack craftRemainingItem = stack.getCraftingRemainingItem();
     return !stack.is(TinkerTags.Items.PROXY_TANK_BLACKLIST)
-      && (craftRemainingItem == null || !RegistryHelper.contains(TinkerTags.Items.PROXY_TANK_BLACKLIST, craftRemainingItem))
-      && (stack.getCapability(Capabilities.FLUID_HANDLER_ITEM).isPresent());
+      && (craftRemainingItem.isEmpty() || !craftRemainingItem.is(TinkerTags.Items.PROXY_TANK_BLACKLIST))
+      && (stack.getCapability(Capabilities.FluidHandler.ITEM) != null);
   }
 
   /** Used by the fluid handler logic to sync changes as we directly mutate the internal stack */
@@ -55,7 +53,7 @@ public class ProxyItemTank<T extends MantleBlockEntity & IFluidTankUpdater> exte
       itemTank = null;
       if (needsUpdate) {
         // both stacks being empty means our stack shrunk by 1 and is being replaced with ItemStack.EMPTY
-        needsUpdate = (oldStack.isEmpty() && newStack.isEmpty()) || !ItemStack.isSameItemSameTags(oldStack, newStack);
+        needsUpdate = (oldStack.isEmpty() && newStack.isEmpty()) || !ItemStack.isSameItemSameComponents(oldStack, newStack);
       }
     } else if (needsUpdate) {
       needsUpdate = syncSame;
@@ -77,7 +75,8 @@ public class ProxyItemTank<T extends MantleBlockEntity & IFluidTankUpdater> exte
   private IFluidHandlerItem getItemTank() {
     if (itemTank == null) {
       ItemStack stack = getStack();
-      itemTank = stack.getCapability(Capabilities.FLUID_HANDLER_ITEM).orElseGet(() -> new EmptyFluidHandlerItem(stack));
+      IFluidHandlerItem cap = stack.getCapability(Capabilities.FluidHandler.ITEM);
+      itemTank = cap != null ? cap : new EmptyFluidHandlerItem(stack);
     }
     return itemTank;
   }

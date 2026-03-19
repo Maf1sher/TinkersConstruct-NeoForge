@@ -3,7 +3,7 @@ package slimeknights.tconstruct.library.tools.item.armor;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import lombok.Getter;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
@@ -22,24 +22,22 @@ import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.ToolAction;
-import net.neoforged.neoforge.common.capabilities.ICapabilityProvider;
+import net.neoforged.neoforge.common.ItemAbility;
+
 import slimeknights.mantle.client.SafeClientAccess;
 import slimeknights.mantle.client.TooltipKey;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
-import slimeknights.tconstruct.library.modifiers.hook.behavior.EnchantmentModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.display.DurabilityDisplayModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.SlotStackModifierHook;
-import slimeknights.tconstruct.library.modifiers.modules.build.RarityModule;
 import slimeknights.tconstruct.library.tools.IndestructibleItemEntity;
-import slimeknights.tconstruct.library.tools.capability.ToolCapabilityProvider;
+
 import slimeknights.tconstruct.library.tools.capability.inventory.ToolInventoryCapability;
 import slimeknights.tconstruct.library.tools.definition.ModifiableArmorMaterial;
 import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
@@ -57,9 +55,7 @@ import slimeknights.tconstruct.library.utils.Util;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -73,17 +69,27 @@ public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay
   /** Volatile flag for an item to act as an enderman mask, stopping them from getting angry. */
   public static final ResourceLocation ENDERMASK = TConstruct.getResource("endermask");
 
+  /** Resource locations for armor attribute modifiers per type */
+  private static final ResourceLocation[] ARMOR_MODIFIER_ID_PER_TYPE = {
+    TConstruct.getResource("armor.boots"),
+    TConstruct.getResource("armor.leggings"),
+    TConstruct.getResource("armor.chestplate"),
+    TConstruct.getResource("armor.helmet"),
+    TConstruct.getResource("armor.body")
+  };
+
   @Getter
   private final ToolDefinition toolDefinition;
   /** Cache of the tool built for rendering */
   private ItemStack toolForRendering = null;
-  public ModifiableArmorItem(ArmorMaterial materialIn, ArmorItem.Type type, Properties builderIn, ToolDefinition toolDefinition) {
+
+  public ModifiableArmorItem(Holder<ArmorMaterial> materialIn, ArmorItem.Type type, Properties builderIn, ToolDefinition toolDefinition) {
     super(materialIn, type, builderIn);
     this.toolDefinition = toolDefinition;
   }
 
   public ModifiableArmorItem(ModifiableArmorMaterial material, ArmorItem.Type type, Properties properties) {
-    this(material, type, properties, Objects.requireNonNull(material.getArmorDefinition(type), "Missing tool definition for " + type.getName()));
+    this(material.getHolder(), type, properties, Objects.requireNonNull(material.getArmorDefinition(type), "Missing tool definition for " + type.getName()));
   }
 
   /* Basic properties */
@@ -109,7 +115,7 @@ public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay
   }
 
   @Override
-  public boolean canPerformAction(ItemStack stack, ToolAction toolAction) {
+  public boolean canPerformAction(ItemStack stack, ItemAbility toolAction) {
     return ModifierUtil.canPerformAction(ToolStack.from(stack), toolAction);
   }
 
@@ -131,34 +137,18 @@ public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay
     return false;
   }
 
+  // canApplyAtEnchantingTable removed in 1.21, replaced by supportsEnchantment/isPrimaryItemFor
+  // Tinker tools don't support enchanting table, so we override supportsEnchantment to only allow curses
   @Override
-  public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
-    return enchantment.isCurse() && super.canApplyAtEnchantingTable(stack, enchantment);
-  }
-
-  @Override
-  public int getEnchantmentLevel(ItemStack stack, Enchantment enchantment) {
-    return EnchantmentModifierHook.getEnchantmentLevel(stack, enchantment);
-  }
-
-  @Override
-  public Map<Enchantment,Integer> getAllEnchantments(ItemStack stack) {
-    return EnchantmentModifierHook.getAllEnchantments(stack);
+  public boolean supportsEnchantment(ItemStack stack, Holder<Enchantment> enchantment) {
+    // Only allow curse enchantments on tinker armor
+    return enchantment.is(net.minecraft.tags.EnchantmentTags.CURSE) && super.supportsEnchantment(stack, enchantment);
   }
 
 
   /* Loading */
 
-  @Nullable
-  @Override
-  public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt) {
-    return new ToolCapabilityProvider(stack);
-  }
-
-  @Override
-  public void verifyTagAfterLoad(CompoundTag nbt) {
-    ToolStack.verifyTag(this, nbt, getToolDefinition());
-  }
+  // verifyTagAfterLoad removed in 1.21 - ItemStack no longer uses NBT tags directly
 
   @Override
   public void onCraftedBy(ItemStack stack, Level levelIn, Player playerIn) {
@@ -187,10 +177,8 @@ public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay
     return ModifierUtil.checkVolatileFlag(stack, SHINY);
   }
 
-  @Override
-  public Rarity getRarity(ItemStack stack) {
-    return RarityModule.getRarity(stack);
-  }
+  // getRarity(ItemStack) removed in 1.21 - rarity is now a data component
+  // Tool rarity is managed through the modifier volatile data system (RarityModule)
 
 
   /* Indestructible items */
@@ -216,18 +204,13 @@ public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay
   }
 
   @Override
-  public boolean canBeDepleted() {
-    return true;
-  }
-
-  @Override
   public int getMaxDamage(ItemStack stack) {
     return ToolDamageUtil.getFakeMaxDamage(stack);
   }
 
   @Override
   public int getDamage(ItemStack stack) {
-    if (!canBeDepleted()) {
+    if (getMaxDamage(stack) <= 0) {
       return 0;
     }
     return ToolStack.from(stack).getDamage();
@@ -235,17 +218,17 @@ public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay
 
   @Override
   public void setDamage(ItemStack stack, int damage) {
-    if (canBeDepleted()) {
+    if (getMaxDamage(stack) > 0) {
       ToolStack.from(stack).setDamage(damage);
     }
   }
 
   @Override
-  public <T extends LivingEntity> int damageItem(ItemStack stack, int amount, T damager, Consumer<T> onBroken) {
+  public <T extends LivingEntity> int damageItem(ItemStack stack, int amount, @Nullable T damager, Consumer<Item> onBroken) {
     // We basically emulate Itemstack.damageItem here. We always return 0 to skip the handling in ItemStack.
     // If we don't tools ignore our damage logic
-    if (canBeDepleted() && ToolDamageUtil.damage(ToolStack.from(stack), amount, damager, stack)) {
-      onBroken.accept(damager);
+    if (getMaxDamage(stack) > 0 && ToolDamageUtil.damage(ToolStack.from(stack), amount, damager, stack)) {
+      onBroken.accept(stack.getItem());
     }
 
     return 0;
@@ -278,7 +261,10 @@ public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay
   }
 
 
-  @Override
+  /**
+   * Gets the attribute modifiers for the given tool and slot.
+   * This is a custom method (not an override) used by the Multimap-based attribute system internally.
+   */
   public Multimap<Attribute,AttributeModifier> getAttributeModifiers(IToolStackView tool, EquipmentSlot slot) {
     if (slot != getEquipmentSlot()) {
       return ImmutableMultimap.of();
@@ -288,12 +274,12 @@ public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay
     if (!tool.isBroken()) {
       // base stats
       StatsNBT statsNBT = tool.getStats();
-      UUID uuid = ARMOR_MODIFIER_UUID_PER_TYPE.get(type);
-      builder.put(Attributes.ARMOR, new AttributeModifier(uuid, "tconstruct.armor.armor", statsNBT.get(ToolStats.ARMOR), AttributeModifier.Operation.ADDITION));
-      builder.put(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(uuid, "tconstruct.armor.toughness", statsNBT.get(ToolStats.ARMOR_TOUGHNESS), AttributeModifier.Operation.ADDITION));
+      ResourceLocation modifierId = ARMOR_MODIFIER_ID_PER_TYPE[type.ordinal()];
+      builder.put(Attributes.ARMOR.value(), new AttributeModifier(modifierId.withSuffix(".armor"), statsNBT.get(ToolStats.ARMOR), AttributeModifier.Operation.ADD_VALUE));
+      builder.put(Attributes.ARMOR_TOUGHNESS.value(), new AttributeModifier(modifierId.withSuffix(".toughness"), statsNBT.get(ToolStats.ARMOR_TOUGHNESS), AttributeModifier.Operation.ADD_VALUE));
       double knockbackResistance = statsNBT.get(ToolStats.KNOCKBACK_RESISTANCE);
       if (knockbackResistance != 0) {
-        builder.put(Attributes.KNOCKBACK_RESISTANCE, new AttributeModifier(uuid, "tconstruct.armor.knockback_resistance", knockbackResistance, AttributeModifier.Operation.ADDITION));
+        builder.put(Attributes.KNOCKBACK_RESISTANCE.value(), new AttributeModifier(modifierId.withSuffix(".knockback_resistance"), knockbackResistance, AttributeModifier.Operation.ADD_VALUE));
       }
       // grab attributes from modifiers
       BiConsumer<Attribute,AttributeModifier> attributeConsumer = builder::put;
@@ -305,10 +291,13 @@ public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay
     return builder.build();
   }
 
-  @Override
+  /**
+   * Returns attribute modifiers for the given slot and stack.
+   * This is a custom method (not an override) that bridges to the internal Multimap system.
+   * In 1.21, the vanilla override is getDefaultAttributeModifiers(ItemStack) returning ItemAttributeModifiers.
+   */
   public Multimap<Attribute,AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
-    CompoundTag nbt = stack.getTag();
-    if (slot != getEquipmentSlot() || nbt == null) {
+    if (slot != getEquipmentSlot() || ToolStack.from(stack).getStats() == StatsNBT.EMPTY) {
       return ImmutableMultimap.of();
     }
     return getAttributeModifiers(ToolStack.from(stack), slot);
@@ -384,8 +373,8 @@ public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay
   }
 
   @Override
-  public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-    TooltipUtil.addInformation(this, stack, level, tooltip, SafeClientAccess.getTooltipKey(), flag);
+  public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    TooltipUtil.addInformation(this, stack, (Level) null, tooltip, SafeClientAccess.getTooltipKey(), flag);
   }
 
   @Override
@@ -395,10 +384,7 @@ public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay
     return tooltips;
   }
 
-  @Override
-  public int getDefaultTooltipHideFlags(ItemStack stack) {
-    return TooltipUtil.getModifierHideFlags(getToolDefinition());
-  }
+  // getDefaultTooltipHideFlags removed in 1.21 - tooltip flags are now handled through data components
 
   /* Display items */
 

@@ -78,7 +78,7 @@ public class ModifierEntry implements Comparable<ModifierEntry> {
 
   /** Gets the contained modifier ID, prevents resolving the lazy modifier if not needed */
   public ModifierId getId() {
-    return modifier.getId();
+    return modifier.getModifierId();
   }
 
   /** Gets the contained modifier */
@@ -172,7 +172,7 @@ public class ModifierEntry implements Comparable<ModifierEntry> {
 
   /** Checks if this entry matches the given modifier */
   public boolean matches(ModifierId id) {
-    return modifier.getId().equals(id);
+    return modifier.getModifierId().equals(id);
   }
 
   /** Checks if this entry matches the given modifier */
@@ -217,7 +217,7 @@ public class ModifierEntry implements Comparable<ModifierEntry> {
   /** Writes this tag to NBT */
   public CompoundTag serializeToNBT() {
     CompoundTag tag = new CompoundTag();
-    tag.putString(TAG_MODIFIER, modifier.getId().toString());
+    tag.putString(TAG_MODIFIER, modifier.getModifierId().toString());
     tag.putInt(TAG_LEVEL, level);
     return tag;
   }
@@ -240,6 +240,6 @@ public class ModifierEntry implements Comparable<ModifierEntry> {
 
   @Override
   public String toString() {
-    return "ModifierEntry{" + modifier.getId() + ",level=" + level + '}';
+    return "ModifierEntry{" + modifier.getModifierId() + ",level=" + level + '}';
   }
 }

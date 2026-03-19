@@ -27,7 +27,7 @@ public class EnderdodgingModifier extends NoLevelsModifier implements DamageBloc
   public boolean isDamageBlocked(IToolStackView tool, ModifierEntry modifier, EquipmentContext context, EquipmentSlot slotType, DamageSource source, float amount) {
     // teleport always from projectiles
     LivingEntity self = context.getEntity();
-    if (!self.hasEffect(TinkerModifiers.teleportCooldownEffect.get()) && source.isIndirect()) {
+    if (!self.hasEffect(TinkerModifiers.teleportCooldownEffect) && !source.isDirect()) {
       if (TeleportHelper.randomNearbyTeleport(context.getEntity(), (e, x, y, z) -> new EnderdodgingTeleportEvent(e, x, y, z, modifier))) {
         TinkerModifiers.teleportCooldownEffect.get().apply(self, 15 * 20, 0, true);
         ToolDamageUtil.damageAnimated(tool, (int)amount, self, slotType, modifier.getId());
@@ -42,7 +42,7 @@ public class EnderdodgingModifier extends NoLevelsModifier implements DamageBloc
   public void onAttacked(IToolStackView tool, ModifierEntry modifier, EquipmentContext context, EquipmentSlot slotType, DamageSource source, float amount, boolean isDirectDamage) {
     // teleport randomly from other damage
     LivingEntity self = context.getEntity();
-    if (!self.hasEffect(TinkerModifiers.teleportCooldownEffect.get()) && source.getEntity() instanceof LivingEntity && RANDOM.nextInt(10) == 0) {
+    if (!self.hasEffect(TinkerModifiers.teleportCooldownEffect) && source.getEntity() instanceof LivingEntity && RANDOM.nextInt(10) == 0) {
       if (TeleportHelper.randomNearbyTeleport(context.getEntity(), (e, x, y, z) -> new EnderdodgingTeleportEvent(e, x, y, z, modifier))) {
         TinkerModifiers.teleportCooldownEffect.get().apply(self, 15 * 20, 1, true);
       }

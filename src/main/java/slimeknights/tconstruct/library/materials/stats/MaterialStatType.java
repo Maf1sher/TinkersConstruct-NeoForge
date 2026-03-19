@@ -1,7 +1,9 @@
 package slimeknights.tconstruct.library.materials.stats;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import net.minecraft.resources.ResourceLocation;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.data.loadable.record.SingletonLoader;
@@ -21,6 +23,7 @@ public class MaterialStatType<T extends IMaterialStats> implements IdAwareObject
   /** Context key to use if you want the recipe serializer passed into your recipe */
   public static final ContextKey<MaterialStatType<?>> CONTEXT_KEY = new ContextKey<>("material_stat_type");
 
+  @Getter(AccessLevel.NONE)
   private final MaterialStatsId id;
   private final T defaultStats;
   private final RecordLoadable<T> loadable;
@@ -43,6 +46,16 @@ public class MaterialStatType<T extends IMaterialStats> implements IdAwareObject
     this.loadable = loadable;
     this.defaultStats = defaultStatsProvider.apply(this);
     this.canRepair = defaultStats instanceof IRepairableMaterialStats;
+  }
+
+  /** Gets the MaterialStatsId for this stat type */
+  public MaterialStatsId getStatId() {
+    return id;
+  }
+
+  @Override
+  public ResourceLocation getId() {
+    return id.location();
   }
 
   /** Creates a stat type that always resolves to the same instance */

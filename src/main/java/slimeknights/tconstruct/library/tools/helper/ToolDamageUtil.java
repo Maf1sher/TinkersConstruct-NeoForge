@@ -1,8 +1,10 @@
 package slimeknights.tconstruct.library.tools.helper;
 
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -30,7 +32,7 @@ public class ToolDamageUtil {
    * @param stack  Tool stack
    */
   public static void breakTool(ItemStack stack) {
-    stack.getOrCreateTag().putBoolean(ToolStack.TAG_BROKEN, true);
+    CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.putBoolean(ToolStack.TAG_BROKEN, true));
   }
 
   /**
@@ -39,8 +41,12 @@ public class ToolDamageUtil {
    * @return  True if broken
    */
   public static boolean isBroken(ItemStack stack) {
-    CompoundTag nbt = stack.getTag();
-    return nbt != null && nbt.getBoolean(ToolStack.TAG_BROKEN);
+    CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
+    if (customData == null) {
+      return false;
+    }
+    CompoundTag nbt = customData.copyTag();
+    return nbt.getBoolean(ToolStack.TAG_BROKEN);
   }
 
   /**
@@ -49,7 +55,7 @@ public class ToolDamageUtil {
    * For normal tool usages, see {@link ToolStack#getStats()} with {@link ToolStats#DURABILITY}.
    */
   public static int getFakeMaxDamage(ItemStack stack) {
-    if (!stack.getItem().canBeDepleted()) {
+    if (!stack.isDamageableItem()) {
       return 0;
     }
     ToolStack tool = ToolStack.from(stack);
@@ -150,7 +156,7 @@ public class ToolDamageUtil {
    */
   public static boolean damageAnimated(IToolStackView tool, int amount, LivingEntity entity, EquipmentSlot slot, ModifierId cause) {
     if (damage(tool, amount, entity, entity.getItemBySlot(slot), cause)) {
-      entity.broadcastBreakEvent(slot);
+      entity.onEquippedItemBroken(entity.getItemBySlot(slot).getItem(), slot);
       return true;
     }
     return false;
@@ -180,8 +186,8 @@ public class ToolDamageUtil {
    */
   public static boolean damageAnimated(IToolStackView tool, int amount, LivingEntity entity, InteractionHand hand, ModifierId cause) {
     if (damage(tool, amount, entity, entity.getItemInHand(hand), cause)) {
-      entity.broadcastBreakEvent(hand);
-      // TODO: why don't we fire ForgeEventFactory.onPlayerDestroyItem here?
+      entity.onEquippedItemBroken(entity.getItemInHand(hand).getItem(), LivingEntity.getSlotForHand(hand));
+      // TODO: why don't we fire EventHooks.onPlayerDestroyItem here?
       return true;
     }
     return false;
@@ -214,7 +220,7 @@ public class ToolDamageUtil {
         ItemStack stack = entity.getItemBySlot(slot);
         if (tool.isSameStack(stack)) {
           if (damage(tool, amount, entity, stack, cause)) {
-            entity.broadcastBreakEvent(slot);
+            entity.onEquippedItemBroken(stack.getItem(), slot);
             return true;
           }
           return false;
@@ -253,12 +259,12 @@ public class ToolDamageUtil {
     return false;
   }
 
-  /** Implements {@link net.minecraft.world.item.Item#damageItem(ItemStack, int, LivingEntity, Consumer)} for a modifiable item */
-  public static <T extends LivingEntity> void handleDamageItem(ItemStack stack, int amount, T damager, Consumer<T> onBroken) {
+  /** Implements {@link net.neoforged.neoforge.common.extensions.IItemExtension#damageItem(ItemStack, int, LivingEntity, Consumer)} for a modifiable item */
+  public static <T extends LivingEntity> void handleDamageItem(ItemStack stack, int amount, @Nullable T damager) {
     // We basically emulate Itemstack.damageItem here. We always return 0 to skip the handling in ItemStack.
     // If we don't tools ignore our damage logic
-    if (stack.getItem().canBeDepleted() && ToolDamageUtil.damage(ToolStack.from(stack), amount, damager, stack)) {
-      onBroken.accept(damager);
+    if (stack.isDamageableItem()) {
+      ToolDamageUtil.damage(ToolStack.from(stack), amount, damager, stack);
     }
   }
 

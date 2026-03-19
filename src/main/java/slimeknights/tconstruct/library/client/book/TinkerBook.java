@@ -1,6 +1,5 @@
 package slimeknights.tconstruct.library.client.book;
 
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import slimeknights.mantle.client.book.BookLoader;
 import slimeknights.mantle.client.book.data.BookData;
@@ -62,7 +61,7 @@ public class TinkerBook extends BookData {
    * Initializes the books
    */
   public static void initBook() {
-    BookLoader.registerGsonTypeAdapter(Component.class, new Component.Serializer());
+    // Component.Serializer constructor is private in 1.21.1, and Mantle no longer registers it
 
     // register page types
     BookLoader.registerPageType(MeleeHarvestMaterialContent.ID, MeleeHarvestMaterialContent.class);
@@ -107,13 +106,13 @@ public class TinkerBook extends BookData {
           return registry.getMaterialStats(id, StatlessMaterialStats.MAILLE.getIdentifier()).isPresent() ? 2 : 1;
         }
         // anything with plating goes 4th
-        if (registry.getMaterialStats(id, CHESTPLATE.getId()).isPresent()) {
+        if (registry.getMaterialStats(id, CHESTPLATE.getStatId()).isPresent()) {
           return 4;
         }
         // if it has maille, it goes before plating. Otherwise (shield cores), it goes after
         return registry.getMaterialStats(id, StatlessMaterialStats.MAILLE.getIdentifier()).isPresent() ? 3 : 5;
       }),
-      HELMET.getId(), CHESTPLATE.getId(), LEGGINGS.getId(), BOOTS.getId(), SHIELD.getId(),
+      HELMET.getStatId(), CHESTPLATE.getStatId(), LEGGINGS.getStatId(), BOOTS.getStatId(), SHIELD.getStatId(),
       StatlessMaterialStats.MAILLE.getIdentifier(), StatlessMaterialStats.CUIRASS.getIdentifier(),
       StatlessMaterialStats.SHIELD_CORE.getIdentifier());
     TierRangeMaterialSectionTransformer.registerMaterialType(getResource("skull"), ContentMaterialSkull::new,
@@ -166,7 +165,7 @@ public class TinkerBook extends BookData {
    */
   @SuppressWarnings("removal")
   private static void addStandardData(BookData book, ResourceLocation id, BookTransformer... extraTransformers) {
-    book.addRepository(new FileRepository(new ResourceLocation(id.getNamespace(), "book/" + id.getPath())));
+    book.addRepository(new FileRepository(ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "book/" + id.getPath())));
     book.addTransformer(BookTransformer.indexTranformer());
     book.addTransformer(TierRangeMaterialSectionTransformer.INSTANCE);
 

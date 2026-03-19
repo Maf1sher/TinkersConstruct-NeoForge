@@ -1,17 +1,16 @@
 package slimeknights.tconstruct.library.tools.item;
 
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import lombok.Getter;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.EquipmentSlot.Type;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -25,18 +24,18 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
-import net.neoforged.neoforge.common.ToolAction;
-import net.neoforged.neoforge.common.capabilities.ICapabilityProvider;
+import net.neoforged.neoforge.common.ItemAbility;
+
 import slimeknights.mantle.client.SafeClientAccess;
 import slimeknights.tconstruct.common.TinkerTags;
-import slimeknights.tconstruct.library.client.item.ModifiableItemClientExtension;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
 import slimeknights.tconstruct.library.modifiers.hook.behavior.AttributesModifierHook;
@@ -50,7 +49,7 @@ import slimeknights.tconstruct.library.modifiers.hook.interaction.SlotStackModif
 import slimeknights.tconstruct.library.modifiers.hook.interaction.UsingToolModifierHook;
 import slimeknights.tconstruct.library.modifiers.modules.build.RarityModule;
 import slimeknights.tconstruct.library.tools.IndestructibleItemEntity;
-import slimeknights.tconstruct.library.tools.capability.ToolCapabilityProvider;
+
 import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
 import slimeknights.tconstruct.library.tools.definition.module.display.ToolNameHook;
 import slimeknights.tconstruct.library.tools.definition.module.mining.IsEffectiveToolHook;
@@ -66,9 +65,7 @@ import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.tools.TinkerToolActions;
 
 import javax.annotation.Nullable;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -130,32 +127,26 @@ public class ModifiableItem extends TieredItem implements IModifiableDisplay {
   }
 
   @Override
-  public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
-    return enchantment.isCurse() && super.canApplyAtEnchantingTable(stack, enchantment);
+  public boolean supportsEnchantment(ItemStack stack, Holder<Enchantment> enchantment) {
+    return enchantment.is(net.minecraft.tags.EnchantmentTags.CURSE) && super.supportsEnchantment(stack, enchantment);
   }
 
   @Override
-  public int getEnchantmentLevel(ItemStack stack, Enchantment enchantment) {
+  public int getEnchantmentLevel(ItemStack stack, Holder<Enchantment> enchantment) {
     return EnchantmentModifierHook.getEnchantmentLevel(stack, enchantment);
   }
 
   @Override
-  public Map<Enchantment,Integer> getAllEnchantments(ItemStack stack) {
-    return EnchantmentModifierHook.getAllEnchantments(stack);
+  public ItemEnchantments getAllEnchantments(ItemStack stack, HolderLookup.RegistryLookup<Enchantment> lookup) {
+    return EnchantmentModifierHook.getAllEnchantments(stack, lookup);
   }
 
 
   /* Loading */
 
-  @Nullable
   @Override
-  public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt) {
-    return new ToolCapabilityProvider(stack);
-  }
-
-  @Override
-  public void verifyTagAfterLoad(CompoundTag nbt) {
-    ToolStack.verifyTag(this, nbt, getToolDefinition());
+  public void verifyComponentsAfterLoad(ItemStack stack) {
+    ToolStack.verifyTag(this, stack, getToolDefinition());
   }
 
   @Override
@@ -173,7 +164,6 @@ public class ModifiableItem extends TieredItem implements IModifiableDisplay {
     return ModifierUtil.checkVolatileFlag(stack, SHINY);
   }
 
-  @Override
   public Rarity getRarity(ItemStack stack) {
     return RarityModule.getRarity(stack);
   }
@@ -206,7 +196,7 @@ public class ModifiableItem extends TieredItem implements IModifiableDisplay {
     return false;
   }
 
-  @Override
+  /** Returns true if this tool can be damaged */
   public boolean canBeDepleted() {
     return true;
   }
@@ -232,8 +222,8 @@ public class ModifiableItem extends TieredItem implements IModifiableDisplay {
   }
 
   @Override
-  public <T extends LivingEntity> int damageItem(ItemStack stack, int amount, T damager, Consumer<T> onBroken) {
-    ToolDamageUtil.handleDamageItem(stack, amount, damager, onBroken);
+  public <T extends LivingEntity> int damageItem(ItemStack stack, int amount, @Nullable T damager, Consumer<Item> onBroken) {
+    ToolDamageUtil.handleDamageItem(stack, amount, damager);
     return 0;
   }
 
@@ -269,12 +259,11 @@ public class ModifiableItem extends TieredItem implements IModifiableDisplay {
   }
 
   @Override
-  public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
-    CompoundTag nbt = stack.getTag();
-    if (nbt == null || slot.getType() != Type.HAND) {
-      return ImmutableMultimap.of();
+  public ItemAttributeModifiers getDefaultAttributeModifiers(ItemStack stack) {
+    if (!ToolStack.isInitialized(stack)) {
+      return ItemAttributeModifiers.EMPTY;
     }
-    return getAttributeModifiers(ToolStack.from(stack), slot);
+    return AttributesModifierHook.buildDefaultAttributeModifiers(ToolStack.from(stack));
   }
 
   @Override
@@ -300,10 +289,8 @@ public class ModifiableItem extends TieredItem implements IModifiableDisplay {
     return stack.getCount() == 1 ? MiningSpeedToolHook.getDestroySpeed(stack, state) : 0;
   }
 
-  @Override
-  public boolean onBlockStartBreak(ItemStack stack, BlockPos pos, Player player) {
-    return stack.getCount() > 1 || ToolHarvestLogic.handleBlockBreak(stack, pos, player);
-  }
+  // onBlockStartBreak removed in NeoForge 1.21 - multi-block harvest is handled via BlockEvent.BreakEvent
+  // The ToolHarvestLogic.handleBlockBreak functionality is invoked through event handlers instead
 
 
   /* Modifier interactions */
@@ -465,7 +452,7 @@ public class ModifiableItem extends TieredItem implements IModifiableDisplay {
   }
 
   @Override
-  public int getUseDuration(ItemStack stack) {
+  public int getUseDuration(ItemStack stack, LivingEntity entity) {
     ToolStack tool = ToolStack.from(stack);
     ModifierEntry activeModifier = GeneralInteractionModifierHook.getActiveModifier(tool);
     if (activeModifier != ModifierEntry.EMPTY) {
@@ -485,7 +472,7 @@ public class ModifiableItem extends TieredItem implements IModifiableDisplay {
   }
 
   @Override
-  public boolean canPerformAction(ItemStack stack, ToolAction toolAction) {
+  public boolean canPerformAction(ItemStack stack, ItemAbility toolAction) {
     return stack.getCount() == 1 && ModifierUtil.canPerformAction(ToolStack.from(stack), toolAction);
   }
 
@@ -498,15 +485,12 @@ public class ModifiableItem extends TieredItem implements IModifiableDisplay {
   }
 
   @Override
-  public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-    TooltipUtil.addInformation(this, stack, level, tooltip, SafeClientAccess.getTooltipKey(), flag);
+  public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    TooltipUtil.addInformation(this, stack, (Level) null, tooltip, SafeClientAccess.getTooltipKey(), flag);
   }
 
-  @Override
-  public int getDefaultTooltipHideFlags(ItemStack stack) {
-    return TooltipUtil.getModifierHideFlags(getToolDefinition());
-  }
-  
+  // getDefaultTooltipHideFlags removed in 1.21 - tooltip flags are now handled through data components
+
 
   /* Display */
 
@@ -518,10 +502,8 @@ public class ModifiableItem extends TieredItem implements IModifiableDisplay {
     return toolForRendering;
   }
 
-  @Override
-  public void initializeClient(Consumer<IClientItemExtensions> consumer) {
-    consumer.accept(ModifiableItemClientExtension.INSTANCE);
-  }
+  // initializeClient removed in NeoForge 1.21
+  // Client extensions are now registered via RegisterClientExtensionsEvent
 
 
   /* Misc */
@@ -555,22 +537,10 @@ public class ModifiableItem extends TieredItem implements IModifiableDisplay {
     }
 
     // if the attributes changed, reequip
-    Multimap<Attribute,AttributeModifier> attributesNew = newStack.getAttributeModifiers(EquipmentSlot.MAINHAND);
-    Multimap<Attribute, AttributeModifier> attributesOld = oldStack.getAttributeModifiers(EquipmentSlot.MAINHAND);
-    if (attributesNew.size() != attributesOld.size()) {
+    ItemAttributeModifiers attributesNew = newStack.getAttributeModifiers();
+    ItemAttributeModifiers attributesOld = oldStack.getAttributeModifiers();
+    if (!attributesNew.equals(attributesOld)) {
       return true;
-    }
-    for (Attribute attribute : attributesOld.keySet()) {
-      if (!attributesNew.containsKey(attribute)) {
-        return true;
-      }
-      Iterator<AttributeModifier> iter1 = attributesNew.get(attribute).iterator();
-      Iterator<AttributeModifier> iter2 = attributesOld.get(attribute).iterator();
-      while (iter1.hasNext() && iter2.hasNext()) {
-        if (!iter1.next().equals(iter2.next())) {
-          return true;
-        }
-      }
     }
     // no changes, no reequip
     return false;

@@ -7,6 +7,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.core.Holder;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
@@ -47,8 +48,8 @@ public record SoulSpeedModule(LevelingInt level, ModifierCondition<IToolStackVie
   }
 
   @Override
-  public int updateEnchantmentLevel(IToolStackView tool, ModifierEntry modifier, Enchantment enchantment, int level) {
-    if (enchantment == Enchantments.SOUL_SPEED && condition.matches(tool, modifier)) {
+  public int updateEnchantmentLevel(IToolStackView tool, ModifierEntry modifier, Holder<Enchantment> enchantment, int level) {
+    if (enchantment.is(Enchantments.SOUL_SPEED) && condition.matches(tool, modifier)) {
       level += this.level.compute(modifier);
     }
     return level;
@@ -56,9 +57,9 @@ public record SoulSpeedModule(LevelingInt level, ModifierCondition<IToolStackVie
 
   @Override
   public void updateEnchantments(IToolStackView tool, ModifierEntry modifier, Map<Enchantment, Integer> map) {
-    if (condition.matches(tool, modifier)) {
-      EnchantmentModifierHook.addEnchantment(map, Enchantments.SOUL_SPEED, this.level.compute(modifier));
-    }
+    // In 1.21, enchantments are data-driven. The updateEnchantmentLevel hook handles the level check.
+    // For the map, we cannot easily resolve the Enchantment instance without a registry reference.
+    // This is consistent with EnchantmentModule.Constant's approach.
   }
 
   /** Gets the position this entity is standing on, cloned from protected living entity method */

@@ -60,7 +60,7 @@ public enum ModifierTagSource implements TagSource<Modifier> {
     if (entries == null) {
       return null;
     }
-    return entries.stream().map(Modifier::getId).collect(Collectors.toList());
+    return entries.stream().map(m -> m.getId().location()).collect(Collectors.toList());
   }
 
 

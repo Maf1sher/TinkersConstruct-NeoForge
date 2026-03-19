@@ -8,6 +8,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import slimeknights.mantle.client.TooltipKey;
+import net.minecraft.core.registries.BuiltInRegistries;
 import slimeknights.tconstruct.common.TinkerEffect;
 import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
@@ -42,13 +43,13 @@ public class InsatiableModifier extends Modifier implements ProjectileHitModifie
     if (type == ToolType.LAUNCHER) {
       type = ToolType.RANGED;
     }
-    return TinkerEffect.getLevel(attacker, TinkerModifiers.insatiableEffect.get(type));
+    return TinkerEffect.getLevel(attacker, BuiltInRegistries.MOB_EFFECT.wrapAsHolder(TinkerModifiers.insatiableEffect.get(type)));
   }
 
   /** Applies the effect to the target */
   public static void applyEffect(LivingEntity living, ToolType type, int duration, int add, int maxLevel) {
     TinkerEffect effect = TinkerModifiers.insatiableEffect.get(type);
-    effect.apply(living, duration, Math.min(maxLevel, TinkerEffect.getAmplifier(living, effect) + add), true);
+    effect.apply(living, duration, Math.min(maxLevel, TinkerEffect.getAmplifier(living, BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effect)) + add), true);
   }
 
   @Override

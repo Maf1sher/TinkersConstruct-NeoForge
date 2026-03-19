@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.library.recipe.modifiers.adding;
 
 import com.google.common.collect.Streams;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -85,7 +86,7 @@ public class MultilevelModifierRecipe extends ModifierRecipe implements IMultiRe
     }
 
     // add modifier
-    tool.addModifier(result.getId(), 1);
+    tool.addModifier(result.getModifierId(), 1);
 
     // ensure no modifier problems
     Component toolValidation = tool.tryValidate();
@@ -106,7 +107,7 @@ public class MultilevelModifierRecipe extends ModifierRecipe implements IMultiRe
   private List<IDisplayModifierRecipe> displayRecipes = null;
 
   @Override
-  public List<IDisplayModifierRecipe> getRecipes(RegistryAccess access) {
+  public List<IDisplayModifierRecipe> getRecipes(HolderLookup.Provider access) {
     // no inputs means this recipe is to handle internal crystal stuff
     if (inputs.isEmpty()) {
       return Collections.emptyList();

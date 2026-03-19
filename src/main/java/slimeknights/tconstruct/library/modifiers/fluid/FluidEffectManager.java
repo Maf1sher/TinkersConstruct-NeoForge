@@ -11,7 +11,7 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.crafting.CraftingHelper;
+import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.common.conditions.ICondition.IContext;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
@@ -23,6 +23,9 @@ import slimeknights.mantle.util.JsonHelper;
 import slimeknights.mantle.util.typed.TypedMapBuilder;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.utils.JsonUtils;
+
+import com.google.gson.JsonArray;
+import com.mojang.serialization.JsonOps;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +70,22 @@ public class FluidEffectManager extends SimpleJsonResourceReloadListener {
     conditionContext = event.getConditionContext();
   }
 
+  /** Evaluates conditions from JSON using ICondition.LIST_CODEC, replacing removed CraftingHelper.processConditions */
+  private static boolean processConditions(JsonObject json, String memberName, IContext conditionContext) {
+    if (!json.has(memberName)) {
+      return true;
+    }
+    JsonArray conditionsArray = json.getAsJsonArray(memberName);
+    List<ICondition> conditions = ICondition.LIST_CODEC.parse(JsonOps.INSTANCE, conditionsArray)
+      .getOrThrow(msg -> new RuntimeException("Failed to parse conditions: " + msg));
+    for (ICondition condition : conditions) {
+      if (!condition.test(conditionContext)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   /** Creates context for modifier parsing */
   public static TypedMapBuilder contextBuilder(ResourceLocation key) {
     return TypedMapBuilder.builder().put(ContextKey.ID, key).put(ContextKey.DEBUG, "Fluid Effect " + key);
@@ -84,7 +103,7 @@ public class FluidEffectManager extends SimpleJsonResourceReloadListener {
         JsonObject json = GsonHelper.convertToJsonObject(entry.getValue(), "fluid_effect");
 
         // want to parse condition without parsing effects, as the effect serializer may be missing
-        if (!CraftingHelper.processConditions(json, "conditions", conditionContext)) {
+        if (!processConditions(json, "conditions", conditionContext)) {
           continue;
         }
         fluids.add(new FluidEffects.Entry(key, FluidEffects.LOADABLE.deserialize(json, contextBuilder(key).put(ContextKey.CONDITION_CONTEXT, conditionContext).build())));

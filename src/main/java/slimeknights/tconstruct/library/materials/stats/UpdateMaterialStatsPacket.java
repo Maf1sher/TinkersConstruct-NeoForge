@@ -3,11 +3,13 @@ package slimeknights.tconstruct.library.materials.stats;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.minecraft.network.FriendlyByteBuf;
-import net.neoforged.neoforge.network.NetworkEvent.Context;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.apache.logging.log4j.Logger;
 import slimeknights.mantle.data.loadable.Loadable;
-import slimeknights.mantle.network.packet.IThreadsafePacket;
 import slimeknights.mantle.util.typed.TypedMapBuilder;
+import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.materials.MaterialRegistry;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.utils.Util;
@@ -20,7 +22,10 @@ import java.util.Map;
 
 @Getter
 @AllArgsConstructor
-public class UpdateMaterialStatsPacket implements IThreadsafePacket {
+public class UpdateMaterialStatsPacket implements CustomPacketPayload {
+  public static final CustomPacketPayload.Type<UpdateMaterialStatsPacket> TYPE = new CustomPacketPayload.Type<>(TConstruct.getResource("update_material_stats"));
+  public static final StreamCodec<FriendlyByteBuf, UpdateMaterialStatsPacket> STREAM_CODEC = StreamCodec.ofMember(UpdateMaterialStatsPacket::encode, UpdateMaterialStatsPacket::new);
+
   private static final Logger log = Util.getLogger("NetworkSync");
 
   protected final Map<MaterialId, Collection<IMaterialStats>> materialToStats;
@@ -48,11 +53,10 @@ public class UpdateMaterialStatsPacket implements IThreadsafePacket {
     }
   }
 
-  @Override
   public void encode(FriendlyByteBuf buffer) {
     buffer.writeInt(materialToStats.size());
     materialToStats.forEach((materialId, stats) -> {
-      buffer.writeResourceLocation(materialId);
+      buffer.writeResourceLocation(materialId.location());
       buffer.writeInt(stats.size());
       stats.forEach(stat -> encodeStat(buffer, stat, stat.getType()));
     });
@@ -65,12 +69,14 @@ public class UpdateMaterialStatsPacket implements IThreadsafePacket {
    */
   @SuppressWarnings("unchecked")
   private <T extends IMaterialStats> void encodeStat(FriendlyByteBuf buffer, IMaterialStats stat, MaterialStatType<T> type) {
-    MaterialStatsId.PARSER.encode(buffer, type.getId());
+    MaterialStatsId.PARSER.encode(buffer, type.getStatId());
     type.getLoadable().encode(buffer, (T) stat);
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
-    MaterialRegistry.updateMaterialStatsFromServer(this);
+  public CustomPacketPayload.Type<? extends CustomPacketPayload> type() { return TYPE; }
+
+  public static void handle(UpdateMaterialStatsPacket payload, IPayloadContext context) {
+    context.enqueueWork(() -> MaterialRegistry.updateMaterialStatsFromServer(payload));
   }
 }

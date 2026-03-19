@@ -8,13 +8,13 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SnowballItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import slimeknights.mantle.util.TranslationHelper;
 import slimeknights.tconstruct.common.Sounds;
 import slimeknights.tconstruct.gadgets.entity.GlowballEntity;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 /** @deprecated use {@link slimeknights.tconstruct.library.tools.item.ModifiableShurikenItem} with {@link slimeknights.tconstruct.tools.modules.ranged.common.ProjectilePlaceGlowModule} */
@@ -45,8 +45,8 @@ public class GlowBallItem extends SnowballItem {
   }
 
   @Override
-  public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+  public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
     TranslationHelper.addOptionalTooltip(stack, tooltip);
-    super.appendHoverText(stack, level, tooltip, flag);
+    super.appendHoverText(stack, context, tooltip, flag);
   }
 }

@@ -4,9 +4,11 @@ import com.google.common.collect.ImmutableMap;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.tags.TagKey;
-import net.neoforged.neoforge.network.NetworkEvent.Context;
-import slimeknights.mantle.network.packet.IThreadsafePacket;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.materials.MaterialRegistry;
 import slimeknights.tconstruct.library.utils.GenericTagUtil;
 
@@ -17,7 +19,10 @@ import java.util.Map;
 
 @Getter
 @AllArgsConstructor
-public class UpdateMaterialsPacket implements IThreadsafePacket {
+public class UpdateMaterialsPacket implements CustomPacketPayload {
+  public static final CustomPacketPayload.Type<UpdateMaterialsPacket> TYPE = new CustomPacketPayload.Type<>(TConstruct.getResource("update_materials"));
+  public static final StreamCodec<FriendlyByteBuf, UpdateMaterialsPacket> STREAM_CODEC = StreamCodec.ofMember(UpdateMaterialsPacket::encode, UpdateMaterialsPacket::new);
+
   private final Map<MaterialId,IMaterial> materials;
   private final Map<MaterialId,MaterialId> redirects;
   private final Map<TagKey<IMaterial>,List<IMaterial>> tags;
@@ -48,11 +53,10 @@ public class UpdateMaterialsPacket implements IThreadsafePacket {
     this.tags = GenericTagUtil.decodeTags(buffer, MaterialManager.REGISTRY_KEY, id -> this.materials.get(new MaterialId(id)));
   }
 
-  @Override
   public void encode(FriendlyByteBuf buffer) {
     buffer.writeInt(this.materials.size());
     this.materials.values().forEach(material -> {
-      buffer.writeResourceLocation(material.getIdentifier());
+      buffer.writeResourceLocation(material.getIdentifier().location());
       buffer.writeVarInt(material.getTier());
       buffer.writeVarInt(material.getSortOrder());
       buffer.writeBoolean(material.isCraftable());
@@ -63,11 +67,13 @@ public class UpdateMaterialsPacket implements IThreadsafePacket {
       buffer.writeUtf(key.toString());
       buffer.writeUtf(value.toString());
     });
-    GenericTagUtil.encodeTags(buffer, IMaterial::getIdentifier, this.tags);
+    GenericTagUtil.encodeTags(buffer, material -> material.getIdentifier().location(), this.tags);
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
-    MaterialRegistry.updateMaterialsFromServer(this);
+  public CustomPacketPayload.Type<? extends CustomPacketPayload> type() { return TYPE; }
+
+  public static void handle(UpdateMaterialsPacket payload, IPayloadContext context) {
+    context.enqueueWork(() -> MaterialRegistry.updateMaterialsFromServer(payload));
   }
 }

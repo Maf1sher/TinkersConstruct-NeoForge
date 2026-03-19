@@ -1,7 +1,6 @@
 package slimeknights.tconstruct.library.tools.item;
 
 import lombok.Getter;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
@@ -15,11 +14,12 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ArrowItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.capabilities.ICapabilityProvider;
+
 import slimeknights.mantle.client.SafeClientAccess;
 import slimeknights.mantle.client.TooltipKey;
 import slimeknights.tconstruct.common.Sounds;
@@ -29,7 +29,7 @@ import slimeknights.tconstruct.library.modifiers.hook.interaction.InventoryTickM
 import slimeknights.tconstruct.library.modifiers.hook.interaction.SlotStackModifierHook;
 import slimeknights.tconstruct.library.modifiers.modules.build.RarityModule;
 import slimeknights.tconstruct.library.tools.IndestructibleItemEntity;
-import slimeknights.tconstruct.library.tools.capability.ToolCapabilityProvider;
+
 import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
 import slimeknights.tconstruct.library.tools.definition.module.display.ToolNameHook;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
@@ -60,14 +60,14 @@ public class ModifiableArrowItem extends ArrowItem implements IModifiableDisplay
   /* Arrowing */
 
   @Override
-  public AbstractArrow createArrow(Level level, ItemStack stack, LivingEntity shooter) {
+  public AbstractArrow createArrow(Level level, ItemStack stack, LivingEntity shooter, @Nullable ItemStack weapon) {
     ModifiableArrow arrow = new ModifiableArrow(level, shooter);
     arrow.onCreate(stack, shooter);
     return arrow;
   }
 
   @Override
-  public boolean isInfinite(ItemStack stack, ItemStack bow, Player player) {
+  public boolean isInfinite(ItemStack stack, ItemStack bow, LivingEntity shooter) {
     return false;
   }
 
@@ -102,15 +102,9 @@ public class ModifiableArrowItem extends ArrowItem implements IModifiableDisplay
 
   /* Loading */
 
-  @Nullable
   @Override
-  public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt) {
-    return new ToolCapabilityProvider(stack);
-  }
-
-  @Override
-  public void verifyTagAfterLoad(CompoundTag nbt) {
-    ToolStack.verifyTag(this, nbt, getToolDefinition());
+  public void verifyComponentsAfterLoad(ItemStack stack) {
+    ToolStack.verifyTag(this, stack, getToolDefinition());
   }
 
   @Override
@@ -128,7 +122,6 @@ public class ModifiableArrowItem extends ArrowItem implements IModifiableDisplay
     return ModifierUtil.checkVolatileFlag(stack, SHINY);
   }
 
-  @Override
   public Rarity getRarity(ItemStack stack) {
     return RarityModule.getRarity(stack);
   }
@@ -174,14 +167,11 @@ public class ModifiableArrowItem extends ArrowItem implements IModifiableDisplay
   }
 
   @Override
-  public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-    TooltipUtil.addInformation(this, stack, level, tooltip, SafeClientAccess.getTooltipKey(), flag);
+  public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    TooltipUtil.addInformation(this, stack, (Level) null, tooltip, SafeClientAccess.getTooltipKey(), flag);
   }
 
-  @Override
-  public int getDefaultTooltipHideFlags(ItemStack stack) {
-    return TooltipUtil.getModifierHideFlags(getToolDefinition());
-  }
+  // getDefaultTooltipHideFlags removed in 1.21 - tooltip flags are now handled through data components
 
   @Override
   public List<Component> getStatInformation(IToolStackView tool, @Nullable Player player, List<Component> tooltips, TooltipKey key, TooltipFlag tooltipFlag) {

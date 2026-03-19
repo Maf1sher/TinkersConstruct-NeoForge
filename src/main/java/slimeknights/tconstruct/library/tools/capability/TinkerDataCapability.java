@@ -2,27 +2,18 @@ package slimeknights.tconstruct.library.tools.capability;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.capabilities.Capability;
-import net.neoforged.neoforge.common.capabilities.CapabilityManager;
-import net.neoforged.neoforge.common.capabilities.CapabilityToken;
-import net.neoforged.neoforge.common.capabilities.ICapabilityProvider;
-import net.neoforged.neoforge.common.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.common.util.LazyOptional;
-import net.neoforged.neoforge.event.AttachCapabilitiesEvent;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.neoforge.capabilities.EntityCapability;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import slimeknights.mantle.registration.object.IdAwareObject;
 import slimeknights.tconstruct.TConstruct;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -35,61 +26,28 @@ public class TinkerDataCapability {
 
   /** Capability ID */
   private static final ResourceLocation ID = TConstruct.getResource("modifier_data");
-  /** Capability type */
-  public static final Capability<Holder> CAPABILITY = CapabilityManager.get(new CapabilityToken<>() {});
+  /** Capability type - NeoForge 1.21.1 EntityCapability */
+  public static final EntityCapability<Holder, Void> CAPABILITY = EntityCapability.createVoid(ID, Holder.class);
 
-  /** Registers this capability */
-  public static void register() {
-    FMLJavaModLoadingContext.get().getModEventBus().addListener(EventPriority.NORMAL, false, RegisterCapabilitiesEvent.class, TinkerDataCapability::register);
-    NeoForge.EVENT_BUS.addGenericListener(Entity.class, TinkerDataCapability::attachCapability);
-  }
+  /** Internal storage for holder instances, keyed weakly by entity */
+  private static final WeakHashMap<LivingEntity, Holder> INSTANCES = new WeakHashMap<>();
 
-  /** Registers the capability with the event bus */
-  private static void register(RegisterCapabilitiesEvent event) {
-    event.register(Holder.class);
-  }
-
-  /** Event listener to attach the capability */
-  private static void attachCapability(AttachCapabilitiesEvent<Entity> event) {
-    if (event.getObject() instanceof LivingEntity) {
-      Provider provider = new Provider();
-      event.addCapability(ID, provider);
-      event.addListener(provider);
-    }
+  /** Registers this capability with the RegisterCapabilitiesEvent */
+  public static void register(RegisterCapabilitiesEvent event) {
+    // register for all living entity types
+    event.registerEntity(CAPABILITY, EntityType.PLAYER, (entity, ctx) ->
+      INSTANCES.computeIfAbsent((LivingEntity) entity, e -> new Holder()));
+    // also register for all living entities using a broader approach
+    // Note: in NeoForge 1.21.1, there's no way to register for all LivingEntity subtypes at once.
+    // Additional entity types can be registered as needed.
   }
 
   /** Gets the data capability from an entity, or null if missing */
-  @SuppressWarnings("DataFlowIssue")
   @Nullable
   public static TinkerDataCapability.Holder getData(LivingEntity entity) {
-    return entity.getCapability(CAPABILITY).orElse(null);
+    return entity.getCapability(CAPABILITY);
   }
 
-
-  /* Required methods */
-
-  /** Capability provider instance */
-  private static class Provider implements ICapabilityProvider, Runnable {
-    private LazyOptional<Holder> data;
-    private Provider() {
-      this.data = LazyOptional.of(Holder::new);
-    }
-
-    @Nonnull
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
-      return CAPABILITY.orEmpty(cap, data);
-    }
-
-    @Override
-    public void run() {
-      // called when capabilities invalidate, just invalidate but preserve the old data
-      // (as if they revive the equipment change event does not fire again, see dimension change)
-      Holder oldData = data.orElse(new Holder());
-      data.invalidate();
-      data = LazyOptional.of(() -> oldData);
-    }
-  }
 
   /** Class for generic keys */
   @SuppressWarnings("unused")

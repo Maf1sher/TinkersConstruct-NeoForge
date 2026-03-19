@@ -2,11 +2,16 @@ package slimeknights.tconstruct.tools.network;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.entity.Entity;
-import net.neoforged.neoforge.network.NetworkEvent.Context;
-import slimeknights.mantle.network.packet.IThreadsafePacket;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import slimeknights.tconstruct.TConstruct;
 
-public class EntityMovementChangePacket implements IThreadsafePacket {
+public class EntityMovementChangePacket implements CustomPacketPayload {
+  public static final CustomPacketPayload.Type<EntityMovementChangePacket> TYPE = new CustomPacketPayload.Type<>(TConstruct.getResource("entity_movement_change"));
+  public static final StreamCodec<FriendlyByteBuf, EntityMovementChangePacket> STREAM_CODEC = StreamCodec.ofMember(EntityMovementChangePacket::encode, EntityMovementChangePacket::new);
+
   private final int entityID;
   private final double x;
   private final double y;
@@ -32,7 +37,6 @@ public class EntityMovementChangePacket implements IThreadsafePacket {
     this.xRot = buffer.readFloat();
   }
 
-  @Override
   public void encode(FriendlyByteBuf packetBuffer) {
     packetBuffer.writeInt(this.entityID);
     packetBuffer.writeDouble(this.x);
@@ -43,10 +47,10 @@ public class EntityMovementChangePacket implements IThreadsafePacket {
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
-    if (context.getSender() != null) {
-      HandleClient.handle(this);
-    }
+  public CustomPacketPayload.Type<? extends CustomPacketPayload> type() { return TYPE; }
+
+  public static void handle(EntityMovementChangePacket payload, IPayloadContext context) {
+    context.enqueueWork(() -> HandleClient.handle(payload));
   }
 
   /** Safely runs client side only code in a method only called on client */
