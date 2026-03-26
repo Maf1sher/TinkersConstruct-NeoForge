@@ -1,85 +1,41 @@
 {
-  "type": "forge:conditional",
-  "conditions": [
+  "type": "tconstruct:ore_melting",
+  "byproducts": [
+    {
+      "amount": 540,
+      "rate": "metal",
+      "tag": "forge:molten_platinum"
+    }
+  ],
+  "ingredient": {
+    "type": "neoforge:intersection",
+    "children": [
+      {
+        "tag": "forge:ores/nickel"
+      },
+      {
+        "tag": "forge:ore_rates/dense"
+      }
+    ]
+  },
+  "rate": "metal",
+  "result": {
+    "amount": 540,
+    "tag": "forge:molten_nickel"
+  },
+  "temperature": 950,
+  "time": 292,
+  "neoforge:conditions": [
     {
       "type": "mantle:tag_combination_filled",
       "match": [
         "forge:ores/nickel",
         "forge:ore_rates/dense"
       ]
-    }
-  ],
-  "recipes": [
-    {
-      "conditions": [
-        {
-          "type": "mantle:tag_filled",
-          "tag": "forge:ingots/platinum"
-        }
-      ],
-      "recipe": {
-        "type": "tconstruct:ore_melting",
-        "byproducts": [
-          {
-            "amount": 540,
-            "rate": "metal",
-            "tag": "forge:molten_platinum"
-          }
-        ],
-        "ingredient": {
-          "type": "neoforge:intersection",
-          "children": [
-            {
-              "tag": "forge:ores/nickel"
-            },
-            {
-              "tag": "forge:ore_rates/dense"
-            }
-          ]
-        },
-        "rate": "metal",
-        "result": {
-          "amount": 540,
-          "tag": "forge:molten_nickel"
-        },
-        "temperature": 950,
-        "time": 292
-      }
     },
     {
-      "conditions": [
-        {
-          "type": "neoforge:true"
-        }
-      ],
-      "recipe": {
-        "type": "tconstruct:ore_melting",
-        "byproducts": [
-          {
-            "amount": 540,
-            "rate": "metal",
-            "tag": "forge:molten_iron"
-          }
-        ],
-        "ingredient": {
-          "type": "neoforge:intersection",
-          "children": [
-            {
-              "tag": "forge:ores/nickel"
-            },
-            {
-              "tag": "forge:ore_rates/dense"
-            }
-          ]
-        },
-        "rate": "metal",
-        "result": {
-          "amount": 540,
-          "tag": "forge:molten_nickel"
-        },
-        "temperature": 950,
-        "time": 292
-      }
+      "type": "mantle:tag_filled",
+      "tag": "forge:ingots/platinum"
     }
   ]
 }

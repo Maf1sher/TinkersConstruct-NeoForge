@@ -3,9 +3,9 @@
   "modules": [
     {
       "type": "tconstruct:attribute",
-      "attribute": "forge:step_height_addition",
+      "attribute": "neoforge:step_height_addition",
       "each_level": 0.5,
-      "operation": "addition",
+      "operation": "add_value",
       "slots": [
         "feet",
         "legs",

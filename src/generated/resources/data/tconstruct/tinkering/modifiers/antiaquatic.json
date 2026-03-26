@@ -6,8 +6,8 @@
       "each_level": 2.0,
       "percent": false,
       "target": {
-        "type": "mantle:mob_type",
-        "mobs": "minecraft:water"
+        "type": "mantle:tag",
+        "tag": "minecraft:sensitive_to_impaling"
       }
     }
   ],

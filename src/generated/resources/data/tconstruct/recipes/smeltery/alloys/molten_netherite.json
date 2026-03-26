@@ -1,56 +1,24 @@
 {
-  "type": "forge:conditional",
-  "recipes": [
+  "type": "tconstruct:alloy",
+  "inputs": [
     {
-      "conditions": [
-        {
-          "type": "tconstruct:config",
-          "prop": "cheaper_netherite_alloy"
-        }
-      ],
-      "recipe": {
-        "type": "tconstruct:alloy",
-        "inputs": [
-          {
-            "amount": 40,
-            "tag": "tconstruct:molten_debris"
-          },
-          {
-            "amount": 20,
-            "tag": "forge:molten_gold"
-          }
-        ],
-        "result": {
-          "amount": 10,
-          "tag": "forge:molten_netherite"
-        },
-        "temperature": 1250
-      }
+      "amount": 40,
+      "tag": "tconstruct:molten_debris"
     },
     {
-      "conditions": [
-        {
-          "type": "neoforge:true"
-        }
-      ],
-      "recipe": {
-        "type": "tconstruct:alloy",
-        "inputs": [
-          {
-            "amount": 40,
-            "tag": "tconstruct:molten_debris"
-          },
-          {
-            "amount": 40,
-            "tag": "forge:molten_gold"
-          }
-        ],
-        "result": {
-          "amount": 10,
-          "tag": "forge:molten_netherite"
-        },
-        "temperature": 1250
-      }
+      "amount": 20,
+      "tag": "forge:molten_gold"
+    }
+  ],
+  "result": {
+    "amount": 10,
+    "tag": "forge:molten_netherite"
+  },
+  "temperature": 1250,
+  "neoforge:conditions": [
+    {
+      "type": "tconstruct:config",
+      "prop": "cheaper_netherite_alloy"
     }
   ]
 }

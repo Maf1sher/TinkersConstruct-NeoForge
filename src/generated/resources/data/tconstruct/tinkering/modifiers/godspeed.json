@@ -5,7 +5,7 @@
       "type": "tconstruct:attribute",
       "attribute": "minecraft:generic.movement_speed",
       "flat": 0.05,
-      "operation": "multiply_total",
+      "operation": "add_multiplied_total",
       "slots": [
         "mainhand",
         "offhand",
@@ -20,7 +20,7 @@
       "type": "tconstruct:attribute",
       "attribute": "minecraft:generic.attack_speed",
       "flat": 0.025,
-      "operation": "multiply_total",
+      "operation": "add_multiplied_total",
       "slots": [
         "mainhand",
         "offhand",
@@ -35,7 +35,7 @@
       "type": "tconstruct:attribute",
       "attribute": "tconstruct:player.mining_speed_multiplier",
       "flat": 0.075,
-      "operation": "multiply_total",
+      "operation": "add_multiplied_total",
       "slots": [
         "mainhand",
         "offhand",

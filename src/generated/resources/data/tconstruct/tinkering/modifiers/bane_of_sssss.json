@@ -9,12 +9,12 @@
         "type": "mantle:or",
         "predicates": [
           {
-            "type": "mantle:mob_type",
-            "mobs": "minecraft:arthropod"
+            "type": "mantle:tag",
+            "tag": "minecraft:sensitive_to_bane_of_arthropods"
           },
           {
             "type": "mantle:tag",
-            "tag": "forge:creepers"
+            "tag": "c:creepers"
           }
         ]
       }
@@ -33,12 +33,12 @@
         "type": "mantle:or",
         "predicates": [
           {
-            "type": "mantle:mob_type",
-            "mobs": "minecraft:arthropod"
+            "type": "mantle:tag",
+            "tag": "minecraft:sensitive_to_bane_of_arthropods"
           },
           {
             "type": "mantle:tag",
-            "tag": "forge:creepers"
+            "tag": "c:creepers"
           }
         ]
       },
