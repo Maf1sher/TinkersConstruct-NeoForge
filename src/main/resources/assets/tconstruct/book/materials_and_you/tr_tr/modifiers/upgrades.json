@@ -1,14 +1,10 @@
 {
   "type": "tconstruct:showcase",
   "title": "Yükseltmeler",
-  "item": {
-    "type": "forge:nbt",
-    "item": "tconstruct:creative_slot",
-    "nbt": {
-      "slot": "upgrades"
-    }
-  },
-  "tooltip": [ "Yükseltme Yuvası İmgesi" ],
+  "item": "tconstruct:creative_slot",
+  "tooltip": [
+    "Yükseltme Yuvası İmgesi"
+  ],
   "text": [
     {
       "text": "Yükseltmeler aracın olağan gelişimleridir. Genelde bir eşyayı uygulayarak ve onun bazı büyü niteliklerini 'bulaştırarak' yapılır, örneğin redstone araçları hızlı yapar. "

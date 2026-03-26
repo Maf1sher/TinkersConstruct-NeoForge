@@ -6,7 +6,7 @@
       "item": "tconstruct:ichor_slime_ball"
     }
   },
-   {
+  {
     "name": "alloyer",
     "data": "sections/alloyer.json",
     "icon": {
@@ -30,55 +30,46 @@
   {
     "name": "melee_harvest_materials",
     "data": "no-load",
-    "extraData": { "tconstruct:material_tier": { "type": "tconstruct:melee_harvest", "tag": "tconstruct:book/blazing_blood" } },
-    "icon": {
-      "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:large_plate",
-        "nbt": { "Material": "tconstruct:manyullyn" }
+    "extraData": {
+      "tconstruct:material_tier": {
+        "type": "tconstruct:melee_harvest",
+        "tag": "tconstruct:book/blazing_blood"
       }
+    },
+    "icon": {
+      "item": "tconstruct:large_plate"
     }
   },
   {
     "name": "ranged_materials",
     "data": "no-load",
-    "extraData": { "tconstruct:material_tier": { "type": "tconstruct:ranged", "tag": "tconstruct:book/blazing_blood" } },
-    "icon": {
-      "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:bow_grip",
-        "nbt": { "Material": "tconstruct:hepatizon" }
+    "extraData": {
+      "tconstruct:material_tier": {
+        "type": "tconstruct:ranged",
+        "tag": "tconstruct:book/blazing_blood"
       }
+    },
+    "icon": {
+      "item": "tconstruct:bow_grip"
     }
   },
   {
     "name": "armor_materials",
     "data": "no-load",
-    "extraData": { "tconstruct:material_tier": { "type": "tconstruct:armor", "tag": "tconstruct:book/blazing_blood" } },
-    "icon": {
-      "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:shield_core",
-        "nbt": { "Material": "tconstruct:blazewood" }
+    "extraData": {
+      "tconstruct:material_tier": {
+        "type": "tconstruct:armor",
+        "tag": "tconstruct:book/blazing_blood"
       }
+    },
+    "icon": {
+      "item": "tconstruct:shield_core"
     }
   },
   {
     "name": "armor",
     "icon": {
-      "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:plate_chestplate",
-        "nbt": {
-          "tic_broken": false,
-          "tic_display": true,
-          "Damage": 0,
-          "tic_materials": [
-            "tconstruct:ui_render#extra",
-            "tconstruct:ui_render#head"
-          ]
-        }
-      }
+      "item": "tconstruct:plate_chestplate"
     },
     "condition": {
       "type": "tconstruct:tag_not_empty",
@@ -87,7 +78,11 @@
     },
     "data": "no-load",
     "extraData": {
-      "tconstruct:load_tools": { "tag": "tconstruct:modifiable/book_armor/fantastic_foundry", "path": "armor", "sort": false }
+      "tconstruct:load_tools": {
+        "tag": "tconstruct:modifiable/book_armor/fantastic_foundry",
+        "path": "armor",
+        "sort": false
+      }
     }
   }
 ]

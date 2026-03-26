@@ -1,14 +1,10 @@
 {
   "type": "tconstruct:showcase",
   "title": "アップグレード",
-  "item": {
-    "type": "forge:nbt",
-    "item": "tconstruct:creative_slot",
-    "nbt": {
-      "slot": "upgrades"
-    }
-  },
-  "tooltip": [ "アップグレードスロットアイコン" ],
+  "item": "tconstruct:creative_slot",
+  "tooltip": [
+    "アップグレードスロットアイコン"
+  ],
   "text": [
     {
       "text": "アップグレードは、道具の標準的な改善効果をもたらします。それらは通常、アイテムを適用して、そのアイテムがもつ優れた品質のいくつかを「受け継がせる」ことによってもたらされます。例えばレッドストーンは道具の使用速度を上昇させます。"

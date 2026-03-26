@@ -1,14 +1,10 @@
 {
   "type": "tconstruct:showcase",
   "title": "Upgrades",
-  "item": {
-    "type": "forge:nbt",
-    "item": "tconstruct:creative_slot",
-    "nbt": {
-      "slot": "upgrades"
-    }
-  },
-  "tooltip": [ "Upgrade Slot Icon" ],
+  "item": "tconstruct:creative_slot",
+  "tooltip": [
+    "Upgrade Slot Icon"
+  ],
   "text": [
     {
       "text": "Upgrades are standard improvements to a tool. They are usually done by applying an item and 'rubbing off' some of its magic qualities, like redstone making tools faster. "

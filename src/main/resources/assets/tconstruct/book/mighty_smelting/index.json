@@ -23,57 +23,61 @@
   {
     "name": "melee_harvest_materials",
     "data": "no-load",
-    "extraData": { "tconstruct:material_tier": { "type": "tconstruct:melee_harvest", "tier": 3, "predicate": { "type": "mantle:inverted", "inverted_type": "mantle:tag", "tag": "tconstruct:book/distant" }}},
-    "icon": {
-      "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:hammer_head",
-        "nbt": { "Material": "tconstruct:slimesteel" }
+    "extraData": {
+      "tconstruct:material_tier": {
+        "type": "tconstruct:melee_harvest",
+        "tier": 3,
+        "predicate": {
+          "type": "mantle:inverted",
+          "inverted_type": "mantle:tag",
+          "tag": "tconstruct:book/distant"
+        }
       }
+    },
+    "icon": {
+      "item": "tconstruct:hammer_head"
     }
   },
   {
     "name": "ranged_materials",
     "data": "no-load",
-    "extraData": { "tconstruct:material_tier": { "type": "tconstruct:ranged", "tier": 3, "predicate": { "type": "mantle:inverted", "inverted_type": "mantle:tag", "tag": "tconstruct:book/distant" }}},
-    "icon": {
-      "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:bow_limb",
-        "nbt": { "Material": "tconstruct:nahuatl" }
+    "extraData": {
+      "tconstruct:material_tier": {
+        "type": "tconstruct:ranged",
+        "tier": 3,
+        "predicate": {
+          "type": "mantle:inverted",
+          "inverted_type": "mantle:tag",
+          "tag": "tconstruct:book/distant"
+        }
       }
+    },
+    "icon": {
+      "item": "tconstruct:bow_limb"
     }
   },
   {
     "name": "armor_materials",
     "data": "no-load",
-    "extraData": { "tconstruct:material_tier": { "type": "tconstruct:armor", "tier": 3, "predicate": { "type": "mantle:inverted", "inverted_type": "mantle:tag", "tag": "tconstruct:book/distant" }}},
-    "icon": {
-      "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:chestplate_plating",
-        "nbt": { "Material": "tconstruct:obsidian" }
+    "extraData": {
+      "tconstruct:material_tier": {
+        "type": "tconstruct:armor",
+        "tier": 3,
+        "predicate": {
+          "type": "mantle:inverted",
+          "inverted_type": "mantle:tag",
+          "tag": "tconstruct:book/distant"
+        }
       }
+    },
+    "icon": {
+      "item": "tconstruct:chestplate_plating"
     }
   },
   {
     "name": "tools",
     "icon": {
-      "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:cleaver",
-        "nbt": {
-          "tic_broken": false,
-          "tic_display": true,
-          "Damage": 0,
-          "tic_materials": [
-            "tconstruct:ui_render#head",
-            "tconstruct:ui_render#handle",
-            "tconstruct:ui_render#extra",
-            "tconstruct:ui_render#large"
-          ]
-        }
-      }
+      "item": "tconstruct:cleaver"
     },
     "data": "sections/tools.json"
   },
@@ -89,33 +93,25 @@
     },
     "data": "no-load",
     "extraData": {
-      "tconstruct:load_tools": { "tag": "tconstruct:modifiable/book_armor/mighty_smelting", "path": "armor", "sort": false }
+      "tconstruct:load_tools": {
+        "tag": "tconstruct:modifiable/book_armor/mighty_smelting",
+        "path": "armor",
+        "sort": false
+      }
     }
   },
   {
     "name": "abilities",
     "data": "sections/abilities.json",
     "icon": {
-      "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:creative_slot",
-        "nbt": {
-          "slot": "abilities"
-        }
-      }
+      "item": "tconstruct:creative_slot"
     }
   },
   {
     "name": "defense",
     "data": "sections/defense.json",
     "icon": {
-      "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:creative_slot",
-        "nbt": {
-          "slot": "defense"
-        }
-      }
+      "item": "tconstruct:creative_slot"
     }
   }
 ]

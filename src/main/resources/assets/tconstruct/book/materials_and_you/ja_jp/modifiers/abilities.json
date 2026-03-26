@@ -1,14 +1,10 @@
 {
   "type": "tconstruct:showcase",
   "title": "アビリティ",
-  "item": {
-    "type": "forge:nbt",
-    "item": "tconstruct:creative_slot",
-    "nbt": {
-      "slot": "abilities"
-    }
-  },
-  "tooltip": [ "アビリティスロットアイコン" ],
+  "item": "tconstruct:creative_slot",
+  "tooltip": [
+    "アビリティスロットアイコン"
+  ],
   "text": [
     {
       "text": "アビリティは、道具を大幅に変更させる強力な改造です。例えば、シルクタッチや自動精錬のような改造は採掘したブロックのドロップを変化させることができる注目に値するものであり、二刀流は道具の扱いをより簡単にします。"

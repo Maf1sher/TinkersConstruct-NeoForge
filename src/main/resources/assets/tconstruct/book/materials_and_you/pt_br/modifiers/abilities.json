@@ -1,14 +1,10 @@
 {
   "type": "tconstruct:showcase",
   "title": "Habilidades",
-  "item": {
-    "type": "forge:nbt",
-    "item": "tconstruct:creative_slot",
-    "nbt": {
-      "slot": "abilities"
-    }
-  },
-  "tooltip": [ "Ícone do Slot de Habilidade" ],
+  "item": "tconstruct:creative_slot",
+  "tooltip": [
+    "Ícone do Slot de Habilidade"
+  ],
   "text": [
     {
       "text": "As habilidades são modificadores poderosos que mudam drasticamente uma ferramenta. Modificadores como 'Sedoso' e 'Auto-Fundição' são notáveis, pois ambos alteram os efeitos da mineração de blocos, enquanto a 'Dupla Empunhadura' torna as ferramentas muito mais fáceis de manusear."

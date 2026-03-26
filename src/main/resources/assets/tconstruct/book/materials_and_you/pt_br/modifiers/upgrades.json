@@ -1,14 +1,10 @@
 {
   "type": "tconstruct:showcase",
   "title": "Melhorias",
-  "item": {
-    "type": "forge:nbt",
-    "item": "tconstruct:creative_slot",
-    "nbt": {
-      "slot": "upgrades"
-    }
-  },
-  "tooltip": [ "Ícone de Slot de Melhoria" ],
+  "item": "tconstruct:creative_slot",
+  "tooltip": [
+    "Ícone de Slot de Melhoria"
+  ],
   "text": [
     {
       "text": "As melhorias são aprimoramentos essenciais para qualquer ferramenta. Essas Geralmente são feitas aplicando um item e 'esfregando' algumas de suas qualidades mágicas, como por exemplo a redstone tornando as ferramentas mais rápidas."
@@ -22,4 +18,3 @@
     }
   ]
 }
-

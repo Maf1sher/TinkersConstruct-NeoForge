@@ -19,7 +19,13 @@
       "item": "tconstruct:sky_staff"
     },
     "data": "no-load",
-    "extraData": { "tconstruct:load_tools": { "tag": "tconstruct:modifiable/special", "path": "staffs", "sort": false }}
+    "extraData": {
+      "tconstruct:load_tools": {
+        "tag": "tconstruct:modifiable/special",
+        "path": "staffs",
+        "sort": false
+      }
+    }
   },
   {
     "name": "exploration",
@@ -31,70 +37,72 @@
   {
     "name": "melee_harvest_materials",
     "data": "no-load",
-    "extraData": { "tconstruct:material_tier": { "type": "tconstruct:melee_harvest", "tag": "tconstruct:book/distant" } },
-    "icon": {
-      "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:broad_blade",
-        "nbt": { "Material": "tconstruct:knightmetal" }
+    "extraData": {
+      "tconstruct:material_tier": {
+        "type": "tconstruct:melee_harvest",
+        "tag": "tconstruct:book/distant"
       }
+    },
+    "icon": {
+      "item": "tconstruct:broad_blade"
     }
   },
   {
     "name": "ranged_materials",
     "data": "no-load",
-    "extraData": { "tconstruct:material_tier": { "type": "tconstruct:ranged", "tag": "tconstruct:book/distant" } },
-    "icon": {
-      "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:bowstring",
-        "nbt": { "Material": "tconstruct:enderslime_vine" }
+    "extraData": {
+      "tconstruct:material_tier": {
+        "type": "tconstruct:ranged",
+        "tag": "tconstruct:book/distant"
       }
+    },
+    "icon": {
+      "item": "tconstruct:bowstring"
     }
   },
   {
     "name": "armor_materials",
     "data": "no-load",
-    "extraData": { "tconstruct:material_tier": { "type": "tconstruct:armor", "tag": "tconstruct:book/distant" } },
-    "icon": {
-      "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:maille",
-        "nbt": { "Material": "tconstruct:dragon_scale" }
+    "extraData": {
+      "tconstruct:material_tier": {
+        "type": "tconstruct:armor",
+        "tag": "tconstruct:book/distant"
       }
+    },
+    "icon": {
+      "item": "tconstruct:maille"
     }
   },
   {
     "name": "ammo_materials",
     "data": "no-load",
-    "extraData": { "tconstruct:material_tier": { "type": "tconstruct:ammo", "predicate": { "type":  "mantle:inverted", "inverted_type": "mantle:tag", "tag": "tconstruct:book/basic_ammo" }}},
-    "icon": {
-      "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:arrow_head",
-        "nbt": { "Material": "tconstruct:shulker" }
+    "extraData": {
+      "tconstruct:material_tier": {
+        "type": "tconstruct:ammo",
+        "predicate": {
+          "type": "mantle:inverted",
+          "inverted_type": "mantle:tag",
+          "tag": "tconstruct:book/basic_ammo"
+        }
       }
+    },
+    "icon": {
+      "item": "tconstruct:arrow_head"
     }
   },
   {
     "name": "ancient_tools",
     "icon": {
-      "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:battlesign",
-        "nbt": {
-          "tic_broken": false,
-          "tic_display": true,
-          "Damage": 0,
-          "tic_materials": [
-            "tconstruct:ui_render#head",
-            "tconstruct:ui_render#handle"
-          ]
-        }
-      }
+      "item": "tconstruct:battlesign"
     },
     "data": "sections/ancient.json",
-    "extraData": { "tconstruct:load_tools": { "tag": "tconstruct:modifiable/ancient", "path": "ancient", "sort": false }}
+    "extraData": {
+      "tconstruct:load_tools": {
+        "tag": "tconstruct:modifiable/ancient",
+        "path": "ancient",
+        "sort": false
+      }
+    }
   },
   {
     "name": "armor",
@@ -108,13 +116,21 @@
     },
     "data": "no-load",
     "extraData": {
-      "tconstruct:load_tools": { "tag": "tconstruct:modifiable/book_armor/tinkers_gadgetry", "path": "armor", "sort": false }
+      "tconstruct:load_tools": {
+        "tag": "tconstruct:modifiable/book_armor/tinkers_gadgetry",
+        "path": "armor",
+        "sort": false
+      }
     }
   },
   {
     "name": "materials",
     "data": "no-load",
-    "extraData": { "tconstruct:material_tier": { "type": "tconstruct:skull" } },
+    "extraData": {
+      "tconstruct:material_tier": {
+        "type": "tconstruct:skull"
+      }
+    },
     "icon": {
       "item": "minecraft:skeleton_skull"
     }

@@ -1,14 +1,10 @@
 {
   "type": "tconstruct:showcase",
   "title": "能力強化",
-  "item": {
-    "type": "forge:nbt",
-    "item": "tconstruct:creative_slot",
-    "nbt": {
-      "slot": "abilities"
-    }
-  },
-  "tooltip": [ "能力槽圖示" ],
+  "item": "tconstruct:creative_slot",
+  "tooltip": [
+    "能力槽圖示"
+  ],
   "text": [
     {
       "text": "「能力」是一種非常強大的工具強化，它甚至可以徹底改變一個工具。諸如「絲綢之觸」和「自動燒煉」這樣的能力非常矚目，它們徹底改變了開採礦物的效果，而「雙持」則讓工具更便於使用。"

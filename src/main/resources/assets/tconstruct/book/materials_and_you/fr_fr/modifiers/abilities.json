@@ -1,14 +1,10 @@
 {
   "type": "tconstruct:showcase",
   "title": "Aptitudes",
-  "item": {
-    "type": "forge:nbt",
-    "item": "tconstruct:creative_slot",
-    "nbt": {
-      "slot": "abilities"
-    }
-  },
-  "tooltip": [ "Icône d’Emplacement d’Aptitude" ],
+  "item": "tconstruct:creative_slot",
+  "tooltip": [
+    "Icône d’Emplacement d’Aptitude"
+  ],
   "text": [
     {
       "text": "Les aptitudes sont des modificateurs puissants qui transforment radicalement un outil. Des modificateurs comme Soyeux ou Auto-fonte sont notables car ils changent les effets du minage, tandis que le maniement double rend les outils beaucoup plus faciles à utiliser."

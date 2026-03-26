@@ -1,14 +1,10 @@
 {
   "type": "tconstruct:showcase",
   "title": "Yuvasız Değiştiriciler",
-  "item": {
-    "type": "forge:nbt",
-    "item": "tconstruct:creative_slot",
-    "nbt": {
-      "slot": "slotless"
-    }
-  },
-  "tooltip": [ "Yuvasız İmge" ],
+  "item": "tconstruct:creative_slot",
+  "tooltip": [
+    "Yuvasız İmge"
+  ],
   "text": [
     {
       "text": "Yuvasız değiştiriciler, öbür bütün değiştiricilerin aksine yuva gerektirmiyorlar. Bu çoğu zaman ya değiştiricinin ödün vermesi gerektiğini ya da etkisinin zayıf olduğu belirtmektedir. "

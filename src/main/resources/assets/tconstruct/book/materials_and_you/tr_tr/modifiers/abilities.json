@@ -1,14 +1,10 @@
 {
   "type": "tconstruct:showcase",
   "title": "Yetenekler",
-  "item": {
-    "type": "forge:nbt",
-    "item": "tconstruct:creative_slot",
-    "nbt": {
-      "slot": "abilities"
-    }
-  },
-  "tooltip": [ "Yetenek Yuvası İmgesi" ],
+  "item": "tconstruct:creative_slot",
+  "tooltip": [
+    "Yetenek Yuvası İmgesi"
+  ],
   "text": [
     {
       "text": "Yetenekler aracı gözle görülür bir biçimde değiştiren güçlü değiştiricilerdir. Çifte kullanma araçları tutmasını kolaylaştırırken ipeksi ve kendiliğinden ergitme gibi değiştiriciler blokları çıkarma etkilerini gözle görülür biçimde değiştirir. "

@@ -1,14 +1,10 @@
 {
   "type": "tconstruct:showcase",
   "title": "Modificadores Sem Slot",
-  "item": {
-    "type": "forge:nbt",
-    "item": "tconstruct:creative_slot",
-    "nbt": {
-      "slot": "slotless"
-    }
-  },
-  "tooltip": [ "Ícone de Sem Slot" ],
+  "item": "tconstruct:creative_slot",
+  "tooltip": [
+    "Ícone de Sem Slot"
+  ],
   "text": [
     {
       "text": "Os modificadores sem slot não exigem slots, ao contrário de todos os outros tipos de modificadores. Isso geralmente significa que o modificador tem alguma compensação ou o efeito é menor."
@@ -22,4 +18,3 @@
     }
   ]
 }
-
