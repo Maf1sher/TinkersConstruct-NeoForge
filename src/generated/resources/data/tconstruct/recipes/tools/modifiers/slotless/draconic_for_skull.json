@@ -12,7 +12,7 @@
   "level": 1,
   "result": "tconstruct:draconic",
   "tools": {
-    "type": "forge:intersection",
+    "type": "neoforge:intersection",
     "children": [
       {
         "tag": "tconstruct:modifiable/bonus_slots"

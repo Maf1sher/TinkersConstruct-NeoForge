@@ -2,7 +2,7 @@
   "type": "tconstruct:casting_table",
   "cast": [
     {
-      "type": "forge:difference",
+      "type": "neoforge:difference",
       "base": {
         "tag": "forge:ingots"
       },

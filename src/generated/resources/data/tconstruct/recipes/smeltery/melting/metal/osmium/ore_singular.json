@@ -15,7 +15,7 @@
     }
   ],
   "ingredient": {
-    "type": "forge:difference",
+    "type": "neoforge:difference",
     "base": {
       "tag": "forge:ores/osmium"
     },

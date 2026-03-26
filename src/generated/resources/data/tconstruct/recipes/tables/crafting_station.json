@@ -6,7 +6,7 @@
       "item": "tconstruct:pattern"
     },
     "w": {
-      "type": "forge:difference",
+      "type": "neoforge:difference",
       "base": {
         "tag": "forge:workbenches"
       },

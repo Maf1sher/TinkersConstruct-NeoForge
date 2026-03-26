@@ -5,7 +5,7 @@
   },
   "pattern": [
     {
-      "type": "forge:difference",
+      "type": "neoforge:difference",
       "base": {
         "tag": "forge:ingots"
       },

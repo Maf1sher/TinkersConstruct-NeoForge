@@ -27,7 +27,7 @@
           }
         ],
         "ingredient": {
-          "type": "forge:intersection",
+          "type": "neoforge:intersection",
           "children": [
             {
               "tag": "forge:ores/tin"
@@ -49,7 +49,7 @@
     {
       "conditions": [
         {
-          "type": "forge:true"
+          "type": "neoforge:true"
         }
       ],
       "recipe": {
@@ -62,7 +62,7 @@
           }
         ],
         "ingredient": {
-          "type": "forge:intersection",
+          "type": "neoforge:intersection",
           "children": [
             {
               "tag": "forge:ores/tin"

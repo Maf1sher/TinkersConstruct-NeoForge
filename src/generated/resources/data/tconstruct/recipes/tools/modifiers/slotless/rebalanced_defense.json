@@ -23,7 +23,7 @@
     "value": "defense"
   },
   "tools": {
-    "type": "forge:intersection",
+    "type": "neoforge:intersection",
     "children": [
       [
         {
