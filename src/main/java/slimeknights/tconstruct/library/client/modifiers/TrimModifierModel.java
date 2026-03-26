@@ -38,9 +38,10 @@ public enum TrimModifierModel implements IBakedModifierModel {
   }
 
   /** Cache texture for each item to save registry lookups */
+  private static final int ARMOR_TYPE_COUNT = ArmorItem.Type.values().length;
   @SuppressWarnings("unchecked")
-  private static final Map<String,TrimTexture>[] TEXTURE_CACHE = new Map[4];
-  public static final ResourceLocation[] TRIM_TEXTURES = new ResourceLocation[4];
+  private static final Map<String,TrimTexture>[] TEXTURE_CACHE = new Map[ARMOR_TYPE_COUNT];
+  public static final ResourceLocation[] TRIM_TEXTURES = new ResourceLocation[ARMOR_TYPE_COUNT];
   static {
     for (ArmorItem.Type type : ArmorItem.Type.values()) {
       TEXTURE_CACHE[type.ordinal()] = new HashMap<>();
