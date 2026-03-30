@@ -3,6 +3,7 @@ package slimeknights.tconstruct.library.modifiers.hook.behavior;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlot.Type;
@@ -106,7 +107,7 @@ public interface AttributesModifierHook {
       Multimap<Attribute, AttributeModifier> modifiers = getHeldAttributeModifiers(tool, slot);
       EquipmentSlotGroup slotGroup = slot == EquipmentSlot.MAINHAND ? EquipmentSlotGroup.MAINHAND : EquipmentSlotGroup.OFFHAND;
       for (var entry : modifiers.entries()) {
-        entries.add(new ItemAttributeModifiers.Entry(Holder.direct(entry.getKey()), entry.getValue(), slotGroup));
+        entries.add(new ItemAttributeModifiers.Entry(BuiltInRegistries.ATTRIBUTE.wrapAsHolder(entry.getKey()), entry.getValue(), slotGroup));
       }
     }
     return new ItemAttributeModifiers(entries, true);

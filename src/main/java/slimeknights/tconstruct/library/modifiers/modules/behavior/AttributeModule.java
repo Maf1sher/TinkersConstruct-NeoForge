@@ -134,7 +134,7 @@ public record AttributeModule(String unique, Attribute attribute, Operation oper
   @Override
   public void onEquip(IToolStackView tool, ModifierEntry modifier, EquipmentChangeContext context) {
     if (condition.matches(tool, modifier)) {
-      AttributeInstance instance = context.getEntity().getAttribute(Holder.direct(attribute));
+      AttributeInstance instance = context.getEntity().getAttribute(BuiltInRegistries.ATTRIBUTE.wrapAsHolder(attribute));
       if (instance != null) {
         AttributeModifier attributeModifier = createModifier(tool, modifier, context.getChangedSlot());
         if (attributeModifier != null) {
@@ -151,7 +151,7 @@ public record AttributeModule(String unique, Attribute attribute, Operation oper
     if (condition.matches(tool, modifier)) {
       ResourceLocation id = getSlotId(context.getChangedSlot());
       if (id != null) {
-        AttributeInstance instance = context.getEntity().getAttribute(Holder.direct(attribute));
+        AttributeInstance instance = context.getEntity().getAttribute(BuiltInRegistries.ATTRIBUTE.wrapAsHolder(attribute));
         if (instance != null) {
           instance.removeModifier(id);
         }

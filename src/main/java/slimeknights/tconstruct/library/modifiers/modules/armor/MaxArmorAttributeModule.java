@@ -76,7 +76,7 @@ public record MaxArmorAttributeModule(String unique, Attribute attribute, Operat
 
   @Override
   public void updateValue(IToolStackView tool, ModifierEntry modifier, EquipmentChangeContext context, Holder data, float newLevel, float oldLevel) {
-    AttributeInstance instance = context.getEntity().getAttribute(net.minecraft.core.Holder.direct(attribute));
+    AttributeInstance instance = context.getEntity().getAttribute(BuiltInRegistries.ATTRIBUTE.wrapAsHolder(attribute));
     if (instance != null) {
       instance.removeModifier(modifierId);
       float attributeValue = amount.computeForLevel(newLevel);

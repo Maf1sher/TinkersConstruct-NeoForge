@@ -4,6 +4,7 @@ import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -426,7 +427,7 @@ public class TooltipUtil {
           AttributeModifier modifier = entry.getValue();
           Operation operation = modifier.operation();
           // allow suppressing specific attributes - wrap raw attribute in a direct holder for comparison
-          Holder<Attribute> attributeHolder = Holder.direct(attribute);
+          Holder<Attribute> attributeHolder = BuiltInRegistries.ATTRIBUTE.wrapAsHolder(attribute);
           if (!showAttribute.test(attributeHolder, operation)) {
             continue;
           }
