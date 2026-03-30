@@ -541,7 +541,7 @@ public class ModifierProvider extends AbstractModifierProvider implements ICondi
         .divide().build()); // FORCE / 2^LEVEL
     buildModifier(ModifierIds.sweeping).addModule(new SweepingEdgeModule(LevelingValue.eachLevel(0.25f)));
     buildModifier(ModifierIds.sticky)
-      .addModule(MobEffectModule.builder(MobEffects.MOVEMENT_SLOWDOWN.value()).level(RandomLevelingValue.perLevel(0, 0.5f)).time(RandomLevelingValue.random(20, 10)).build());
+      .addModule(MobEffectModule.builder(MobEffects.MOVEMENT_SLOWDOWN.value()).level(RandomLevelingValue.perLevel(0, 0.5f)).time(RandomLevelingValue.random(20, 10)).chance(LevelingValue.eachLevel(0.25f)).buildWeapon());
 
     // damage boost
     // vanilla give +1, 1.5, 2, 2.5, 3, but that is low
