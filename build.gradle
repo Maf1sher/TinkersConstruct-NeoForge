@@ -180,6 +180,84 @@ tasks.register('syncModernDataPackPaths', Sync) {
             }
         }
 
+        def findExistingTagFile
+        findExistingTagFile = { String namespace, String registry, String tagPath ->
+            List<File> candidates = [
+                file("src/main/resources/data/${namespace}/tags/${registry}/${tagPath}.json"),
+                file("src/generated/resources/data/${namespace}/tags/${registry}/${tagPath}.json")
+            ]
+            candidates.find { it.exists() }
+        }
+
+        def collectTagChildren
+        collectTagChildren = { String namespace, String registry, String tagPath ->
+            Set<String> children = new TreeSet<>()
+            [
+                file("src/main/resources/data/${namespace}/tags/${registry}/${tagPath}"),
+                file("src/generated/resources/data/${namespace}/tags/${registry}/${tagPath}")
+            ].each { File directory ->
+                if (directory.exists() && directory.isDirectory()) {
+                    fileTree(directory) {
+                        include '**/*.json'
+                    }.files.each { File child ->
+                        String relativePath = directory.toPath().relativize(child.toPath()).toString().replace('\\', '/')
+                        children.add(relativePath.substring(0, relativePath.length() - '.json'.length()))
+                    }
+                }
+            }
+            children
+        }
+
+        def readTagValues
+        readTagValues = { File tagFile ->
+            if (tagFile == null || !tagFile.exists()) {
+                return null
+            }
+            def parsed = new groovy.json.JsonSlurper().parse(tagFile)
+            if (!(parsed instanceof Map) || !(parsed.values instanceof List)) {
+                return null
+            }
+            [
+                replace: parsed.replace == true,
+                values : new ArrayList<>(parsed.values.collect { it.toString() })
+            ]
+        }
+
+        def synthesizeCommonItemTag
+        synthesizeCommonItemTag = { String tagPath ->
+            Set<String> values = new LinkedHashSet<>()
+
+            collectTagChildren('forge', 'item', tagPath).each { String child ->
+                values.add("#forge:${tagPath}/${child}")
+            }
+
+            if (values.isEmpty()) {
+                File forgeBlockTag = findExistingTagFile('forge', 'block', tagPath)
+                def parsedBlockTag = readTagValues(forgeBlockTag)
+                if (parsedBlockTag != null) {
+                    values.addAll(parsedBlockTag.values)
+                }
+            }
+
+            if (values.isEmpty()) {
+                switch (tagPath) {
+                    case 'cobblestone':
+                        values.add('minecraft:cobblestone')
+                        values.add('minecraft:mossy_cobblestone')
+                        break
+                }
+            }
+
+            if (values.isEmpty()) {
+                return null
+            }
+
+            [
+                replace: false,
+                values : new ArrayList<>(values)
+            ]
+        }
+
         Set<String> missingForgeItemTags = new LinkedHashSet<>()
         Set<String> missingCommonItemTags = new LinkedHashSet<>()
 
@@ -267,16 +345,20 @@ tasks.register('syncModernDataPackPaths', Sync) {
 
             File sourceForgeTag = file("src/main/resources/data/forge/tags/item/${tagPath}.json")
             File generatedForgeTag = file("src/generated/resources/data/forge/tags/item/${tagPath}.json")
-            if (!sourceForgeTag.exists() && !generatedForgeTag.exists()) {
-                return
-            }
-
             File bridgeTag = file("${modernDataPackDir.get().asFile}/data/c/tags/item/${tagPath}.json")
             bridgeTag.parentFile.mkdirs()
-            Map<String,Object> bridgeJson = [
-                replace: false,
-                values : ["#forge:${tagPath}"]
-            ]
+            Map<String,Object> bridgeJson
+            if (sourceForgeTag.exists() || generatedForgeTag.exists()) {
+                bridgeJson = [
+                    replace: false,
+                    values : ["#forge:${tagPath}"]
+                ]
+            } else {
+                bridgeJson = synthesizeCommonItemTag(tagPath)
+                if (bridgeJson == null) {
+                    return
+                }
+            }
             bridgeTag.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(bridgeJson))
         }
     }
