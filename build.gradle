@@ -78,24 +78,206 @@ if (System.getenv().ARTIFACT_VERSION != null) {
 version = "${minecraft_version}-${artifact_version}"
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}, Version: ${version}"
 
-sourceSets {
-    main {
-        java {
-            // Exclude third-party mod integration plugins that are not available as compile dependencies.
-            // These plugins are compile-optional: they only load at runtime when the target mod is present.
-            // Add them back (and add the mod as a compileOnly dependency) when the mod is available for NeoForge 1.21.1.
-            exclude 'slimeknights/tconstruct/plugin/craftingtweaks/**'
-            exclude 'slimeknights/tconstruct/plugin/jsonthings/**'
-            exclude 'slimeknights/tconstruct/plugin/ImmersiveEngineeringPlugin.java'
-            exclude 'slimeknights/tconstruct/plugin/DietPlugin.java'
-            exclude 'slimeknights/tconstruct/plugin/DummmmmmyPlugin.java'
+def modernDataPackDir = layout.buildDirectory.dir('generated/modernResources/main')
+
+sourceSets.main {
+    java {
+        // Exclude third-party mod integration plugins that are not available as compile dependencies.
+        // These plugins are compile-optional: they only load at runtime when the target mod is present.
+        // Add them back (and add the mod as a compileOnly dependency) when the mod is available for NeoForge 1.21.1.
+        exclude 'slimeknights/tconstruct/plugin/craftingtweaks/**'
+        exclude 'slimeknights/tconstruct/plugin/jsonthings/**'
+        exclude 'slimeknights/tconstruct/plugin/ImmersiveEngineeringPlugin.java'
+        exclude 'slimeknights/tconstruct/plugin/DietPlugin.java'
+        exclude 'slimeknights/tconstruct/plugin/DummmmmmyPlugin.java'
+    }
+    resources {
+        srcDir 'src/generated/resources'
+        srcDir modernDataPackDir
+        // But exclude the cache of the generated data from what gets built
+        exclude '.cache'
+        // Exclude debug resources, they are for helping us make the mod, not for the actual mod
+        exclude 'assets/tconstruct/debug'
+    }
+}
+
+tasks.register('syncModernDataPackPaths', Sync) {
+    into(modernDataPackDir)
+
+    from('src/main/resources') {
+        include 'data/*/recipes/**'
+        eachFile { fileCopyDetails ->
+            fileCopyDetails.path = fileCopyDetails.path.replace('/recipes/', '/recipe/')
         }
-        resources {
-            srcDirs "src/generated/resources"
-            //But exclude the cache of the generated data from what gets built
-            exclude '.cache'
-            // exclude debug resources, they are for helping us make the mod, not for the actual mod
-            exclude 'assets/tconstruct/debug'
+        includeEmptyDirs = false
+    }
+
+    from('src/generated/resources') {
+        include 'data/*/recipes/**'
+        eachFile { fileCopyDetails ->
+            fileCopyDetails.path = fileCopyDetails.path.replace('/recipes/', '/recipe/')
+        }
+        includeEmptyDirs = false
+    }
+
+    doLast {
+        def normalizeJson
+        normalizeJson = { node, List<String> path = [] ->
+            if (node instanceof Map) {
+                boolean fluidTagContext = node.containsKey('amount') && (node.containsKey('tag') || node.containsKey('fluid'))
+                boolean outputTagContext = path.any { it in ['result', 'results', 'output', 'outputs'] }
+                boolean conditionTagContext = path.contains('conditions')
+                node.replaceAll { key, value ->
+                    if (key == 'tag' && !fluidTagContext && !outputTagContext && !conditionTagContext && value instanceof String && value.startsWith('forge:')) {
+                        return 'c:' + value.substring('forge:'.length())
+                    }
+                    return normalizeJson(value, path + key.toString())
+                }
+
+                return node
+            }
+            if (node instanceof List) {
+                return node.collect { value -> normalizeJson(value, path) }
+            }
+            return node
+        }
+
+        def collectForgeItemTags
+        collectForgeItemTags = { node, Set<String> tags, List<String> path = [] ->
+            if (node instanceof Map) {
+                boolean fluidTagContext = node.containsKey('amount') && (node.containsKey('tag') || node.containsKey('fluid'))
+                boolean outputTagContext = path.any { it in ['result', 'results', 'output', 'outputs'] }
+                boolean conditionTagContext = path.contains('conditions')
+                node.each { key, value ->
+                    if (key == 'tag' && !fluidTagContext && (outputTagContext || conditionTagContext) && value instanceof String && value.startsWith('forge:')) {
+                        tags.add(value)
+                    }
+                    collectForgeItemTags(value, tags, path + key.toString())
+                }
+                return
+            }
+            if (node instanceof List) {
+                node.each { value -> collectForgeItemTags(value, tags, path) }
+            }
+        }
+
+        def collectCommonItemTags
+        collectCommonItemTags = { node, Set<String> tags, List<String> path = [] ->
+            if (node instanceof Map) {
+                boolean fluidTagContext = node.containsKey('amount') && (node.containsKey('tag') || node.containsKey('fluid'))
+                boolean outputTagContext = path.any { it in ['result', 'results', 'output', 'outputs'] }
+                boolean conditionTagContext = path.contains('conditions')
+                node.each { key, value ->
+                    if (key == 'tag' && !fluidTagContext && !outputTagContext && !conditionTagContext && value instanceof String && value.startsWith('c:')) {
+                        tags.add(value)
+                    }
+                    collectCommonItemTags(value, tags, path + key.toString())
+                }
+                return
+            }
+            if (node instanceof List) {
+                node.each { value -> collectCommonItemTags(value, tags, path) }
+            }
+        }
+
+        Set<String> missingForgeItemTags = new LinkedHashSet<>()
+        Set<String> missingCommonItemTags = new LinkedHashSet<>()
+
+        fileTree(modernDataPackDir.get().asFile) {
+            include 'data/*/recipe/**/*.json'
+        }.each { File recipeFile ->
+            def json = new groovy.json.JsonSlurper().parse(recipeFile)
+            def normalizedJson = normalizeJson(json)
+            def vanillaResultTypes = [
+                'minecraft:crafting_shaped',
+                'minecraft:crafting_shapeless',
+                'minecraft:smelting',
+                'minecraft:blasting',
+                'minecraft:smoking',
+                'minecraft:campfire_cooking',
+                'minecraft:stonecutting'
+            ] as Set
+            def retexturedCraftingTypes = [
+                'mantle:crafting_shaped_retextured'
+            ] as Set
+            if (normalizedJson instanceof Map && normalizedJson.type in vanillaResultTypes) {
+                if (normalizedJson.result instanceof String) {
+                    def normalizedResult = [id: normalizedJson.result]
+                    if (normalizedJson.count instanceof Number) {
+                        normalizedResult.count = normalizedJson.remove('count')
+                    }
+                    normalizedJson.result = normalizedResult
+                } else if (normalizedJson.result instanceof Map && normalizedJson.result.item != null && normalizedJson.result.id == null) {
+                    normalizedJson.result.id = normalizedJson.result.remove('item')
+                }
+            }
+            if (normalizedJson instanceof Map && normalizedJson.type in retexturedCraftingTypes) {
+                if (normalizedJson.result instanceof Map && normalizedJson.result.item != null && normalizedJson.result.id == null) {
+                    normalizedJson.result.id = normalizedJson.result.remove('item')
+                }
+                if (normalizedJson.texture instanceof String && normalizedJson.key instanceof Map) {
+                    def textureKey = normalizedJson.texture
+                    def textureIngredient = normalizedJson.key[textureKey]
+                    if (textureIngredient instanceof Map) {
+                        normalizedJson.texture = textureIngredient
+                    }
+                }
+            }
+            if (normalizedJson instanceof Map && normalizedJson.type instanceof String && normalizedJson.type.startsWith('tconstruct:') && normalizedJson.id == null) {
+                def relativePath = modernDataPackDir.get().asFile.toPath().relativize(recipeFile.toPath()).toString().replace('\\', '/')
+                def matcher = relativePath =~ /^data\/([^\/]+)\/recipe\/(.+)\.json$/
+                if (matcher.matches()) {
+                    normalizedJson.id = "${matcher.group(1)}:${matcher.group(2)}"
+                }
+            }
+            collectForgeItemTags(normalizedJson, missingForgeItemTags)
+            collectCommonItemTags(normalizedJson, missingCommonItemTags)
+            if (normalizedJson != json || json instanceof Map) {
+                recipeFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(normalizedJson))
+            } else if (json instanceof Map && json.result instanceof Map && json.result.item != null && json.result.id == null) {
+                json.result.id = json.result.remove('item')
+                recipeFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(json))
+            }
+        }
+
+        missingForgeItemTags.each { String forgeTag ->
+            String tagPath = forgeTag.substring('forge:'.length())
+            File sourceTag = file("src/main/resources/data/forge/tags/item/${tagPath}.json")
+            File generatedTag = file("src/generated/resources/data/forge/tags/item/${tagPath}.json")
+            if (sourceTag.exists() || generatedTag.exists()) {
+                return
+            }
+
+            File bridgeTag = file("${modernDataPackDir.get().asFile}/data/forge/tags/item/${tagPath}.json")
+            bridgeTag.parentFile.mkdirs()
+            Map<String,Object> bridgeJson = [
+                replace: false,
+                values : ["#c:${tagPath}"]
+            ]
+            bridgeTag.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(bridgeJson))
+        }
+
+        missingCommonItemTags.each { String commonTag ->
+            String tagPath = commonTag.substring('c:'.length())
+            File sourceTag = file("src/main/resources/data/c/tags/item/${tagPath}.json")
+            File generatedTag = file("src/generated/resources/data/c/tags/item/${tagPath}.json")
+            if (sourceTag.exists() || generatedTag.exists()) {
+                return
+            }
+
+            File sourceForgeTag = file("src/main/resources/data/forge/tags/item/${tagPath}.json")
+            File generatedForgeTag = file("src/generated/resources/data/forge/tags/item/${tagPath}.json")
+            if (!sourceForgeTag.exists() && !generatedForgeTag.exists()) {
+                return
+            }
+
+            File bridgeTag = file("${modernDataPackDir.get().asFile}/data/c/tags/item/${tagPath}.json")
+            bridgeTag.parentFile.mkdirs()
+            Map<String,Object> bridgeJson = [
+                replace: false,
+                values : ["#forge:${tagPath}"]
+            ]
+            bridgeTag.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(bridgeJson))
         }
     }
 }
@@ -189,6 +371,7 @@ test {
 }
 
 tasks.named('processResources', ProcessResources).configure {
+    dependsOn tasks.named('syncModernDataPackPaths')
     var replaceProperties = [
         'version': artifact_version,
         'loader_range': loader_range,
@@ -202,6 +385,10 @@ tasks.named('processResources', ProcessResources).configure {
     filesMatching(['META-INF/neoforge.mods.toml', 'pack.mcmeta']) {
         expand replaceProperties + [project: project]
     }
+}
+
+tasks.matching { it.name in ['runClient', 'runServer', 'runData', 'runGameTestServer'] }.configureEach {
+    dependsOn tasks.named('syncModernDataPackPaths')
 }
 
 tasks.named('jar', Jar).configure {
@@ -223,6 +410,7 @@ java {
 }
 
 sourcesJar {
+    dependsOn tasks.named('syncModernDataPackPaths')
     exclude 'assets/**'
     exclude 'data/**'
     exclude 'pack.png'

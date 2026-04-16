@@ -17,6 +17,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.mantle.fluid.tooltip.FluidTooltipHandler;
@@ -60,7 +61,7 @@ public class MeltingCategory extends AbstractMeltingCategory {
   }
 
   @Override
-  public RecipeType<MeltingRecipe> getRecipeType() {
+  public RecipeType<RecipeHolder<MeltingRecipe>> getRecipeType() {
     return TConstructJEIConstants.MELTING;
   }
 
@@ -70,8 +71,9 @@ public class MeltingCategory extends AbstractMeltingCategory {
   }
 
   @Override
-  public void draw(MeltingRecipe recipe, IRecipeSlotsView slots, GuiGraphics graphics, double mouseX, double mouseY) {
-    super.draw(recipe, slots, graphics, mouseX, mouseY);
+  public void draw(RecipeHolder<MeltingRecipe> holder, IRecipeSlotsView slots, GuiGraphics graphics, double mouseX, double mouseY) {
+    MeltingRecipe recipe = holder.value();
+    super.draw(holder, slots, graphics, mouseX, mouseY);
 
     // solid fuel slot
     int temperature = recipe.getTemperature();
@@ -81,7 +83,8 @@ public class MeltingCategory extends AbstractMeltingCategory {
   }
 
   @Override
-  public void setRecipe(IRecipeLayoutBuilder builder, MeltingRecipe recipe, IFocusGroup focuses) {
+  public void setRecipe(IRecipeLayoutBuilder builder, RecipeHolder<MeltingRecipe> holder, IFocusGroup focuses) {
+    MeltingRecipe recipe = holder.value();
     // input
     builder.addSlot(RecipeIngredientRole.INPUT, 24, 18).addIngredients(recipe.getInput());
 

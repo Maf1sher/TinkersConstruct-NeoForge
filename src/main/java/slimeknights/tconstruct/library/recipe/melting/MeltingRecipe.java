@@ -65,9 +65,25 @@ public class MeltingRecipe implements IMeltingRecipe {
     this.temperature = temperature;
     this.time = time;
     this.byproducts = byproducts;
+    validateFluidOutput(id, "result", output);
+    for (int i = 0; i < byproducts.size(); i++) {
+      validateFluidOutput(id, "byproducts[" + i + "]", byproducts.get(i));
+    }
     if (addLookup) {
       MeltingRecipeLookup.addMeltingFluid(input, output, temperature);
     }
+  }
+
+  /** Ensures datapack outputs resolve to an actual fluid before the recipe reaches packet sync */
+  protected static void validateFluidOutput(ResourceLocation recipeId, String fieldName, FluidOutput fluidOutput) {
+    if (!fluidOutput.get().isEmpty()) {
+      return;
+    }
+
+    String source = fluidOutput.getTag() != null
+      ? "tag '" + fluidOutput.getTag().location() + "'"
+      : "an empty fluid stack";
+    throw new IllegalArgumentException("Melting recipe '" + recipeId + "' has invalid " + fieldName + " from " + source);
   }
 
   @Override

@@ -20,6 +20,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.mantle.fluid.tooltip.FluidTooltipHandler;
 import slimeknights.tconstruct.TConstruct;
@@ -34,7 +35,7 @@ import java.util.Collections;
 import java.util.List;
 
 /** Shared logic between melting and foundry */
-public abstract class AbstractMeltingCategory implements IRecipeCategory<MeltingRecipe> {
+public abstract class AbstractMeltingCategory implements IRecipeCategory<RecipeHolder<MeltingRecipe>> {
   protected static final ResourceLocation BACKGROUND_LOC = TConstruct.getResource("textures/gui/jei/melting.png");
   protected static final String KEY_COOLING_TIME = TConstruct.makeTranslationKey("jei", "melting.time");
   protected static final String KEY_TEMPERATURE = TConstruct.makeTranslationKey("jei", "temperature");
@@ -69,7 +70,8 @@ public abstract class AbstractMeltingCategory implements IRecipeCategory<Melting
   }
 
   @Override
-  public void draw(MeltingRecipe recipe, IRecipeSlotsView slots, GuiGraphics graphics, double mouseX, double mouseY) {
+  public void draw(RecipeHolder<MeltingRecipe> holder, IRecipeSlotsView slots, GuiGraphics graphics, double mouseX, double mouseY) {
+    MeltingRecipe recipe = holder.value();
     // draw the arrow
     cachedArrows.getUnchecked(recipe.getTime() * 5).draw(graphics, 56, 18);
     if (recipe.getOreType() != null) {
@@ -85,7 +87,8 @@ public abstract class AbstractMeltingCategory implements IRecipeCategory<Melting
   }
 
   @Override
-  public List<Component> getTooltipStrings(MeltingRecipe recipe, IRecipeSlotsView slots, double mouseXD, double mouseYD) {
+  public List<Component> getTooltipStrings(RecipeHolder<MeltingRecipe> holder, IRecipeSlotsView slots, double mouseXD, double mouseYD) {
+    MeltingRecipe recipe = holder.value();
     int mouseX = (int)mouseXD;
     int mouseY = (int)mouseYD;
     if (recipe.getOreType() != null && GuiUtil.isHovered(mouseX, mouseY, 87, 31, 16, 16)) {
@@ -120,10 +123,5 @@ public abstract class AbstractMeltingCategory implements IRecipeCategory<Melting
         FluidTooltipHandler.appendShift(tooltip);
       }
     }
-  }
-
-  @Override
-  public ResourceLocation getRegistryName(MeltingRecipe recipe) {
-    return recipe.getId();
   }
 }

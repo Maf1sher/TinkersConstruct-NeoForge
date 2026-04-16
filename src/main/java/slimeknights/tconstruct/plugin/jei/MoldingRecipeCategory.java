@@ -16,6 +16,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.Ingredient;
 import slimeknights.mantle.client.SafeClientAccess;
 import slimeknights.tconstruct.TConstruct;
@@ -28,7 +29,7 @@ import java.util.Collections;
 import java.util.List;
 
 /** Recipe category for molding casts */
-public class MoldingRecipeCategory implements IRecipeCategory<MoldingRecipe> {
+public class MoldingRecipeCategory implements IRecipeCategory<RecipeHolder<MoldingRecipe>> {
   private static final ResourceLocation BACKGROUND_LOC = TConstruct.getResource("textures/gui/jei/casting.png");
   private static final Component TITLE = TConstruct.makeTranslation("jei", "molding.title");
   private static final Component TOOLTIP_PATTERN_CONSUMED = Component.translatable(TConstruct.makeTranslationKey("jei", "molding.pattern_consumed"));
@@ -48,7 +49,7 @@ public class MoldingRecipeCategory implements IRecipeCategory<MoldingRecipe> {
   }
 
   @Override
-  public RecipeType<MoldingRecipe> getRecipeType() {
+  public RecipeType<RecipeHolder<MoldingRecipe>> getRecipeType() {
     return TConstructJEIConstants.MOLDING;
   }
 
@@ -58,7 +59,8 @@ public class MoldingRecipeCategory implements IRecipeCategory<MoldingRecipe> {
   }
 
   @Override
-  public void draw(MoldingRecipe recipe, IRecipeSlotsView slots, GuiGraphics graphics, double mouseX, double mouseY) {
+  public void draw(RecipeHolder<MoldingRecipe> holder, IRecipeSlotsView slots, GuiGraphics graphics, double mouseX, double mouseY) {
+    MoldingRecipe recipe = holder.value();
     // draw the main block
     IDrawable block = recipe.getType() == TinkerRecipeTypes.MOLDING_BASIN.get() ? basin : table;
     block.draw(graphics, 3, 40);
@@ -73,7 +75,8 @@ public class MoldingRecipeCategory implements IRecipeCategory<MoldingRecipe> {
   }
 
   @Override
-  public List<Component> getTooltipStrings(MoldingRecipe recipe, IRecipeSlotsView slots, double mouseX, double mouseY) {
+  public List<Component> getTooltipStrings(RecipeHolder<MoldingRecipe> holder, IRecipeSlotsView slots, double mouseX, double mouseY) {
+    MoldingRecipe recipe = holder.value();
     if (recipe.isPatternConsumed() && !recipe.getPattern().isEmpty() && GuiUtil.isHovered((int)mouseX, (int)mouseY, 50, 7, 18, 18)) {
       return Collections.singletonList(TOOLTIP_PATTERN_CONSUMED);
     }
@@ -81,7 +84,8 @@ public class MoldingRecipeCategory implements IRecipeCategory<MoldingRecipe> {
   }
 
   @Override
-  public void setRecipe(IRecipeLayoutBuilder builder, MoldingRecipe recipe, IFocusGroup focuses) {
+  public void setRecipe(IRecipeLayoutBuilder builder, RecipeHolder<MoldingRecipe> holder, IFocusGroup focuses) {
+    MoldingRecipe recipe = holder.value();
     // basic input output
     builder.addSlot(RecipeIngredientRole.INPUT, 3, 24).addIngredients(recipe.getMaterial());
     RegistryAccess access = SafeClientAccess.getRegistryAccess();
@@ -98,10 +102,5 @@ public class MoldingRecipeCategory implements IRecipeCategory<MoldingRecipe> {
         builder.createFocusLink(inputSlot, preservedSlot);
       }
     }
-  }
-
-  @Override
-  public ResourceLocation getRegistryName(MoldingRecipe recipe) {
-    return recipe.getId();
   }
 }

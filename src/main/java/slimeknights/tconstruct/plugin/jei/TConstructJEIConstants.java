@@ -4,6 +4,8 @@ import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.IIngredientTypeWithSubtypes;
 import mezz.jei.api.recipe.RecipeType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
@@ -62,18 +64,18 @@ public class TConstructJEIConstants {
   // casting
   public static final RecipeType<IDisplayableCastingRecipe> CASTING_BASIN = type("casting_basin", IDisplayableCastingRecipe.class);
   public static final RecipeType<IDisplayableCastingRecipe> CASTING_TABLE = type("casting_table", IDisplayableCastingRecipe.class);
-  public static final RecipeType<MoldingRecipe> MOLDING = type("molding", MoldingRecipe.class);
+  public static final RecipeType<RecipeHolder<MoldingRecipe>> MOLDING = holderType("molding");
 
   // melting
-  public static final RecipeType<MeltingRecipe> MELTING = type("melting", MeltingRecipe.class);
-  public static final RecipeType<EntityMeltingRecipe> ENTITY_MELTING = type("entity_melting", EntityMeltingRecipe.class);
-  public static final RecipeType<AlloyRecipe> ALLOY = type("alloy", AlloyRecipe.class);
-  public static final RecipeType<MeltingRecipe> FOUNDRY = type("foundry", MeltingRecipe.class);
+  public static final RecipeType<RecipeHolder<MeltingRecipe>> MELTING = holderType("melting");
+  public static final RecipeType<RecipeHolder<EntityMeltingRecipe>> ENTITY_MELTING = holderType("entity_melting");
+  public static final RecipeType<RecipeHolder<AlloyRecipe>> ALLOY = holderType("alloy");
+  public static final RecipeType<RecipeHolder<MeltingRecipe>> FOUNDRY = holderType("foundry");
 
   // tinker station
   public static final RecipeType<IDisplayModifierRecipe> MODIFIERS = type("modifiers", IDisplayModifierRecipe.class);
-  public static final RecipeType<SeveringRecipe> SEVERING = type("severing", SeveringRecipe.class);
-  public static final RecipeType<ToolBuildingRecipe> TOOL_BUILDING = type("tool_recipes", ToolBuildingRecipe.class);
+  public static final RecipeType<RecipeHolder<SeveringRecipe>> SEVERING = holderType("severing");
+  public static final RecipeType<RecipeHolder<ToolBuildingRecipe>> TOOL_BUILDING = holderType("tool_recipes");
 
   // part builder
   public static final RecipeType<IDisplayPartBuilderRecipe> PART_BUILDER = type("part_builder", IDisplayPartBuilderRecipe.class);
@@ -83,5 +85,9 @@ public class TConstructJEIConstants {
 
   private static <T> RecipeType<T> type(String name, Class<T> clazz) {
     return RecipeType.create(TConstruct.MOD_ID, name, clazz);
+  }
+
+  private static <T extends Recipe<?>> RecipeType<RecipeHolder<T>> holderType(String name) {
+    return RecipeType.createRecipeHolderType(TConstruct.getResource(name));
   }
 }

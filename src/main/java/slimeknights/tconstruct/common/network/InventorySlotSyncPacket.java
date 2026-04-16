@@ -5,8 +5,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -50,8 +52,16 @@ public class InventorySlotSyncPacket implements CustomPacketPayload {
     private static void handle(InventorySlotSyncPacket packet) {
       Level world = Minecraft.getInstance().level;
       if (world != null) {
+        BlockEntity blockEntity = world.getBlockEntity(packet.pos);
+        if (blockEntity instanceof Container container && packet.slot >= 0 && packet.slot < container.getContainerSize()) {
+          container.setItem(packet.slot, packet.itemStack);
+          //noinspection ConstantConditions
+          Minecraft.getInstance().levelRenderer.blockChanged(null, packet.pos, null, null, 0);
+          return;
+        }
+
         IItemHandlerModifiable cap = world.getCapability(Capabilities.ItemHandler.BLOCK, packet.pos, null) instanceof IItemHandlerModifiable modifiable ? modifiable : null;
-        if (cap != null) {
+        if (cap != null && packet.slot >= 0 && packet.slot < cap.getSlots()) {
           cap.setStackInSlot(packet.slot, packet.itemStack);
           //noinspection ConstantConditions
           Minecraft.getInstance().levelRenderer.blockChanged(null, packet.pos, null, null, 0);

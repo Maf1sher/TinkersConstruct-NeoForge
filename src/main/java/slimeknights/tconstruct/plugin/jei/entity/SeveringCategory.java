@@ -12,6 +12,7 @@ import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import slimeknights.mantle.plugin.jei.MantleJEIConstants;
 import slimeknights.mantle.plugin.jei.entity.EntityIngredientRenderer;
 import slimeknights.mantle.recipe.ingredient.EntityIngredient;
@@ -20,7 +21,7 @@ import slimeknights.tconstruct.library.recipe.modifiers.severing.SeveringRecipe;
 import slimeknights.tconstruct.plugin.jei.TConstructJEIConstants;
 import slimeknights.tconstruct.tools.TinkerTools;
 
-public class SeveringCategory implements IRecipeCategory<SeveringRecipe> {
+public class SeveringCategory implements IRecipeCategory<RecipeHolder<SeveringRecipe>> {
   public static final ResourceLocation BACKGROUND_LOC = TConstruct.getResource("textures/gui/jei/tinker_station.png");
   private static final Component TITLE = TConstruct.makeTranslation("jei", "severing.title");
 
@@ -37,7 +38,7 @@ public class SeveringCategory implements IRecipeCategory<SeveringRecipe> {
   }
 
   @Override
-  public RecipeType<SeveringRecipe> getRecipeType() {
+  public RecipeType<RecipeHolder<SeveringRecipe>> getRecipeType() {
     return TConstructJEIConstants.SEVERING;
   }
 
@@ -47,7 +48,8 @@ public class SeveringCategory implements IRecipeCategory<SeveringRecipe> {
   }
 
   @Override
-  public void setRecipe(IRecipeLayoutBuilder builder, SeveringRecipe recipe, IFocusGroup focuses) {
+  public void setRecipe(IRecipeLayoutBuilder builder, RecipeHolder<SeveringRecipe> holder, IFocusGroup focuses) {
+    SeveringRecipe recipe = holder.value();
     EntityIngredient input = recipe.getIngredient();
     IIngredientAcceptor<?> entities = builder.addSlot(RecipeIngredientRole.INPUT, 3, 3)
            .setCustomRenderer(MantleJEIConstants.ENTITY_TYPE, entityRenderer)
@@ -57,10 +59,5 @@ public class SeveringCategory implements IRecipeCategory<SeveringRecipe> {
 
     // output
     builder.addSlot(RecipeIngredientRole.OUTPUT, 76, 11).addItemStack(recipe.getOutput());
-  }
-
-  @Override
-  public ResourceLocation getRegistryName(SeveringRecipe recipe) {
-    return recipe.getId();
   }
 }

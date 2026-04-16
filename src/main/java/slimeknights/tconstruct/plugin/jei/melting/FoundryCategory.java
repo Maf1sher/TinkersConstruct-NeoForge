@@ -11,6 +11,7 @@ import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.recipe.FluidValues;
 import slimeknights.tconstruct.library.recipe.melting.MeltingRecipe;
@@ -33,7 +34,7 @@ public class FoundryCategory extends AbstractMeltingCategory {
   }
 
   @Override
-  public RecipeType<MeltingRecipe> getRecipeType() {
+  public RecipeType<RecipeHolder<MeltingRecipe>> getRecipeType() {
     return TConstructJEIConstants.FOUNDRY;
   }
 
@@ -43,7 +44,8 @@ public class FoundryCategory extends AbstractMeltingCategory {
   }
 
   @Override
-  public void setRecipe(IRecipeLayoutBuilder builder, MeltingRecipe recipe, IFocusGroup focuses) {
+  public void setRecipe(IRecipeLayoutBuilder builder, RecipeHolder<MeltingRecipe> holder, IFocusGroup focuses) {
+    MeltingRecipe recipe = holder.value();
     // input
     builder.addSlot(RecipeIngredientRole.INPUT, 24, 18).addIngredients(recipe.getInput());
 

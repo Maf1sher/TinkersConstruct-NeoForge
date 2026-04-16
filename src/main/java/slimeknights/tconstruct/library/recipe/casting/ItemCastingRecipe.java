@@ -42,7 +42,20 @@ public class ItemCastingRecipe extends AbstractCastingRecipe implements IDisplay
     this.fluid = fluid;
     this.result = result;
     this.coolingTime = coolingTime;
+    validateItemOutput(id, result);
     CastingRecipeLookup.registerCastable(result);
+  }
+
+  /** Ensures datapack outputs resolve to an actual item before the recipe reaches packet sync */
+  protected static void validateItemOutput(ResourceLocation recipeId, ItemOutput output) {
+    if (!output.get().isEmpty()) {
+      return;
+    }
+
+    String source = output.getTag() != null
+      ? "tag '" + output.getTag().location() + "'"
+      : "an empty item stack";
+    throw new IllegalArgumentException("Casting recipe '" + recipeId + "' has invalid result from " + source);
   }
 
   @Override

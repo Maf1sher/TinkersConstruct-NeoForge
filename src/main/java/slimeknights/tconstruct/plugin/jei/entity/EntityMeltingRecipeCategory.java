@@ -19,6 +19,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.mantle.fluid.tooltip.FluidTooltipHandler;
 import slimeknights.mantle.plugin.jei.MantleJEIConstants;
@@ -37,7 +38,7 @@ import java.util.List;
 /**
  * Entity melting display in JEI
  */
-public class EntityMeltingRecipeCategory implements IRecipeCategory<EntityMeltingRecipe> {
+public class EntityMeltingRecipeCategory implements IRecipeCategory<RecipeHolder<EntityMeltingRecipe>> {
   public static final ResourceLocation BACKGROUND_LOC = TConstruct.getResource("textures/gui/jei/melting.png");
   private static final Component TITLE = TConstruct.makeTranslation("jei", "entity_melting.title");
   private static final String KEY_PER_HEARTS = TConstruct.makeTranslationKey("jei", "entity_melting.per_hearts");
@@ -61,7 +62,7 @@ public class EntityMeltingRecipeCategory implements IRecipeCategory<EntityMeltin
   }
 
   @Override
-  public RecipeType<EntityMeltingRecipe> getRecipeType() {
+  public RecipeType<RecipeHolder<EntityMeltingRecipe>> getRecipeType() {
     return TConstructJEIConstants.ENTITY_MELTING;
   }
 
@@ -71,7 +72,8 @@ public class EntityMeltingRecipeCategory implements IRecipeCategory<EntityMeltin
   }
 
   @Override
-  public void draw(EntityMeltingRecipe recipe, IRecipeSlotsView slot, GuiGraphics graphics, double mouseX, double mouseY) {
+  public void draw(RecipeHolder<EntityMeltingRecipe> holder, IRecipeSlotsView slot, GuiGraphics graphics, double mouseX, double mouseY) {
+    EntityMeltingRecipe recipe = holder.value();
     arrow.draw(graphics, 71, 21);
 
     // draw damage string next to the heart icon
@@ -82,7 +84,8 @@ public class EntityMeltingRecipeCategory implements IRecipeCategory<EntityMeltin
   }
 
   @Override
-  public void setRecipe(IRecipeLayoutBuilder builder, EntityMeltingRecipe recipe, IFocusGroup focuses) {
+  public void setRecipe(IRecipeLayoutBuilder builder, RecipeHolder<EntityMeltingRecipe> holder, IFocusGroup focuses) {
+    EntityMeltingRecipe recipe = holder.value();
     // inputs, filtered by spawn egg item
     EntityIngredient input = recipe.getIngredient();
     IIngredientAcceptor<?> entities = builder.addSlot(RecipeIngredientRole.INPUT, 19, 11)
@@ -105,12 +108,6 @@ public class EntityMeltingRecipeCategory implements IRecipeCategory<EntityMeltin
            .addTooltipCallback(FluidTooltipCallback.NO_AMOUNT)
            .addIngredients(NeoForgeTypes.FLUID_STACK, MeltingFuelHandler.getUsableFuels(1));
   }
-
-  @Override
-  public ResourceLocation getRegistryName(EntityMeltingRecipe recipe) {
-    return recipe.getId();
-  }
-
   /** Tooltip for relevant damage on the fluid */
   private record FluidTooltip(int damage) implements FluidTooltipCallback {
     @Override

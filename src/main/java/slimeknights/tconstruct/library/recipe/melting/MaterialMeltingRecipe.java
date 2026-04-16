@@ -49,6 +49,10 @@ public class MaterialMeltingRecipe implements IMeltingRecipe, IMultiRecipe<Melti
     this.temperature = temperature;
     this.result = result;
     this.byproducts = byproducts;
+    MeltingRecipe.validateFluidOutput(id, "result", result);
+    for (int i = 0; i < byproducts.size(); i++) {
+      MeltingRecipe.validateFluidOutput(id, "byproducts[" + i + "]", byproducts.get(i));
+    }
   }
 
   /** @deprecated use {@link #MaterialMeltingRecipe(ResourceLocation,MaterialVariantId,int,FluidOutput,List)} */

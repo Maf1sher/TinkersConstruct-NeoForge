@@ -4,12 +4,18 @@ import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import slimeknights.mantle.data.listener.IEarlySafeManagerReloadListener;
+import slimeknights.tconstruct.TConstruct;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Class that handles notifying recipe caches that they need to invalidate
@@ -49,7 +55,20 @@ public class RecipeCacheInvalidator implements IEarlySafeManagerReloadListener {
 
   @Override
   public void onReloadSafe(ResourceManager resourceManager) {
+    logRecipeResourceState(resourceManager);
     reload(false);
+  }
+
+  /** Logs basic datapack visibility for debugging recipe loading issues */
+  private static void logRecipeResourceState(ResourceManager resourceManager) {
+    ResourceLocation legacySample = TConstruct.getResource("recipes/world/wood/skyroot/planks.json");
+    ResourceLocation modernSample = TConstruct.getResource("recipe/world/wood/skyroot/planks.json");
+    Optional<Resource> legacyRecipe = resourceManager.getResource(legacySample);
+    Optional<Resource> modernRecipe = resourceManager.getResource(modernSample);
+    Map<ResourceLocation,Resource> tconstructRecipes = resourceManager.listResources("recipes", location -> location.getNamespace().equals(TConstruct.MOD_ID) && location.getPath().endsWith(".json"));
+    Map<ResourceLocation,Resource> tconstructModernRecipes = resourceManager.listResources("recipe", location -> location.getNamespace().equals(TConstruct.MOD_ID) && location.getPath().endsWith(".json"));
+    List<String> samples = tconstructModernRecipes.keySet().stream().limit(5).map(ResourceLocation::toString).toList();
+    TConstruct.LOG.info("TConstruct datapack visibility: legacy_sample_present={}, modern_sample_present={}, legacy_recipe_files={}, modern_recipe_files={}, sample_ids={}", legacyRecipe.isPresent(), modernRecipe.isPresent(), tconstructRecipes.size(), tconstructModernRecipes.size(), samples.isEmpty() ? "<none>" : samples);
   }
 
   /**

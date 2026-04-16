@@ -21,6 +21,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.mantle.fluid.tooltip.FluidTooltipHandler;
 import slimeknights.tconstruct.TConstruct;
@@ -38,7 +39,7 @@ import java.util.function.Function;
 /**
  * Alloy recipe category for JEI display
  */
-public class AlloyRecipeCategory implements IRecipeCategory<AlloyRecipe> {
+public class AlloyRecipeCategory implements IRecipeCategory<RecipeHolder<AlloyRecipe>> {
   private static final ResourceLocation BACKGROUND_LOC = TConstruct.getResource("textures/gui/jei/alloy.png");
   private static final Component TITLE = TConstruct.makeTranslation("jei", "alloy.title");
   private static final Component CATALYST = TConstruct.makeTranslation("jei", "alloy.catalyst").withStyle(ChatFormatting.ITALIC);
@@ -73,7 +74,7 @@ public class AlloyRecipeCategory implements IRecipeCategory<AlloyRecipe> {
   }
 
   @Override
-  public RecipeType<AlloyRecipe> getRecipeType() {
+  public RecipeType<RecipeHolder<AlloyRecipe>> getRecipeType() {
     return TConstructJEIConstants.ALLOY;
   }
 
@@ -83,7 +84,8 @@ public class AlloyRecipeCategory implements IRecipeCategory<AlloyRecipe> {
   }
 
   @Override
-  public void draw(AlloyRecipe recipe, IRecipeSlotsView slots, GuiGraphics graphics, double mouseX, double mouseY) {
+  public void draw(RecipeHolder<AlloyRecipe> holder, IRecipeSlotsView slots, GuiGraphics graphics, double mouseX, double mouseY) {
+    AlloyRecipe recipe = holder.value();
     arrow.draw(graphics, 90, 21);
     // temperature info
     Font fontRenderer = Minecraft.getInstance().font;
@@ -142,7 +144,8 @@ public class AlloyRecipeCategory implements IRecipeCategory<AlloyRecipe> {
   }
 
   @Override
-  public void setRecipe(IRecipeLayoutBuilder builder, AlloyRecipe recipe, IFocusGroup focuses) {
+  public void setRecipe(IRecipeLayoutBuilder builder, RecipeHolder<AlloyRecipe> holder, IFocusGroup focuses) {
+    AlloyRecipe recipe = holder.value();
     // inputs
     int maxAmount = drawVariableFluids(builder, RecipeIngredientRole.INPUT, 19, 11, 48, 32, recipe.getInputs(),recipe.getOutput().getAmount(),
                                        ingredient -> ingredient.fluid().getFluids(),
@@ -160,10 +163,5 @@ public class AlloyRecipeCategory implements IRecipeCategory<AlloyRecipe> {
            .setFluidRenderer(1, false, 16, 16)
            .setOverlay(tank, 0, 0)
            .addIngredients(NeoForgeTypes.FLUID_STACK, MeltingFuelHandler.getUsableFuels(recipe.getTemperature()));
-  }
-
-  @Override
-  public ResourceLocation getRegistryName(AlloyRecipe recipe) {
-    return recipe.getId();
   }
 }

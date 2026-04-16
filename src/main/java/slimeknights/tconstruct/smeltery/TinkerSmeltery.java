@@ -25,6 +25,8 @@ import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.fluids.FluidType;
@@ -117,6 +119,7 @@ import slimeknights.tconstruct.smeltery.block.entity.component.SmelteryInputOutp
 import slimeknights.tconstruct.smeltery.block.entity.component.TankBlockEntity;
 import slimeknights.tconstruct.smeltery.block.entity.controller.AlloyerBlockEntity;
 import slimeknights.tconstruct.smeltery.block.entity.controller.FoundryBlockEntity;
+import slimeknights.tconstruct.smeltery.block.entity.controller.HeatingStructureBlockEntity;
 import slimeknights.tconstruct.smeltery.block.entity.controller.MelterBlockEntity;
 import slimeknights.tconstruct.smeltery.block.entity.controller.SmelteryBlockEntity;
 import slimeknights.tconstruct.smeltery.data.FluidContainerTransferProvider;
@@ -452,6 +455,30 @@ public final class TinkerSmeltery extends TinkerModule {
       searedTank.forEach(dispenserBehavior);
       scorchedTank.forEach(dispenserBehavior);
     });
+  }
+
+  @SubscribeEvent
+  void registerCapabilities(RegisterCapabilitiesEvent event) {
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, tank.get(), TankBlockEntity::getFluidHandlerCapability);
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, fluidCannon.get(), FluidCannonBlockEntity::getFluidHandlerCapability);
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, lantern.get(), LanternBlockEntity::getFluidHandlerCapability);
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, melter.get(), MelterBlockEntity::getFluidHandlerCapability);
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, alloyer.get(), AlloyerBlockEntity::getFluidHandlerCapability);
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, smeltery.get(), (blockEntity, side) -> blockEntity.getFluidHandler());
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, foundry.get(), (blockEntity, side) -> blockEntity.getFluidHandler());
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, drain.get(), (blockEntity, side) -> blockEntity.getHandler(side));
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, duct.get(), (blockEntity, side) -> blockEntity.getHandler(side));
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, channel.get(), ChannelBlockEntity::getFluidHandlerCapability);
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, basin.get(), CastingBlockEntity::getFluidHandlerCapability);
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, table.get(), CastingBlockEntity::getFluidHandlerCapability);
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, castingTank.get(), CastingTankBlockEntity::getFluidHandlerCapability);
+
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, chute.get(), (blockEntity, side) -> blockEntity.getHandler(side));
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, heater.get(), HeaterBlockEntity::getItemHandlerCapability);
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, melter.get(), MelterBlockEntity::getItemHandlerCapability);
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, smeltery.get(), HeatingStructureBlockEntity::getItemHandlerCapability);
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, foundry.get(), HeatingStructureBlockEntity::getItemHandlerCapability);
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, fluidCannon.get(), FluidCannonBlockEntity::getItemHandlerCapability);
   }
 
   @SuppressWarnings("removal")

@@ -16,6 +16,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.GuiUtil;
 import slimeknights.tconstruct.library.recipe.tinkerstation.building.ToolBuildingRecipe;
@@ -33,7 +34,7 @@ import static slimeknights.tconstruct.library.recipe.tinkerstation.building.Tool
 import static slimeknights.tconstruct.library.recipe.tinkerstation.building.ToolBuildingRecipe.X_OFFSET;
 import static slimeknights.tconstruct.library.recipe.tinkerstation.building.ToolBuildingRecipe.Y_OFFSET;
 
-public class ToolBuildingCategory implements IRecipeCategory<ToolBuildingRecipe> {
+public class ToolBuildingCategory implements IRecipeCategory<RecipeHolder<ToolBuildingRecipe>> {
   private static final ResourceLocation BACKGROUND_LOC = TConstruct.getResource("textures/gui/jei/tinker_station.png");
   private static final Component TITLE = TConstruct.makeTranslation("jei", "tinkering.tool_building");
   @Getter
@@ -56,7 +57,8 @@ public class ToolBuildingCategory implements IRecipeCategory<ToolBuildingRecipe>
   }
 
   @Override
-  public void setRecipe(IRecipeLayoutBuilder builder, ToolBuildingRecipe recipe, IFocusGroup focuses) {
+  public void setRecipe(IRecipeLayoutBuilder builder, RecipeHolder<ToolBuildingRecipe> holder, IFocusGroup focuses) {
+    ToolBuildingRecipe recipe = holder.value();
     List<List<ItemStack>> partsAndExtras = Stream.concat(recipe.getAllToolParts().stream(),
       recipe.getExtraRequirements().stream().map(ingredient -> Arrays.asList(ingredient.getItems()))).toList();
     List<LayoutSlot> layoutSlots = recipe.getLayoutSlots();
@@ -89,7 +91,8 @@ public class ToolBuildingCategory implements IRecipeCategory<ToolBuildingRecipe>
   }
 
   @Override
-  public void draw(ToolBuildingRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
+  public void draw(RecipeHolder<ToolBuildingRecipe> holder, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
+    ToolBuildingRecipe recipe = holder.value();
     // first, draw the item background
     ItemStack outputStack = recipe.getOutput() instanceof IModifiableDisplay modifiable ? modifiable.getRenderTool() : recipe.getOutput().asItem().getDefaultInstance();
     PoseStack renderPose = graphics.pose();
@@ -127,7 +130,8 @@ public class ToolBuildingCategory implements IRecipeCategory<ToolBuildingRecipe>
   }
 
   @Override
-  public List<Component> getTooltipStrings(ToolBuildingRecipe recipe, IRecipeSlotsView recipeSlotsView, double mouseX, double mouseY) {
+  public List<Component> getTooltipStrings(RecipeHolder<ToolBuildingRecipe> holder, IRecipeSlotsView recipeSlotsView, double mouseX, double mouseY) {
+    ToolBuildingRecipe recipe = holder.value();
     return recipe.requiresAnvil() && GuiUtil.isHovered((int) mouseX, (int) mouseY, 76, 44, ITEM_SIZE, ITEM_SIZE) ?
       List.of(TConstruct.makeTranslation("jei", "tinkering.tool_building.anvil")) :
       List.of();
@@ -141,12 +145,7 @@ public class ToolBuildingCategory implements IRecipeCategory<ToolBuildingRecipe>
 
   @Nonnull
   @Override
-  public RecipeType<ToolBuildingRecipe> getRecipeType() {
+  public RecipeType<RecipeHolder<ToolBuildingRecipe>> getRecipeType() {
     return TConstructJEIConstants.TOOL_BUILDING;
-  }
-
-  @Override
-  public ResourceLocation getRegistryName(ToolBuildingRecipe recipe) {
-    return recipe.getId();
   }
 }

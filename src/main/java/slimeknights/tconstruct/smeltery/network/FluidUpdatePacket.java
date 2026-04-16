@@ -24,12 +24,12 @@ public class FluidUpdatePacket implements CustomPacketPayload {
 
   public FluidUpdatePacket(RegistryFriendlyByteBuf buffer) {
     this.pos = buffer.readBlockPos();
-    this.fluid = FluidStack.STREAM_CODEC.decode(buffer);
+    this.fluid = FluidStack.OPTIONAL_STREAM_CODEC.decode(buffer);
   }
 
   public void encode(RegistryFriendlyByteBuf buffer) {
     buffer.writeBlockPos(pos);
-    FluidStack.STREAM_CODEC.encode(buffer, fluid);
+    FluidStack.OPTIONAL_STREAM_CODEC.encode(buffer, fluid);
   }
 
   @Override

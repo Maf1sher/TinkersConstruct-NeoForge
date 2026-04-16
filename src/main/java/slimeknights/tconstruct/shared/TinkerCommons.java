@@ -62,7 +62,10 @@ import slimeknights.tconstruct.library.json.predicate.HarvestTierPredicate;
 import slimeknights.tconstruct.library.json.predicate.HasMobEffectPredicate;
 import slimeknights.tconstruct.library.json.predicate.TinkerPredicate;
 import slimeknights.tconstruct.library.recipe.ingredient.BlockTagIngredient;
+import slimeknights.tconstruct.library.recipe.ingredient.MaterialIngredient;
+import slimeknights.tconstruct.library.recipe.ingredient.MaterialValueIngredient;
 import slimeknights.tconstruct.library.recipe.ingredient.NoContainerIngredient;
+import slimeknights.tconstruct.library.recipe.ingredient.ToolHookIngredient;
 import slimeknights.tconstruct.library.utils.SlimeBounceHandler;
 import slimeknights.tconstruct.shared.block.BetterPaneBlock;
 import slimeknights.tconstruct.shared.block.ClearGlassPaneBlock;
@@ -200,6 +203,9 @@ public final class TinkerCommons extends TinkerModule {
     if (event.getRegistryKey() == NeoForgeRegistries.Keys.INGREDIENT_TYPES) {
       event.register(NeoForgeRegistries.Keys.INGREDIENT_TYPES, NoContainerIngredient.ID, () -> NoContainerIngredient.TYPE);
       event.register(NeoForgeRegistries.Keys.INGREDIENT_TYPES, BlockTagIngredient.ID, () -> BlockTagIngredient.TYPE);
+      event.register(NeoForgeRegistries.Keys.INGREDIENT_TYPES, MaterialIngredient.ID, () -> MaterialIngredient.TYPE);
+      event.register(NeoForgeRegistries.Keys.INGREDIENT_TYPES, MaterialValueIngredient.ID, () -> MaterialValueIngredient.TYPE);
+      event.register(NeoForgeRegistries.Keys.INGREDIENT_TYPES, ToolHookIngredient.ID, () -> ToolHookIngredient.TYPE);
     }
     if (event.getRegistryKey() == Registries.TRIGGER_TYPE) {
       event.register(Registries.TRIGGER_TYPE, getResource("block_container_opened"), () -> CONTAINER_OPENED_TRIGGER);

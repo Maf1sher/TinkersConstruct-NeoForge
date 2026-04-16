@@ -32,6 +32,8 @@ public class ModifierRepairCraftingRecipe extends CustomRecipe implements IModif
   private static final Predicate<ItemStack> TOOLS = stack -> stack.is(TinkerTags.Items.DURABILITY);
 
   @Getter
+  private final ResourceLocation id;
+  @Getter
   private final ModifierId modifier;
   @Getter
   private final Ingredient ingredient;
@@ -39,6 +41,7 @@ public class ModifierRepairCraftingRecipe extends CustomRecipe implements IModif
   private final int repairAmount;
   public ModifierRepairCraftingRecipe(ResourceLocation idIn, ModifierId modifier, Ingredient ingredient, int repairAmount) {
     super(CraftingBookCategory.EQUIPMENT);
+    this.id = idIn;
     this.modifier = modifier;
     this.ingredient = ingredient;
     this.repairAmount = repairAmount;
