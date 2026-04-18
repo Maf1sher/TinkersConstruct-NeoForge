@@ -260,6 +260,17 @@ public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay
     return false;
   }
 
+  @Override
+  public boolean canEquip(ItemStack stack, EquipmentSlot armorType, LivingEntity entity) {
+    return armorType == getEquipmentSlot();
+  }
+
+  @Nullable
+  @Override
+  public EquipmentSlot getEquipmentSlot(ItemStack stack) {
+    return getEquipmentSlot();
+  }
+
 
   /**
    * Gets the attribute modifiers for the given tool and slot.
