@@ -245,6 +245,18 @@ tasks.register('syncModernDataPackPaths', Sync) {
                         values.add('minecraft:cobblestone')
                         values.add('minecraft:mossy_cobblestone')
                         break
+                    case 'glass':
+                        values.add('#c:glass_blocks')
+                        break
+                    case 'glass/colorless':
+                        values.add('#c:glass_blocks/colorless')
+                        break
+                    case 'glass_panes':
+                        values.add('minecraft:glass_pane')
+                        break
+                    case 'glass_panes/colorless':
+                        values.add('minecraft:glass_pane')
+                        break
                 }
             }
 
@@ -348,7 +360,27 @@ tasks.register('syncModernDataPackPaths', Sync) {
             File bridgeTag = file("${modernDataPackDir.get().asFile}/data/c/tags/item/${tagPath}.json")
             bridgeTag.parentFile.mkdirs()
             Map<String,Object> bridgeJson
-            if (sourceForgeTag.exists() || generatedForgeTag.exists()) {
+            if (tagPath == 'glass') {
+                bridgeJson = [
+                    replace: false,
+                    values : ['#c:glass_blocks']
+                ]
+            } else if (tagPath == 'glass/colorless') {
+                bridgeJson = [
+                    replace: false,
+                    values : ['#c:glass_blocks/colorless']
+                ]
+            } else if (tagPath == 'glass_panes') {
+                bridgeJson = [
+                    replace: false,
+                    values : ['minecraft:glass_pane']
+                ]
+            } else if (tagPath == 'glass_panes/colorless') {
+                bridgeJson = [
+                    replace: false,
+                    values : ['minecraft:glass_pane']
+                ]
+            } else if (sourceForgeTag.exists() || generatedForgeTag.exists()) {
                 bridgeJson = [
                     replace: false,
                     values : ["#forge:${tagPath}"]
@@ -359,6 +391,13 @@ tasks.register('syncModernDataPackPaths', Sync) {
                     return
                 }
             }
+
+            String selfReference = "#c:${tagPath}"
+            bridgeJson.values = bridgeJson.values.findAll { it != selfReference }
+            if (bridgeJson.values.isEmpty()) {
+                return
+            }
+
             bridgeTag.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(bridgeJson))
         }
     }
