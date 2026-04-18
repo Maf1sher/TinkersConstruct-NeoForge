@@ -112,10 +112,42 @@ tasks.register('syncModernDataPackPaths', Sync) {
         includeEmptyDirs = false
     }
 
+    from('src/main/resources') {
+        include 'data/*/loot_tables/**'
+        eachFile { fileCopyDetails ->
+            fileCopyDetails.path = fileCopyDetails.path.replace('/loot_tables/', '/loot_table/')
+        }
+        includeEmptyDirs = false
+    }
+
     from('src/generated/resources') {
         include 'data/*/recipes/**'
         eachFile { fileCopyDetails ->
             fileCopyDetails.path = fileCopyDetails.path.replace('/recipes/', '/recipe/')
+        }
+        includeEmptyDirs = false
+    }
+
+    from('src/generated/resources') {
+        include 'data/*/loot_tables/**'
+        eachFile { fileCopyDetails ->
+            fileCopyDetails.path = fileCopyDetails.path.replace('/loot_tables/', '/loot_table/')
+        }
+        includeEmptyDirs = false
+    }
+
+    from('src/main/resources') {
+        include 'data/forge/tags/block/needs_*_tool.json'
+        eachFile { fileCopyDetails ->
+            fileCopyDetails.path = fileCopyDetails.path.replace('data/forge/tags/block/', 'data/neoforge/tags/block/')
+        }
+        includeEmptyDirs = false
+    }
+
+    from('src/generated/resources') {
+        include 'data/forge/tags/block/needs_*_tool.json'
+        eachFile { fileCopyDetails ->
+            fileCopyDetails.path = fileCopyDetails.path.replace('data/forge/tags/block/', 'data/neoforge/tags/block/')
         }
         includeEmptyDirs = false
     }
@@ -138,6 +170,29 @@ tasks.register('syncModernDataPackPaths', Sync) {
             }
             if (node instanceof List) {
                 return node.collect { value -> normalizeJson(value, path) }
+            }
+            return node
+        }
+
+        def normalizeLootJson
+        normalizeLootJson = { node ->
+            if (node instanceof Map) {
+                node.replaceAll { key, value ->
+                    if (key == 'function' && value == 'minecraft:copy_nbt') {
+                        return 'minecraft:copy_custom_data'
+                    }
+                    if (key == 'condition' && value == 'forge:can_tool_perform_action') {
+                        return 'neoforge:can_item_perform_ability'
+                    }
+                    if (key == 'condition' && value == 'forge:loot_table_id') {
+                        return 'neoforge:loot_table_id'
+                    }
+                    return normalizeLootJson(value)
+                }
+                return node
+            }
+            if (node instanceof List) {
+                return node.collect { value -> normalizeLootJson(value) }
             }
             return node
         }
@@ -327,6 +382,17 @@ tasks.register('syncModernDataPackPaths', Sync) {
             } else if (json instanceof Map && json.result instanceof Map && json.result.item != null && json.result.id == null) {
                 json.result.id = json.result.remove('item')
                 recipeFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(json))
+            }
+        }
+
+        fileTree(modernDataPackDir.get().asFile) {
+            include 'data/*/loot_table/**/*.json'
+            include 'data/*/loot_modifiers/**/*.json'
+        }.each { File lootFile ->
+            def json = new groovy.json.JsonSlurper().parse(lootFile)
+            def normalizedJson = normalizeLootJson(json)
+            if (normalizedJson != json || json instanceof Map) {
+                lootFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(normalizedJson))
             }
         }
 

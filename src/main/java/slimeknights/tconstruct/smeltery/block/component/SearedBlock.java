@@ -56,9 +56,12 @@ public class SearedBlock extends Block implements EntityBlock {
       } else {
         // block changed, tell the master then ditch the block entity
         BlockEntityHelper.get(SmelteryComponentBlockEntity.class, world, pos).ifPresent(te -> te.notifyMasterOfChange(pos, newState));
-        world.removeBlockEntity(pos);
       }
     }
+
+    // In modern MC versions, loot generation can read block-entity data during break.
+    // Let vanilla perform the final block-entity teardown after loot has a chance to inspect it.
+    super.onRemove(oldState, world, pos, newState, isMoving);
   }
 
   @Override
