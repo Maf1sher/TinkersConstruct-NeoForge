@@ -9,13 +9,16 @@ import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.player.Input;
 import net.minecraft.client.renderer.entity.ItemEntityRenderer;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent.RegisterGeometryLoaders;
 import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
@@ -41,6 +44,7 @@ import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
 import slimeknights.tconstruct.library.client.armor.AbstractArmorModel;
 import slimeknights.tconstruct.library.client.armor.ArmorModelManager;
+import slimeknights.tconstruct.library.client.armor.ArmorModelManager.ArmorModelDispatcher;
 import slimeknights.tconstruct.library.client.armor.texture.TrimArmorTextureSupplier;
 import slimeknights.tconstruct.library.client.book.content.AbstractMaterialContent;
 import slimeknights.tconstruct.library.client.materials.MaterialTooltipCache;
@@ -83,6 +87,8 @@ import slimeknights.tconstruct.tools.logic.InteractionHandler;
 import slimeknights.tconstruct.tools.modules.ranged.ammo.SmashingModule;
 import slimeknights.tconstruct.tools.network.TinkerControlPacket;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import static slimeknights.tconstruct.TConstruct.getResource;
@@ -111,6 +117,31 @@ public class ToolClientEvents extends ClientEventBase {
     manager.registerReloadListener(HarvestTiers.RELOAD_LISTENER);
     ArmorModelManager.init(manager);
     manager.registerReloadListener(TrimArmorTextureSupplier.CACHE_INVALIDATOR);
+  }
+
+  @SubscribeEvent
+  static void registerClientExtensions(RegisterClientExtensionsEvent event) {
+    // In 1.21, armor item client extensions must be registered here.
+    // Without this, vanilla armor texture fallback is used, causing missing pink textures.
+    event.registerItem(armorModel(ArmorDefinitions.TRAVELERS.getId()), TinkerTools.travelersGear.values().toArray(new Item[0]));
+    event.registerItem(armorModel(ArmorDefinitions.PLATE.getId()), TinkerTools.plateArmor.values().toArray(new Item[0]));
+
+    // Slimesuit helmet has its own custom skull extension; only register the wearable pieces.
+    List<Item> slimesuitWearables = new ArrayList<>(3);
+    slimesuitWearables.add(TinkerTools.slimesuit.get(ArmorItem.Type.BOOTS));
+    slimesuitWearables.add(TinkerTools.slimesuit.get(ArmorItem.Type.LEGGINGS));
+    slimesuitWearables.add(TinkerTools.slimesuit.get(ArmorItem.Type.CHESTPLATE));
+    event.registerItem(armorModel(ArmorDefinitions.SLIMESUIT.getId()), slimesuitWearables.toArray(new Item[0]));
+  }
+
+  /** Creates a lightweight dispatcher bound to the given armor model id. */
+  private static ArmorModelDispatcher armorModel(ResourceLocation name) {
+    return new ArmorModelDispatcher() {
+      @Override
+      protected ResourceLocation getName() {
+        return name;
+      }
+    };
   }
 
   @SubscribeEvent
