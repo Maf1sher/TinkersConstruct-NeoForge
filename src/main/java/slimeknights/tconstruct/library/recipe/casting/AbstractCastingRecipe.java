@@ -9,13 +9,14 @@ import net.minecraft.world.item.crafting.RecipeType;
 import slimeknights.mantle.data.loadable.common.IngredientLoadable;
 import slimeknights.mantle.data.loadable.field.LoadableField;
 import slimeknights.mantle.data.loadable.primitive.BooleanLoadable;
+import slimeknights.tconstruct.library.json.field.CompatIngredientField;
 
 import javax.annotation.Nonnull;
 
 /** Shared logic between item and material casting */
 public abstract class AbstractCastingRecipe implements ICastingRecipe {
   /* Common fields */
-  protected static final LoadableField<Ingredient,AbstractCastingRecipe> CAST_FIELD = IngredientLoadable.ALLOW_EMPTY.defaultField("cast", Ingredient.EMPTY, AbstractCastingRecipe::getCast);
+  protected static final LoadableField<Ingredient,AbstractCastingRecipe> CAST_FIELD = new CompatIngredientField<>(IngredientLoadable.ALLOW_EMPTY.defaultField("cast", Ingredient.EMPTY, AbstractCastingRecipe::getCast));
   protected static final LoadableField<Boolean,AbstractCastingRecipe> CAST_CONSUMED_FIELD = BooleanLoadable.INSTANCE.defaultField("cast_consumed", false, false, AbstractCastingRecipe::isConsumed);
   protected static final LoadableField<Boolean,AbstractCastingRecipe> SWITCH_SLOTS_FIELD = BooleanLoadable.INSTANCE.defaultField("switch_slots", false, false, AbstractCastingRecipe::switchSlots);
 

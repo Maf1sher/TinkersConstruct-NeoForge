@@ -16,6 +16,8 @@ import slimeknights.mantle.recipe.helper.ItemOutput;
 import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
 import slimeknights.mantle.recipe.helper.TypeAwareRecipeSerializer;
 import slimeknights.mantle.recipe.ingredient.FluidIngredient;
+import slimeknights.tconstruct.library.json.field.CompatFluidIngredientField;
+import slimeknights.tconstruct.library.json.field.CompatItemOutputField;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,8 +26,8 @@ import java.util.List;
 @Getter
 public class ItemCastingRecipe extends AbstractCastingRecipe implements IDisplayableCastingRecipe {
   /* Shared fields */
-  protected static final LoadableField<FluidIngredient,ItemCastingRecipe> FLUID_FIELD = FluidIngredient.LOADABLE.requiredField("fluid", ItemCastingRecipe::getFluid);
-  protected static final LoadableField<ItemOutput,ItemCastingRecipe> RESULT_FIELD = ItemOutput.Loadable.REQUIRED_ITEM.requiredField("result", r -> r.result);
+  protected static final LoadableField<FluidIngredient,ItemCastingRecipe> FLUID_FIELD = new CompatFluidIngredientField<>(FluidIngredient.LOADABLE.requiredField("fluid", ItemCastingRecipe::getFluid));
+  protected static final LoadableField<ItemOutput,ItemCastingRecipe> RESULT_FIELD = new CompatItemOutputField<>(ItemOutput.Loadable.REQUIRED_ITEM.requiredField("result", r -> r.result));
   protected static final LoadableField<Integer,ItemCastingRecipe> COOLING_TIME_FIELD = IntLoadable.FROM_ONE.requiredField("cooling_time", ItemCastingRecipe::getCoolingTime);
   /** Loader instance */
   public static final RecordLoadable<ItemCastingRecipe> LOADER = RecordLoadable.create(
@@ -49,6 +51,10 @@ public class ItemCastingRecipe extends AbstractCastingRecipe implements IDisplay
 
   /** Ensures datapack outputs resolve to an actual item before the recipe reaches packet sync */
   protected static void validateItemOutput(ResourceLocation recipeId, ItemOutput output) {
+    if (output == ItemOutput.EMPTY) {
+      return;
+    }
+
     // Tag outputs must resolve to a non-empty stack to safely sync in packets.
     // Some outputs may temporarily fail to resolve during early load if they depend on config,
     // in which case we defer validation and let final recipe loading decide.

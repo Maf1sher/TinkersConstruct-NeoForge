@@ -1,6 +1,8 @@
 package slimeknights.tconstruct.library.recipe;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonPrimitive;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
@@ -20,6 +22,7 @@ import slimeknights.mantle.recipe.helper.TypeAwareRecipeSerializer;
 import slimeknights.tconstruct.TConstruct;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -72,7 +75,7 @@ public class TConstructLoadableRecipeSerializer<T extends Recipe<?>> extends Loa
           input.entries().forEach(pair -> {
             String key = ops.getStringValue(pair.getFirst()).getOrThrow();
             O value = pair.getSecond();
-            json.add(key, ops.convertTo(com.mojang.serialization.JsonOps.INSTANCE, value));
+            json.add(key, convertToJson(ops, value));
           });
           return DataResult.success(loadable.deserialize(json, buildContext(getContextId(json)).build()));
         } catch (Exception e) {
@@ -99,6 +102,58 @@ public class TConstructLoadableRecipeSerializer<T extends Recipe<?>> extends Loa
         return Stream.empty();
       }
     };
+  }
+
+  /**
+   * Converts a dynamic element to JSON, with a fallback for registry reference values that can appear
+   * when external parsers invoke codecs through registry-aware ops.
+   */
+  private static <O> com.google.gson.JsonElement convertToJson(DynamicOps<O> ops, O value) {
+    try {
+      return ops.convertTo(com.mojang.serialization.JsonOps.INSTANCE, value);
+    } catch (RuntimeException ignored) {
+      // Fallback below
+    }
+
+    Optional<com.mojang.serialization.MapLike<O>> map = ops.getMap(value).result();
+    if (map.isPresent()) {
+      JsonObject json = new JsonObject();
+      map.get().entries().forEach(entry -> {
+        String key = ops.getStringValue(entry.getFirst()).getOrThrow();
+        json.add(key, convertToJson(ops, entry.getSecond()));
+      });
+      return json;
+    }
+
+    Optional<Stream<O>> stream = ops.getStream(value).result();
+    if (stream.isPresent()) {
+      JsonArray json = new JsonArray();
+      stream.get().forEach(child -> json.add(convertToJson(ops, child)));
+      return json;
+    }
+
+    Optional<String> stringValue = ops.getStringValue(value).result();
+    if (stringValue.isPresent()) {
+      return new JsonPrimitive(stringValue.get());
+    }
+
+    Optional<Number> numberValue = ops.getNumberValue(value).result();
+    if (numberValue.isPresent()) {
+      return new JsonPrimitive(numberValue.get());
+    }
+
+    Optional<Boolean> booleanValue = ops.getBooleanValue(value).result();
+    if (booleanValue.isPresent()) {
+      return new JsonPrimitive(booleanValue.get());
+    }
+
+    String debug = String.valueOf(value);
+    int equalsIndex = debug.lastIndexOf('=');
+    if (debug.startsWith("Reference{") && equalsIndex >= 0 && debug.endsWith("}")) {
+      return new JsonPrimitive(debug.substring(equalsIndex + 1, debug.length() - 1));
+    }
+
+    throw new IllegalArgumentException("Failed to convert dynamic value to JSON: " + debug);
   }
 
   public static class TypeAware<T extends Recipe<?>> extends TConstructLoadableRecipeSerializer<T> implements TypeAwareRecipeSerializer<T> {

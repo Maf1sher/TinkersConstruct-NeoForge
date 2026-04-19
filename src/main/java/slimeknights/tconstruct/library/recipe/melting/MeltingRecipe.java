@@ -17,6 +17,8 @@ import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.helper.FluidOutput;
 import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
 import slimeknights.tconstruct.common.config.Config;
+import slimeknights.tconstruct.library.json.field.CompatFluidOutputField;
+import slimeknights.tconstruct.library.json.field.CompatIngredientField;
 import slimeknights.tconstruct.library.recipe.melting.IMeltingContainer.OreRateType;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
@@ -29,8 +31,8 @@ import java.util.stream.Stream;
  */
 public class MeltingRecipe implements IMeltingRecipe {
   /* Reusable fields */
-  protected static final LoadableField<Ingredient, MeltingRecipe> INPUT = IngredientLoadable.DISALLOW_EMPTY.requiredField("ingredient", MeltingRecipe::getInput);
-  protected static final LoadableField<FluidOutput, MeltingRecipe> OUTPUT = FluidOutput.Loadable.REQUIRED.requiredField("result", r -> r.output);
+  protected static final LoadableField<Ingredient, MeltingRecipe> INPUT = new CompatIngredientField<>(IngredientLoadable.DISALLOW_EMPTY.requiredField("ingredient", MeltingRecipe::getInput));
+  protected static final LoadableField<FluidOutput, MeltingRecipe> OUTPUT = new CompatFluidOutputField<>(FluidOutput.Loadable.REQUIRED.requiredField("result", r -> r.output));
   protected static final LoadableField<Integer, MeltingRecipe> TEMPERATURE = IntLoadable.FROM_ZERO.requiredField("temperature", MeltingRecipe::getTemperature);
   protected static final LoadableField<Integer, MeltingRecipe> TIME = IntLoadable.FROM_ONE.requiredField("time", MeltingRecipe::getTime);
   protected static final LoadableField<List<FluidOutput>, MeltingRecipe> BYPRODUCTS = FluidOutput.Loadable.REQUIRED.list(0).defaultField("byproducts", List.of(), r -> r.byproducts);

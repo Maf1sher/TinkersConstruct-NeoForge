@@ -202,9 +202,8 @@ tasks.register('syncModernDataPackPaths', Sync) {
             if (node instanceof Map) {
                 boolean fluidTagContext = node.containsKey('amount') && (node.containsKey('tag') || node.containsKey('fluid'))
                 boolean outputTagContext = path.any { it in ['result', 'results', 'output', 'outputs'] }
-                boolean conditionTagContext = path.contains('conditions')
                 node.each { key, value ->
-                    if (key == 'tag' && !fluidTagContext && (outputTagContext || conditionTagContext) && value instanceof String && value.startsWith('forge:')) {
+                    if (key == 'tag' && !fluidTagContext && outputTagContext && value instanceof String && value.startsWith('forge:')) {
                         tags.add(value)
                     }
                     collectForgeItemTags(value, tags, path + key.toString())
@@ -221,9 +220,8 @@ tasks.register('syncModernDataPackPaths', Sync) {
             if (node instanceof Map) {
                 boolean fluidTagContext = node.containsKey('amount') && (node.containsKey('tag') || node.containsKey('fluid'))
                 boolean outputTagContext = path.any { it in ['result', 'results', 'output', 'outputs'] }
-                boolean conditionTagContext = path.contains('conditions')
                 node.each { key, value ->
-                    if (key == 'tag' && !fluidTagContext && !outputTagContext && !conditionTagContext && value instanceof String && value.startsWith('c:')) {
+                    if (key == 'tag' && !fluidTagContext && !outputTagContext && value instanceof String && value.startsWith('c:')) {
                         tags.add(value)
                     }
                     collectCommonItemTags(value, tags, path + key.toString())
@@ -239,7 +237,8 @@ tasks.register('syncModernDataPackPaths', Sync) {
         findExistingTagFile = { String namespace, String registry, String tagPath ->
             List<File> candidates = [
                 file("src/main/resources/data/${namespace}/tags/${registry}/${tagPath}.json"),
-                file("src/generated/resources/data/${namespace}/tags/${registry}/${tagPath}.json")
+                file("src/generated/resources/data/${namespace}/tags/${registry}/${tagPath}.json"),
+                file("${modernDataPackDir.get().asFile}/data/${namespace}/tags/${registry}/${tagPath}.json")
             ]
             candidates.find { it.exists() }
         }
@@ -249,7 +248,8 @@ tasks.register('syncModernDataPackPaths', Sync) {
             Set<String> children = new TreeSet<>()
             [
                 file("src/main/resources/data/${namespace}/tags/${registry}/${tagPath}"),
-                file("src/generated/resources/data/${namespace}/tags/${registry}/${tagPath}")
+                file("src/generated/resources/data/${namespace}/tags/${registry}/${tagPath}"),
+                file("${modernDataPackDir.get().asFile}/data/${namespace}/tags/${registry}/${tagPath}")
             ].each { File directory ->
                 if (directory.exists() && directory.isDirectory()) {
                     fileTree(directory) {
@@ -274,8 +274,28 @@ tasks.register('syncModernDataPackPaths', Sync) {
             }
             [
                 replace: parsed.replace == true,
-                values : new ArrayList<>(parsed.values.collect { it.toString() })
+                values : new ArrayList<>(parsed.values.collect { value ->
+                    if (value instanceof Map) {
+                        return new LinkedHashMap(value)
+                    }
+                    if (value instanceof List) {
+                        return new ArrayList(value)
+                    }
+                    return value
+                })
             ]
+        }
+
+        def isTagSelfReference
+        isTagSelfReference = { Object value, String selfReference ->
+            if (value instanceof String) {
+                return value == selfReference
+            }
+            if (value instanceof Map) {
+                def id = value.id
+                return id instanceof String && id == selfReference
+            }
+            false
         }
 
         def synthesizeForgeTag
@@ -399,7 +419,7 @@ tasks.register('syncModernDataPackPaths', Sync) {
 
         def synthesizeCommonItemTag
         synthesizeCommonItemTag = { String tagPath ->
-            Set<String> values = new LinkedHashSet<>()
+            Set<Object> values = new LinkedHashSet<>()
 
             collectTagChildren('forge', 'item', tagPath).each { String child ->
                 values.add("#forge:${tagPath}/${child}")
@@ -434,6 +454,14 @@ tasks.register('syncModernDataPackPaths', Sync) {
                     case 'glass_panes/colorless':
                         values.add('minecraft:glass_pane')
                         break
+                    case 'end_stones':
+                        values.add('minecraft:end_stone')
+                        break
+                    case 'ores/gold':
+                        values.add('minecraft:gold_ore')
+                        values.add('minecraft:deepslate_gold_ore')
+                        values.add('minecraft:nether_gold_ore')
+                        break
                 }
             }
 
@@ -447,7 +475,44 @@ tasks.register('syncModernDataPackPaths', Sync) {
             ]
         }
 
+        def collectForgeFluidTags
+        collectForgeFluidTags = { node, Set<String> tags, List<String> path = [] ->
+            if (node instanceof Map) {
+                boolean fluidTagContext = node.containsKey('amount') && (node.containsKey('tag') || node.containsKey('fluid'))
+                node.each { key, value ->
+                    if (key == 'tag' && fluidTagContext && value instanceof String && value.startsWith('forge:')) {
+                        tags.add(value)
+                    }
+                    collectForgeFluidTags(value, tags, path + key.toString())
+                }
+                return
+            }
+            if (node instanceof List) {
+                node.each { value -> collectForgeFluidTags(value, tags, path) }
+            }
+        }
+
+        def collectForgeConditionTags
+        collectForgeConditionTags = { node, Map<String,Set<String>> tagsByRegistry, List<String> path = [] ->
+            if (node instanceof Map) {
+                boolean conditionContext = path.any { it in ['conditions', 'neoforge:conditions'] }
+                if (conditionContext) {
+                    def tag = node.tag
+                    if (tag instanceof String && tag.startsWith('forge:')) {
+                        String registry = node.registry == 'minecraft:fluid' ? 'fluid' : node.registry == 'minecraft:block' ? 'block' : 'item'
+                        tagsByRegistry.computeIfAbsent(registry) { new LinkedHashSet<>() }.add(tag)
+                    }
+                }
+                node.each { key, value -> collectForgeConditionTags(value, tagsByRegistry, path + key.toString()) }
+                return
+            }
+            if (node instanceof List) {
+                node.each { value -> collectForgeConditionTags(value, tagsByRegistry, path) }
+            }
+        }
+
         Set<String> missingForgeItemTags = new LinkedHashSet<>()
+        Set<String> missingForgeFluidTags = new LinkedHashSet<>()
         Set<String> missingCommonItemTags = new LinkedHashSet<>()
 
         fileTree(modernDataPackDir.get().asFile) {
@@ -497,8 +562,16 @@ tasks.register('syncModernDataPackPaths', Sync) {
                     normalizedJson.id = "${matcher.group(1)}:${matcher.group(2)}"
                 }
             }
+            if (normalizedJson instanceof Map && normalizedJson.conditions instanceof List && normalizedJson['neoforge:conditions'] == null) {
+                normalizedJson['neoforge:conditions'] = normalizedJson.remove('conditions')
+            }
             collectForgeItemTags(normalizedJson, missingForgeItemTags)
+            collectForgeFluidTags(normalizedJson, missingForgeFluidTags)
             collectCommonItemTags(normalizedJson, missingCommonItemTags)
+            Map<String,Set<String>> forgeConditionTags = [:].withDefault { new LinkedHashSet<>() }
+            collectForgeConditionTags(normalizedJson, forgeConditionTags)
+            missingForgeItemTags.addAll(forgeConditionTags['item'])
+            missingForgeFluidTags.addAll(forgeConditionTags['fluid'])
             if (normalizedJson != json || json instanceof Map) {
                 recipeFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(normalizedJson))
             } else if (json instanceof Map && json.result instanceof Map && json.result.item != null && json.result.id == null) {
@@ -527,6 +600,23 @@ tasks.register('syncModernDataPackPaths', Sync) {
             }
 
             File bridgeTag = file("${modernDataPackDir.get().asFile}/data/forge/tags/item/${tagPath}.json")
+            bridgeTag.parentFile.mkdirs()
+            Map<String,Object> bridgeJson = [
+                replace: false,
+                values : ["#c:${tagPath}"]
+            ]
+            bridgeTag.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(bridgeJson))
+        }
+
+        missingForgeFluidTags.each { String forgeTag ->
+            String tagPath = forgeTag.substring('forge:'.length())
+            File sourceTag = file("src/main/resources/data/forge/tags/fluid/${tagPath}.json")
+            File generatedTag = file("src/generated/resources/data/forge/tags/fluid/${tagPath}.json")
+            if (sourceTag.exists() || generatedTag.exists()) {
+                return
+            }
+
+            File bridgeTag = file("${modernDataPackDir.get().asFile}/data/forge/tags/fluid/${tagPath}.json")
             bridgeTag.parentFile.mkdirs()
             Map<String,Object> bridgeJson = [
                 replace: false,
@@ -569,10 +659,34 @@ tasks.register('syncModernDataPackPaths', Sync) {
                     values : ['minecraft:glass_pane']
                 ]
             } else if (sourceForgeTag.exists() || generatedForgeTag.exists()) {
-                bridgeJson = [
-                    replace: false,
-                    values : ["#forge:${tagPath}"]
-                ]
+                File forgeTag = sourceForgeTag.exists() ? sourceForgeTag : generatedForgeTag
+                def parsedForgeTag = readTagValues(forgeTag)
+                String selfReference = "#c:${tagPath}"
+                if (parsedForgeTag != null) {
+                    List<Object> forgeValues = parsedForgeTag.values.findAll { !isTagSelfReference(it, selfReference) }
+                    if (!forgeValues.isEmpty()) {
+                        bridgeJson = [
+                            replace: parsedForgeTag.replace,
+                            values : forgeValues
+                        ]
+                    } else {
+                        bridgeJson = synthesizeCommonItemTag(tagPath)
+                        if (bridgeJson == null) {
+                            bridgeJson = [
+                                replace: false,
+                                values : []
+                            ]
+                        }
+                    }
+                } else {
+                    bridgeJson = synthesizeCommonItemTag(tagPath)
+                    if (bridgeJson == null) {
+                        bridgeJson = [
+                            replace: false,
+                            values : []
+                        ]
+                    }
+                }
             } else {
                 bridgeJson = synthesizeCommonItemTag(tagPath)
                 if (bridgeJson == null) {
@@ -581,7 +695,7 @@ tasks.register('syncModernDataPackPaths', Sync) {
             }
 
             String selfReference = "#c:${tagPath}"
-            bridgeJson.values = bridgeJson.values.findAll { it != selfReference }
+            bridgeJson.values = bridgeJson.values.findAll { !isTagSelfReference(it, selfReference) }
             if (bridgeJson.values.isEmpty()) {
                 return
             }

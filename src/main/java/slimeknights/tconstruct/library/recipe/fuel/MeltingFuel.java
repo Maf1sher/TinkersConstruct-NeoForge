@@ -13,6 +13,7 @@ import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.ICustomOutputRecipe;
 import slimeknights.mantle.recipe.ingredient.FluidIngredient;
+import slimeknights.tconstruct.library.json.field.CompatFluidIngredientField;
 import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import slimeknights.tconstruct.smeltery.block.component.SearedTankBlock.TankType;
@@ -26,10 +27,10 @@ import java.util.List;
 public class MeltingFuel implements ICustomOutputRecipe<IFluidContainer> {
   public static final RecordLoadable<MeltingFuel> LOADER = RecordLoadable.create(
     ContextKey.ID.requiredField(),
-    FluidIngredient.LOADABLE.defaultField("fluid", FluidIngredient.EMPTY, r -> r.input),
+    new CompatFluidIngredientField<>(FluidIngredient.LOADABLE.defaultField("fluid", FluidIngredient.EMPTY, r -> r.input)),
     IntLoadable.FROM_ONE.defaultField("duration", 0, MeltingFuel::getDuration),
     IntLoadable.FROM_ONE.requiredField("temperature", MeltingFuel::getTemperature),
-    IntLoadable.FROM_ONE.requiredField("rate", MeltingFuel::getRate),
+    IntLoadable.FROM_ONE.defaultField("rate", 0, MeltingFuel::getRate),
     MeltingFuel::new).validate((fuel, error) -> {
       // duration is optional (and ignored) for solid
       if (fuel.input != FluidIngredient.EMPTY && fuel.duration == 0) {
@@ -45,13 +46,18 @@ public class MeltingFuel implements ICustomOutputRecipe<IFluidContainer> {
   private final int rate;
 
   public MeltingFuel(ResourceLocation id, FluidIngredient input, int duration, int temperature, int rate) {
+    this(id, input, duration, temperature, rate, true);
+  }
+
+  public MeltingFuel(ResourceLocation id, FluidIngredient input, int duration, int temperature, int rate, boolean addLookup) {
     this.id = id;
     this.input = input;
     this.duration = duration;
     this.temperature = temperature;
-    this.rate = rate;
-    // register this recipe with the lookup
-    MeltingFuelLookup.addFuel(this);
+    this.rate = rate > 0 ? rate : Math.max(1, temperature / 100);
+    if (addLookup) {
+      MeltingFuelLookup.addFuel(this);
+    }
   }
 
   /* Recipe methods */

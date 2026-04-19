@@ -12,6 +12,7 @@ import slimeknights.mantle.recipe.helper.ItemOutput;
 import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
 import slimeknights.mantle.recipe.helper.TypeAwareRecipeSerializer;
 import slimeknights.mantle.recipe.ingredient.FluidIngredient;
+import slimeknights.tconstruct.library.json.field.CompatIngredientField;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,7 +22,7 @@ public class CastDuplicationRecipe extends ItemCastingRecipe implements IMultiRe
   public static final RecordLoadable<CastDuplicationRecipe> LOADER = RecordLoadable.create(
     LoadableRecipeSerializer.TYPED_SERIALIZER.requiredField(), ContextKey.ID.requiredField(),
     LoadableRecipeSerializer.RECIPE_GROUP,
-    IngredientLoadable.DISALLOW_EMPTY.requiredField("cast", CastDuplicationRecipe::getCast),
+    new CompatIngredientField<>(IngredientLoadable.DISALLOW_EMPTY.requiredField("cast", CastDuplicationRecipe::getCast)),
     FLUID_FIELD, COOLING_TIME_FIELD,
     CastDuplicationRecipe::new);
 
