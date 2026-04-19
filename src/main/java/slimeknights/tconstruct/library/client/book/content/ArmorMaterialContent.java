@@ -60,6 +60,8 @@ public class ArmorMaterialContent extends AbstractMaterialContent {
   ).collect(Collectors.toSet());
   /** Plating stat types in top down order */
   private static final List<MaterialStatsId> TOP_DOWN_STATS = List.of(HELMET.getStatId(), CHESTPLATE.getStatId(), LEGGINGS.getStatId(), BOOTS.getStatId(), SHIELD.getStatId());
+  /** Standard wearable armor slots (excludes BODY which is for animal armor) */
+  private static final ArmorItem.Type[] WEARABLE_ARMOR_TYPES = {ArmorItem.Type.HELMET, ArmorItem.Type.CHESTPLATE, ArmorItem.Type.LEGGINGS, ArmorItem.Type.BOOTS};
 
   private static final Component PLATING_LABEL = TConstruct.makeTranslation("stat", "plating").withStyle(ChatFormatting.BOLD, ChatFormatting.UNDERLINE);
   private static final Component ARMOR_PLATING_LABEL = TConstruct.makeTranslation("stat", "plating_armor").withStyle(ChatFormatting.BOLD, ChatFormatting.UNDERLINE);
@@ -105,7 +107,7 @@ public class ArmorMaterialContent extends AbstractMaterialContent {
 
   /** Gets the tool to display for the given stat type, just hardcoding to plate armor for simplicity */
   private static void addPlatingItem(MaterialStatsId statType, List<ItemStack> stacks, MaterialVariantId variant) {
-    for (ArmorItem.Type slotType : ArmorItem.Type.values()) {
+    for (ArmorItem.Type slotType : WEARABLE_ARMOR_TYPES) {
       if (statType.equals(PlatingMaterialStats.TYPES.get(slotType.ordinal()).getId())) {
         stacks.add(TinkerToolParts.plating.get(slotType).withMaterialForDisplay(variant));
         return;
