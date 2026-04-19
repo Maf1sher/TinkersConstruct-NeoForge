@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.library.recipe.casting;
 
+import com.google.gson.JsonParseException;
 import lombok.Getter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
@@ -48,14 +49,44 @@ public class ItemCastingRecipe extends AbstractCastingRecipe implements IDisplay
 
   /** Ensures datapack outputs resolve to an actual item before the recipe reaches packet sync */
   protected static void validateItemOutput(ResourceLocation recipeId, ItemOutput output) {
+    // Tag outputs must resolve to a non-empty stack to safely sync in packets.
+    // Some outputs may temporarily fail to resolve during early load if they depend on config,
+    // in which case we defer validation and let final recipe loading decide.
+    if (output.getTag() != null) {
+      try {
+        if (!output.get().isEmpty()) {
+          return;
+        }
+      } catch (RuntimeException e) {
+        if (isConfigNotLoaded(e)) {
+          return;
+        }
+        throw e;
+      }
+
+      String source = "tag '" + output.getTag().location() + "'";
+      throw new JsonParseException("Casting recipe '" + recipeId + "' has invalid result from " + source);
+    }
+
     if (!output.get().isEmpty()) {
       return;
     }
 
-    String source = output.getTag() != null
-      ? "tag '" + output.getTag().location() + "'"
-      : "an empty item stack";
-    throw new IllegalArgumentException("Casting recipe '" + recipeId + "' has invalid result from " + source);
+    String source = "an empty item stack";
+    throw new JsonParseException("Casting recipe '" + recipeId + "' has invalid result from " + source);
+  }
+
+  /** Detects the common early-load config access failure so we can defer validation until later load stages. */
+  private static boolean isConfigNotLoaded(Throwable throwable) {
+    Throwable current = throwable;
+    while (current != null) {
+      String message = current.getMessage();
+      if (message != null && message.contains("Cannot get config value before config is loaded")) {
+        return true;
+      }
+      current = current.getCause();
+    }
+    return false;
   }
 
   @Override
@@ -70,7 +101,7 @@ public class ItemCastingRecipe extends AbstractCastingRecipe implements IDisplay
 
   @Override
   public ItemStack getResultItem(HolderLookup.Provider access) {
-    return this.result.get();
+    return getSafeResult();
   }
 
   @Override
@@ -99,7 +130,22 @@ public class ItemCastingRecipe extends AbstractCastingRecipe implements IDisplay
 
   @Override
   public ItemStack getOutput() {
-    return this.result.get();
+    return getSafeResult();
+  }
+
+  /**
+   * Some third-party recipe scanners request outputs before configs are loaded,
+   * which can make tag preference lookup throw. Return empty in that phase.
+   */
+  private ItemStack getSafeResult() {
+    try {
+      return this.result.get();
+    } catch (RuntimeException e) {
+      if (isConfigNotLoaded(e)) {
+        return ItemStack.EMPTY;
+      }
+      throw e;
+    }
   }
 
   /**

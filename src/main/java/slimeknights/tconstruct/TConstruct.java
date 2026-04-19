@@ -184,6 +184,9 @@ public class TConstruct {
       } else {
         clazz.getDeclaredMethod("onConstruct").invoke(null);
       }
+    } catch (ClassNotFoundException e) {
+      // Optional integrations are excluded from this build when compile dependencies are unavailable.
+      LOG.debug("Skipping optional plugin {}: class not present in this build", className);
     } catch (Exception e) {
       LOG.error("Failed to load plugin {}", className, e);
     }

@@ -13,6 +13,7 @@ import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.ICustomOutputRecipe;
+import slimeknights.tconstruct.library.json.field.CompatIngredientField;
 import slimeknights.tconstruct.library.json.IntRange;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
@@ -29,7 +30,7 @@ import slimeknights.tconstruct.tools.TinkerModifiers;
 public class ModifierSalvage implements ICustomOutputRecipe<RecipeInput> {
   public static final RecordLoadable<ModifierSalvage> LOADER = RecordLoadable.create(
     ContextKey.ID.requiredField(),
-    IngredientLoadable.DISALLOW_EMPTY.requiredField("tools", r -> r.toolIngredient),
+    new CompatIngredientField<>(IngredientLoadable.DISALLOW_EMPTY.requiredField("tools", r -> r.toolIngredient)),
     IntLoadable.FROM_ONE.defaultField("max_tool_size", ITinkerStationRecipe.DEFAULT_TOOL_STACK_SIZE, r -> r.maxToolSize), // TODO 1.20: max tool size is unused, remove it
     ModifierId.PARSER.requiredField("modifier", r -> r.modifier),
     ModifierEntry.VALID_LEVEL.defaultField("level", r -> r.level),

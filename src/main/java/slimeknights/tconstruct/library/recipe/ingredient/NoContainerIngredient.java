@@ -1,7 +1,10 @@
 package slimeknights.tconstruct.library.recipe.ingredient;
 
 import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.MapLike;
+import com.mojang.serialization.RecordBuilder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
@@ -40,11 +43,33 @@ public class NoContainerIngredient extends NestedIngredient {
   }
 
   /** MapCodec for JSON serialization */
-  public static final MapCodec<NoContainerIngredient> CODEC = RecordCodecBuilder.mapCodec(instance ->
-    instance.group(
-      Ingredient.CODEC_NONEMPTY.fieldOf("match").forGetter(i -> i.nested)
-    ).apply(instance, NoContainerIngredient::new)
-  );
+  public static final MapCodec<NoContainerIngredient> CODEC = new MapCodec<>() {
+    private static final String MATCH = "match";
+    private static final String TYPE = "type";
+
+    @Override
+    public <T> Stream<T> keys(DynamicOps<T> ops) {
+      return Stream.concat(Stream.of(ops.createString(MATCH)), Ingredient.MAP_CODEC_NONEMPTY.keys(ops));
+    }
+
+    @Override
+    public <T> DataResult<NoContainerIngredient> decode(DynamicOps<T> ops, MapLike<T> input) {
+      T match = input.get(MATCH);
+      if (match != null) {
+        return Ingredient.CODEC_NONEMPTY.parse(ops, match).map(NoContainerIngredient::new);
+      }
+      return Ingredient.CODEC_NONEMPTY.parse(ops, ops.createMap(input.entries().filter(entry -> {
+        DataResult<String> key = ops.getStringValue(entry.getFirst());
+        return key.result().filter(name -> name.equals(MATCH) || name.equals(TYPE)).isEmpty();
+      })))
+                                            .map(NoContainerIngredient::new);
+    }
+
+    @Override
+    public <T> RecordBuilder<T> encode(NoContainerIngredient ingredient, DynamicOps<T> ops, RecordBuilder<T> prefix) {
+      return Ingredient.MAP_CODEC_NONEMPTY.encode(ingredient.nested, ops, prefix);
+    }
+  };
 
   /** StreamCodec for network serialization */
   public static final StreamCodec<RegistryFriendlyByteBuf, NoContainerIngredient> STREAM_CODEC = new StreamCodec<>() {
