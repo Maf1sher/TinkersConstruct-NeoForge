@@ -2,9 +2,12 @@ package slimeknights.tconstruct.library.recipe.material;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.mojang.serialization.MapLike;
+import com.mojang.serialization.RecordBuilder;
 import lombok.Getter;
+import java.util.stream.Stream;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -195,15 +198,74 @@ public class ShapedMaterialsRecipe extends ShapedRecipe implements MaterialsCraf
       );
 
     /**
-     * The MapCodec for ShapedMaterialsRecipe.
-     * We encode parts as a "parts" string that references keys from the shaped pattern.
-     * The shaped recipe itself is decoded from the standard fields, plus we add "parts" and "extra_materials".
+     * The MapCodec for ShapedMaterialsRecipe. Supports two field-name formats for the parts list:
+     * <ul>
+     *   <li>{@code "parts"}: a string of pattern key characters (e.g. {@code "c"}), resolved to
+     *       ingredients via the shaped recipe's {@code key} map. This is the format produced by
+     *       TCon's data-gen.</li>
+     *   <li>{@code "part_ingredients"}: an explicit JSON array of ingredient objects.</li>
+     * </ul>
+     * Encoding always writes {@code "part_ingredients"} as an explicit ingredient list.
      */
-    public static final MapCodec<ShapedMaterialsRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-      ShapedRecipe.Serializer.CODEC.forGetter(r -> (ShapedRecipe) r),
-      Ingredient.CODEC.listOf().fieldOf("part_ingredients").forGetter(r -> r.parts),
-      EXTRA_MATERIALS_CODEC.optionalFieldOf("extra_materials", List.of()).forGetter(r -> r.extraMaterials)
-    ).apply(instance, ShapedMaterialsRecipe::new));
+    public static final MapCodec<ShapedMaterialsRecipe> CODEC = new MapCodec<>() {
+      @Override
+      public <T> Stream<T> keys(DynamicOps<T> ops) {
+        return Stream.concat(
+          ShapedRecipe.Serializer.CODEC.keys(ops),
+          Stream.of(ops.createString("part_ingredients"), ops.createString("parts"), ops.createString("extra_materials")));
+      }
+
+      @Override
+      public <T> DataResult<ShapedMaterialsRecipe> decode(DynamicOps<T> ops, MapLike<T> input) {
+        return ShapedRecipe.Serializer.CODEC.decode(ops, input).flatMap(base -> {
+          // decode optional extra_materials
+          T extraT = input.get("extra_materials");
+          DataResult<List<MaterialVariantId>> extraResult = extraT != null
+            ? EXTRA_MATERIALS_CODEC.parse(ops, extraT)
+            : DataResult.success(List.of());
+
+          // "parts" string format: each character is a key in the shaped pattern's key map
+          T partsStrT = input.get("parts");
+          if (partsStrT != null) {
+            return ShapedRecipePattern.Data.MAP_CODEC.decode(ops, input).flatMap(patternData ->
+              ops.getStringValue(partsStrT).flatMap(partsStr -> {
+                var keyMap = patternData.key(); // Map<Character, Ingredient>
+                List<Ingredient> partIngredients = new ArrayList<>();
+                for (int i = 0; i < partsStr.length(); i++) {
+                  char c = partsStr.charAt(i);
+                  Ingredient ing = keyMap.get(c);
+                  if (ing == null) {
+                    char fc = c;
+                    return DataResult.error(() -> "Unknown pattern key '" + fc + "' referenced in 'parts'");
+                  }
+                  partIngredients.add(ing);
+                }
+                return extraResult.map(extra -> new ShapedMaterialsRecipe(base, List.copyOf(partIngredients), extra));
+              })
+            );
+          }
+
+          // "part_ingredients" list format: explicit list of ingredient objects
+          T partIngrT = input.get("part_ingredients");
+          if (partIngrT != null) {
+            return Ingredient.CODEC.listOf().parse(ops, partIngrT)
+              .flatMap(parts -> extraResult.map(extra -> new ShapedMaterialsRecipe(base, parts, extra)));
+          }
+
+          return DataResult.error(() -> "Missing required 'parts' or 'part_ingredients' field in shaped materials recipe");
+        });
+      }
+
+      @Override
+      public <T> RecordBuilder<T> encode(ShapedMaterialsRecipe input, DynamicOps<T> ops, RecordBuilder<T> prefix) {
+        ShapedRecipe.Serializer.CODEC.encode(input, ops, prefix);
+        prefix.add("part_ingredients", Ingredient.CODEC.listOf().encodeStart(ops, input.parts));
+        if (!input.extraMaterials.isEmpty()) {
+          prefix.add("extra_materials", EXTRA_MATERIALS_CODEC.encodeStart(ops, input.extraMaterials));
+        }
+        return prefix;
+      }
+    };
 
     /**
      * StreamCodec for network sync. We sync the shaped recipe base fields,

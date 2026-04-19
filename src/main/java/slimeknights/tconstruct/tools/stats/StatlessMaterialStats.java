@@ -31,7 +31,9 @@ public enum StatlessMaterialStats implements IMaterialStats {
   /** Stat type shaft of arrows and throwing axes. */
   ARROW_SHAFT("arrow_shaft"),
   /** Stat type for the fletching of arrows, typically have negative traits. */
-  FLETCHING("fletching");
+  FLETCHING("fletching"),
+  /** Backward-compatibility stat type for addons (e.g. AllTheModium) that reference the legacy tconstruct:extra material stat. No stats are applied. */
+  EXTRA("extra");
 
   private static final List<Component> LOCALIZED = List.of(IMaterialStats.makeTooltip(TConstruct.getResource("extra.no_stats")));
   private static final List<Component> DESCRIPTION = List.of(Component.empty());

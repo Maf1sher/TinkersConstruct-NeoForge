@@ -131,6 +131,8 @@ public final class MaterialRegistry {
     // misc
     registry.registerStatType(StatlessMaterialStats.REPAIR_KIT.getType());
     registry.registerStatType(SkullStats.TYPE);
+    // backward compat: addons may reference the legacy tconstruct:extra stat type from older TCon versions
+    registry.registerStatType(StatlessMaterialStats.EXTRA.getType());
   }
 
   @VisibleForTesting
