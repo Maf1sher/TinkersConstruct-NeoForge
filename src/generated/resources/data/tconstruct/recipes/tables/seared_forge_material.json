@@ -23,8 +23,8 @@
     "mtm",
     "m m"
   ],
-  "result": {
-    "item": "tconstruct:tinkers_anvil",
+  "result":{
+    "id": "tconstruct:tinkers_anvil",
     "nbt": {
       "display": {
         "Name": "{\"translate\":\"block.tconstruct.tool_forge\"}"

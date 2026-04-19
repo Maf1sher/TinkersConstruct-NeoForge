@@ -45,8 +45,8 @@
     "c c",
     "l l"
   ],
-  "result": {
-    "item": "tconstruct:travelers_leggings"
+  "result":{
+    "id": "tconstruct:travelers_leggings"
   },
   "show_notification": true
 }

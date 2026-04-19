@@ -23,8 +23,8 @@
     "mtm",
     "m m"
   ],
-  "result": {
-    "item": "tconstruct:scorched_anvil",
+  "result":{
+    "id": "tconstruct:scorched_anvil",
     "nbt": {
       "display": {
         "Name": "{\"translate\":\"block.tconstruct.tool_forge\"}"

@@ -20,8 +20,8 @@
     " s ",
     "sss"
   ],
-  "result": {
-    "item": "tconstruct:tinkers_anvil"
+  "result":{
+    "id": "tconstruct:tinkers_anvil"
   },
   "show_notification": true
 }

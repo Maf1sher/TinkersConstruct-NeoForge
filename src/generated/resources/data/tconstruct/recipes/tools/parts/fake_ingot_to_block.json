@@ -17,8 +17,8 @@
     "###",
     "###"
   ],
-  "result": {
-    "item": "tconstruct:fake_storage_block"
+  "result":{
+    "id": "tconstruct:fake_storage_block"
   },
   "show_notification": true
 }

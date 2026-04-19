@@ -12,8 +12,8 @@
     }
   ],
   "parts": 1,
-  "result": {
+  "result":{
     "count": 9,
-    "item": "tconstruct:fake_ingot"
+    "id": "tconstruct:fake_ingot"
   }
 }

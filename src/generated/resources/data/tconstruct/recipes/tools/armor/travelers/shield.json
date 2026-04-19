@@ -22,8 +22,8 @@
     "cl",
     "lc"
   ],
-  "result": {
-    "item": "tconstruct:travelers_shield"
+  "result":{
+    "id": "tconstruct:travelers_shield"
   },
   "show_notification": true
 }

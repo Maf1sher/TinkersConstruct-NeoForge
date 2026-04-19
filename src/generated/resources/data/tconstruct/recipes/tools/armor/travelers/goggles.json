@@ -48,8 +48,8 @@
     "glg",
     "c c"
   ],
-  "result": {
-    "item": "tconstruct:travelers_helmet"
+  "result":{
+    "id": "tconstruct:travelers_helmet"
   },
   "show_notification": true
 }

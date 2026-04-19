@@ -45,8 +45,8 @@
     "lcl",
     "lcl"
   ],
-  "result": {
-    "item": "tconstruct:travelers_chestplate"
+  "result":{
+    "id": "tconstruct:travelers_chestplate"
   },
   "show_notification": true
 }

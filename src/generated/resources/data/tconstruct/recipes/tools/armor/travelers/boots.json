@@ -44,8 +44,8 @@
     "c c",
     "l l"
   ],
-  "result": {
-    "item": "tconstruct:travelers_boots"
+  "result":{
+    "id": "tconstruct:travelers_boots"
   },
   "show_notification": true
 }
