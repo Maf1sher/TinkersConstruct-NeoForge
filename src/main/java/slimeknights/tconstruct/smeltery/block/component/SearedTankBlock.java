@@ -24,7 +24,10 @@ import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.util.RandomSource;
+import net.minecraft.server.level.ServerLevel;
 import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidType;
 import slimeknights.mantle.fluid.FluidTransferHelper;
 import slimeknights.mantle.util.BlockEntityHelper;
 import slimeknights.tconstruct.library.recipe.FluidValues;
@@ -41,6 +44,8 @@ import java.util.function.ToIntFunction;
 public class SearedTankBlock extends SearedBlock implements ITankBlock, EntityBlock {
   public static final IntegerProperty LIGHT = IntegerProperty.create("light", 0, 15);
   public static final ToIntFunction<BlockState> LIGHT_GETTER = state -> state.getValue(SearedTankBlock.LIGHT);
+  private static final int SETTLE_DELAY = 2;
+  private static final int SETTLE_TRANSFER_PER_TICK = FluidType.BUCKET_VOLUME / 4;
 
   @Getter
   private final int capacity;
@@ -113,6 +118,23 @@ public class SearedTankBlock extends SearedBlock implements ITankBlock, EntityBl
       }
     }
     super.setPlacedBy(world, pos, state, placer, stack);
+    // If this changes a stacked column shape, start a short settling loop for smooth downward flow.
+    if (!world.isClientSide) {
+      world.scheduleTick(pos, this, SETTLE_DELAY);
+      world.scheduleTick(pos.above(), this, SETTLE_DELAY);
+      world.scheduleTick(pos.below(), this, SETTLE_DELAY);
+    }
+  }
+
+  @Override
+  public void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
+    if (world.getBlockState(pos).getBlock() != this) {
+      return;
+    }
+    BlockEntity blockEntity = world.getBlockEntity(pos);
+    if (blockEntity instanceof TankBlockEntity tank && TankBlockEntity.settleTankColumnStep(tank, SETTLE_TRANSFER_PER_TICK)) {
+      world.scheduleTick(pos, this, SETTLE_DELAY);
+    }
   }
 
   @Deprecated
