@@ -52,6 +52,7 @@ public class FoundryBlockEntity extends HeatingStructureBlockEntity {
     if (structure == null || level == null) {
       return;
     }
+    fuelModule.validateFuel();
 
     // the next set of behaviors all require fuel, skip if no tanks
     if (structure.hasTanks()) {

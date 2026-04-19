@@ -10,6 +10,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.EmptyFluidHandler;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
+import slimeknights.tconstruct.library.recipe.fuel.MeltingFuel;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -81,6 +82,16 @@ public class MultitankFuelModule extends FuelModule implements IFluidHandler {
     return tankHandlers;
   }
 
+  /** Returns true if the cached handler still belongs to the current tank set */
+  private boolean isTrackedHandler(IFluidHandler handler) {
+    for (IFluidHandler tracked : getTankHandlers().values()) {
+      if (tracked == handler) {
+        return true;
+      }
+    }
+    return false;
+  }
+
 
   /* Fuel finding */
 
@@ -104,6 +115,27 @@ public class MultitankFuelModule extends FuelModule implements IFluidHandler {
     return 0;
   }
 
+  @Override
+  protected boolean isFluidFuelStillValid() {
+    if (activeFuelFluid == null) {
+      return false;
+    }
+    for (Entry<BlockPos,IFluidHandler> entry : getTankHandlers().entrySet()) {
+      IFluidHandler handler = entry.getValue();
+      FluidStack fluid = handler.getFluidInTank(0);
+      if (!fluid.isEmpty() && fluid.getFluid() == activeFuelFluid) {
+        MeltingFuel recipe = findRecipe(fluid.getFluid());
+        if (recipe != null && fluid.getAmount() >= recipe.getAmount(fluid.getFluid())) {
+          fluidHandler = handler;
+          lastPos = entry.getKey();
+          return true;
+        }
+      }
+    }
+    clearLastHandler();
+    return false;
+  }
+
   /**
    * Attempts to consume fuel from one of the tanks
    * @return  temperature of the found fluid, 0 if none
@@ -111,6 +143,13 @@ public class MultitankFuelModule extends FuelModule implements IFluidHandler {
   @Override
   public int findFuel(boolean consume) {
     // only fetch a handler if we haven't done so
+    if (fluidHandler != null) {
+      // a stale handler can survive block swaps; if so, force a fresh search
+      if (!isTrackedHandler(fluidHandler)) {
+        clearLastHandler();
+      }
+    }
+
     if (fluidHandler != null) {
       // if we have a handler, try to use that if possible
       int temperature = tryLiquidFuel(fluidHandler, consume);

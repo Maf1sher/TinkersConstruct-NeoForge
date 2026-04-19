@@ -60,6 +60,8 @@ public class SolidFuelModule extends FuelModule {
             fuelQuality = time;
             temperature = solid.getTemperature();
             rate = solid.getRate();
+            fuelFromFluid = false;
+            activeFuelFluid = null;
             parent.setChangedFast();
             // return the container
             ItemStack container = extracted.getCraftingRemainingItem();
@@ -84,6 +86,23 @@ public class SolidFuelModule extends FuelModule {
       }
     }
     return 0;
+  }
+
+  @Override
+  protected boolean isFluidFuelStillValid() {
+    if (activeFuelFluid == null) {
+      return false;
+    }
+    fetchHandlers();
+    if (fluidHandler == null) {
+      return false;
+    }
+    var fluid = fluidHandler.getFluidInTank(0);
+    if (fluid.isEmpty() || fluid.getFluid() != activeFuelFluid) {
+      return false;
+    }
+    MeltingFuel recipe = findRecipe(fluid.getFluid());
+    return recipe != null && fluid.getAmount() >= recipe.getAmount(fluid.getFluid());
   }
 
   /** Fetches any relevant fuel handlers from the target position */

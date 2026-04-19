@@ -128,6 +128,7 @@ public class MelterBlockEntity extends NameableBlockEntity implements ITankInven
   private void tick(Level level, BlockPos pos, BlockState state) {
     // are we fully formed?
     if (isFormed()) {
+      fuelModule.validateFuel();
       switch (tick) {
         // tick 0: find fuel
         case 0 -> {

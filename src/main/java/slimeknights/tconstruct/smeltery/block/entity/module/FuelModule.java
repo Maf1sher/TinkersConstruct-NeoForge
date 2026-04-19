@@ -4,8 +4,10 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
@@ -47,6 +49,11 @@ public abstract class FuelModule implements ContainerData {
   /** Amount to progress recipes by per time step */
   @Getter
   protected int rate = 0;
+  /** True if the current buffered fuel came from a fluid source */
+  protected boolean fuelFromFluid = false;
+  /** Fluid used to create the current buffered fuel */
+  @Nullable
+  protected Fluid activeFuelFluid;
 
 
   /*
@@ -101,6 +108,31 @@ public abstract class FuelModule implements ContainerData {
     parent.setChangedFast();
   }
 
+  /** Clears the current buffered fuel state */
+  protected void clearFuel() {
+    if (fuel != 0 || fuelQuality != 0 || temperature != 0 || rate != 0 || fuelFromFluid || activeFuelFluid != null) {
+      fuel = 0;
+      fuelQuality = 0;
+      temperature = 0;
+      rate = 0;
+      fuelFromFluid = false;
+      activeFuelFluid = null;
+      parent.setChangedFast();
+    }
+  }
+
+  /** Validates buffered fuel against the currently connected sources */
+  public void validateFuel() {
+    if (fuel > 0 && fuelFromFluid && !isFluidFuelStillValid()) {
+      clearFuel();
+    }
+  }
+
+  /** Returns true if the buffered fluid fuel is still backed by a connected source */
+  protected boolean isFluidFuelStillValid() {
+    return true;
+  }
+
 
   /* Fuel updating */
 
@@ -124,6 +156,8 @@ public abstract class FuelModule implements ContainerData {
           fuelQuality = recipe.getDuration();
           temperature = recipe.getTemperature();
           rate = recipe.getRate();
+          fuelFromFluid = true;
+          activeFuelFluid = fluid.getFluid();
           parent.setChangedFast();
           return temperature;
         } else {
@@ -144,6 +178,8 @@ public abstract class FuelModule implements ContainerData {
   private static final String TAG_FUEL = "fuel";
   private static final String TAG_TEMPERATURE = "temperature";
   private static final String TAG_RATE = "rate";
+  private static final String TAG_FLUID_FUEL = "fluid_fuel";
+  private static final String TAG_ACTIVE_FUEL = "active_fuel";
 
   /**
    * Reads the fuel from NBT
@@ -157,6 +193,14 @@ public abstract class FuelModule implements ContainerData {
       temperature = nbt.getInt(TAG_TEMPERATURE);
       rate = nbt.getInt(TAG_RATE);
     }
+    fuelFromFluid = nbt.getBoolean(TAG_FLUID_FUEL);
+    activeFuelFluid = null;
+    if (nbt.contains(TAG_ACTIVE_FUEL, Tag.TAG_STRING)) {
+      ResourceLocation id = ResourceLocation.tryParse(nbt.getString(TAG_ACTIVE_FUEL));
+      if (id != null) {
+        activeFuelFluid = BuiltInRegistries.FLUID.getOptional(id).orElse(null);
+      }
+    }
   }
 
   /**
@@ -168,6 +212,12 @@ public abstract class FuelModule implements ContainerData {
     nbt.putInt(TAG_FUEL, fuel);
     nbt.putInt(TAG_TEMPERATURE, temperature);
     nbt.putInt(TAG_RATE, rate);
+    if (fuelFromFluid) {
+      nbt.putBoolean(TAG_FLUID_FUEL, true);
+    }
+    if (activeFuelFluid != null) {
+      nbt.putString(TAG_ACTIVE_FUEL, BuiltInRegistries.FLUID.getKey(activeFuelFluid).toString());
+    }
     return nbt;
   }
 

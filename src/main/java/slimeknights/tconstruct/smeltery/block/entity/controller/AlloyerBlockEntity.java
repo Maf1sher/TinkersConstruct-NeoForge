@@ -97,6 +97,7 @@ public class AlloyerBlockEntity extends NameableBlockEntity implements ITankBloc
   /** Handles server tick */
   private void tick(Level level, BlockPos pos, BlockState state) {
     if (isFormed()) {
+      fuelModule.validateFuel();
       switch (tick) {
         // tick 0: find fuel
         case 0 -> {
