@@ -278,6 +278,125 @@ tasks.register('syncModernDataPackPaths', Sync) {
             ]
         }
 
+        def synthesizeForgeTag
+        synthesizeForgeTag = { String registry, String tagPath ->
+            Set<String> values = new LinkedHashSet<>()
+
+            collectTagChildren('forge', registry, tagPath).each { String child ->
+                values.add("#forge:${tagPath}/${child}")
+            }
+
+            if (values.isEmpty()) {
+                switch (tagPath) {
+                    case 'stone':
+                        File normalStone = findExistingTagFile('forge', registry, 'normal_stone')
+                        if (normalStone != null) {
+                            values.add('#forge:normal_stone')
+                        }
+                        break
+                    case 'cobblestone':
+                        values.add('#c:cobblestones')
+                        break
+                    case 'sandstone':
+                        values.add('#c:sandstone_blocks')
+                        break
+                    case 'gravel':
+                        values.add('#c:gravels')
+                        break
+                    case 'seeds':
+                        values.add('#c:seeds')
+                        break
+                    case 'fences':
+                        File woodenFences = findExistingTagFile('forge', registry, 'fences/wooden')
+                        if (woodenFences != null) {
+                            values.add('#forge:fences/wooden')
+                        }
+                        break
+                    case 'glass_panes':
+                        File colorlessPanes = findExistingTagFile('forge', registry, 'glass_panes/colorless')
+                        if (colorlessPanes != null) {
+                            values.add('#forge:glass_panes/colorless')
+                        }
+                        break
+                    case 'milk':
+                        if (registry == 'fluid') {
+                            values.add('#c:milk')
+                        }
+                        break
+                }
+            }
+
+            if (values.isEmpty() && ['item', 'block', 'fluid'].contains(registry)) {
+                File commonTag = findExistingTagFile('c', registry, tagPath)
+                if (commonTag != null) {
+                    values.add("#c:${tagPath}")
+                }
+            }
+
+            if (values.isEmpty()) {
+                return null
+            }
+
+            [
+                replace: false,
+                values : new ArrayList<>(values)
+            ]
+        }
+
+        def collectForgeTagRefs
+        collectForgeTagRefs = { node, Set<String> refs ->
+            if (node instanceof String) {
+                if (node.startsWith('#forge:')) {
+                    refs.add(node.substring(7))
+                }
+                return
+            }
+            if (node instanceof Map) {
+                node.each { key, value ->
+                    if (value instanceof String && value.startsWith('#forge:')) {
+                        refs.add(value.substring(7))
+                    } else if (value instanceof Map) {
+                        def id = value.id
+                        if (id instanceof String && id.startsWith('#forge:')) {
+                            refs.add(id.substring(7))
+                        }
+                    }
+                    collectForgeTagRefs(value, refs)
+                }
+                return
+            }
+            if (node instanceof List) {
+                node.each { value -> collectForgeTagRefs(value, refs) }
+            }
+        }
+
+        def collectCommonTagRefs
+        collectCommonTagRefs = { node, Set<String> refs ->
+            if (node instanceof String) {
+                if (node.startsWith('#c:')) {
+                    refs.add(node.substring(3))
+                }
+                return
+            }
+            if (node instanceof Map) {
+                node.each { key, value ->
+                    if (value instanceof String && value.startsWith('#c:')) {
+                        refs.add(value.substring(3))
+                    } else if (value instanceof Map) {
+                        def id = value.id
+                        if (id instanceof String && id.startsWith('#c:')) {
+                            refs.add(id.substring(3))
+                        }
+                    }
+                    collectCommonTagRefs(value, refs)
+                }
+                return
+            }
+            if (node instanceof List) {
+                node.each { value -> collectCommonTagRefs(value, refs) }
+            }
+        }
+
         def synthesizeCommonItemTag
         synthesizeCommonItemTag = { String tagPath ->
             Set<String> values = new LinkedHashSet<>()
@@ -299,6 +418,9 @@ tasks.register('syncModernDataPackPaths', Sync) {
                     case 'cobblestone':
                         values.add('minecraft:cobblestone')
                         values.add('minecraft:mossy_cobblestone')
+                        break
+                    case 'leather':
+                        values.add('minecraft:leather')
                         break
                     case 'glass':
                         values.add('#c:glass_blocks')
@@ -465,6 +587,107 @@ tasks.register('syncModernDataPackPaths', Sync) {
             }
 
             bridgeTag.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(bridgeJson))
+        }
+
+        Set<String> missingForgeTagRefs = new LinkedHashSet<>()
+
+        [
+            file('src/main/resources/data/tconstruct/tags'),
+            file('src/generated/resources/data/tconstruct/tags')
+        ].each { File tagRoot ->
+            if (!(tagRoot.exists() && tagRoot.isDirectory())) {
+                return
+            }
+            fileTree(tagRoot) {
+                include '**/*.json'
+            }.each { File tagFile ->
+                String relativePath = tagRoot.toPath().relativize(tagFile.toPath()).toString().replace('\\', '/')
+                def matcher = relativePath =~ /^([^\/]+)\/.+$/
+                if (!matcher.matches()) {
+                    return
+                }
+
+                String registry = matcher.group(1)
+                Set<String> refs = new LinkedHashSet<>()
+                def parsed = new groovy.json.JsonSlurper().parse(tagFile)
+                collectForgeTagRefs(parsed, refs)
+                refs.each { String ref ->
+                    File sourceTag = file("src/main/resources/data/forge/tags/${registry}/${ref}.json")
+                    File generatedTag = file("src/generated/resources/data/forge/tags/${registry}/${ref}.json")
+                    File modernTag = file("${modernDataPackDir.get().asFile}/data/forge/tags/${registry}/${ref}.json")
+                    if (!(sourceTag.exists() || generatedTag.exists() || modernTag.exists())) {
+                        missingForgeTagRefs.add("${registry}|${ref}")
+                    }
+                }
+            }
+        }
+
+        missingForgeTagRefs.each { String missingRef ->
+            String[] parts = missingRef.split('\\|', 2)
+            if (parts.length != 2) {
+                return
+            }
+
+            String registry = parts[0]
+            String tagPath = parts[1]
+            Map<String,Object> bridgeJson = synthesizeForgeTag(registry, tagPath)
+            if (bridgeJson == null) {
+                bridgeJson = [replace: false, values: []]
+            }
+
+            File bridgeTag = file("${modernDataPackDir.get().asFile}/data/forge/tags/${registry}/${tagPath}.json")
+            bridgeTag.parentFile.mkdirs()
+            bridgeTag.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(bridgeJson))
+        }
+
+        Set<String> missingCommonTagRefs = new LinkedHashSet<>()
+
+        [
+            file('src/main/resources/data/forge/tags'),
+            file('src/generated/resources/data/forge/tags'),
+            file("${modernDataPackDir.get().asFile}/data/forge/tags")
+        ].each { File tagRoot ->
+            if (!(tagRoot.exists() && tagRoot.isDirectory())) {
+                return
+            }
+            fileTree(tagRoot) {
+                include '**/*.json'
+            }.each { File tagFile ->
+                String relativePath = tagRoot.toPath().relativize(tagFile.toPath()).toString().replace('\\', '/')
+                def matcher = relativePath =~ /^([^\/]+)\/(.+)\.json$/
+                if (!matcher.matches()) {
+                    return
+                }
+
+                String registry = matcher.group(1)
+                Set<String> refs = new LinkedHashSet<>()
+                def parsed = new groovy.json.JsonSlurper().parse(tagFile)
+                collectCommonTagRefs(parsed, refs)
+                refs.each { String ref ->
+                    File sourceTag = file("src/main/resources/data/c/tags/${registry}/${ref}.json")
+                    File generatedTag = file("src/generated/resources/data/c/tags/${registry}/${ref}.json")
+                    File modernTag = file("${modernDataPackDir.get().asFile}/data/c/tags/${registry}/${ref}.json")
+                    if (!(sourceTag.exists() || generatedTag.exists() || modernTag.exists())) {
+                        missingCommonTagRefs.add("${registry}|${ref}")
+                    }
+                }
+            }
+        }
+
+        missingCommonTagRefs.each { String missingRef ->
+            String[] parts = missingRef.split('\\|', 2)
+            if (parts.length != 2) {
+                return
+            }
+
+            String registry = parts[0]
+            String tagPath = parts[1]
+            File bridgeTag = file("${modernDataPackDir.get().asFile}/data/c/tags/${registry}/${tagPath}.json")
+            bridgeTag.parentFile.mkdirs()
+            bridgeTag.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson([
+                replace: false,
+                values : []
+            ]))
         }
     }
 }
