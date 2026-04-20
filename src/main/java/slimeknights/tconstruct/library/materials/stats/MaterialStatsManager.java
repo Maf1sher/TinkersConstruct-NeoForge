@@ -266,7 +266,7 @@ public class MaterialStatsManager extends MergingJsonDataLoader<Map<ResourceLoca
       if (legacyFields && "allthemodium".equals(materialId.getNamespace())) {
         scaleField(normalized, "durability", 0.1f);
         scaleField(normalized, "mining_speed", 0.01f);
-        scaleField(normalized, "melee_speed", 0.32f);
+        scaleField(normalized, "melee_speed", 0.30f);
         scaleField(normalized, "melee_damage", 0.1f);
       }
     }
