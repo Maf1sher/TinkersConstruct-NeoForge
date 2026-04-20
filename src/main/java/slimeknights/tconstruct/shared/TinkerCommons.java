@@ -4,6 +4,7 @@ import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTab.ItemDisplayParameters;
 import net.minecraft.world.item.Item;
@@ -23,6 +24,7 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
@@ -67,6 +69,7 @@ import slimeknights.tconstruct.library.recipe.ingredient.MaterialValueIngredient
 import slimeknights.tconstruct.library.recipe.ingredient.NoContainerIngredient;
 import slimeknights.tconstruct.library.recipe.ingredient.ToolHookIngredient;
 import slimeknights.tconstruct.library.utils.SlimeBounceHandler;
+import slimeknights.tconstruct.library.utils.TierRegistry;
 import slimeknights.tconstruct.shared.block.BetterPaneBlock;
 import slimeknights.tconstruct.shared.block.ClearGlassPaneBlock;
 import slimeknights.tconstruct.shared.block.ClearStainedGlassBlock;
@@ -195,6 +198,62 @@ public final class TinkerCommons extends TinkerModule {
   @SubscribeEvent
   void commonSetupEvent(FMLCommonSetupEvent event) {
     SlimeBounceHandler.init();
+    
+    // Register mod-specific tiers with TinkersConstruct's TierRegistry
+    registerModTiers();
+  }
+  
+  /**
+   * Registers custom tiers from compatible mods with TinkersConstruct's TierRegistry.
+   * This ensures that material stats that reference custom tiers won't silently fall back to WOOD tier.
+   */
+  private static void registerModTiers() {
+    // AllTheModium integration
+    if (ModList.get().isLoaded("allthemodium")) {
+      try {
+        registerAllTheModiumTiers();
+      } catch (Exception e) {
+        // Silently fail if AllTheModium is not properly available
+      }
+    }
+  }
+  
+  /**
+   * Registers AllTheModium tier materials with TinkersConstruct's TierRegistry.
+   * This fixes the issue where vibranium and other ATM materials show as WOOD tier.
+   */
+  private static void registerAllTheModiumTiers() {
+    try {
+      // Dynamically access AllTheModium's ATMTier class and tiers
+      Class<?> atmTierClass = Class.forName("com.thevortex.allthemodium.material.ATMTier");
+      
+      // Register each tier
+      Object vibraniumTier = atmTierClass.getDeclaredField("VIBRANIUM").get(null);
+      if (vibraniumTier != null) {
+        ResourceLocation vibraniumId = ResourceLocation.fromNamespaceAndPath("allthemodium", "vibranium");
+        TierRegistry.register(vibraniumId, (net.minecraft.world.item.Tier) vibraniumTier);
+      }
+      
+      Object allthemodiumTier = atmTierClass.getDeclaredField("ALLTHEMODIUM").get(null);
+      if (allthemodiumTier != null) {
+        ResourceLocation allthemodiumId = ResourceLocation.fromNamespaceAndPath("allthemodium", "allthemodium");
+        TierRegistry.register(allthemodiumId, (net.minecraft.world.item.Tier) allthemodiumTier);
+      }
+      
+      Object unobtainiumTier = atmTierClass.getDeclaredField("UNOBTAINIUM").get(null);
+      if (unobtainiumTier != null) {
+        ResourceLocation unobtainiumId = ResourceLocation.fromNamespaceAndPath("allthemodium", "unobtainium");
+        TierRegistry.register(unobtainiumId, (net.minecraft.world.item.Tier) unobtainiumTier);
+      }
+      
+      Object alloyTier = atmTierClass.getDeclaredField("ALLOY").get(null);
+      if (alloyTier != null) {
+        ResourceLocation alloyId = ResourceLocation.fromNamespaceAndPath("allthemodium", "alloy");
+        TierRegistry.register(alloyId, (net.minecraft.world.item.Tier) alloyTier);
+      }
+    } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
+      TConstruct.LOG.warn("Failed to register AllTheModium tiers", e);
+    }
   }
 
   @SuppressWarnings("removal")

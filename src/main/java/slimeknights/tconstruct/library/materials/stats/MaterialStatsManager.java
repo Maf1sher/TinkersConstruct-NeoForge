@@ -229,7 +229,7 @@ public class MaterialStatsManager extends MergingJsonDataLoader<Map<ResourceLoca
     ImmutableMap.Builder<MaterialStatsId, IMaterialStats> builder = ImmutableMap.builder();
     for (Entry<ResourceLocation, JsonObject> entry : contentsMap.entrySet()) {
       MaterialStatsId statType = new MaterialStatsId(entry.getKey());
-      JsonObject json = entry.getValue();
+      JsonObject json = normalizeLegacyStatFields(id, statType, entry.getValue());
       MaterialStatType<?> type = getStatType(statType);
       if (type == null) {
         try {
@@ -245,5 +245,51 @@ public class MaterialStatsManager extends MergingJsonDataLoader<Map<ResourceLoca
       builder.put(statType, type.getLoadable().deserialize(json, TypedMapBuilder.builder().put(MaterialStatType.CONTEXT_KEY, type).build()));
     }
     return builder.build();
+  }
+
+  /** Normalizes older addon field names to the current material stat schema before deserialization. */
+  private static JsonObject normalizeLegacyStatFields(ResourceLocation materialId, MaterialStatsId statType, JsonObject json) {
+    JsonObject normalized = json.deepCopy();
+    if (statType.equals(slimeknights.tconstruct.tools.stats.HeadMaterialStats.ID)) {
+      boolean legacyFields = normalized.has("miningSpeed") || normalized.has("harvestTier") || normalized.has("attack");
+      renameLegacyField(normalized, "miningSpeed", "mining_speed");
+      renameLegacyField(normalized, "harvestTier", "mining_tier");
+      renameLegacyField(normalized, "attack", "melee_attack");
+      if (legacyFields && "allthemodium".equals(materialId.getNamespace())) {
+        scaleField(normalized, "melee_attack", 0.7f);
+      }
+    } else if (statType.equals(slimeknights.tconstruct.tools.stats.HandleMaterialStats.ID)) {
+      boolean legacyFields = normalized.has("miningSpeed") || normalized.has("attackSpeed") || normalized.has("attackDamage");
+      renameLegacyField(normalized, "miningSpeed", "mining_speed");
+      renameLegacyField(normalized, "attackSpeed", "melee_speed");
+      renameLegacyField(normalized, "attackDamage", "melee_damage");
+      if (legacyFields && "allthemodium".equals(materialId.getNamespace())) {
+        scaleField(normalized, "durability", 0.1f);
+        scaleField(normalized, "mining_speed", 0.01f);
+        scaleField(normalized, "melee_speed", 0.32f);
+        scaleField(normalized, "melee_damage", 0.1f);
+      }
+    }
+    return normalized;
+  }
+
+  /** Renames a legacy field if present and if the replacement field is absent. */
+  private static void renameLegacyField(JsonObject json, String legacyName, String currentName) {
+    if (!json.has(currentName) && json.has(legacyName)) {
+      JsonElement legacy = json.remove(legacyName);
+      if (legacy != null) {
+        json.add(currentName, legacy);
+      }
+    }
+  }
+
+  /** Scales the given numeric field if present. */
+  private static void scaleField(JsonObject json, String field, float scale) {
+    if (json.has(field)) {
+      JsonElement value = json.get(field);
+      if (value.isJsonPrimitive() && value.getAsJsonPrimitive().isNumber()) {
+        json.addProperty(field, value.getAsFloat() * scale);
+      }
+    }
   }
 }
