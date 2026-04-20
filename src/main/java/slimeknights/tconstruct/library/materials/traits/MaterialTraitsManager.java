@@ -16,6 +16,7 @@ import slimeknights.tconstruct.library.materials.json.MaterialTraitsJson;
 import slimeknights.tconstruct.library.materials.stats.IMaterialStats;
 import slimeknights.tconstruct.library.materials.stats.MaterialStatsId;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
+import slimeknights.tconstruct.tools.stats.HeadMaterialStats;
 import slimeknights.tconstruct.library.utils.Util;
 
 import java.util.Arrays;
@@ -110,7 +111,28 @@ public class MaterialTraitsManager extends MergingJsonDataLoader<MaterialTraits.
    */
   public List<ModifierEntry> getTraits(MaterialId materialId, MaterialStatsId statId) {
     MaterialTraits traits = materialTraits.get(materialId);
-    return traits == null ? Collections.emptyList() : traits.getTraits(statId);
+    if (traits == null) {
+      return Collections.emptyList();
+    }
+
+    // Legacy ATM addons often place strong traits in "default", which this loader applies once per part.
+    // Scope default traits to head stats for ATM materials to avoid unintended per-part trait stacking.
+    if ("allthemodium".equals(materialId.getNamespace()) && !traits.hasUniqueTraits(statId)) {
+      return statId.equals(HeadMaterialStats.ID) ? halveTraitLevels(traits.getDefaultTraits()) : Collections.emptyList();
+    }
+
+    List<ModifierEntry> result = traits.getTraits(statId);
+    if ("allthemodium".equals(materialId.getNamespace())) {
+      return halveTraitLevels(result);
+    }
+    return result;
+  }
+
+  /** Halves trait levels (minimum 1) to keep ATM material traits in a sane range for this port. */
+  private static List<ModifierEntry> halveTraitLevels(List<ModifierEntry> traits) {
+    return traits.stream()
+      .map(entry -> entry.withLevel(Math.max(1, entry.getLevel() / 2)))
+      .toList();
   }
 
   /**

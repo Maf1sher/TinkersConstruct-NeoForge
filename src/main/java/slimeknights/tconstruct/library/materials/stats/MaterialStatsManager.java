@@ -256,7 +256,7 @@ public class MaterialStatsManager extends MergingJsonDataLoader<Map<ResourceLoca
       renameLegacyField(normalized, "harvestTier", "mining_tier");
       renameLegacyField(normalized, "attack", "melee_attack");
       if (legacyFields && "allthemodium".equals(materialId.getNamespace())) {
-        scaleField(normalized, "melee_attack", 0.7f);
+        scaleField(normalized, "melee_attack", 0.65f);
       }
     } else if (statType.equals(slimeknights.tconstruct.tools.stats.HandleMaterialStats.ID)) {
       boolean legacyFields = normalized.has("miningSpeed") || normalized.has("attackSpeed") || normalized.has("attackDamage");
@@ -265,8 +265,8 @@ public class MaterialStatsManager extends MergingJsonDataLoader<Map<ResourceLoca
       renameLegacyField(normalized, "attackDamage", "melee_damage");
       if (legacyFields && "allthemodium".equals(materialId.getNamespace())) {
         scaleField(normalized, "durability", 0.1f);
-        scaleField(normalized, "mining_speed", 0.01f);
-        scaleField(normalized, "melee_speed", 0.30f);
+        scaleField(normalized, "mining_speed", 0.015f);
+        scaleField(normalized, "melee_speed", 0.13f);
         scaleField(normalized, "melee_damage", 0.1f);
       }
     }
