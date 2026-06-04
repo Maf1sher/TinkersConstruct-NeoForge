@@ -123,6 +123,10 @@ public record PlatingMaterialStats(MaterialStatType<?> getType, int durability, 
     @Override
     public PlatingMaterialStats build(ArmorItem.Type slot) {
       int index = slot.ordinal();
+      // BODY armor type was added by NeoForge and is not supported
+      if (index >= armor.length) {
+        throw new IllegalArgumentException("Cannot build plating stats for unsupported armor type: " + slot);
+      }
       return new PlatingMaterialStats(TYPES.get(index), durability[index], armor[index], toughness, knockbackResistance);
     }
 

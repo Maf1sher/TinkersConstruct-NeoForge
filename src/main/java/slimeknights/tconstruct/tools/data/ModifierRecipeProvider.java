@@ -1832,16 +1832,20 @@ public class ModifierRecipeProvider extends BaseRecipeProvider {
     }
 
     // compatability
-    String theOneProbe = "theoneprobe";
-    ResourceLocation probe = ResourceLocation.fromNamespaceAndPath(theOneProbe, "probe");
-    RecipeOutput topConsumer = withCondition(consumer, modLoaded(theOneProbe));
-    ModifierRecipeBuilder.modifier(ModifierIds.theOneProbe)
-                         .setTools(ingredientFromTags(TinkerTags.Items.HELMETS, TinkerTags.Items.HELD))
-                         .addInput(ItemNameIngredient.from(probe).toIngredient())
-                         .setSlots(SlotType.UPGRADE, 1)
-                         .setMaxLevel(1).checkTraitLevel()
-                         .saveSalvage(topConsumer, prefix(ModifierIds.theOneProbe, compatSalvage))
-                         .save(topConsumer, prefix(ModifierIds.theOneProbe, compatFolder));
+    try {
+      String theOneProbe = "theoneprobe";
+      ResourceLocation probe = ResourceLocation.fromNamespaceAndPath(theOneProbe, "probe");
+      RecipeOutput topConsumer = withCondition(consumer, modLoaded(theOneProbe));
+      ModifierRecipeBuilder.modifier(ModifierIds.theOneProbe)
+                           .setTools(ingredientFromTags(TinkerTags.Items.HELMETS, TinkerTags.Items.HELD))
+                           .addInput(ItemNameIngredient.from(probe).toIngredient())
+                           .setSlots(SlotType.UPGRADE, 1)
+                           .setMaxLevel(1).checkTraitLevel()
+                           .saveSalvage(topConsumer, prefix(ModifierIds.theOneProbe, compatSalvage))
+                           .save(topConsumer, prefix(ModifierIds.theOneProbe, compatFolder));
+    } catch (Exception e) {
+      TConstruct.LOG.debug("Skipping the_one_probe recipe: {}", e.getMessage());
+    }
     RecipeOutput headlightConsumer = withCondition(consumer, modLoaded("headlight"));
     BiConsumer<Ingredient,String> headlight = (ingredient, light) -> {
       SwappableModifierRecipeBuilder builder = SwappableModifierRecipeBuilder.modifier(ModifierIds.headlight, light);

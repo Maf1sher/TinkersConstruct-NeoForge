@@ -1,0 +1,13 @@
+{
+  "type": "tconstruct:casting_basin",
+  "cast": {
+    "item": "tconstruct:spider_head"
+  },
+  "cast_consumed": true,
+  "cooling_time": 237,
+  "fluid": {
+    "amount": 5000,
+    "tag": "tconstruct:ender_slime"
+  },
+  "result": "tconstruct:slime_helmet"
+}

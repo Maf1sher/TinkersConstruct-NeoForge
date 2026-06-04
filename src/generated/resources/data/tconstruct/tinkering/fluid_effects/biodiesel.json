@@ -1,4 +1,10 @@
 {
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "immersiveengineering"
+    }
+  ],
   "block_effects": [
     {
       "type": "tconstruct:mob_effect_cloud",
@@ -9,12 +15,6 @@
           "time": 160
         }
       ]
-    }
-  ],
-  "conditions": [
-    {
-      "type": "neoforge:mod_loaded",
-      "modid": "immersiveengineering"
     }
   ],
   "entity_effects": [
@@ -33,6 +33,6 @@
   ],
   "fluid": {
     "amount": 50,
-    "tag": "forge:biodiesel"
+    "tag": "c:biodiesel"
   }
 }

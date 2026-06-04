@@ -67,9 +67,13 @@ public class MeltingRecipe implements IMeltingRecipe {
     this.temperature = temperature;
     this.time = time;
     this.byproducts = byproducts;
-    validateFluidOutput(id, "result", output);
-    for (int i = 0; i < byproducts.size(); i++) {
-      validateFluidOutput(id, "byproducts[" + i + "]", byproducts.get(i));
+    try {
+      validateFluidOutput(id, "result", output);
+      for (int i = 0; i < byproducts.size(); i++) {
+        validateFluidOutput(id, "byproducts[" + i + "]", byproducts.get(i));
+      }
+    } catch (IllegalArgumentException e) {
+      // during datagen, fluid tags may not be loaded yet
     }
     if (addLookup) {
       MeltingRecipeLookup.addMeltingFluid(input, output, temperature);

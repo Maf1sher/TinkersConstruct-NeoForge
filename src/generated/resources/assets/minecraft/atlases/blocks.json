@@ -40,7 +40,8 @@
         "minecraft:trims/items/helmet_trim",
         "minecraft:trims/items/chestplate_trim",
         "minecraft:trims/items/leggings_trim",
-        "minecraft:trims/items/boots_trim"
+        "minecraft:trims/items/boots_trim",
+        "minecraft:trims/items/body_trim"
       ]
     },
     {
@@ -58,6 +59,10 @@
     {
       "type": "minecraft:single",
       "resource": "minecraft:trims/items/boots_trim"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:trims/items/body_trim"
     }
   ]
 }

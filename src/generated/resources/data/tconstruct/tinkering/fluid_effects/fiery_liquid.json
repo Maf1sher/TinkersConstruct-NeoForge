@@ -1,12 +1,5 @@
 {
-  "block_effects": [
-    {
-      "type": "tconstruct:melt_block",
-      "min_amount": 90,
-      "temperature": 1500
-    }
-  ],
-  "conditions": [
+  "neoforge:conditions": [
     {
       "type": "neoforge:or",
       "values": [
@@ -16,9 +9,16 @@
         },
         {
           "type": "mantle:tag_filled",
-          "tag": "forge:ingots/fiery"
+          "tag": "c:ingots/fiery"
         }
       ]
+    }
+  ],
+  "block_effects": [
+    {
+      "type": "tconstruct:melt_block",
+      "min_amount": 90,
+      "temperature": 1500
     }
   ],
   "fluid": {

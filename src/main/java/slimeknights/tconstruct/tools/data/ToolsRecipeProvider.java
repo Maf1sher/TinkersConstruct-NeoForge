@@ -393,11 +393,15 @@ public class ToolsRecipeProvider extends BaseRecipeProvider implements IMaterial
       .part(TinkerToolParts.toolHandle)
       .part(TinkerToolParts.bowGrip)
       .save(consumer, location(folder + "swasher"));
-    PartBuilderToolRecycleBuilder.tools(SizedIngredient.of(ItemNameIngredient.from(TinkerTools.minotaurAxe.getId()).toIngredient()))
-      .part(TinkerToolParts.smallAxeHead)
-      .part(TinkerToolParts.repairKit)
-      .part(TinkerToolParts.toolHandle)
-      .save(withCondition(consumer, new ModLoadedCondition("twilightforest")), location(folder + "minotaur_axe"));
+    try {
+      PartBuilderToolRecycleBuilder.tools(SizedIngredient.of(ItemNameIngredient.from(TinkerTools.minotaurAxe.getId()).toIngredient()))
+        .part(TinkerToolParts.smallAxeHead)
+        .part(TinkerToolParts.repairKit)
+        .part(TinkerToolParts.toolHandle)
+        .save(withCondition(consumer, new ModLoadedCondition("twilightforest")), location(folder + "minotaur_axe"));
+    } catch (Exception e) {
+      TConstruct.LOG.debug("Skipping minotaur_axe recipe: {}", e.getMessage());
+    }
   }
 
   private void addPartRecipes(RecipeOutput consumer) {

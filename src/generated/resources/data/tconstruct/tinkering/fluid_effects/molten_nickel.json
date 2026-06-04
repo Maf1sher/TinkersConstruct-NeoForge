@@ -1,17 +1,5 @@
 {
-  "block_effects": [
-    {
-      "type": "tconstruct:mob_effect_cloud",
-      "effects": [
-        {
-          "effect": "minecraft:weakness",
-          "level": 1,
-          "time": 140
-        }
-      ]
-    }
-  ],
-  "conditions": [
+  "neoforge:conditions": [
     {
       "type": "neoforge:or",
       "values": [
@@ -21,7 +9,19 @@
         },
         {
           "type": "mantle:tag_filled",
-          "tag": "forge:ingots/nickel"
+          "tag": "c:ingots/nickel"
+        }
+      ]
+    }
+  ],
+  "block_effects": [
+    {
+      "type": "tconstruct:mob_effect_cloud",
+      "effects": [
+        {
+          "effect": "minecraft:weakness",
+          "level": 1,
+          "time": 140
         }
       ]
     }
@@ -52,6 +52,6 @@
   ],
   "fluid": {
     "amount": 10,
-    "tag": "forge:molten_nickel"
+    "tag": "c:molten_nickel"
   }
 }

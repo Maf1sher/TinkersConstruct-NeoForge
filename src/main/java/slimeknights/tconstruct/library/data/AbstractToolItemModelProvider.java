@@ -247,9 +247,12 @@ public abstract class AbstractToolItemModelProvider extends GenericDataProvider 
     }
   }
 
+  /** Standard wearable armor slots (excludes BODY which is for animal armor) */
+  private static final ArmorItem.Type[] WEARABLE_ARMOR_TYPES = {ArmorItem.Type.HELMET, ArmorItem.Type.CHESTPLATE, ArmorItem.Type.LEGGINGS, ArmorItem.Type.BOOTS};
+
   /** Adds broken and blocking models for the armor set */
   protected void armor(String name, EnumObject<ArmorItem.Type,? extends Item> armor, String... textures) throws IOException {
-    armor(name, armor, ArmorItem.Type.values(), textures);
+    armor(name, armor, WEARABLE_ARMOR_TYPES, textures);
   }
 
   /** Creates models for fishing rods cast and broken */

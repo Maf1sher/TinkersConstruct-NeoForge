@@ -1,17 +1,5 @@
 {
-  "block_effects": [
-    {
-      "type": "tconstruct:mob_effect_cloud",
-      "effects": [
-        {
-          "effect": "tconstruct:enderference",
-          "level": 1,
-          "time": 200
-        }
-      ]
-    }
-  ],
-  "conditions": [
+  "neoforge:conditions": [
     {
       "type": "neoforge:or",
       "values": [
@@ -21,7 +9,19 @@
         },
         {
           "type": "mantle:tag_filled",
-          "tag": "forge:ingots/enderium"
+          "tag": "c:ingots/enderium"
+        }
+      ]
+    }
+  ],
+  "block_effects": [
+    {
+      "type": "tconstruct:mob_effect_cloud",
+      "effects": [
+        {
+          "effect": "tconstruct:enderference",
+          "level": 1,
+          "time": 200
         }
       ]
     }
@@ -45,6 +45,6 @@
   ],
   "fluid": {
     "amount": 10,
-    "tag": "forge:molten_enderium"
+    "tag": "c:molten_enderium"
   }
 }

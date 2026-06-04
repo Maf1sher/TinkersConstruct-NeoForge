@@ -1,17 +1,5 @@
 {
-  "block_effects": [
-    {
-      "type": "tconstruct:mob_effect_cloud",
-      "effects": [
-        {
-          "effect": "minecraft:haste",
-          "level": 1,
-          "time": 160
-        }
-      ]
-    }
-  ],
-  "conditions": [
+  "neoforge:conditions": [
     {
       "type": "neoforge:or",
       "values": [
@@ -21,11 +9,23 @@
         },
         {
           "type": "mantle:tag_filled",
-          "tag": "forge:ingots/electrum"
+          "tag": "c:ingots/electrum"
         },
         {
           "type": "mantle:tag_filled",
-          "tag": "forge:ingots/silver"
+          "tag": "c:ingots/silver"
+        }
+      ]
+    }
+  ],
+  "block_effects": [
+    {
+      "type": "tconstruct:mob_effect_cloud",
+      "effects": [
+        {
+          "effect": "minecraft:haste",
+          "level": 1,
+          "time": 160
         }
       ]
     }
@@ -49,6 +49,6 @@
   ],
   "fluid": {
     "amount": 10,
-    "tag": "forge:molten_electrum"
+    "tag": "c:molten_electrum"
   }
 }

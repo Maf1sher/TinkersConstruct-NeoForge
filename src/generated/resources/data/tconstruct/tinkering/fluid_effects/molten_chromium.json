@@ -1,17 +1,5 @@
 {
-  "block_effects": [
-    {
-      "type": "tconstruct:mob_effect_cloud",
-      "effects": [
-        {
-          "effect": "minecraft:luck",
-          "level": 1,
-          "time": 100
-        }
-      ]
-    }
-  ],
-  "conditions": [
+  "neoforge:conditions": [
     {
       "type": "neoforge:or",
       "values": [
@@ -21,7 +9,19 @@
         },
         {
           "type": "mantle:tag_filled",
-          "tag": "forge:ingots/chromium"
+          "tag": "c:ingots/chromium"
+        }
+      ]
+    }
+  ],
+  "block_effects": [
+    {
+      "type": "tconstruct:mob_effect_cloud",
+      "effects": [
+        {
+          "effect": "minecraft:luck",
+          "level": 1,
+          "time": 100
         }
       ]
     }
@@ -45,6 +45,6 @@
   ],
   "fluid": {
     "amount": 10,
-    "tag": "forge:molten_chromium"
+    "tag": "c:molten_chromium"
   }
 }

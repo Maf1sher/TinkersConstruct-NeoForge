@@ -1,0 +1,32 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "m": {
+      "tag": "tconstruct:anvil_metal"
+    },
+    "s": {
+      "tag": "tconstruct:scorched_blocks"
+    },
+    "t": {
+      "item": "tconstruct:tinker_station"
+    }
+  },
+  "pattern": [
+    "sss",
+    "mtm",
+    "m m"
+  ],
+  "result": {
+    "components": {
+      "minecraft:custom_data": {
+        "display": {
+          "Name": "{\"translate\":\"block.tconstruct.tool_forge\"}"
+        }
+      },
+      "minecraft:custom_name": "{\"translate\":\"block.tconstruct.tool_forge\"}"
+    },
+    "count": 1,
+    "id": "tconstruct:scorched_anvil"
+  }
+}

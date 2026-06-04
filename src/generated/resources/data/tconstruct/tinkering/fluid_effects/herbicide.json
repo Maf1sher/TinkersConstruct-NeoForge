@@ -1,4 +1,11 @@
 {
+  "neoforge:conditions": [
+    {
+      "type": "mantle:tag_filled",
+      "registry": "minecraft:fluid",
+      "tag": "c:herbicide"
+    }
+  ],
   "block_effects": [
     {
       "type": "tconstruct:offset",
@@ -71,15 +78,8 @@
       }
     }
   ],
-  "conditions": [
-    {
-      "type": "mantle:tag_filled",
-      "registry": "minecraft:fluid",
-      "tag": "forge:herbicide"
-    }
-  ],
   "fluid": {
     "amount": 10,
-    "tag": "forge:herbicide"
+    "tag": "c:herbicide"
   }
 }

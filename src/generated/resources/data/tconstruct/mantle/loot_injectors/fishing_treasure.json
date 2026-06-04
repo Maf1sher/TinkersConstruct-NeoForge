@@ -22,8 +22,8 @@
             },
             {
               "fluid": {
-                "id": "minecraft:lava",
-                "amount": 1000
+                "amount": 1000,
+                "id": "minecraft:lava"
               },
               "function": "mantle:set_fluid"
             }

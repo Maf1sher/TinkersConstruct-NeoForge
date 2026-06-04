@@ -21,6 +21,7 @@ import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import javax.annotation.Nullable;
+import java.util.Objects;
 
 /**
  * Builder for a potion bottle filling recipe. Takes a fluid and optional cast to create an item that copies the fluid NBT
@@ -179,7 +180,12 @@ public class PotionCastingRecipeBuilder extends AbstractRecipeBuilder<PotionCast
     }
     @Nullable AdvancementHolder advancement = this.buildOptionalAdvancement(consumer, id, "casting");
     if (modifier != null) {
-      saveRecipe(consumer, id, new TippingCastingRecipe(recipeSerializer, id, group, bottle, fluid, coolingTime, modifier), advancement);
+      TypeAwareRecipeSerializer<?> rawSerializer = Objects.requireNonNull(recipeSerializer);
+      if (rawSerializer == TinkerSmeltery.basinTipClearingRecipeSerializer.get() || rawSerializer == TinkerSmeltery.tableTipClearingRecipeSerializer.get()) {
+        saveRecipe(consumer, id, new TipClearingCastingRecipe(recipeSerializer, id, group, bottle, fluid, coolingTime, modifier), advancement);
+      } else {
+        saveRecipe(consumer, id, new TippingCastingRecipe(recipeSerializer, id, group, bottle, fluid, coolingTime, modifier), advancement);
+      }
     } else {
       saveRecipe(consumer, id, new PotionCastingRecipe(recipeSerializer, id, group, bottle, fluid, result, coolingTime), advancement);
     }

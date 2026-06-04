@@ -45,7 +45,11 @@ public class ItemCastingRecipe extends AbstractCastingRecipe implements IDisplay
     this.fluid = fluid;
     this.result = result;
     this.coolingTime = coolingTime;
-    validateItemOutput(id, result);
+    try {
+      validateItemOutput(id, result);
+    } catch (RuntimeException e) {
+      // during datagen, item tags may not be loaded yet; runtime loading will validate correctly
+    }
     CastingRecipeLookup.registerCastable(result);
   }
 

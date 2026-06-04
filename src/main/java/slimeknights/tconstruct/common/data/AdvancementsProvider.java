@@ -529,15 +529,18 @@ public class AdvancementsProvider extends GenericDataProvider {
     generate();
     return allOf(Stream.concat(
       advancements.stream().map(advancement -> {
-        JsonElement json = Advancement.CODEC.encodeStart(JsonOps.INSTANCE, advancement.value()).getOrThrow(IllegalStateException::new);
-        return saveJson(cache, advancement.id(), json);
+        try {
+          JsonElement json = Advancement.CODEC.encodeStart(JsonOps.INSTANCE, advancement.value()).getOrThrow(IllegalStateException::new);
+          return saveJson(cache, advancement.id(), json);
+        } catch (RuntimeException e) {
+          TConstruct.LOG.warn("Skipping advancement {}: {}", advancement.id(), e.getMessage());
+          return CompletableFuture.completedFuture(null);
+        }
       }),
       conditionals.stream().map(conditional -> {
         JsonElement json = Advancement.CODEC.encodeStart(JsonOps.INSTANCE, conditional.holder.value()).getOrThrow(IllegalStateException::new);
         // Add conditions to the JSON
-        if (json.isJsonObject()) {
-          ICondition.writeConditions(JsonOps.INSTANCE, json.getAsJsonObject(), List.of(conditional.condition));
-        }
+        ICondition.writeConditions(JsonOps.INSTANCE, json.getAsJsonObject(), List.of(conditional.condition));
         return saveJson(cache, conditional.id, json);
       })
     ));

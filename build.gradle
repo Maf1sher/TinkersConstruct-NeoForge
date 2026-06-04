@@ -153,26 +153,23 @@ tasks.register('syncModernDataPackPaths', Sync) {
     }
 
     doLast {
-        def normalizeJson
-        normalizeJson = { node, List<String> path = [] ->
-            if (node instanceof Map) {
-                boolean fluidTagContext = node.containsKey('amount') && (node.containsKey('tag') || node.containsKey('fluid'))
-                boolean outputTagContext = path.any { it in ['result', 'results', 'output', 'outputs'] }
-                boolean conditionTagContext = path.contains('conditions')
-                node.replaceAll { key, value ->
-                    if (key == 'tag' && !fluidTagContext && !outputTagContext && !conditionTagContext && value instanceof String && value.startsWith('forge:')) {
-                        return 'c:' + value.substring('forge:'.length())
-                    }
-                    return normalizeJson(value, path + key.toString())
+    def normalizeJson
+    normalizeJson = { node, List<String> path = [] ->
+        if (node instanceof Map) {
+            node.replaceAll { key, value ->
+                if (key == 'tag' && value instanceof String && value.startsWith('forge:')) {
+                    return 'c:' + value.substring('forge:'.length())
                 }
+                return normalizeJson(value, path + key.toString())
+            }
 
-                return node
-            }
-            if (node instanceof List) {
-                return node.collect { value -> normalizeJson(value, path) }
-            }
             return node
         }
+        if (node instanceof List) {
+            return node.collect { value -> normalizeJson(value, path) }
+        }
+        return node
+    }
 
         def normalizeLootJson
         normalizeLootJson = { node ->
@@ -200,10 +197,8 @@ tasks.register('syncModernDataPackPaths', Sync) {
         def collectForgeItemTags
         collectForgeItemTags = { node, Set<String> tags, List<String> path = [] ->
             if (node instanceof Map) {
-                boolean fluidTagContext = node.containsKey('amount') && (node.containsKey('tag') || node.containsKey('fluid'))
-                boolean outputTagContext = path.any { it in ['result', 'results', 'output', 'outputs'] }
                 node.each { key, value ->
-                    if (key == 'tag' && !fluidTagContext && outputTagContext && value instanceof String && value.startsWith('forge:')) {
+                    if (key == 'tag' && value instanceof String && value.startsWith('forge:')) {
                         tags.add(value)
                     }
                     collectForgeItemTags(value, tags, path + key.toString())
@@ -218,10 +213,8 @@ tasks.register('syncModernDataPackPaths', Sync) {
         def collectCommonItemTags
         collectCommonItemTags = { node, Set<String> tags, List<String> path = [] ->
             if (node instanceof Map) {
-                boolean fluidTagContext = node.containsKey('amount') && (node.containsKey('tag') || node.containsKey('fluid'))
-                boolean outputTagContext = path.any { it in ['result', 'results', 'output', 'outputs'] }
                 node.each { key, value ->
-                    if (key == 'tag' && !fluidTagContext && !outputTagContext && value instanceof String && value.startsWith('c:')) {
+                    if (key == 'tag' && value instanceof String && value.startsWith('c:')) {
                         tags.add(value)
                     }
                     collectCommonItemTags(value, tags, path + key.toString())
@@ -478,9 +471,8 @@ tasks.register('syncModernDataPackPaths', Sync) {
         def collectForgeFluidTags
         collectForgeFluidTags = { node, Set<String> tags, List<String> path = [] ->
             if (node instanceof Map) {
-                boolean fluidTagContext = node.containsKey('amount') && (node.containsKey('tag') || node.containsKey('fluid'))
                 node.each { key, value ->
-                    if (key == 'tag' && fluidTagContext && value instanceof String && value.startsWith('forge:')) {
+                    if (key == 'tag' && value instanceof String && value.startsWith('forge:')) {
                         tags.add(value)
                     }
                     collectForgeFluidTags(value, tags, path + key.toString())
@@ -895,6 +887,7 @@ test {
 }
 
 tasks.named('processResources', ProcessResources).configure {
+    duplicatesStrategy = DuplicatesStrategy.WARN
     dependsOn tasks.named('syncModernDataPackPaths')
     var replaceProperties = [
         'version': artifact_version,

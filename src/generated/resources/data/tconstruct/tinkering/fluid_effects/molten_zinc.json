@@ -1,17 +1,5 @@
 {
-  "block_effects": [
-    {
-      "type": "tconstruct:mob_effect_cloud",
-      "effects": [
-        {
-          "effect": "minecraft:speed",
-          "level": 1,
-          "time": 200
-        }
-      ]
-    }
-  ],
-  "conditions": [
+  "neoforge:conditions": [
     {
       "type": "neoforge:or",
       "values": [
@@ -21,7 +9,19 @@
         },
         {
           "type": "mantle:tag_filled",
-          "tag": "forge:ingots/zinc"
+          "tag": "c:ingots/zinc"
+        }
+      ]
+    }
+  ],
+  "block_effects": [
+    {
+      "type": "tconstruct:mob_effect_cloud",
+      "effects": [
+        {
+          "effect": "minecraft:speed",
+          "level": 1,
+          "time": 200
         }
       ]
     }
@@ -52,6 +52,6 @@
   ],
   "fluid": {
     "amount": 10,
-    "tag": "forge:molten_zinc"
+    "tag": "c:molten_zinc"
   }
 }

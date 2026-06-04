@@ -88,9 +88,11 @@ public abstract class AbstractMaterialStatsDataProvider extends GenericDataProvi
    * @param statBuilder  Stat builder
    * @param otherStats   Other stat types to add after the builder
    */
+  private static final ArmorItem.Type[] WEARABLE_ARMOR_TYPES = {ArmorItem.Type.HELMET, ArmorItem.Type.CHESTPLATE, ArmorItem.Type.LEGGINGS, ArmorItem.Type.BOOTS};
+
   protected void addArmorStats(MaterialId location, ArmorModuleBuilder<? extends IMaterialStats> statBuilder, IMaterialStats... otherStats) {
     IMaterialStats[] stats = new IMaterialStats[4];
-    for (ArmorItem.Type slotType : ArmorItem.Type.values()) {
+    for (ArmorItem.Type slotType : WEARABLE_ARMOR_TYPES) {
       stats[slotType.ordinal()] = statBuilder.build(slotType);
     }
     addMaterialStats(location, stats);

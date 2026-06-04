@@ -1,0 +1,32 @@
+{
+  "type": "tconstruct:modifier_salvage",
+  "modifier": "tconstruct:blocking",
+  "slots": {
+    "abilities": 1
+  },
+  "tools": {
+    "type": "neoforge:difference",
+    "base": {
+      "type": "neoforge:intersection",
+      "children": [
+        {
+          "tag": "tconstruct:modifiable/interactable/charge"
+        },
+        {
+          "tag": "tconstruct:modifiable/durability"
+        }
+      ]
+    },
+    "subtracted": {
+      "type": "neoforge:compound",
+      "ingredients": [
+        {
+          "tag": "tconstruct:modifiable/melee/parry"
+        },
+        {
+          "tag": "tconstruct:modifiable/shields"
+        }
+      ]
+    }
+  }
+}

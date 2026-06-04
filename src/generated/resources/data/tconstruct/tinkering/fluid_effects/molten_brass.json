@@ -1,17 +1,5 @@
 {
-  "block_effects": [
-    {
-      "type": "tconstruct:mob_effect_cloud",
-      "effects": [
-        {
-          "effect": "minecraft:fire_resistance",
-          "level": 1,
-          "time": 160
-        }
-      ]
-    }
-  ],
-  "conditions": [
+  "neoforge:conditions": [
     {
       "type": "neoforge:or",
       "values": [
@@ -21,11 +9,23 @@
         },
         {
           "type": "mantle:tag_filled",
-          "tag": "forge:ingots/brass"
+          "tag": "c:ingots/brass"
         },
         {
           "type": "mantle:tag_filled",
-          "tag": "forge:ingots/zinc"
+          "tag": "c:ingots/zinc"
+        }
+      ]
+    }
+  ],
+  "block_effects": [
+    {
+      "type": "tconstruct:mob_effect_cloud",
+      "effects": [
+        {
+          "effect": "minecraft:fire_resistance",
+          "level": 1,
+          "time": 160
         }
       ]
     }
@@ -56,6 +56,6 @@
   ],
   "fluid": {
     "amount": 10,
-    "tag": "forge:molten_brass"
+    "tag": "c:molten_brass"
   }
 }

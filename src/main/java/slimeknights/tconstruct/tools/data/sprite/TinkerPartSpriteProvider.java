@@ -73,7 +73,8 @@ public class TinkerPartSpriteProvider extends AbstractPartSpriteProvider {
 
     // plate textures
     addPart("maille", StatlessMaterialStats.MAILLE.getIdentifier());
-    for (ArmorItem.Type slot : ArmorItem.Type.values()) {
+    ArmorItem.Type[] armorSlots = {ArmorItem.Type.HELMET, ArmorItem.Type.CHESTPLATE, ArmorItem.Type.LEGGINGS, ArmorItem.Type.BOOTS};
+    for (ArmorItem.Type slot : armorSlots) {
       buildTool("armor/plate/" + slot.getName()).disallowAnimated() // the armor model won't be animated, so don't animate the item
         .addBreakablePart("plating", PlatingMaterialStats.TYPES.get(slot.ordinal()).getStatId())
         .addBreakablePart("maille", StatlessMaterialStats.MAILLE.getIdentifier());

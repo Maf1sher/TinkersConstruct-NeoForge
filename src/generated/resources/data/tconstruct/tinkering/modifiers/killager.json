@@ -10,7 +10,7 @@
         "predicates": [
           {
             "type": "mantle:tag",
-            "tag": "tconstruct:illagers"
+            "tag": "c:illagers"
           },
           {
             "type": "mantle:tag",

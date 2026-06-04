@@ -27,9 +27,13 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.common.NeoForgeMod;
+import javax.annotation.Nullable;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.crafting.CompoundIngredient;
 import net.neoforged.neoforge.common.crafting.DifferenceIngredient;
@@ -131,16 +135,30 @@ public class SmelteryRecipeProvider extends BaseRecipeProvider implements ISmelt
 
   @Override
   protected void buildRecipes(RecipeOutput consumer) {
-    this.addCraftingRecipes(consumer);
-    this.addSmelteryRecipes(consumer);
-    this.addFoundryRecipes(consumer);
-    this.addTagRecipes(consumer);
-    this.addMeltingRecipes(consumer);
-    this.addCastingRecipes(consumer);
-    this.addAlloyRecipes(consumer);
-    this.addEntityMeltingRecipes(consumer);
-
-    this.addCompatRecipes(consumer);
+    class SafeRecipeOutput implements RecipeOutput {
+      @Override
+      public void accept(ResourceLocation id, Recipe<?> recipe, @Nullable AdvancementHolder advancement, ICondition... conditions) {
+        try {
+          consumer.accept(id, recipe, advancement, conditions);
+        } catch (RuntimeException e) {
+          TConstruct.LOG.warn("Skipping recipe {} during datagen: {}", id, e.getMessage());
+        }
+      }
+      @Override
+      public Advancement.Builder advancement() {
+        return consumer.advancement();
+      }
+    }
+    RecipeOutput safeConsumer = new SafeRecipeOutput();
+    this.addCraftingRecipes(safeConsumer);
+    this.addSmelteryRecipes(safeConsumer);
+    this.addFoundryRecipes(safeConsumer);
+    this.addTagRecipes(safeConsumer);
+    this.addMeltingRecipes(safeConsumer);
+    this.addCastingRecipes(safeConsumer);
+    this.addAlloyRecipes(safeConsumer);
+    this.addEntityMeltingRecipes(safeConsumer);
+    this.addCompatRecipes(safeConsumer);
   }
 
   private void addCraftingRecipes(RecipeOutput consumer) {

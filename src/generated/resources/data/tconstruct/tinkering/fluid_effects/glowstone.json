@@ -1,4 +1,11 @@
 {
+  "neoforge:conditions": [
+    {
+      "type": "mantle:tag_filled",
+      "registry": "minecraft:fluid",
+      "tag": "c:glowstone"
+    }
+  ],
   "block_effects": [
     {
       "type": "tconstruct:mob_effect_cloud",
@@ -15,13 +22,6 @@
       "block": "tconstruct:glow"
     }
   ],
-  "conditions": [
-    {
-      "type": "mantle:tag_filled",
-      "registry": "minecraft:fluid",
-      "tag": "forge:glowstone"
-    }
-  ],
   "entity_effects": [
     {
       "type": "tconstruct:mob_effect",
@@ -33,6 +33,6 @@
   ],
   "fluid": {
     "amount": 100,
-    "tag": "forge:glowstone"
+    "tag": "c:glowstone"
   }
 }

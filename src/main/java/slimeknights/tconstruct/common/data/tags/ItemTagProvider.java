@@ -194,9 +194,9 @@ public class ItemTagProvider extends ItemTagsProvider {
     copy(Tags.Blocks.GLASS_PANES_COLORLESS, Tags.Items.GLASS_PANES_COLORLESS);
     for (DyeColor color : DyeColor.values()) {
       ResourceLocation name = commonResource("glass/" + color.getSerializedName());
-      copy(TagKey.create(Registries.BLOCK, name), TagKey.create(Registries.ITEM, name));
+      this.tag(TagKey.create(Registries.ITEM, name)).addOptionalTag(name);
       name = commonResource("glass_panes/" + color.getSerializedName());
-      copy(TagKey.create(Registries.BLOCK, name), TagKey.create(Registries.ITEM, name));
+      this.tag(TagKey.create(Registries.ITEM, name)).addOptionalTag(name);
     }
 
     copy(TinkerTags.Blocks.WORKBENCHES, TinkerTags.Items.WORKBENCHES);
@@ -367,20 +367,21 @@ public class ItemTagProvider extends ItemTagsProvider {
     addToolTags(TinkerTools.plateShield,     DURABILITY, BONUS_SLOTS, SHIELDS, INTERACTABLE_LEFT, Tags.Items.TOOLS_SHIELD, SINGLEPART_TOOL, UNRECYCLABLE);
 
     // care about order for armor in the book
+    ArmorItem.Type[] wearableArmor = {ArmorItem.Type.HELMET, ArmorItem.Type.CHESTPLATE, ArmorItem.Type.LEGGINGS, ArmorItem.Type.BOOTS};
     tag(BASIC_ARMOR);
     IntrinsicTagAppender<Item> bookArmor = tag(PUNY_ARMOR);
-    for (ArmorItem.Type slotType : ArmorItem.Type.values()) {
+    for (ArmorItem.Type slotType : wearableArmor) {
       bookArmor.add(TinkerTools.travelersGear.get(slotType));
     }
     bookArmor.add(TinkerTools.travelersShield.get());
-    for (ArmorItem.Type slotType : ArmorItem.Type.values()) {
+    for (ArmorItem.Type slotType : wearableArmor) {
       bookArmor.add(TinkerTools.plateArmor.get(slotType));
     }
     bookArmor.add(TinkerTools.plateShield.get());
     tag(MIGHTY_ARMOR);
     tag(FANTASTIC_ARMOR);
     bookArmor = tag(GADGETRY_ARMOR);
-    for (ArmorItem.Type slotType : ArmorItem.Type.values()) {
+    for (ArmorItem.Type slotType : wearableArmor) {
       bookArmor.add(TinkerTools.slimesuit.get(slotType));
     }
     tag(BOOK_ARMOR).addTags(BASIC_ARMOR, PUNY_ARMOR, MIGHTY_ARMOR, FANTASTIC_ARMOR, GADGETRY_ARMOR);

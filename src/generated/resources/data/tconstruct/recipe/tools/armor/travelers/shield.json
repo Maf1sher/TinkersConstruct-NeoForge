@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "c": {
+      "type": "tconstruct:material_value",
+      "max_value": 1.0,
+      "min_value": 1.0
+    },
+    "l": {
+      "tag": "c:leathers"
+    }
+  },
+  "pattern": [
+    "cl",
+    "lc"
+  ],
+  "result": {
+    "components": {
+      "minecraft:custom_data": {}
+    },
+    "count": 1,
+    "id": "tconstruct:travelers_shield"
+  }
+}

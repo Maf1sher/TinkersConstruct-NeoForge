@@ -1,0 +1,35 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "c": [
+      {
+        "type": "tconstruct:material_value",
+        "max_value": 1.0,
+        "min_value": 1.0
+      },
+      {
+        "type": "tconstruct:material",
+        "match": {
+          "item": "tconstruct:fake_ingot"
+        },
+        "material": {
+          "type": "tconstruct:stat_type",
+          "stat_type": "tconstruct:plating_chestplate"
+        }
+      }
+    ],
+    "l": {
+      "tag": "c:leathers"
+    }
+  },
+  "pattern": [
+    "l l",
+    "lcl",
+    "lcl"
+  ],
+  "result": {
+    "count": 1,
+    "id": "tconstruct:travelers_chestplate"
+  }
+}

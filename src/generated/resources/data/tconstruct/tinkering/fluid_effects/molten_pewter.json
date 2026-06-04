@@ -1,17 +1,5 @@
 {
-  "block_effects": [
-    {
-      "type": "tconstruct:mob_effect_cloud",
-      "effects": [
-        {
-          "effect": "minecraft:strength",
-          "level": 1,
-          "time": 140
-        }
-      ]
-    }
-  ],
-  "conditions": [
+  "neoforge:conditions": [
     {
       "type": "neoforge:or",
       "values": [
@@ -21,15 +9,27 @@
         },
         {
           "type": "mantle:tag_filled",
-          "tag": "forge:ingots/pewter"
+          "tag": "c:ingots/pewter"
         },
         {
           "type": "mantle:tag_filled",
-          "tag": "forge:ingots/tin"
+          "tag": "c:ingots/tin"
         },
         {
           "type": "mantle:tag_filled",
-          "tag": "forge:ingots/lead"
+          "tag": "c:ingots/lead"
+        }
+      ]
+    }
+  ],
+  "block_effects": [
+    {
+      "type": "tconstruct:mob_effect_cloud",
+      "effects": [
+        {
+          "effect": "minecraft:strength",
+          "level": 1,
+          "time": 140
         }
       ]
     }
@@ -60,6 +60,6 @@
   ],
   "fluid": {
     "amount": 10,
-    "tag": "forge:molten_pewter"
+    "tag": "c:molten_pewter"
   }
 }

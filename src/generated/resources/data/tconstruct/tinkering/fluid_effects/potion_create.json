@@ -1,4 +1,10 @@
 {
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "create"
+    }
+  ],
   "block_effects": [
     {
       "type": "tconstruct:potion_cloud",
@@ -20,12 +26,6 @@
         "Bottle": "LINGERING"
       },
       "scale": 0.75
-    }
-  ],
-  "conditions": [
-    {
-      "type": "neoforge:mod_loaded",
-      "modid": "create"
     }
   ],
   "entity_effects": [

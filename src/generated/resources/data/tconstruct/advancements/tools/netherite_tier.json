@@ -5,13 +5,16 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:stat_in_set",
-              "stat": "tconstruct:harvest_tier",
-              "values": [
-                "minecraft:netherite"
-              ]
+            "predicates": {
+              "tconstruct:tool_stack": {
+                "predicate": {
+                  "type": "tconstruct:stat_in_set",
+                  "stat": "tconstruct:harvest_tier",
+                  "values": [
+                    "minecraft:netherite"
+                  ]
+                }
+              }
             }
           }
         ]
@@ -20,16 +23,14 @@
     }
   },
   "display": {
-    "announce_to_chat": true,
     "description": {
       "translate": "advancements.tconstruct.tools.netherite_tier.description"
     },
     "frame": "goal",
-    "hidden": false,
     "icon": {
-      "item": "minecraft:netherite_ingot"
+      "count": 1,
+      "id": "minecraft:netherite_ingot"
     },
-    "show_toast": true,
     "title": {
       "translate": "advancements.tconstruct.tools.netherite_tier.title"
     }

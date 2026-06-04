@@ -3,7 +3,7 @@
     "minecraft:nether_wart",
     "#minecraft:crops",
     {
-      "id": "#forge:crops",
+      "id": "#c:crops",
       "required": false
     }
   ]
