@@ -132,12 +132,9 @@ public class SwappableModifierRecipe extends ModifierRecipe {
 
   @Override
   public List<ItemStack> getToolWithModifier() {
-    if (toolWithModifier == null) {
-      ResourceLocation id = result.getId();
-      ModifierEntry result = getDisplayResult();
-      toolWithModifier = getToolInputs().stream().map(stack -> withModifiers(stack, maxToolSize, modifiersForResult(result, result), data -> data.putString(id, value))).collect(Collectors.toList());
-    }
-    return toolWithModifier;
+    ResourceLocation id = result.getId();
+    ModifierEntry result = getDisplayResult();
+    return getToolInputs().stream().map(stack -> withModifiers(stack, maxToolSize, modifiersForResult(result, result), data -> data.putString(id, value))).collect(Collectors.toList());
   }
 
   @Override

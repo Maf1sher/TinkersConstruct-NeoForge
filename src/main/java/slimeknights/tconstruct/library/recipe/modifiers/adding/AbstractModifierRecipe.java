@@ -110,9 +110,6 @@ public abstract class AbstractModifierRecipe implements ITinkerStationRecipe, ID
   }
 
   /* JEI display */
-  /** Cache of input items shared between result and input */
-  @Nullable
-  private List<ItemStack> toolInputs = null;
   /** Cache of modifier slots produced by this recipe for JEI display */
   @Nullable
   protected List<SlotCount> resultSlots = null;
@@ -124,17 +121,8 @@ public abstract class AbstractModifierRecipe implements ITinkerStationRecipe, ID
 
   /** Gets or builds the list of tool inputs */
   protected List<ItemStack> getToolInputs() {
-    if (toolInputs == null) {
-      toolInputs = Arrays.stream(this.toolRequirement.getItems()).map(MAP_TOOL_STACK_FOR_RENDERING).collect(Collectors.toList());
-    }
-    return toolInputs;
+    return Arrays.stream(this.toolRequirement.getItems()).map(MAP_TOOL_STACK_FOR_RENDERING).collect(Collectors.toList());
   }
-
-  /** Cache of display tool inputs */
-  private List<ItemStack> displayInputs = null;
-
-  /** Cache of display output */
-  List<ItemStack> toolWithModifier = null;
 
   /** Display result, may be a higher level than real result */
   private ModifierEntry displayResult;
@@ -150,22 +138,16 @@ public abstract class AbstractModifierRecipe implements ITinkerStationRecipe, ID
 
   @Override
   public List<ItemStack> getToolWithoutModifier() {
-    if (displayInputs == null) {
-      int min = level.min() - 1;
-      ModifierEntry existing = min > 0 ? new ModifierEntry(result, min) : null;
-      ModifierEntry displayResult = getDisplayResult();
-      displayInputs = getToolInputs().stream().map(stack -> withModifiers(stack, maxToolSize, modifiersForResult(displayResult, existing))).collect(Collectors.toList());
-    }
-    return displayInputs;
+    int min = level.min() - 1;
+    ModifierEntry existing = min > 0 ? new ModifierEntry(result, min) : null;
+    ModifierEntry displayResult = getDisplayResult();
+    return getToolInputs().stream().map(stack -> withModifiers(stack, maxToolSize, modifiersForResult(displayResult, existing))).collect(Collectors.toList());
   }
 
   @Override
   public List<ItemStack> getToolWithModifier() {
-    if (toolWithModifier == null) {
-      ModifierEntry result = getDisplayResult();
-      toolWithModifier = getToolInputs().stream().map(stack -> withModifiers(stack, maxToolSize, modifiersForResult(result, result))).collect(Collectors.toList());
-    }
-    return toolWithModifier;
+    ModifierEntry result = getDisplayResult();
+    return getToolInputs().stream().map(stack -> withModifiers(stack, maxToolSize, modifiersForResult(result, result))).collect(Collectors.toList());
   }
 
   /**

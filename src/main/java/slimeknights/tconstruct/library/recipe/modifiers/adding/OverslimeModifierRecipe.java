@@ -121,8 +121,6 @@ public class OverslimeModifierRecipe implements ITinkerStationRecipe, IDisplayMo
   /* JEI display */
   /** Cache of modifier result, same for all overslime */
   private static final ModifierEntry RESULT = new ModifierEntry(TinkerModifiers.overslime, 1);
-  /** Cache of input and output tools for display */
-  private List<ItemStack> toolWithoutModifier, toolWithModifier = null;
 
   @Nullable
   @Override
@@ -142,25 +140,20 @@ public class OverslimeModifierRecipe implements ITinkerStationRecipe, IDisplayMo
     }
     return Collections.emptyList();
   }
+
   @Override
   public List<ItemStack> getToolWithoutModifier() {
-    if (toolWithoutModifier == null) {
-      toolWithoutModifier = Arrays.stream(this.tools.getItems()).map(MAP_TOOL_STACK_FOR_RENDERING).toList();
-    }
-    return toolWithoutModifier;
+    return Arrays.stream(this.tools.getItems()).map(MAP_TOOL_STACK_FOR_RENDERING).toList();
   }
 
   @Override
   public List<ItemStack> getToolWithModifier() {
-    if (toolWithModifier == null) {
-      List<ModifierEntry> result = List.of(RESULT);
-      int maxSize = shrinkToolSlotBy();
-      toolWithModifier = Arrays.stream(this.tools.getItems())
-        .map(MAP_TOOL_STACK_FOR_RENDERING)
-        .map(stack -> withModifiers(stack, maxSize, result, data -> OverslimeModule.INSTANCE.setAmountRaw(data, restoreAmount)))
-        .toList();
-    }
-    return toolWithModifier;
+    List<ModifierEntry> result = List.of(RESULT);
+    int maxSize = shrinkToolSlotBy();
+    return Arrays.stream(this.tools.getItems())
+      .map(MAP_TOOL_STACK_FOR_RENDERING)
+      .map(stack -> withModifiers(stack, maxSize, result, data -> OverslimeModule.INSTANCE.setAmountRaw(data, restoreAmount)))
+      .toList();
   }
 
   @Override

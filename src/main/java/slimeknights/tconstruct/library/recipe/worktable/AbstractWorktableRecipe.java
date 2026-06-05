@@ -59,24 +59,19 @@ public abstract class AbstractWorktableRecipe implements IModifierWorktableRecip
     }
     return inv.getTinkerable().getUpgrades().getModifiers();
   }
+@Override
+public void updateInputs(LazyToolStack result, ITinkerableContainer.Mutable inv, ModifierEntry selected, boolean isServer) {
+  ModifierRecipe.updateInputs(inv, inputs);
+}
 
-  @Override
-  public void updateInputs(LazyToolStack result, ITinkerableContainer.Mutable inv, ModifierEntry selected, boolean isServer) {
-    ModifierRecipe.updateInputs(inv, inputs);
-  }
 
+/* JEI */
 
-  /* JEI */
-
-  /** Gets a list of tools to display */
-  @Override
-  public List<ItemStack> getInputTools() {
-    if (tools == null) {
-      tools = Arrays.stream(toolRequirement.getItems()).map(stack -> IModifiableDisplay.getDisplayStack(stack.getItem())).toList();
-    }
-    return tools;
-  }
-
+/** Gets a list of tools to display */
+@Override
+public List<ItemStack> getInputTools() {
+  return Arrays.stream(toolRequirement.getItems()).map(stack -> IModifiableDisplay.getDisplayStack(stack.getItem())).toList();
+}
   @Override
   public List<ItemStack> getDisplayItems(int slot) {
     if (slot < 0 || slot >= inputs.size()) {
