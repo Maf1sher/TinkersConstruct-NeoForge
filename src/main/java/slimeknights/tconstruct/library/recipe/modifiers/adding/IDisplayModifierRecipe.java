@@ -145,7 +145,8 @@ public interface IDisplayModifierRecipe extends IModifierRecipe {
   /* Gets a copy of the stack with the given modifiers */
   static ItemStack withModifiers(ItemStack stack, int maxSize, List<ModifierEntry> modifierList, Consumer<ModDataNBT> persistentDataConsumer) {
     ItemStack output = stack.copyWithCount(Math.min(stack.getMaxStackSize(), maxSize));
-    CompoundTag nbt = new CompoundTag();
+    CustomData existingData = output.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+    CompoundTag nbt = existingData.copyTag();
 
     // build modifiers list
     // go through the builder to ensure they are merged properly
@@ -155,12 +156,15 @@ public interface IDisplayModifierRecipe extends IModifierRecipe {
     nbt.put(ToolStack.TAG_MODIFIERS, list);
 
     // build persistent and volatile NBT
-    CompoundTag persistentNBT = new CompoundTag();
+    CompoundTag persistentNBT = nbt.contains(ToolStack.TAG_PERSISTENT_MOD_DATA, net.minecraft.nbt.Tag.TAG_COMPOUND) ? nbt.getCompound(ToolStack.TAG_PERSISTENT_MOD_DATA).copy() : new CompoundTag();
     ModDataNBT persistentData = ModDataNBT.readFromNBT(persistentNBT);
     CompoundTag volatileNBT = new CompoundTag();
     ToolDataNBT volatileData = ToolDataNBT.readFromNBT(volatileNBT);
     persistentDataConsumer.accept(persistentData);
-    ToolRebuildContext context = new ToolRebuildContext(stack.getItem(), ToolDefinition.EMPTY, MaterialNBT.EMPTY, modifiers, modifiers, persistentData);
+
+    // Read materials if present, otherwise EMPTY
+    MaterialNBT materials = MaterialNBT.readFromNBT(nbt.get(ToolStack.TAG_MATERIALS));
+    ToolRebuildContext context = new ToolRebuildContext(stack.getItem(), ToolDefinition.EMPTY, materials, modifiers, modifiers, persistentData);
     for (ModifierEntry entry : modifiers.getModifiers()) {
       entry.getHook(ModifierHooks.VOLATILE_DATA).addVolatileData(context, entry, volatileData);
     }
