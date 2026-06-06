@@ -28,7 +28,8 @@
       }
     },
     "icon": {
-      "item": "tconstruct:pick_head"
+      "item": "tconstruct:pick_head",
+      "nbt": "{Material:\"tconstruct:ui_render#extra_large\"}"
     }
   },
   {
@@ -41,7 +42,8 @@
       }
     },
     "icon": {
-      "item": "tconstruct:bow_limb"
+      "item": "tconstruct:bow_limb",
+      "nbt": "{Material:\"tconstruct:ui_render#handle\"}"
     }
   },
   {
@@ -54,7 +56,8 @@
       }
     },
     "icon": {
-      "item": "tconstruct:arrow_head"
+      "item": "tconstruct:arrow_head",
+      "nbt": "{Material:\"tconstruct:ui_render#head\"}"
     }
   },
   {
@@ -74,7 +77,8 @@
       }
     },
     "icon": {
-      "item": "tconstruct:leggings_plating"
+      "item": "tconstruct:leggings_plating",
+      "nbt": "{Material:\"tconstruct:ui_render#large\"}"
     }
   },
   {
