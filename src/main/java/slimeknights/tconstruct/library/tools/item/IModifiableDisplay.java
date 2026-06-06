@@ -2,6 +2,11 @@ package slimeknights.tconstruct.library.tools.item;
 
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import slimeknights.tconstruct.library.materials.MaterialRegistry;
+import slimeknights.tconstruct.library.materials.definition.IMaterial;
+import slimeknights.tconstruct.library.materials.stats.MaterialStatsId;
+import slimeknights.tconstruct.library.tools.part.IMaterialItem;
+import slimeknights.tconstruct.library.tools.part.IToolPart;
 
 /**
  * Interface for tools to display in books and other similar contexts
@@ -16,14 +21,29 @@ public interface IModifiableDisplay extends IModifiable, ITinkerStationDisplay {
 
   /** Helper method to convert an item into its display tool, if it uses this interface */
   static ItemStack getDisplayStack(Item item) {
-    return item instanceof IModifiableDisplay display ? display.getRenderTool() : new ItemStack(item);
+    if (item instanceof IModifiableDisplay display) {
+      return display.getRenderTool();
+    }
+    return getDisplayStack(new ItemStack(item));
   }
 
   /** Helper method to convert a stack into its display tool, if it uses this interface */
   static ItemStack getDisplayStack(ItemStack stack) {
-    if (stack.getItem() instanceof IModifiableDisplay display) {
+    Item item = stack.getItem();
+    if (item instanceof IModifiableDisplay display) {
       ItemStack tool = display.getRenderTool();
       return stack.getCount() > 1 ? tool.copyWithCount(stack.getCount()) : tool;
+    }
+    // Handle parts and other material items
+    if (item instanceof IMaterialItem materialItem && materialItem.getMaterial(stack).equals(IMaterial.UNKNOWN_ID)) {
+      if (MaterialRegistry.isFullyLoaded()) {
+        MaterialStatsId statId = (materialItem instanceof IToolPart toolPart) ? toolPart.getStatType() : null;
+        IMaterial material = statId != null ? MaterialRegistry.firstWithStatType(statId) : MaterialRegistry.getInstance().getVisibleMaterials().stream().findFirst().orElse(null);
+        if (material != null) {
+          ItemStack result = materialItem.withMaterial(material.getIdentifier());
+          return stack.getCount() > 1 ? result.copyWithCount(stack.getCount()) : result;
+        }
+      }
     }
     return stack;
   }
