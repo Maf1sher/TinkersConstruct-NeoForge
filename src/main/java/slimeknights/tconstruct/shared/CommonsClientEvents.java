@@ -11,10 +11,12 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.EventBusSubscriber.Bus;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import slimeknights.mantle.client.screen.book.element.ItemElement;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.ClientEventBase;
 import slimeknights.tconstruct.library.client.book.TinkerBook;
 import slimeknights.tconstruct.library.client.model.UniqueGuiModel;
+import slimeknights.tconstruct.library.tools.item.IModifiableDisplay;
 import slimeknights.tconstruct.library.utils.DomainDisplayName;
 import slimeknights.tconstruct.shared.client.FluidParticle;
 
@@ -32,6 +34,7 @@ public class CommonsClientEvents extends ClientEventBase {
 
   @SubscribeEvent
   static void clientSetup(final FMLClientSetupEvent event) {
+    ItemElement.ANY_TRANSFORMER = IModifiableDisplay::getDisplayStack;
     Font unicode = unicodeFontRender();
     TinkerBook.MATERIALS_AND_YOU.fontRenderer = unicode;
     TinkerBook.TINKERS_GADGETRY.fontRenderer = unicode;
