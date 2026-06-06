@@ -175,56 +175,32 @@
     "name": "upgrades",
     "data": "sections/upgrades.json",
     "icon": {
-      "item": {
-        "item": "tconstruct:creative_slot",
-        "components": {
-          "minecraft:custom_data": {
-            "slot": "upgrades"
-          }
-        }
-      }
+      "item": "tconstruct:creative_slot",
+      "nbt": "{slot:\"upgrades\"}"
     }
   },
   {
     "name": "defense",
     "data": "sections/defense.json",
     "icon": {
-      "item": {
-        "item": "tconstruct:creative_slot",
-        "components": {
-          "minecraft:custom_data": {
-            "slot": "defense"
-          }
-        }
-      }
+      "item": "tconstruct:creative_slot",
+      "nbt": "{slot:\"defense\"}"
     }
   },
   {
     "name": "slotless",
     "data": "sections/slotless.json",
     "icon": {
-      "item": {
-        "item": "tconstruct:creative_slot",
-        "components": {
-          "minecraft:custom_data": {
-            "slot": "slotless"
-          }
-        }
-      }
+      "item": "tconstruct:creative_slot",
+      "nbt": "{slot:\"slotless\"}"
     }
   },
   {
     "name": "abilities",
     "data": "sections/abilities.json",
     "icon": {
-      "item": {
-        "item": "tconstruct:creative_slot",
-        "components": {
-          "minecraft:custom_data": {
-            "slot": "abilities"
-          }
-        }
-      }
+      "item": "tconstruct:creative_slot",
+      "nbt": "{slot:\"abilities\"}"
     }
   }
 ]
