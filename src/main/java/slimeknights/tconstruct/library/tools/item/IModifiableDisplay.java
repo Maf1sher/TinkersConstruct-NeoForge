@@ -4,10 +4,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import slimeknights.tconstruct.library.materials.MaterialRegistry;
 import slimeknights.tconstruct.library.materials.definition.IMaterial;
-import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
-import slimeknights.tconstruct.library.tools.helper.ToolBuildHandler;
+import slimeknights.tconstruct.library.materials.stats.MaterialStatsId;
 import slimeknights.tconstruct.library.tools.SlotType;
 import slimeknights.tconstruct.library.tools.part.IMaterialItem;
+import slimeknights.tconstruct.library.tools.part.IToolPart;
 import slimeknights.tconstruct.tools.item.CreativeSlotItem;
 
 /**
@@ -41,12 +41,15 @@ public interface IModifiableDisplay extends IModifiable, ITinkerStationDisplay {
       ItemStack result = CreativeSlotItem.withSlot(stack.copy(), SlotType.UPGRADE);
       return stack.getCount() > 1 ? result.copyWithCount(stack.getCount()) : result;
     }
-    // Handle parts and other material items — use ui_render materials for display
+    // Handle parts and other material items
     if (item instanceof IMaterialItem materialItem && materialItem.getMaterial(stack).equals(IMaterial.UNKNOWN_ID)) {
       if (MaterialRegistry.isFullyLoaded()) {
-        MaterialVariantId renderMaterial = ToolBuildHandler.getRenderMaterial(0);
-        ItemStack result = materialItem.withMaterial(renderMaterial);
-        return stack.getCount() > 1 ? result.copyWithCount(stack.getCount()) : result;
+        MaterialStatsId statId = (materialItem instanceof IToolPart toolPart) ? toolPart.getStatType() : null;
+        IMaterial material = statId != null ? MaterialRegistry.firstWithStatType(statId) : MaterialRegistry.getInstance().getVisibleMaterials().stream().findFirst().orElse(null);
+        if (material != null) {
+          ItemStack result = materialItem.withMaterial(material.getIdentifier());
+          return stack.getCount() > 1 ? result.copyWithCount(stack.getCount()) : result;
+        }
       }
     }
     return stack;
