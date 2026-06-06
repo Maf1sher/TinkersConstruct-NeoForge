@@ -1,7 +1,11 @@
 package slimeknights.tconstruct.library.tools.item;
 
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import slimeknights.tconstruct.library.materials.MaterialRegistry;
 import slimeknights.tconstruct.library.materials.definition.IMaterial;
 import slimeknights.tconstruct.library.materials.stats.MaterialStatsId;
@@ -33,6 +37,11 @@ public interface IModifiableDisplay extends IModifiable, ITinkerStationDisplay {
   static ItemStack getDisplayStack(ItemStack stack) {
     Item item = stack.getItem();
     if (item instanceof IModifiableDisplay display) {
+      // Don't override tools that already have material data (e.g., from material pages)
+      CompoundTag nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+      if (nbt.contains("tic_materials", Tag.TAG_LIST)) {
+        return stack;
+      }
       ItemStack tool = display.getRenderTool();
       return stack.getCount() > 1 ? tool.copyWithCount(stack.getCount()) : tool;
     }
