@@ -2,8 +2,10 @@ package slimeknights.tconstruct.library.tools.item;
 
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.materials.MaterialRegistry;
 import slimeknights.tconstruct.library.materials.definition.IMaterial;
+import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 import slimeknights.tconstruct.library.materials.stats.MaterialStatsId;
 import slimeknights.tconstruct.library.tools.SlotType;
 import slimeknights.tconstruct.library.tools.part.IMaterialItem;
@@ -43,13 +45,34 @@ public interface IModifiableDisplay extends IModifiable, ITinkerStationDisplay {
     }
     // Handle parts and other material items
     if (item instanceof IMaterialItem materialItem && materialItem.getMaterial(stack).equals(IMaterial.UNKNOWN_ID)) {
-      if (MaterialRegistry.isFullyLoaded()) {
-        MaterialStatsId statId = (materialItem instanceof IToolPart toolPart) ? toolPart.getStatType() : null;
-        IMaterial material = statId != null ? MaterialRegistry.firstWithStatType(statId) : MaterialRegistry.getInstance().getVisibleMaterials().stream().findFirst().orElse(null);
-        if (material != null) {
-          ItemStack result = materialItem.withMaterial(material.getIdentifier());
-          return stack.getCount() > 1 ? result.copyWithCount(stack.getCount()) : result;
+      MaterialStatsId statId = (materialItem instanceof IToolPart toolPart) ? toolPart.getStatType() : null;
+      MaterialVariantId renderMaterial = null;
+      if (statId != null) {
+        if (statId.equals(new MaterialStatsId(TConstruct.MOD_ID, "head"))) {
+          renderMaterial = MaterialVariantId.create(TConstruct.MOD_ID, "ui_render", "head");
+        } else if (statId.equals(new MaterialStatsId(TConstruct.MOD_ID, "handle"))) {
+          renderMaterial = MaterialVariantId.create(TConstruct.MOD_ID, "ui_render", "handle");
+        } else if (statId.equals(new MaterialStatsId(TConstruct.MOD_ID, "extra"))) {
+          renderMaterial = MaterialVariantId.create(TConstruct.MOD_ID, "ui_render", "extra");
+        } else if (statId.equals(new MaterialStatsId(TConstruct.MOD_ID, "large"))) {
+          renderMaterial = MaterialVariantId.create(TConstruct.MOD_ID, "ui_render", "large");
+        } else if (statId.equals(new MaterialStatsId(TConstruct.MOD_ID, "extra_large"))) {
+          renderMaterial = MaterialVariantId.create(TConstruct.MOD_ID, "ui_render", "extra_large");
         }
+      }
+      
+      if (renderMaterial == null) {
+        if (MaterialRegistry.isFullyLoaded()) {
+          IMaterial material = statId != null ? MaterialRegistry.firstWithStatType(statId) : MaterialRegistry.getInstance().getVisibleMaterials().stream().findFirst().orElse(null);
+          if (material != null) {
+            renderMaterial = material.getIdentifier();
+          }
+        }
+      }
+
+      if (renderMaterial != null) {
+        ItemStack result = materialItem.withMaterial(renderMaterial);
+        return stack.getCount() > 1 ? result.copyWithCount(stack.getCount()) : result;
       }
     }
     return stack;
