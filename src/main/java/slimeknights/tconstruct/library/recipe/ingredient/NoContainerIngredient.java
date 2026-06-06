@@ -46,6 +46,7 @@ public class NoContainerIngredient extends NestedIngredient {
   public static final MapCodec<NoContainerIngredient> CODEC = new MapCodec<>() {
     private static final String MATCH = "match";
     private static final String TYPE = "type";
+    private static final String CHILDREN = "children";
 
     @Override
     public <T> Stream<T> keys(DynamicOps<T> ops) {
@@ -58,11 +59,16 @@ public class NoContainerIngredient extends NestedIngredient {
       if (match != null) {
         return Ingredient.CODEC_NONEMPTY.parse(ops, match).map(NoContainerIngredient::new);
       }
+      // handle "children" key used by TCon's compound ingredient format
+      T children = input.get(CHILDREN);
+      if (children != null) {
+        return Ingredient.CODEC_NONEMPTY.parse(ops, children).map(NoContainerIngredient::new);
+      }
       return Ingredient.CODEC_NONEMPTY.parse(ops, ops.createMap(input.entries().filter(entry -> {
         DataResult<String> key = ops.getStringValue(entry.getFirst());
         return key.result().filter(name -> name.equals(MATCH) || name.equals(TYPE)).isEmpty();
       })))
-                                            .map(NoContainerIngredient::new);
+        .map(NoContainerIngredient::new);
     }
 
     @Override
