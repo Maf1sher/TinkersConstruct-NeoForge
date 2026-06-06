@@ -5,8 +5,10 @@ import net.minecraft.world.item.ItemStack;
 import slimeknights.tconstruct.library.materials.MaterialRegistry;
 import slimeknights.tconstruct.library.materials.definition.IMaterial;
 import slimeknights.tconstruct.library.materials.stats.MaterialStatsId;
+import slimeknights.tconstruct.library.tools.SlotType;
 import slimeknights.tconstruct.library.tools.part.IMaterialItem;
 import slimeknights.tconstruct.library.tools.part.IToolPart;
+import slimeknights.tconstruct.tools.item.CreativeSlotItem;
 
 /**
  * Interface for tools to display in books and other similar contexts
@@ -33,6 +35,11 @@ public interface IModifiableDisplay extends IModifiable, ITinkerStationDisplay {
     if (item instanceof IModifiableDisplay display) {
       ItemStack tool = display.getRenderTool();
       return stack.getCount() > 1 ? tool.copyWithCount(stack.getCount()) : tool;
+    }
+    // Handle creative slots
+    if (item instanceof CreativeSlotItem && CreativeSlotItem.getSlot(stack) == null) {
+      ItemStack result = CreativeSlotItem.withSlot(stack.copy(), SlotType.UPGRADE);
+      return stack.getCount() > 1 ? result.copyWithCount(stack.getCount()) : result;
     }
     // Handle parts and other material items
     if (item instanceof IMaterialItem materialItem && materialItem.getMaterial(stack).equals(IMaterial.UNKNOWN_ID)) {
