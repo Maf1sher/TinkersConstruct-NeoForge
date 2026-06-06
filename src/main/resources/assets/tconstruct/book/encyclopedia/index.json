@@ -176,7 +176,7 @@
     "data": "sections/upgrades.json",
     "icon": {
       "item": "tconstruct:creative_slot",
-      "nbt": "{slot:\"upgrades\"}"
+      "nbt": {"slot": "upgrades"}
     }
   },
   {
@@ -184,7 +184,7 @@
     "data": "sections/defense.json",
     "icon": {
       "item": "tconstruct:creative_slot",
-      "nbt": "{slot:\"defense\"}"
+      "nbt": {"slot": "defense"}
     }
   },
   {
@@ -192,7 +192,7 @@
     "data": "sections/slotless.json",
     "icon": {
       "item": "tconstruct:creative_slot",
-      "nbt": "{slot:\"slotless\"}"
+      "nbt": {"slot": "slotless"}
     }
   },
   {
@@ -200,7 +200,7 @@
     "data": "sections/abilities.json",
     "icon": {
       "item": "tconstruct:creative_slot",
-      "nbt": "{slot:\"abilities\"}"
+      "nbt": {"slot": "abilities"}
     }
   }
 ]
