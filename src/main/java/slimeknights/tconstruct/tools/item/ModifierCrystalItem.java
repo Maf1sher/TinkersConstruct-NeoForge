@@ -16,6 +16,7 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import slimeknights.mantle.command.MantleCommand;
 import slimeknights.mantle.fluid.FluidTransferHelper;
+import org.apache.logging.log4j.Logger;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.TinkerTags.Modifiers;
@@ -39,6 +40,8 @@ public class ModifierCrystalItem extends Item {
   private static final Component TOOLTIP_APPLY = TConstruct.makeTranslation("item", "modifier_crystal.tooltip").withStyle(ChatFormatting.GRAY);
   private static final String MODIFIER_KEY = TConstruct.makeTranslationKey("item", "modifier_crystal.modifier_id");
   private static final String TAG_MODIFIER = "modifier";
+  private static final Logger LOG = TConstruct.LOG;
+
   public ModifierCrystalItem(Properties props) {
     super(props);
   }
@@ -175,7 +178,9 @@ public class ModifierCrystalItem extends Item {
   /** Creates a stack with the given modifier */
   public static ItemStack withModifier(ModifierId modifier, int count) {
     ItemStack stack = new ItemStack(TinkerModifiers.modifierCrystal.get(), count);
-    CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.putString(TAG_MODIFIER, modifier.toString()));
+    CompoundTag tag = new CompoundTag();
+    tag.putString(TAG_MODIFIER, modifier.toString());
+    stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
     return stack;
   }
 
@@ -190,8 +195,15 @@ public class ModifierCrystalItem extends Item {
     CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
     if (customData != null) {
       CompoundTag tag = customData.copyTag();
-      return ModifierId.tryParse(tag.getString(TAG_MODIFIER));
+      String modifierStr = tag.getString(TAG_MODIFIER);
+      if (modifierStr.isEmpty()) {
+        LOG.warn("ModifierCrystalItem: CUSTOM_DATA found but no '{}' key in tag", TAG_MODIFIER);
+        return null;
+      }
+      return ModifierId.tryParse(modifierStr);
     }
+    LOG.warn("ModifierCrystalItem: stack has no CUSTOM_DATA component. Stack: item={}, count={}, components={}",
+      stack.getItem(), stack.getCount(), stack.getComponents());
     return null;
   }
 

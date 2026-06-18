@@ -309,12 +309,12 @@ public class ToolClientEvents extends ClientEventBase {
         int color = ResourceColorManager.getColor(Util.makeTranslationKey("modifier", modifier.location()));
         // fallback to amber if color is white (unregistered modifier or missing color entry)
         if (color == -1) {
-          return 0xFFC070;
+          return 0xFF0000;
         }
         return color;
       }
-      // diagnostic: bright magenta for broken crystal items (missing modifier data)
-      return 0xFF00FF;
+      // diagnostic: modifier data is missing from the item stack
+      return 0x00FF00;
     }, TinkerModifiers.modifierCrystal);
   }
 
