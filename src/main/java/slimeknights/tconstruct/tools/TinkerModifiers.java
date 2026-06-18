@@ -1078,6 +1078,6 @@ public final class TinkerModifiers extends TinkerModule {
     output.accept(cobaltReinforcement);
     output.accept(obsidianReinforcement);
     creativeSlotItem.get().addVariants(output::accept);
-    // modifier crystal is handled by tool parts tab
+    // modifier crystal is obtained through JEI modifier recipes
   }
 }

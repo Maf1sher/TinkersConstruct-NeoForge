@@ -26,7 +26,6 @@ import slimeknights.tconstruct.library.tools.part.block.MaterialBlockEntity;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import slimeknights.tconstruct.tools.item.FakeIngotItem;
 import slimeknights.tconstruct.tools.item.FakeStorageBlockItem;
-import slimeknights.tconstruct.tools.item.ModifierCrystalItem;
 import slimeknights.tconstruct.tools.item.RepairKitItem;
 import slimeknights.tconstruct.tools.stats.GripMaterialStats;
 import slimeknights.tconstruct.tools.stats.HandleMaterialStats;
@@ -137,9 +136,6 @@ public final class TinkerToolParts extends TinkerModule {
     }
     accept(output, maille);
     accept(output, shieldCore);
-
-    // end with modifier crystal dynamic listing
-    ModifierCrystalItem.addVariants(output);
   }
 
   /** Adds a tool part to the tab */

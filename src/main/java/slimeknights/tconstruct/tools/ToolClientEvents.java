@@ -107,9 +107,6 @@ public class ToolClientEvents extends ClientEventBase {
     ModifierManager.INSTANCE.getAllValues().forEach(modifier -> modifier.clearCache(PackType.CLIENT_RESOURCES));
   };
 
-  /** Diagnostic counter for modifier crystal color logging */
-  private static final java.util.concurrent.atomic.AtomicInteger DEBUG_CRYSTAL_COLOR_LOG = new java.util.concurrent.atomic.AtomicInteger(0);
-
   @SubscribeEvent
   static void addResourceListener(RegisterClientReloadListenersEvent manager) {
     ModifierModelManager.init(manager);
@@ -310,12 +307,7 @@ public class ToolClientEvents extends ClientEventBase {
       ModifierId modifier = ModifierCrystalItem.getModifier(stack);
       if (modifier != null) {
         String key = Util.makeTranslationKey("modifier", modifier.location());
-        int color = ResourceColorManager.getColor(key);
-        // diagnostic: log first 10 color lookups
-        if (DEBUG_CRYSTAL_COLOR_LOG.incrementAndGet() <= 10) {
-          TConstruct.LOG.info("[crystal_color] key={} colorHex={}", key, Integer.toHexString(color));
-        }
-        return color;
+        return ResourceColorManager.getColor(key);
       }
       return -1;
     }, TinkerModifiers.modifierCrystal);
