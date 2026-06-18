@@ -306,15 +306,9 @@ public class ToolClientEvents extends ClientEventBase {
     event.register((stack, index) -> {
       ModifierId modifier = ModifierCrystalItem.getModifier(stack);
       if (modifier != null) {
-        int color = ResourceColorManager.getColor(Util.makeTranslationKey("modifier", modifier.location()));
-        // fallback to amber if color is white (unregistered modifier or missing color entry)
-        if (color == -1) {
-          return 0xFF0000;
-        }
-        return color;
+        return ResourceColorManager.getColor(Util.makeTranslationKey("modifier", modifier.location()));
       }
-      // diagnostic: modifier data is missing from the item stack
-      return 0x00FF00;
+      return -1;
     }, TinkerModifiers.modifierCrystal);
   }
 
