@@ -927,6 +927,7 @@ java {
 }
 
 sourcesJar {
+    enabled = false
     dependsOn tasks.named('syncModernDataPackPaths')
     exclude 'assets/**'
     exclude 'data/**'
