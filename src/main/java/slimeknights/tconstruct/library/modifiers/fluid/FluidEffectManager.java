@@ -72,10 +72,16 @@ public class FluidEffectManager extends SimpleJsonResourceReloadListener {
 
   /** Evaluates conditions from JSON using ICondition.LIST_CODEC, replacing removed CraftingHelper.processConditions */
   private static boolean processConditions(JsonObject json, String memberName, IContext conditionContext) {
-    if (!json.has(memberName)) {
+    // check both NeoForge and legacy Forge condition keys
+    if (!json.has(memberName) && !json.has("neoforge:conditions")) {
       return true;
     }
-    JsonArray conditionsArray = json.getAsJsonArray(memberName);
+    JsonArray conditionsArray;
+    if (json.has("neoforge:conditions")) {
+      conditionsArray = json.getAsJsonArray("neoforge:conditions");
+    } else {
+      conditionsArray = json.getAsJsonArray(memberName);
+    }
     List<ICondition> conditions = ICondition.LIST_CODEC.parse(JsonOps.INSTANCE, conditionsArray)
       .getOrThrow(msg -> new RuntimeException("Failed to parse conditions: " + msg));
     for (ICondition condition : conditions) {

@@ -48,6 +48,7 @@ public class FluidEffectInjectingTransformer extends BookTransformer {
       // setup the index
       List<FluidEffects.Entry> effects = FluidEffectManager.INSTANCE.getFluids();
       if (effects.isEmpty()) {
+        TConstruct.LOG.warn("No fluid effects data available when building encyclopedia page. Player may need to join a world to sync data.");
         return;
       }
 
