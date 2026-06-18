@@ -21,6 +21,7 @@ import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.registration.CastItemObject;
 import slimeknights.tconstruct.library.tools.part.MaterialItem;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
+import slimeknights.tconstruct.tools.TinkerModifiers;
 import slimeknights.tconstruct.tools.TinkerToolParts;
 import slimeknights.tconstruct.world.TinkerWorld;
 
@@ -131,6 +132,9 @@ public class TinkerItemModelProvider extends ItemModelProvider {
     generated(TinkerWorld.knightmetalCluster, "block/geode/knightmetal_cluster");
     // heads
     TinkerWorld.headItems.forEach(head -> withExistingParent(id(head).getPath(), "item/template_skull"));
+
+    // other
+    basicItem(TinkerModifiers.modifierCrystal, "materials/modifier_crystal");
   }
 
   @SuppressWarnings("deprecation") // no its not
