@@ -25,6 +25,7 @@ import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
 import slimeknights.tconstruct.library.client.GuiUtil;
 import slimeknights.tconstruct.library.recipe.partbuilder.Pattern;
+import slimeknights.tconstruct.library.tools.item.IModifiableDisplay;
 import slimeknights.tconstruct.library.tools.layout.LayoutIcon;
 import slimeknights.tconstruct.library.tools.layout.LayoutSlot;
 import slimeknights.tconstruct.library.tools.layout.StationSlotLayout;
@@ -329,6 +330,11 @@ public class TinkerStationScreen extends ToolTableScreen<TinkerStationBlockEntit
 
     ItemStack stack = icon.getValue(ItemStack.class);
     if (stack != null) {
+      // if the icon is a tool item serialized without its components (raw item ID only),
+      // use the proper render tool stack to avoid white rendering
+      if (stack.getItem() instanceof IModifiableDisplay tool) {
+        stack = tool.getRenderTool();
+      }
       graphics.renderItem(stack, x, y);
     }
   }
