@@ -45,6 +45,7 @@ public class BaseTabbedScreen<TILE extends BlockEntity, CONTAINER extends Tabbed
     super.init();
 
     this.tabsScreen = addRenderableWidget(new TinkerTabsWidget(this));
+    TinkerTabsWidget.restoreMousePos();
   }
 
   @Nullable

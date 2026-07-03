@@ -20,6 +20,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.tuple.Pair;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.glfw.GLFW;
 import slimeknights.mantle.client.screen.ElementScreen;
 import slimeknights.mantle.client.screen.TabsWidget;
 import slimeknights.tconstruct.TConstruct;
@@ -29,6 +31,7 @@ import slimeknights.tconstruct.tables.client.inventory.BaseTabbedScreen;
 import slimeknights.tconstruct.tables.menu.TabbedContainerMenu;
 import slimeknights.tconstruct.tables.network.StationTabPacket;
 
+import java.nio.DoubleBuffer;
 import java.util.List;
 
 public class TinkerTabsWidget implements Renderable, GuiEventListener, NarratableEntry {
@@ -46,6 +49,40 @@ public class TinkerTabsWidget implements Renderable, GuiEventListener, Narratabl
   private final TabsWidget tabs;
   private final List<BlockPos> tabData;
   private final BaseTabbedScreen<?, ?> parent;
+
+  /** Saved hardware cursor position before a tab switch screen transition */
+  private static double cachedMouseX = Double.NaN;
+  private static double cachedMouseY = Double.NaN;
+
+  /** Saves the current hardware cursor position for restoration after a screen transition */
+  public static void saveCurrentMousePos() {
+    long window = Minecraft.getInstance().getWindow().getWindow();
+    DoubleBuffer xBuf = BufferUtils.createDoubleBuffer(1);
+    DoubleBuffer yBuf = BufferUtils.createDoubleBuffer(1);
+    GLFW.glfwGetCursorPos(window, xBuf, yBuf);
+    cachedMouseX = xBuf.get(0);
+    cachedMouseY = yBuf.get(0);
+  }
+
+  /** Returns true if there is a saved cursor position to restore */
+  public static boolean hasSavedMousePos() {
+    return !Double.isNaN(cachedMouseX);
+  }
+
+  /** Restores the saved cursor position and clears it */
+  public static void restoreMousePos() {
+    if (hasSavedMousePos()) {
+      long window = Minecraft.getInstance().getWindow().getWindow();
+      GLFW.glfwSetCursorPos(window, cachedMouseX, cachedMouseY);
+      clearSavedMousePos();
+    }
+  }
+
+  /** Clears the saved cursor position */
+  public static void clearSavedMousePos() {
+    cachedMouseX = Double.NaN;
+    cachedMouseY = Double.NaN;
+  }
 
   public TinkerTabsWidget(BaseTabbedScreen<?, ?> parent) {
     this.parent = parent;
@@ -97,6 +134,9 @@ public class TinkerTabsWidget implements Renderable, GuiEventListener, Narratabl
   }
 
   private void onNewTabSelection(BlockPos pos) {
+    // save cursor position before screen transition so we can restore it after the new screen opens
+    saveCurrentMousePos();
+
     Level level = this.parent.getMinecraft().level;
 
     if (level != null) {
