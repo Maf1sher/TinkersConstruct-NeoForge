@@ -105,8 +105,12 @@ public class ModifiableCrossbowItem extends ModifiableLauncherItem {
 
   @Override
   public UseAnim getUseAnimation(ItemStack stack) {
-    // crossbow is superhardcoded to crossbows, so use none and rely on the model
-    return ModifierUtil.blockWhileCharging(ToolStack.from(stack), UseAnim.NONE);
+    ToolStack tool = ToolStack.from(stack);
+    // if this tool also has shield blocking, let that take priority
+    if (ModifierUtil.canPerformAction(tool, ItemAbilities.SHIELD_BLOCK)) {
+      return ModifierUtil.blockWhileCharging(tool, UseAnim.NONE);
+    }
+    return ModifierUtil.blockWhileCharging(tool, UseAnim.CROSSBOW);
   }
 
   @Override

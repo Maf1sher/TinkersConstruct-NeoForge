@@ -67,6 +67,11 @@ public class TinkerItemProperties {
       if (anim != UseAnim.EAT && anim != UseAnim.DRINK) {
         return ModifierUtil.checkPersistentPresent(stack, ModifiableLauncherItem.KEY_DRAWBACK_AMMO) ? 1.5f : 1;
       }
+      // shield blocking fallback: if the item can block but getUseAnimation returned NONE
+      // (e.g. server sync clobbered persistent data), show the blocking model anyway
+      if (stack.canPerformAction(ItemAbilities.SHIELD_BLOCK)) {
+        return 2;
+      }
     }
     return 0;
   };

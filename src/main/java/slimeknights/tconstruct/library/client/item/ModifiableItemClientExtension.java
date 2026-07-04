@@ -57,6 +57,7 @@ public class ModifiableItemClientExtension implements IClientItemExtensions {
           applyItemArmTransform(poseStack, equipProgress, sideOffset);
           break;
 
+        case CROSSBOW:
         case BOW:
           applyItemArmTransform(poseStack, equipProgress, sideOffset);
           poseStack.translate(sideOffset * -0.2785682f, 0.18344387f, 0.15731531f);
