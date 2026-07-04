@@ -2,6 +2,16 @@
   "parent": "neoforge:item/default-tool",
   "gui_light": "front",
   "display": {
+    "firstperson_righthand": {
+      "rotation": [ -90, 0, -55 ],
+      "translation": [ 0.5, 2.0, 0.5 ],
+      "scale": [ 0.68, 0.68, 0.68 ]
+    },
+    "firstperson_lefthand": {
+      "rotation": [ -90, 0, 35 ],
+      "translation": [ 0.5, 2.0, 0.5 ],
+      "scale": [ 0.68, 0.68, 0.68 ]
+    },
     "tconstruct:thrown": {
       "rotation": [ 0, 180, 290 ],
       "scale": [ 1, 1, 1 ],

@@ -21,10 +21,12 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.AbstractArrow.Pickup;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.ChargedProjectiles;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
@@ -287,6 +289,7 @@ public class ModifiableCrossbowItem extends ModifiableLauncherItem {
 
       // clear the ammo, damage the bow
       tool.getPersistentData().remove(KEY_CROSSBOW_AMMO);
+      living.getItemInHand(hand).remove(DataComponents.CHARGED_PROJECTILES);
       ToolDamageUtil.damageAnimated(tool, damage, living, hand);
 
       // stats
@@ -322,6 +325,7 @@ public class ModifiableCrossbowItem extends ModifiableLauncherItem {
       if (!level.isClientSide) {
         CompoundTag ammoNBT = (CompoundTag) ammo.saveOptional(level.registryAccess());
         persistentData.put(KEY_CROSSBOW_AMMO, ammoNBT);
+        bow.set(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.of(ammo));
         // if the crossbow broke during loading, fire immediately
         if (tool.isBroken()) {
           fireCrossbow(tool, living, player != null && player.getAbilities().instabuild, living.getUsedItemHand(), ammoNBT);
