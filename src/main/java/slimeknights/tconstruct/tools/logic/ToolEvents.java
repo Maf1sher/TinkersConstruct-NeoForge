@@ -34,6 +34,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
@@ -76,6 +77,8 @@ import slimeknights.tconstruct.library.tools.helper.ArmorUtil;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
 import slimeknights.tconstruct.library.tools.helper.ToolAttackUtil;
 import slimeknights.tconstruct.library.tools.helper.ToolDamageUtil;
+import slimeknights.tconstruct.library.tools.helper.ToolHarvestLogic;
+import slimeknights.tconstruct.library.tools.item.ModifiableItem;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ModifierNBT;
@@ -94,6 +97,28 @@ import java.util.Objects;
  */
 @EventBusSubscriber(modid = TConstruct.MOD_ID)
 public class ToolEvents {
+  /** Guard to prevent re-entry when handleBlockBreak fires its own BreakEvent for AoE blocks */
+  private static final ThreadLocal<Boolean> HANDLING_BREAK = ThreadLocal.withInitial(() -> false);
+
+  @SubscribeEvent
+  static void onBlockBreak(BlockEvent.BreakEvent event) {
+    if (HANDLING_BREAK.get()) {
+      return;
+    }
+    Player player = event.getPlayer();
+    ItemStack stack = player.getMainHandItem();
+    if (stack.getItem() instanceof ModifiableItem) {
+      HANDLING_BREAK.set(true);
+      try {
+        if (ToolHarvestLogic.handleBlockBreak(stack, event.getPos().immutable(), player)) {
+          event.setCanceled(true);
+        }
+      } finally {
+        HANDLING_BREAK.remove();
+      }
+    }
+  }
+
   @SuppressWarnings("removal")
   @SubscribeEvent
   static void onBreakSpeed(PlayerEvent.BreakSpeed event) {

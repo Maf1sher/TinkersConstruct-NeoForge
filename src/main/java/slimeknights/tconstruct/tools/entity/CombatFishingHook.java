@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -111,6 +112,20 @@ public class CombatFishingHook extends FishingHook implements ProjectileWithKnoc
     builder.define(GRAPPLE, (byte) GrappleType.NONE.ordinal());
     builder.define(COLLECTING, false);
     builder.define(MATERIAL, IMaterial.UNKNOWN_ID);
+  }
+
+  @Override
+  public void recreateFromPacket(ClientboundAddEntityPacket packet) {
+    if (this.getPlayerOwner() == null) {
+      int i = packet.getData();
+      if (i > 0) {
+        Entity entity = this.level().getEntity(i);
+        if (entity instanceof Player player) {
+          this.setOwner(player);
+        }
+      }
+    }
+    super.recreateFromPacket(packet);
   }
 
   /** Gets the currently displayed material */
