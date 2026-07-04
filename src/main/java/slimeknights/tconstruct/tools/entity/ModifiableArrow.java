@@ -55,11 +55,11 @@ public class ModifiableArrow extends AbstractArrow implements ToolProjectile, Re
   }
 
   public ModifiableArrow(Level level, double pX, double pY, double pZ) {
-    super(TinkerTools.materialArrow.get(), pX, pY, pZ, level, ItemStack.EMPTY, null);
+    super(TinkerTools.materialArrow.get(), pX, pY, pZ, level, new ItemStack(Items.ARROW), null);
   }
 
   public ModifiableArrow(Level level, LivingEntity shooter) {
-    super(TinkerTools.materialArrow.get(), shooter, level, ItemStack.EMPTY, null);
+    super(TinkerTools.materialArrow.get(), shooter, level, new ItemStack(Items.ARROW), null);
   }
 
   @Override
