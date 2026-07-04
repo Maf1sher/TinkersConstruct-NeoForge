@@ -7,6 +7,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import slimeknights.mantle.util.sync.LambdaDataSlot;
@@ -58,6 +59,7 @@ public class ModifierWorktableContainerMenu extends TabbedContainerMenu<Modifier
 
     // add armor and offhand slots, for convenience
     for (ArmorItem.Type slotType : ArmorItem.Type.values()) {
+      if (slotType.getSlot().getType() != EquipmentSlot.Type.HUMANOID_ARMOR) continue;
       this.addSlot(new ArmorSlot(inv, slotType.getSlot(), 152, 16 + slotType.ordinal() * 18));
     }
     this.addSlot(new Slot(inv, 40, 132, 70).setBackground(InventoryMenu.BLOCK_ATLAS, InventoryMenu.EMPTY_ARMOR_SLOT_SHIELD));
