@@ -673,6 +673,9 @@ public class ToolStack implements IToolStackView {
         markDirty();
         persistentModData = ToolDataNBT.readFromNBT(tag);
       }
+      // in 1.21+, copyTag() returns a copy, so modifications to nbt don't automatically flow back
+      // to the ItemStack's CUSTOM_DATA component. this callback ensures we sync on every write.
+      persistentModData.setDirtyCallback(this::markDirty);
     }
     return persistentModData;
   }

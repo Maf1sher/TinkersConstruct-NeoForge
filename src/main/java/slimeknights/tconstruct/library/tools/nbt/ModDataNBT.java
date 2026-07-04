@@ -1,13 +1,14 @@
 package slimeknights.tconstruct.library.tools.nbt;
 
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 
+import javax.annotation.Nullable;
 import java.util.function.BiFunction;
 
 /**
@@ -15,12 +16,32 @@ import java.util.function.BiFunction;
  * On a typical tool, there are two copies of this class, one for persistent data, and one that rebuilds when the modifiers refresh.
  * Note unlike other NBT classes, the data inside this one is mutable as most of it is directly used by the tools.
  */
-@EqualsAndHashCode
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class ModDataNBT implements IModDataView {
   /** Compound representing modifier data */
   @Getter(AccessLevel.PROTECTED)
+  @EqualsAndHashCode.Include
   private final CompoundTag data;
+
+  /** Callback invoked when data is modified, used to sync back to the source ItemStack via DataComponents */
+  @Nullable
+  private Runnable dirtyCallback;
+
+  /**
+   * Sets a callback to be invoked when this data is modified.
+   * Used in 1.21+ to sync changes back to the ItemStack's CUSTOM_DATA component.
+   */
+  public void setDirtyCallback(@Nullable Runnable callback) {
+    this.dirtyCallback = callback;
+  }
+
+  /** Invokes the dirty callback if set */
+  protected void onDataModified() {
+    if (dirtyCallback != null) {
+      dirtyCallback.run();
+    }
+  }
 
   /**
    * Creates a new mod data containing empty data
@@ -51,6 +72,7 @@ public class ModDataNBT implements IModDataView {
    */
   public void put(ResourceLocation name, Tag nbt) {
     data.put(name.toString(), nbt);
+    onDataModified();
   }
 
   /**
@@ -60,6 +82,7 @@ public class ModDataNBT implements IModDataView {
    */
   public void putInt(ResourceLocation name, int value) {
     data.putInt(name.toString(), value);
+    onDataModified();
   }
 
   /**
@@ -69,6 +92,7 @@ public class ModDataNBT implements IModDataView {
    */
   public void putBoolean(ResourceLocation name, boolean value) {
     data.putBoolean(name.toString(), value);
+    onDataModified();
   }
 
   /**
@@ -78,6 +102,7 @@ public class ModDataNBT implements IModDataView {
    */
   public void putFloat(ResourceLocation name, float value) {
     data.putFloat(name.toString(), value);
+    onDataModified();
   }
 
   /**
@@ -87,6 +112,7 @@ public class ModDataNBT implements IModDataView {
    */
   public void putString(ResourceLocation name, String value) {
     data.putString(name.toString(), value);
+    onDataModified();
   }
 
   /**
@@ -95,6 +121,7 @@ public class ModDataNBT implements IModDataView {
    */
   public void remove(ResourceLocation name) {
     data.remove(name.toString());
+    onDataModified();
   }
 
 
@@ -112,6 +139,7 @@ public class ModDataNBT implements IModDataView {
   public void copyFrom(CompoundTag data) {
     this.data.getAllKeys().clear();
     this.data.merge(data);
+    onDataModified();
   }
 
   /**
