@@ -64,7 +64,7 @@ public class ModifiableArrow extends AbstractArrow implements ToolProjectile, Re
 
   @Override
   protected ItemStack getDefaultPickupItem() {
-    return stack.isEmpty() ? new ItemStack(Items.ARROW) : stack.copy();
+    return stack == null || stack.isEmpty() ? new ItemStack(Items.ARROW) : stack.copy();
   }
 
 
