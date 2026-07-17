@@ -60,9 +60,9 @@ public class CraftingStationBlockEntity extends RetexturedTableBlockEntity imple
 
   /* Crafting */
 
-  /** Creates a CraftingInput from the current crafting inventory */
-  private CraftingInput createCraftingInput() {
-    return CraftingInput.of(craftingInventory.getWidth(), craftingInventory.getHeight(), craftingInventory.getItems());
+  /** Creates a Positioned CraftingInput from the current crafting inventory, preserving the position offsets */
+  private CraftingInput.Positioned createCraftingInput() {
+    return CraftingInput.ofPositioned(craftingInventory.getWidth(), craftingInventory.getHeight(), craftingInventory.getItems());
   }
 
   @Override
@@ -78,7 +78,7 @@ public class CraftingStationBlockEntity extends RetexturedTableBlockEntity imple
       // first, try the cached recipe
       CommonHooks.setCraftingPlayer(player);
       RecipeHolder<CraftingRecipe> recipe = lastRecipe;
-      CraftingInput craftingInput = createCraftingInput();
+      CraftingInput craftingInput = createCraftingInput().input();
       // if it does not match, find a new recipe
       // note we intentionally have no player access during matches, that could lead to an unstable recipe
       if (recipe == null || !recipe.value().matches(craftingInput, this.level)) {
@@ -98,7 +98,7 @@ public class CraftingStationBlockEntity extends RetexturedTableBlockEntity imple
       CommonHooks.setCraftingPlayer(null);
     }
     else if (this.lastRecipe != null) {
-      CraftingInput craftingInput = createCraftingInput();
+      CraftingInput craftingInput = createCraftingInput().input();
       if (this.lastRecipe.value().matches(craftingInput, this.level)) {
         CommonHooks.setCraftingPlayer(player);
         result = this.lastRecipe.value().assemble(craftingInput, level.registryAccess());
@@ -118,7 +118,7 @@ public class CraftingStationBlockEntity extends RetexturedTableBlockEntity imple
     RecipeHolder<CraftingRecipe> recipe = this.lastRecipe; // local variable just to prevent race conditions if the field changes, though that is unlikely
 
     // try matches again now that we have player access
-    CraftingInput craftingInput = createCraftingInput();
+    CraftingInput craftingInput = createCraftingInput().input();
     if (recipe == null || this.level == null || !recipe.value().matches(craftingInput, level)) {
       CommonHooks.setCraftingPlayer(null);
       return ItemStack.EMPTY;
@@ -158,7 +158,7 @@ public class CraftingStationBlockEntity extends RetexturedTableBlockEntity imple
     RecipeHolder<CraftingRecipe> recipe = this.lastRecipe; // local variable just to prevent race conditions if the field changes, though that is unlikely
     // if cached recipe is null, try to find it now from the current grid contents
     if (recipe == null && this.level != null && this.level.getServer() != null) {
-      CraftingInput craftingInput = createCraftingInput();
+      CraftingInput craftingInput = createCraftingInput().input();
       recipe = this.level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftingInput, this.level).orElse(null);
       if (recipe != null) {
         this.lastRecipe = recipe;
@@ -178,29 +178,38 @@ public class CraftingStationBlockEntity extends RetexturedTableBlockEntity imple
 
     // update all slots in the inventory
     // remove remaining items
-    CraftingInput craftingInput = createCraftingInput();
+    CraftingInput.Positioned positioned = createCraftingInput();
+    CraftingInput craftingInput = positioned.input();
+    int trimLeft = positioned.left();
+    int trimTop = positioned.top();
+    int gridWidth = craftingInventory.getWidth();
     CommonHooks.setCraftingPlayer(player);
     NonNullList<ItemStack> remaining = recipe.value().getRemainingItems(craftingInput);
     CommonHooks.setCraftingPlayer(null);
-    for (int i = 0; i < remaining.size(); ++i) {
-      ItemStack original = this.getItem(i);
-      ItemStack newStack = remaining.get(i);
+    int idx = 0;
+    for (int row = 0; row < craftingInput.height(); row++) {
+      for (int col = 0; col < craftingInput.width(); col++) {
+        int gridIndex = (col + trimLeft) + (row + trimTop) * gridWidth;
+        ItemStack original = this.getItem(gridIndex);
+        ItemStack newStack = remaining.get(idx);
+        idx++;
 
-      // if empty or size 1, set directly (decreases by 1)
-      if (original.isEmpty() || original.getCount() == 1) {
-        this.setItem(i, newStack);
-      }
-      else if (ItemStack.isSameItemSameComponents(original, newStack)) {
-        // if matching, merge (decreasing by 1
-        newStack.grow(original.getCount() - 1);
-        this.setItem(i, newStack);
-      }
-      else {
-        // directly update the slot
-        this.setItem(i, original.copyWithCount(original.getCount() - 1));
-        // otherwise, drop the item as the player
-        if (!newStack.isEmpty() && !player.getInventory().add(newStack)) {
-          player.drop(newStack, false);
+        // if empty or size 1, set directly (decreases by 1)
+        if (original.isEmpty() || original.getCount() == 1) {
+          this.setItem(gridIndex, newStack);
+        }
+        else if (ItemStack.isSameItemSameComponents(original, newStack)) {
+          // if matching, merge (decreasing by 1
+          newStack.grow(original.getCount() - 1);
+          this.setItem(gridIndex, newStack);
+        }
+        else {
+          // directly update the slot
+          this.setItem(gridIndex, original.copyWithCount(original.getCount() - 1));
+          // otherwise, drop the item as the player
+          if (!newStack.isEmpty() && !player.getInventory().add(newStack)) {
+            player.drop(newStack, false);
+          }
         }
       }
     }
