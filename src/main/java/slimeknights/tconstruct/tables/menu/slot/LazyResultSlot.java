@@ -46,4 +46,9 @@ public class LazyResultSlot extends Slot {
   protected void onSwapCraft(int numItemsCrafted) {
     this.amountCrafted += numItemsCrafted;
   }
+
+  @Override
+  public boolean isFake() {
+    return true;
+  }
 }

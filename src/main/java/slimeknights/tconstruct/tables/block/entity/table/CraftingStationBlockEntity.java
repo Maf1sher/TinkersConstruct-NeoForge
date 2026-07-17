@@ -156,6 +156,14 @@ public class CraftingStationBlockEntity extends RetexturedTableBlockEntity imple
    */
   public void takeResult(Player player, ItemStack result, int amount) {
     RecipeHolder<CraftingRecipe> recipe = this.lastRecipe; // local variable just to prevent race conditions if the field changes, though that is unlikely
+    // if cached recipe is null, try to find it now from the current grid contents
+    if (recipe == null && this.level != null && this.level.getServer() != null) {
+      CraftingInput craftingInput = createCraftingInput();
+      recipe = this.level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftingInput, this.level).orElse(null);
+      if (recipe != null) {
+        this.lastRecipe = recipe;
+      }
+    }
     if (recipe == null || this.level == null) {
       return;
     }
