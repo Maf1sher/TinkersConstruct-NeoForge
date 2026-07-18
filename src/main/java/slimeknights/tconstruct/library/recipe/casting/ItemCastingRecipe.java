@@ -106,7 +106,12 @@ public class ItemCastingRecipe extends AbstractCastingRecipe implements IDisplay
 
   @Override
   public boolean matches(ICastingContainer inv, Level worldIn) {
-    return getCast().test(inv.getStack()) && fluid.test(inv.getFluid());
+    // In 1.21, Ingredient.EMPTY.test(ItemStack.EMPTY) returns false unlike Forge 1.20.
+    // For cast-less recipes (cast == Ingredient.EMPTY), match when the slot is empty.
+    Ingredient cast = getCast();
+    ItemStack stack = inv.getStack();
+    boolean castMatches = (cast == Ingredient.EMPTY) ? stack.isEmpty() : cast.test(stack);
+    return castMatches && fluid.test(inv.getFluid());
   }
 
   @Override
