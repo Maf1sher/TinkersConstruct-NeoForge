@@ -10,18 +10,30 @@ For a gameplay overview, see https://slimeknights.github.io/docs/gameplay/tinker
 
 ## Setting up a Workspace/Compiling from Source
 
-Note: Git MUST be installed and in the system path to use our scripts.
-* Setup: Import Tinkers' Construct as a Gradle project into IDEA. Let it run setup.
-* Run: Run the `gradlew genIntellijRuns` through IDEA.
-* Build: Run `gradlew build`.
-* If obscure Gradle issues are found try running `gradlew clean` and `gradlew cleanCache`
+Use a 64-bit Java 21 JDK. Build the workspace Mantle dependency first so its
+exact pinned artifact is available in the sibling `Mantle-NeoForge/build/libs`
+directory:
+
+```bash
+cd ../Mantle-NeoForge
+./gradlew build
+cd ../TinkersConstruct-NeoForge
+./gradlew tasks
+```
+
+The project uses ModDevGradle; available run and data-generation tasks are listed
+by `./gradlew tasks`. Run `./gradlew test` and `./gradlew build` after the source
+port is complete. The Java source still contains Forge 1.20.1 APIs, so a full
+Tinkers' Construct build is not expected to pass yet. The Mantle pin in
+`gradle.properties` identifies the exact workspace commit artifact and must be
+updated when the Mantle checkout changes.
 
 ## Issue reporting
 Please include the following:
 
 * Minecraft version
 * Tinkers' Construct version
-* Forge version/build
+* NeoForge version/build and Java version
 * Versions of any mods potentially related to the issue 
 * Any relevant screenshots are greatly appreciated.
 * For crashes:
