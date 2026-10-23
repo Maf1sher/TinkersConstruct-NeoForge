@@ -5,11 +5,11 @@ import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
 import slimeknights.mantle.recipe.helper.FluidOutput;
-import slimeknights.mantle.recipe.ingredient.FluidIngredient;
 import slimeknights.mantle.registration.object.FluidObject;
 import slimeknights.tconstruct.library.recipe.alloying.AlloyRecipe.AlloyIngredient;
 
@@ -64,7 +64,7 @@ public class AlloyRecipeBuilder extends AbstractRecipeBuilder<AlloyRecipeBuilder
    * @param input  Input ingredient
    * @return  Builder instance
    */
-  public AlloyRecipeBuilder addInput(FluidIngredient input) {
+  public AlloyRecipeBuilder addInput(SizedFluidIngredient input) {
     inputs.add(new AlloyIngredient(input, false));
     return this;
   }
@@ -74,7 +74,7 @@ public class AlloyRecipeBuilder extends AbstractRecipeBuilder<AlloyRecipeBuilder
    * @param input  Catalyst ingredient
    * @return  Builder instance
    */
-  public AlloyRecipeBuilder addCatalyst(FluidIngredient input) {
+  public AlloyRecipeBuilder addCatalyst(SizedFluidIngredient input) {
     inputs.add(new AlloyIngredient(input, true));
     return this;
   }
@@ -85,7 +85,7 @@ public class AlloyRecipeBuilder extends AbstractRecipeBuilder<AlloyRecipeBuilder
    * @return  Builder instance
    */
   public AlloyRecipeBuilder addInput(FluidStack input) {
-    return addInput(FluidIngredient.of(input));
+    return addInput(SizedFluidIngredient.of(input));
   }
 
   /**
@@ -95,7 +95,7 @@ public class AlloyRecipeBuilder extends AbstractRecipeBuilder<AlloyRecipeBuilder
    * @return  Builder instance
    */
   public AlloyRecipeBuilder addInput(Fluid fluid, int amount) {
-    return addInput(FluidIngredient.of(new FluidStack(fluid, amount)));
+    return addInput(SizedFluidIngredient.of(new FluidStack(fluid, amount)));
   }
 
   /**
@@ -105,7 +105,7 @@ public class AlloyRecipeBuilder extends AbstractRecipeBuilder<AlloyRecipeBuilder
    * @return  Builder instance
    */
   public AlloyRecipeBuilder addInput(TagKey<Fluid> tag, int amount) {
-    return addInput(FluidIngredient.of(tag, amount));
+    return addInput(SizedFluidIngredient.of(tag, amount));
   }
 
 

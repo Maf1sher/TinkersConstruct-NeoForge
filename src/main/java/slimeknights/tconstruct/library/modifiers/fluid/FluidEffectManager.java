@@ -10,15 +10,14 @@ import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.conditions.ICondition.IContext;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.event.OnDatapackSyncEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.OnDatapackSyncEvent;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import slimeknights.mantle.data.loadable.field.ContextKey;
-import slimeknights.mantle.recipe.ingredient.FluidIngredient;
 import slimeknights.mantle.util.JsonHelper;
 import slimeknights.mantle.util.typed.TypedMapBuilder;
 import slimeknights.tconstruct.TConstruct;
@@ -26,8 +25,8 @@ import slimeknights.tconstruct.library.utils.JsonUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
@@ -46,7 +45,7 @@ public class FluidEffectManager extends SimpleJsonResourceReloadListener {
   private final Map<Fluid,FluidEffects> cache = new ConcurrentHashMap<>();
 
   /** Empty spilling fluid instance */
-  private static final FluidEffects EMPTY = new FluidEffects(FluidIngredient.EMPTY, List.of(), List.of(), true);
+  private static final FluidEffects EMPTY = new FluidEffects(null, List.of(), List.of(), true);
 
   /** Condition context for recipe loading */
   private IContext conditionContext = IContext.EMPTY;
@@ -57,8 +56,8 @@ public class FluidEffectManager extends SimpleJsonResourceReloadListener {
 
   /** For internal use only */
   public void init() {
-    MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, AddReloadListenerEvent.class, this::addDataPackListeners);
-    MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, OnDatapackSyncEvent.class, e -> JsonUtils.syncPackets(e, new UpdateFluidEffectsPacket(this.fluids)));
+    NeoForge.EVENT_BUS.addListener(this::addDataPackListeners);
+    NeoForge.EVENT_BUS.addListener((OnDatapackSyncEvent e) -> JsonUtils.syncPackets(e, new UpdateFluidEffectsPacket(this.fluids)));
   }
 
   /** Adds the managers as datapack listeners */

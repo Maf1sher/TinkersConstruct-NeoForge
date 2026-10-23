@@ -3,10 +3,12 @@ package slimeknights.tconstruct.smeltery.network;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.network.NetworkEvent.Context;
-import slimeknights.mantle.network.packet.BlockEntityPacket;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import slimeknights.tconstruct.common.network.TinkerBlockEntityPayload;
+import slimeknights.tconstruct.common.network.TinkerPayload;
 import slimeknights.tconstruct.smeltery.block.entity.FaucetBlockEntity;
 
 /**
@@ -15,21 +17,25 @@ import slimeknights.tconstruct.smeltery.block.entity.FaucetBlockEntity;
  */
 @RequiredArgsConstructor
 @ToString(callSuper = true)
-public class FaucetActivationPacket implements BlockEntityPacket<FaucetBlockEntity> {
+public class FaucetActivationPacket implements TinkerBlockEntityPayload<FaucetBlockEntity> {
+  public static final Type<FaucetActivationPacket> TYPE = TinkerPayload.type("faucet_activation_packet");
+  public static final StreamCodec<RegistryFriendlyByteBuf,FaucetActivationPacket> CODEC = TinkerPayload.codec(FaucetActivationPacket::new, (buffer, packet) -> packet.encode(buffer));
+  @Override public Type<FaucetActivationPacket> type() { return TYPE; }
+
   protected final BlockPos pos;
   protected final FluidStack fluid;
   private final boolean isPouring;
 
-  public FaucetActivationPacket(FriendlyByteBuf buffer) {
+  public FaucetActivationPacket(RegistryFriendlyByteBuf buffer) {
     this.pos = buffer.readBlockPos();
-    this.fluid = buffer.readFluidStack();
+    this.fluid = FluidStack.STREAM_CODEC.decode(buffer);
     this.isPouring = buffer.readBoolean();
   }
 
   @Override
-  public void encode(FriendlyByteBuf buffer) {
+  public void encode(RegistryFriendlyByteBuf buffer) {
     buffer.writeBlockPos(pos);
-    buffer.writeFluidStack(fluid);
+    FluidStack.STREAM_CODEC.encode(buffer, fluid);
     buffer.writeBoolean(isPouring);
   }
 
@@ -39,12 +45,12 @@ public class FaucetActivationPacket implements BlockEntityPacket<FaucetBlockEnti
   }
 
   @Override
-  public Class<FaucetBlockEntity> type() {
+  public Class<FaucetBlockEntity> blockEntityType() {
     return FaucetBlockEntity.class;
   }
 
   @Override
-  public void handleBlockEntity(Context context, FaucetBlockEntity be) {
+  public void handleBlockEntity(IPayloadContext context, FaucetBlockEntity be) {
     be.onActivationPacket(fluid, isPouring);
   }
 }

@@ -1,12 +1,12 @@
 package slimeknights.tconstruct.library.materials.definition;
 
 import com.google.common.collect.ImmutableMap;
-import io.netty.buffer.Unpooled;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.item.Rarity;
 import org.junit.jupiter.api.Test;
 import slimeknights.tconstruct.fixture.MaterialFixture;
 import slimeknights.tconstruct.test.BaseMcTest;
+import slimeknights.tconstruct.test.TestHelper;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -28,7 +28,7 @@ class UpdateMaterialPacketTest extends BaseMcTest {
     Map<MaterialId,MaterialId> redirects = ImmutableMap.of(REDIRECT_ID, MATERIAL_ID_1);
 
     // send a packet over the buffer
-    FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
+    RegistryFriendlyByteBuf buffer = TestHelper.registryBuffer();
     UpdateMaterialsPacket packetToEncode = new UpdateMaterialsPacket(materials, redirects, Collections.emptyMap());
     packetToEncode.encode(buffer);
     UpdateMaterialsPacket decoded = new UpdateMaterialsPacket(buffer);

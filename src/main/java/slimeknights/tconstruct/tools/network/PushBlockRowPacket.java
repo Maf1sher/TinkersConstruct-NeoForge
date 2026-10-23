@@ -3,15 +3,20 @@ package slimeknights.tconstruct.tools.network;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.network.NetworkEvent.Context;
-import slimeknights.mantle.network.packet.IThreadsafePacket;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import slimeknights.tconstruct.common.network.TinkerPayload;
 import slimeknights.tconstruct.library.modifiers.fluid.block.MoveBlocksFluidEffect;
 
 /** Packet handling {@link MoveBlocksFluidEffect} syncing to the client */
-public record PushBlockRowPacket(BlockPos pos, Direction direction, boolean push, int moving) implements IThreadsafePacket {
-  public PushBlockRowPacket(FriendlyByteBuf buffer) {
+public record PushBlockRowPacket(BlockPos pos, Direction direction, boolean push, int moving) implements TinkerPayload {
+  public static final Type<PushBlockRowPacket> TYPE = TinkerPayload.type("push_block_row_packet");
+  public static final StreamCodec<RegistryFriendlyByteBuf,PushBlockRowPacket> CODEC = TinkerPayload.codec(PushBlockRowPacket::new, (buffer, packet) -> packet.encode(buffer));
+  @Override public Type<PushBlockRowPacket> type() { return TYPE; }
+
+  public PushBlockRowPacket(RegistryFriendlyByteBuf buffer) {
     this(buffer.readBlockPos(), buffer.readEnum(Direction.class), buffer.readBoolean(), buffer.readVarInt());
   }
 
@@ -21,7 +26,7 @@ public record PushBlockRowPacket(BlockPos pos, Direction direction, boolean push
   }
 
   @Override
-  public void encode(FriendlyByteBuf buffer) {
+  public void encode(RegistryFriendlyByteBuf buffer) {
     buffer.writeBlockPos(pos);
     buffer.writeEnum(direction);
     buffer.writeBoolean(push);
@@ -29,8 +34,10 @@ public record PushBlockRowPacket(BlockPos pos, Direction direction, boolean push
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
-    HandleClient.handle(this);
+  public void handle(IPayloadContext context) {
+    enqueue(context, () -> {
+      HandleClient.handle(this);
+    });
   }
 
   /** Accesses client only safely */

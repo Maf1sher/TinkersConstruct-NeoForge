@@ -2,22 +2,29 @@ package slimeknights.tconstruct.tables.network;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent.Context;
-import slimeknights.mantle.network.packet.IThreadsafePacket;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import slimeknights.tconstruct.common.network.TinkerPayload;
 import slimeknights.tconstruct.tables.client.inventory.BaseTabbedScreen;
 
-public class UpdateStationScreenPacket implements IThreadsafePacket {
+public class UpdateStationScreenPacket implements TinkerPayload {
+  public static final Type<UpdateStationScreenPacket> TYPE = TinkerPayload.type("update_station_screen_packet");
+  @Override public Type<UpdateStationScreenPacket> type() { return TYPE; }
+
   public static final UpdateStationScreenPacket INSTANCE = new UpdateStationScreenPacket();
+  public static final StreamCodec<RegistryFriendlyByteBuf,UpdateStationScreenPacket> CODEC = StreamCodec.unit(INSTANCE);
 
   private UpdateStationScreenPacket() {}
 
   @Override
-  public void encode(FriendlyByteBuf packetBuffer) {}
+  public void encode(RegistryFriendlyByteBuf packetBuffer) {}
 
   @Override
-  public void handleThreadsafe(Context context) {
-    HandleClient.handle();
+  public void handle(IPayloadContext context) {
+    enqueue(context, () -> {
+      HandleClient.handle();
+    });
   }
 
   /** Safely runs client side only code in a method only called on client */

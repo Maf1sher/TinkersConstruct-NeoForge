@@ -1,12 +1,17 @@
 package slimeknights.tconstruct.tools.network;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.network.NetworkEvent.Context;
-import slimeknights.mantle.network.packet.IThreadsafePacket;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import slimeknights.tconstruct.common.network.TinkerPayload;
 
-public class EntityMovementChangePacket implements IThreadsafePacket {
+public class EntityMovementChangePacket implements TinkerPayload {
+  public static final Type<EntityMovementChangePacket> TYPE = TinkerPayload.type("entity_movement_change_packet");
+  public static final StreamCodec<RegistryFriendlyByteBuf,EntityMovementChangePacket> CODEC = TinkerPayload.codec(EntityMovementChangePacket::new, (buffer, packet) -> packet.encode(buffer));
+  @Override public Type<EntityMovementChangePacket> type() { return TYPE; }
+
   private final int entityID;
   private final double x;
   private final double y;
@@ -23,7 +28,7 @@ public class EntityMovementChangePacket implements IThreadsafePacket {
     this.xRot = entity.getXRot();
   }
 
-  public EntityMovementChangePacket(FriendlyByteBuf buffer) {
+  public EntityMovementChangePacket(RegistryFriendlyByteBuf buffer) {
     this.entityID = buffer.readInt();
     this.x = buffer.readDouble();
     this.y = buffer.readDouble();
@@ -33,7 +38,7 @@ public class EntityMovementChangePacket implements IThreadsafePacket {
   }
 
   @Override
-  public void encode(FriendlyByteBuf packetBuffer) {
+  public void encode(RegistryFriendlyByteBuf packetBuffer) {
     packetBuffer.writeInt(this.entityID);
     packetBuffer.writeDouble(this.x);
     packetBuffer.writeDouble(this.y);
@@ -43,10 +48,10 @@ public class EntityMovementChangePacket implements IThreadsafePacket {
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
-    if (context.getSender() != null) {
+  public void handle(IPayloadContext context) {
+    enqueue(context, () -> {
       HandleClient.handle(this);
-    }
+    });
   }
 
   /** Safely runs client side only code in a method only called on client */

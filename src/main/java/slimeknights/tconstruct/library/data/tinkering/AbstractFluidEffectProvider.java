@@ -6,8 +6,8 @@ import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
+import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
@@ -21,12 +21,12 @@ import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.common.crafting.conditions.ModLoadedCondition;
 import net.minecraftforge.common.crafting.conditions.OrCondition;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
 import slimeknights.mantle.data.predicate.entity.LivingEntityPredicate;
 import slimeknights.mantle.recipe.condition.TagFilledCondition;
-import slimeknights.mantle.recipe.ingredient.FluidIngredient;
 import slimeknights.mantle.registration.object.FluidObject;
 import slimeknights.tconstruct.common.TinkerDamageTypes;
 import slimeknights.tconstruct.common.json.ConfigEnabledCondition;
@@ -38,8 +38,8 @@ import slimeknights.tconstruct.library.modifiers.fluid.FluidMobEffect;
 import slimeknights.tconstruct.library.modifiers.fluid.TimeAction;
 import slimeknights.tconstruct.library.modifiers.fluid.block.OffsetBlockFluidEffect;
 import slimeknights.tconstruct.library.modifiers.fluid.block.PlaceBlockFluidEffect;
-import slimeknights.tconstruct.library.modifiers.fluid.entity.DamageFluidEffect;
 import slimeknights.tconstruct.library.modifiers.fluid.entity.DamageFluidEffect.DamageTypePair;
+import slimeknights.tconstruct.library.modifiers.fluid.entity.DamageFluidEffect;
 import slimeknights.tconstruct.library.modifiers.fluid.entity.FireFluidEffect;
 import slimeknights.tconstruct.library.modifiers.fluid.general.ConditionalFluidEffect;
 import slimeknights.tconstruct.library.recipe.FluidValues;
@@ -76,7 +76,7 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
   /* Helpers */
 
   /** Creates a new fluid builder for the given location */
-  protected Builder addFluid(ResourceLocation id, FluidIngredient fluid) {
+  protected Builder addFluid(ResourceLocation id, SizedFluidIngredient fluid) {
     Builder newBuilder = new Builder(fluid);
     Builder original = entries.put(id, newBuilder);
     if (original != null) {
@@ -87,23 +87,23 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
 
   /** Creates a new fluid builder for the given mod ID */
   @SuppressWarnings("removal")
-  protected Builder addFluid(String name, FluidIngredient fluid) {
+  protected Builder addFluid(String name, SizedFluidIngredient fluid) {
     return addFluid(new ResourceLocation(modId, name), fluid);
   }
 
   /** Creates a builder for a fluid stack */
   protected Builder addFluid(FluidStack fluid) {
-    return addFluid(BuiltInRegistries.FLUID.getKey(fluid.getFluid()).getPath(), FluidIngredient.of(fluid));
+    return addFluid(BuiltInRegistries.FLUID.getKey(fluid.getFluid()).getPath(), SizedFluidIngredient.of(fluid));
   }
 
   /** Creates a builder for a fluid and amount */
   protected Builder addFluid(Fluid fluid, int amount) {
-    return addFluid(BuiltInRegistries.FLUID.getKey(fluid).getPath(), FluidIngredient.of(fluid, amount));
+    return addFluid(BuiltInRegistries.FLUID.getKey(fluid).getPath(), SizedFluidIngredient.of(fluid, amount));
   }
 
   /** Creates a builder for a tag and amount */
   protected Builder addFluid(String name, TagKey<Fluid> fluid, int amount) {
-    return addFluid(name, FluidIngredient.of(fluid, amount));
+    return addFluid(name, SizedFluidIngredient.of(fluid, amount));
   }
 
   /** Creates a builder for a tag and amount */
@@ -202,7 +202,7 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
   @CanIgnoreReturnValue
   protected static class Builder {
     private final List<ICondition> conditions = new ArrayList<>();
-    private final FluidIngredient ingredient;
+    private final SizedFluidIngredient ingredient;
     private final List<FluidEffect<? super FluidEffectContext.Block>> blockEffects = new ArrayList<>();
     private final List<FluidEffect<? super FluidEffectContext.Entity>> entityEffects = new ArrayList<>();
     private boolean hidden = false;

@@ -9,13 +9,13 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.field.LoadableField;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
 import slimeknights.mantle.recipe.helper.TypeAwareRecipeSerializer;
-import slimeknights.mantle.recipe.ingredient.FluidIngredient;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.recipe.casting.potion.ModifierPotionCastingRecipe;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
@@ -35,7 +35,7 @@ public class TippingCastingRecipe extends ModifierPotionCastingRecipe {
     LoadableRecipeSerializer.TYPED_SERIALIZER.requiredField(), ContextKey.ID.requiredField(), LoadableRecipeSerializer.RECIPE_GROUP,
     TOOL_FIELD, FLUID_FIELD, COOLING_TIME_FIELD, MODIFIER_FIELD, TippingCastingRecipe::new);
 
-  public TippingCastingRecipe(TypeAwareRecipeSerializer<?> serializer, ResourceLocation id, String group, Ingredient tool, FluidIngredient fluid, int coolingTime, ModifierId modifier) {
+  public TippingCastingRecipe(TypeAwareRecipeSerializer<?> serializer, ResourceLocation id, String group, Ingredient tool, SizedFluidIngredient fluid, int coolingTime, ModifierId modifier) {
     super(serializer, id, group, tool, fluid, Items.AIR, coolingTime, modifier);
   }
 
@@ -77,7 +77,7 @@ public class TippingCastingRecipe extends ModifierPotionCastingRecipe {
       }).toList();
 
       // next, make 1 copy of the potion fluid with NBT list per potion fluid
-      List<FluidStack> basePotions = this.fluid.getFluids();
+      List<FluidStack> basePotions = java.util.Arrays.asList(this.fluid.getFluids());
       List<FluidStack> fluids = basePotions.stream()
         .flatMap(fluid -> potionNBT.stream().map(nbt -> new FluidStack(fluid.getFluid(), fluid.getAmount(), nbt)))
         .toList();

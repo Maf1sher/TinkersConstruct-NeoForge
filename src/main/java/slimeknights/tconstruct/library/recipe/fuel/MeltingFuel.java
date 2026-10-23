@@ -7,12 +7,15 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
+import org.jetbrains.annotations.Nullable;
+import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.ICustomOutputRecipe;
-import slimeknights.mantle.recipe.ingredient.FluidIngredient;
+import slimeknights.tconstruct.library.recipe.TinkerFluidIngredients;
 import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import slimeknights.tconstruct.smeltery.block.component.SearedTankBlock.TankType;
@@ -26,25 +29,25 @@ import java.util.List;
 public class MeltingFuel implements ICustomOutputRecipe<IFluidContainer> {
   public static final RecordLoadable<MeltingFuel> LOADER = RecordLoadable.create(
     ContextKey.ID.requiredField(),
-    FluidIngredient.LOADABLE.defaultField("fluid", FluidIngredient.EMPTY, r -> r.input),
+    Loadables.SIZED_FLUID_INGREDIENT.defaultField("fluid", null, r -> r.input),
     IntLoadable.FROM_ONE.defaultField("duration", 0, MeltingFuel::getDuration),
     IntLoadable.FROM_ONE.requiredField("temperature", MeltingFuel::getTemperature),
     IntLoadable.FROM_ONE.requiredField("rate", MeltingFuel::getRate),
     MeltingFuel::new).validate((fuel, error) -> {
       // duration is optional (and ignored) for solid
-      if (fuel.input != FluidIngredient.EMPTY && fuel.duration == 0) {
+      if (fuel.input != null && fuel.duration == 0) {
         throw error.create("Missing JSON field duration");
       }
       return fuel;
     });
 
   private final ResourceLocation id;
-  private final FluidIngredient input;
+  @Nullable private final SizedFluidIngredient input;
   private final int duration;
   private final int temperature;
   private final int rate;
 
-  public MeltingFuel(ResourceLocation id, FluidIngredient input, int duration, int temperature, int rate) {
+  public MeltingFuel(ResourceLocation id, @Nullable SizedFluidIngredient input, int duration, int temperature, int rate) {
     this.id = id;
     this.input = input;
     this.duration = duration;
@@ -67,7 +70,7 @@ public class MeltingFuel implements ICustomOutputRecipe<IFluidContainer> {
    * @return  True if matches
    */
   public boolean matches(Fluid fluid) {
-    return input.test(fluid);
+    return input != null && TinkerFluidIngredients.matchesFluid(input, fluid);
   }
 
   /**
@@ -85,7 +88,7 @@ public class MeltingFuel implements ICustomOutputRecipe<IFluidContainer> {
    * @return  Amount of fluid consumed
    */
   public int getAmount(Fluid fluid) {
-    return input.getAmount(fluid);
+    return TinkerFluidIngredients.amountFor(input, fluid);
   }
 
   /**
@@ -93,7 +96,7 @@ public class MeltingFuel implements ICustomOutputRecipe<IFluidContainer> {
    * @return  Input fluids
    */
   public List<FluidStack> getInputs() {
-    return input.getFluids();
+    return TinkerFluidIngredients.displayFluids(input);
   }
 
   /* Recipe type methods */

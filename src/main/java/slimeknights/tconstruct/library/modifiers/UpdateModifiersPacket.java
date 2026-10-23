@@ -5,26 +5,31 @@ import com.google.common.collect.ImmutableMap;
 import io.netty.handler.codec.DecoderException;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraftforge.network.NetworkEvent.Context;
-import net.minecraftforge.registries.ForgeRegistries;
-import slimeknights.mantle.network.packet.IThreadsafePacket;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.common.network.TinkerPayload;
 import slimeknights.tconstruct.library.modifiers.impl.ComposableModifier;
 import slimeknights.tconstruct.library.utils.GenericTagUtil;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Map;
 
 /** Packet to sync modifiers */
 @RequiredArgsConstructor
-public class UpdateModifiersPacket implements IThreadsafePacket {
+public class UpdateModifiersPacket implements TinkerPayload {
+  public static final Type<UpdateModifiersPacket> TYPE = TinkerPayload.type("update_modifiers_packet");
+  public static final StreamCodec<RegistryFriendlyByteBuf,UpdateModifiersPacket> CODEC = TinkerPayload.codec(UpdateModifiersPacket::new, (buffer, packet) -> packet.encode(buffer));
+  @Override public Type<UpdateModifiersPacket> type() { return TYPE; }
+
   /** Collection of all modifiers */
   private final Map<ModifierId,Modifier> allModifiers;
   /** Map of all modifier tags */
@@ -37,6 +42,7 @@ public class UpdateModifiersPacket implements IThreadsafePacket {
   private final Map<Enchantment,Modifier> enchantmentMap;
   /** Collection of all enchantment tag mappings */
   private final Map<TagKey<Enchantment>, Modifier> enchantmentTagMappings;
+  private static final StreamCodec<RegistryFriendlyByteBuf,Enchantment> ENCHANTMENT_CODEC = ByteBufCodecs.registry(Registries.ENCHANTMENT);
 
   /** Ensures both the modifiers and redirects lists are calculated, allows one packet to be used multiple times without redundant work */
   private void ensureCalculated() {
@@ -75,7 +81,7 @@ public class UpdateModifiersPacket implements IThreadsafePacket {
     return modifier;
   }
 
-  public UpdateModifiersPacket(FriendlyByteBuf buffer) {
+  public UpdateModifiersPacket(RegistryFriendlyByteBuf buffer) {
     // read in modifiers
     int size = buffer.readVarInt();
     Map<ModifierId,Modifier> modifiers = new HashMap<>();
@@ -104,7 +110,7 @@ public class UpdateModifiersPacket implements IThreadsafePacket {
     size = buffer.readVarInt();
     for (int i = 0; i < size; i++) {
       enchantmentBuilder.put(
-        buffer.readRegistryIdUnsafe(ForgeRegistries.ENCHANTMENTS),
+          ENCHANTMENT_CODEC.decode(buffer),
         getModifier(modifiers, new ModifierId(buffer.readResourceLocation())));
     }
     enchantmentMap = enchantmentBuilder.build();
@@ -119,7 +125,7 @@ public class UpdateModifiersPacket implements IThreadsafePacket {
   }
 
   @Override
-  public void encode(FriendlyByteBuf buffer) {
+  public void encode(RegistryFriendlyByteBuf buffer) {
     ensureCalculated();
     // write modifiers
     buffer.writeVarInt(modifiers.size());
@@ -145,7 +151,7 @@ public class UpdateModifiersPacket implements IThreadsafePacket {
     // enchantment mapping
     buffer.writeVarInt(enchantmentMap.size());
     for (Entry<Enchantment,Modifier> entry : enchantmentMap.entrySet()) {
-      buffer.writeRegistryIdUnsafe(ForgeRegistries.ENCHANTMENTS, entry.getKey());
+      ENCHANTMENT_CODEC.encode(buffer, entry.getKey());
       buffer.writeResourceLocation(entry.getValue().getId());
     }
     buffer.writeVarInt(enchantmentTagMappings.size());
@@ -156,7 +162,9 @@ public class UpdateModifiersPacket implements IThreadsafePacket {
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
-    ModifierManager.INSTANCE.updateModifiersFromServer(allModifiers, tags, enchantmentMap, enchantmentTagMappings);
+  public void handle(IPayloadContext context) {
+    enqueue(context, () -> {
+      ModifierManager.INSTANCE.updateModifiersFromServer(allModifiers, tags, enchantmentMap, enchantmentTagMappings);
+    });
   }
 }

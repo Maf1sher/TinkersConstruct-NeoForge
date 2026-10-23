@@ -6,12 +6,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
 import slimeknights.mantle.recipe.helper.TypeAwareRecipeSerializer;
-import slimeknights.mantle.recipe.ingredient.FluidIngredient;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.recipe.casting.potion.ModifierPotionCastingRecipe;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
@@ -29,7 +29,7 @@ public class TipClearingCastingRecipe extends ModifierPotionCastingRecipe {
     LoadableRecipeSerializer.TYPED_SERIALIZER.requiredField(), ContextKey.ID.requiredField(), LoadableRecipeSerializer.RECIPE_GROUP,
     TOOL_FIELD, FLUID_FIELD, COOLING_TIME_FIELD, MODIFIER_FIELD, TipClearingCastingRecipe::new);
 
-  public TipClearingCastingRecipe(TypeAwareRecipeSerializer<?> serializer, ResourceLocation id, String group, Ingredient tool, FluidIngredient fluid, int coolingTime, ModifierId modifier) {
+  public TipClearingCastingRecipe(TypeAwareRecipeSerializer<?> serializer, ResourceLocation id, String group, Ingredient tool, SizedFluidIngredient fluid, int coolingTime, ModifierId modifier) {
     super(serializer, id, group, tool, fluid, Items.AIR, coolingTime, modifier);
   }
 
@@ -51,7 +51,7 @@ public class TipClearingCastingRecipe extends ModifierPotionCastingRecipe {
   @Override
   public List<IDisplayableCastingRecipe> getRecipes(RegistryAccess access) {
     if (displayRecipes == null) {
-      List<FluidStack> fluids = fluid.getFluids();
+      List<FluidStack> fluids = java.util.Arrays.asList(fluid.getFluids());
       List<String> potions = getPotionIds();
 
       // create a recipe per tool

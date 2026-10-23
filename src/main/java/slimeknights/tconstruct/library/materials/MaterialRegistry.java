@@ -1,15 +1,14 @@
 package slimeknights.tconstruct.library.materials;
 
 import com.google.common.annotations.VisibleForTesting;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.event.OnDatapackSyncEvent;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.network.PacketDistributor.PacketTarget;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.OnDatapackSyncEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import slimeknights.mantle.command.argument.TagSource;
-import slimeknights.mantle.network.packet.ISimplePacket;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
 import slimeknights.tconstruct.library.events.MaterialsLoadedEvent;
@@ -82,8 +81,8 @@ public final class MaterialRegistry {
     // create registry instance
     INSTANCE = new MaterialRegistry();
     // add event listeners
-    MinecraftForge.EVENT_BUS.addListener(INSTANCE::addDataPackListeners);
-    MinecraftForge.EVENT_BUS.addListener(INSTANCE::onDatapackSync);
+    NeoForge.EVENT_BUS.addListener(INSTANCE::addDataPackListeners);
+    NeoForge.EVENT_BUS.addListener(INSTANCE::onDatapackSync);
     // on the client, mark materials not fully loaded when the client logs out.
     // this also runs when starting a world in SP, but its early enough that the player login event will correct the state later (see handleLogin method)
     // TODO: is this still needed? disabled as it runs before the world finishes unloading in SP
@@ -233,7 +232,7 @@ public final class MaterialRegistry {
       traitsLoaded = false;
       fullyLoaded = true;
       FIRST_MATERIALS.clear();
-      MinecraftForge.EVENT_BUS.post(new MaterialsLoadedEvent());
+      NeoForge.EVENT_BUS.post(new MaterialsLoadedEvent());
     } else {
       fullyLoaded = false;
     }
@@ -250,30 +249,28 @@ public final class MaterialRegistry {
   }
 
   /** Sends all relevant packets to the given player */
-  private void sendPackets(ServerPlayer player, ISimplePacket[] packets) {
+  private void sendPackets(ServerPlayer player, CustomPacketPayload[] packets) {
     // on an integrated server, the material registries have a single instance on both the client and the server thread
     // this means syncing is unneeded, and has the side-effect of recreating all the material instances (which can lead to unexpected behavior)
     // as a result, integrated servers just mark fullyLoaded as true without syncing anything, side-effect is listeners may run twice on single player
 
     // on a dedicated server, the client is running a separate game instance, this is where we send packets, plus fully loaded should already be true
     // this event is not fired when connecting to a server
-    if (player.connection.connection.isMemoryConnection()) {
+    if (player.connection.getConnection().isMemoryConnection()) {
       // if the packet is being sent to ourself, skip sending, prevents recreating all material instances in the registry a second time on dedicated servers
       // note it will still send the packet if another client connects in LAN
       fullyLoaded = true;
-      MinecraftForge.EVENT_BUS.post(new MaterialsLoadedEvent());
+      NeoForge.EVENT_BUS.post(new MaterialsLoadedEvent());
     } else {
-      TinkerNetwork network = TinkerNetwork.getInstance();
-      PacketTarget target = PacketDistributor.PLAYER.with(() -> player);
-      for (ISimplePacket packet : packets) {
-        network.send(target, packet);
+      for (CustomPacketPayload packet : packets) {
+        PacketDistributor.sendToPlayer(player, packet);
       }
     }
   }
 
   /** Called when the player logs in to send packets */
   private void onDatapackSync(OnDatapackSyncEvent event) {
-    ISimplePacket[] packets = {
+    CustomPacketPayload[] packets = {
       materialManager.getUpdatePacket(),
       materialStatsManager.getUpdatePacket(),
       materialTraitsManager.getUpdatePacket()

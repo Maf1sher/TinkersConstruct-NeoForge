@@ -6,11 +6,12 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import org.jetbrains.annotations.ApiStatus.Internal;
+import org.jetbrains.annotations.Nullable;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
-import slimeknights.mantle.recipe.ingredient.FluidIngredient;
 
 import java.util.function.Consumer;
 
@@ -21,7 +22,7 @@ import static slimeknights.tconstruct.library.recipe.melting.IMeltingRecipe.getT
  */
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class MeltingFuelBuilder extends AbstractRecipeBuilder<MeltingFuelBuilder> {
-  private final FluidIngredient input;
+  @Nullable private final SizedFluidIngredient input;
   private final int duration;
   private final int temperature;
   @Setter
@@ -34,7 +35,7 @@ public class MeltingFuelBuilder extends AbstractRecipeBuilder<MeltingFuelBuilder
    * @param duration  Fluid duration
    * @return  Builder instance
    */
-  public static MeltingFuelBuilder fuel(FluidIngredient fluid, int duration, int temperature) {
+  public static MeltingFuelBuilder fuel(@Nullable SizedFluidIngredient fluid, int duration, int temperature) {
     return new MeltingFuelBuilder(fluid, duration, temperature, temperature / 100);
   }
 
@@ -45,21 +46,21 @@ public class MeltingFuelBuilder extends AbstractRecipeBuilder<MeltingFuelBuilder
    * @return  Builder instance
    */
   public static MeltingFuelBuilder fuel(FluidStack fluid, int duration) {
-    return fuel(FluidIngredient.of(fluid), duration, getTemperature(fluid));
+    return fuel(SizedFluidIngredient.of(fluid), duration, getTemperature(fluid));
   }
 
   /** Setups the builder for solid fuel */
   @Internal
   public static MeltingFuelBuilder solid(int temperature) {
-    return fuel(FluidIngredient.EMPTY, 0, temperature);
+    return fuel(null, 0, temperature);
   }
 
   @Override
   public void save(Consumer<FinishedRecipe> consumer) {
-    if (input.getFluids().isEmpty()) {
+    if (input == null || input.getFluids().length == 0) {
       throw new IllegalStateException("Must have at least one fluid for dynamic input");
     }
-    save(consumer, Loadables.FLUID.getKey(input.getFluids().get(0).getFluid()));
+    save(consumer, Loadables.FLUID.getKey(input.getFluids()[0].getFluid()));
   }
 
   @Override

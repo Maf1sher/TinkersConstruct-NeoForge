@@ -98,6 +98,7 @@ public class TConstruct {
     modEventBus.addListener(TConstruct::commonSetup);
     modEventBus.addListener(TConstruct::gatherData);
     modEventBus.addListener(Sounds::registerSounds);
+    modEventBus.addListener(TinkerNetwork::registerPackets);
 
     Config.init(modContainer);
     MaterialRegistry.init();

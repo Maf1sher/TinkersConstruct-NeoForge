@@ -1,8 +1,7 @@
 package slimeknights.tconstruct.library.tools.definition;
 
 import com.google.common.collect.ImmutableMap;
-import io.netty.buffer.Unpooled;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.ToolActions;
@@ -38,8 +37,8 @@ import slimeknights.tconstruct.library.tools.nbt.StatsNBT;
 import slimeknights.tconstruct.library.tools.part.IToolPart;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
 import slimeknights.tconstruct.test.BaseMcTest;
-import slimeknights.tconstruct.test.TestHelper;
 import slimeknights.tconstruct.test.TestHelper.ToolDefinitionStats;
+import slimeknights.tconstruct.test.TestHelper;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -96,7 +95,7 @@ class UpdateToolDefinitionDataPacketTest extends BaseMcTest {
       .build();
 
     // send a packet over the buffer
-    FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
+    RegistryFriendlyByteBuf buffer = TestHelper.registryBuffer();
     UpdateToolDefinitionDataPacket packetToEncode = new UpdateToolDefinitionDataPacket(ImmutableMap.of(EMPTY_ID, empty, FILLED_ID, filled));
     packetToEncode.encode(buffer);
     UpdateToolDefinitionDataPacket decoded = new UpdateToolDefinitionDataPacket(buffer);

@@ -10,8 +10,8 @@ import net.minecraftforge.fluids.FluidStack;
 import slimeknights.mantle.client.book.data.BookData;
 import slimeknights.mantle.client.book.data.PageData;
 import slimeknights.mantle.client.book.data.SectionData;
-import slimeknights.mantle.client.book.data.content.ContentPageIconList;
 import slimeknights.mantle.client.book.data.content.ContentPageIconList.PageWithIcon;
+import slimeknights.mantle.client.book.data.content.ContentPageIconList;
 import slimeknights.mantle.client.book.transformer.BookTransformer;
 import slimeknights.mantle.client.screen.book.element.ItemElement;
 import slimeknights.mantle.client.screen.book.element.SizedBookElement;
@@ -21,6 +21,7 @@ import slimeknights.tconstruct.library.client.book.content.FluidEffectContent;
 import slimeknights.tconstruct.library.client.book.elements.FluidItemElement;
 import slimeknights.tconstruct.library.modifiers.fluid.FluidEffectManager;
 import slimeknights.tconstruct.library.modifiers.fluid.FluidEffects;
+import slimeknights.tconstruct.library.recipe.TinkerFluidIngredients;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -60,7 +61,7 @@ public class FluidEffectInjectingTransformer extends BookTransformer {
           continue;
         }
         // skip effects with no fluids - usually means empty tag for compat
-        List<FluidStack> fluids = effect.ingredient().getFluids();
+        List<FluidStack> fluids = TinkerFluidIngredients.displayFluids(effect.ingredient());
         if (fluids.isEmpty()) {
           return;
         }

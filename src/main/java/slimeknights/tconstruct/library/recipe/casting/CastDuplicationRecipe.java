@@ -4,6 +4,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import slimeknights.mantle.data.loadable.common.IngredientLoadable;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
@@ -11,7 +12,6 @@ import slimeknights.mantle.recipe.IMultiRecipe;
 import slimeknights.mantle.recipe.helper.ItemOutput;
 import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
 import slimeknights.mantle.recipe.helper.TypeAwareRecipeSerializer;
-import slimeknights.mantle.recipe.ingredient.FluidIngredient;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ public class CastDuplicationRecipe extends ItemCastingRecipe implements IMultiRe
     FLUID_FIELD, COOLING_TIME_FIELD,
     CastDuplicationRecipe::new);
 
-  public CastDuplicationRecipe(TypeAwareRecipeSerializer<?> serializer, ResourceLocation id, String group, Ingredient cast, FluidIngredient fluid, int coolingTime) {
+  public CastDuplicationRecipe(TypeAwareRecipeSerializer<?> serializer, ResourceLocation id, String group, Ingredient cast, SizedFluidIngredient fluid, int coolingTime) {
     super(serializer, id, group, cast, fluid, ItemOutput.EMPTY, coolingTime, false, false);
   }
 
@@ -48,7 +48,7 @@ public class CastDuplicationRecipe extends ItemCastingRecipe implements IMultiRe
       List<ItemStack> casts = List.of(getCast().getItems());
       displayRecipes = List.of(DisplayCastingRecipe.from(this)
         .casts(casts).results(casts).linkCastToOutput()
-        .fluids(fluid.getFluids())
+        .fluids(java.util.Arrays.asList(fluid.getFluids()))
         .coolingTime(coolingTime)
         .build());
     }

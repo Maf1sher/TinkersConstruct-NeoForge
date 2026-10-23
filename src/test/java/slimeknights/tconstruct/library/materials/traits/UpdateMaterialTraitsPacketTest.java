@@ -1,7 +1,6 @@
 package slimeknights.tconstruct.library.materials.traits;
 
-import io.netty.buffer.Unpooled;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import slimeknights.tconstruct.fixture.MaterialFixture;
@@ -11,6 +10,7 @@ import slimeknights.tconstruct.library.materials.stats.MaterialStatsId;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierFixture;
 import slimeknights.tconstruct.test.BaseMcTest;
+import slimeknights.tconstruct.test.TestHelper;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -46,7 +46,7 @@ class UpdateMaterialTraitsPacketTest extends BaseMcTest {
     map.put(MATERIAL_ID_2, materialTraits2);
 
     // send a packet over the buffer
-    FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
+    RegistryFriendlyByteBuf buffer = TestHelper.registryBuffer();
     UpdateMaterialTraitsPacket packetToEncode = new UpdateMaterialTraitsPacket(map);
     packetToEncode.encode(buffer);
     UpdateMaterialTraitsPacket decoded = new UpdateMaterialTraitsPacket(buffer);

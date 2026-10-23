@@ -1,5 +1,24 @@
 package slimeknights.tconstruct.plugin.jei;
 
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.fluids.FluidStack;
+import slimeknights.mantle.fluid.tooltip.FluidTooltipHandler;
+import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.library.recipe.TinkerFluidIngredients;
+import slimeknights.tconstruct.library.recipe.alloying.AlloyRecipe;
+import slimeknights.tconstruct.library.recipe.fuel.MeltingFuel;
+import slimeknights.tconstruct.library.recipe.fuel.MeltingFuelLookup;
+import slimeknights.tconstruct.plugin.jei.melting.MeltingFuelHandler;
+import slimeknights.tconstruct.plugin.jei.util.CategoryUtil;
+import slimeknights.tconstruct.plugin.jei.util.FluidTooltipCallback;
+import slimeknights.tconstruct.smeltery.TinkerSmeltery;
+
+import java.awt.Color;
+import java.util.List;
+import java.util.function.Function;
 import mezz.jei.api.forge.ForgeTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -12,24 +31,6 @@ import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.category.AbstractRecipeCategory;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.fluids.FluidStack;
-import slimeknights.mantle.fluid.tooltip.FluidTooltipHandler;
-import slimeknights.tconstruct.TConstruct;
-import slimeknights.tconstruct.library.recipe.alloying.AlloyRecipe;
-import slimeknights.tconstruct.library.recipe.fuel.MeltingFuel;
-import slimeknights.tconstruct.library.recipe.fuel.MeltingFuelLookup;
-import slimeknights.tconstruct.plugin.jei.melting.MeltingFuelHandler;
-import slimeknights.tconstruct.plugin.jei.util.CategoryUtil;
-import slimeknights.tconstruct.plugin.jei.util.FluidTooltipCallback;
-import slimeknights.tconstruct.smeltery.TinkerSmeltery;
-
-import java.awt.Color;
-import java.util.List;
-import java.util.function.Function;
 
 /**
  * Alloy recipe category for JEI display
@@ -106,7 +107,7 @@ public class AlloyRecipeCategory extends AbstractRecipeCategory<AlloyRecipe> {
     // inputs
     int maxAmount = CategoryUtil.drawMultipleFluids(builder, ingredient -> ingredient.catalyst() ? RecipeIngredientRole.CATALYST : RecipeIngredientRole.INPUT,
                                        19, 11, 48, 32, recipe.getInputs(), recipe.getOutput().getAmount(),
-                                       ingredient -> ingredient.fluid().getFluids(),
+                                        ingredient -> TinkerFluidIngredients.displayFluids(ingredient.fluid()),
                                        ingredient -> ingredient.catalyst() ? CATALYST_TOOLTIP : FluidTooltipCallback.UNITS);
 
     // output

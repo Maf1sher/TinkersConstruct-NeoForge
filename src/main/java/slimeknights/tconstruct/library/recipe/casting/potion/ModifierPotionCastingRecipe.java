@@ -5,10 +5,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import slimeknights.mantle.data.loadable.common.IngredientLoadable;
 import slimeknights.mantle.data.loadable.field.LoadableField;
 import slimeknights.mantle.recipe.helper.TypeAwareRecipeSerializer;
-import slimeknights.mantle.recipe.ingredient.FluidIngredient;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.recipe.casting.ICastingContainer;
@@ -26,7 +26,7 @@ public abstract class ModifierPotionCastingRecipe extends PotionCastingRecipe {
   protected static final LoadableField<ModifierId, ModifierPotionCastingRecipe> MODIFIER_FIELD = ModifierId.PARSER.requiredField("modifier", r -> r.modifier);
 
   protected final ModifierId modifier;
-  public ModifierPotionCastingRecipe(TypeAwareRecipeSerializer<?> serializer, ResourceLocation id, String group, Ingredient bottle, FluidIngredient fluid, Item result, int coolingTime, ModifierId modifier) {
+  public ModifierPotionCastingRecipe(TypeAwareRecipeSerializer<?> serializer, ResourceLocation id, String group, Ingredient bottle, SizedFluidIngredient fluid, Item result, int coolingTime, ModifierId modifier) {
     super(serializer, id, group, bottle, fluid, result, coolingTime);
     this.modifier = modifier;
   }

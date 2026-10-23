@@ -3,29 +3,35 @@ package slimeknights.tconstruct.common.network;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.network.NetworkEvent.Context;
-import slimeknights.mantle.network.packet.IThreadsafePacket;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import slimeknights.tconstruct.library.tools.capability.PersistentDataCapability;
 
 /** Packet to sync player persistent data to the client */
 @RequiredArgsConstructor
-public class SyncPersistentDataPacket implements IThreadsafePacket {
+public class SyncPersistentDataPacket implements TinkerPayload {
+  public static final Type<SyncPersistentDataPacket> TYPE = TinkerPayload.type("sync_persistent_data_packet");
+  public static final StreamCodec<RegistryFriendlyByteBuf,SyncPersistentDataPacket> CODEC = TinkerPayload.codec(SyncPersistentDataPacket::new, (buffer, packet) -> packet.encode(buffer));
+  @Override public Type<SyncPersistentDataPacket> type() { return TYPE; }
+
   private final CompoundTag data;
 
-  public SyncPersistentDataPacket(FriendlyByteBuf buffer) {
+  public SyncPersistentDataPacket(RegistryFriendlyByteBuf buffer) {
     data = buffer.readNbt();
   }
 
   @Override
-  public void encode(FriendlyByteBuf buffer) {
+  public void encode(RegistryFriendlyByteBuf buffer) {
     buffer.writeNbt(data);
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
-    HandleClient.handle(this);
+  public void handle(IPayloadContext context) {
+    enqueue(context, () -> {
+      HandleClient.handle(this);
+    });
   }
 
   /** Handles client side only code safely */

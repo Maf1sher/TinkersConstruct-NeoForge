@@ -2,14 +2,15 @@ package slimeknights.tconstruct.tables.network;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.network.NetworkEvent.Context;
-import slimeknights.mantle.network.packet.BlockEntityPacket;
-import slimeknights.mantle.network.packet.IThreadsafePacket;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import slimeknights.mantle.recipe.helper.RecipeHelper;
 import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.common.network.TinkerBlockEntityPayload;
+import slimeknights.tconstruct.common.network.TinkerPayload;
 import slimeknights.tconstruct.library.recipe.tinkerstation.ITinkerStationRecipe;
 import slimeknights.tconstruct.tables.block.entity.table.TinkerStationBlockEntity;
 import slimeknights.tconstruct.tables.client.inventory.TinkerStationScreen;
@@ -18,7 +19,11 @@ import slimeknights.tconstruct.tables.client.inventory.TinkerStationScreen;
  * Packet to send the current crafting recipe to a player who opens the tinker station.
  * TODO 1.21: make record.
  */
-public class UpdateTinkerStationRecipePacket implements IThreadsafePacket {
+public class UpdateTinkerStationRecipePacket implements TinkerPayload {
+  public static final Type<UpdateTinkerStationRecipePacket> TYPE = TinkerPayload.type("update_tinker_station_recipe_packet");
+  public static final StreamCodec<RegistryFriendlyByteBuf,UpdateTinkerStationRecipePacket> CODEC = TinkerPayload.codec(UpdateTinkerStationRecipePacket::new, (buffer, packet) -> packet.encode(buffer));
+  @Override public Type<UpdateTinkerStationRecipePacket> type() { return TYPE; }
+
   private final BlockPos pos;
   private final ResourceLocation recipe;
   public UpdateTinkerStationRecipePacket(BlockPos pos, ITinkerStationRecipe recipe) {
@@ -26,20 +31,22 @@ public class UpdateTinkerStationRecipePacket implements IThreadsafePacket {
     this.recipe = recipe.getId();
   }
 
-  public UpdateTinkerStationRecipePacket(FriendlyByteBuf buffer) {
+  public UpdateTinkerStationRecipePacket(RegistryFriendlyByteBuf buffer) {
     this.pos = buffer.readBlockPos();
     this.recipe = buffer.readResourceLocation();
   }
 
   @Override
-  public void encode(FriendlyByteBuf buffer) {
+  public void encode(RegistryFriendlyByteBuf buffer) {
     buffer.writeBlockPos(pos);
     buffer.writeResourceLocation(recipe);
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
-    HandleClient.handle(this);
+  public void handle(IPayloadContext context) {
+    enqueue(context, () -> {
+      HandleClient.handle(this);
+    });
   }
 
   /** Safely runs client side only code in a method only called on client */
@@ -64,7 +71,7 @@ public class UpdateTinkerStationRecipePacket implements IThreadsafePacket {
           }
         }
         // if the wrong screen is open or no screen, use the tile directly
-        if (BlockEntityPacket.getBlockEntity(world, packet.pos, packet) instanceof TinkerStationBlockEntity be) {
+        if (slimeknights.tconstruct.common.network.TinkerBlockEntityPayload.getBlockEntity(world, packet.pos, packet) instanceof TinkerStationBlockEntity be) {
           be.updateRecipe(recipe);
         } else {
           TConstruct.LOG.error("Failed to update Tinker Station Recipe at {} to {}: unable to find Tinker Station", packet.pos, packet.recipe);

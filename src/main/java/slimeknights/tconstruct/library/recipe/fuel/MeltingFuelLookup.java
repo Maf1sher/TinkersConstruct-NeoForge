@@ -4,10 +4,10 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluid;
-import slimeknights.mantle.recipe.ingredient.FluidIngredient;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import slimeknights.tconstruct.TConstruct;
-import slimeknights.tconstruct.common.recipe.RecipeCacheInvalidator;
 import slimeknights.tconstruct.common.recipe.RecipeCacheInvalidator.DuelSidedListener;
+import slimeknights.tconstruct.common.recipe.RecipeCacheInvalidator;
 import slimeknights.tconstruct.library.utils.SimpleCache;
 
 import javax.annotation.Nullable;
@@ -21,7 +21,7 @@ import java.util.List;
 public class MeltingFuelLookup {
   /** Dummy fuel instance sine caches don't support caching null */
   @SuppressWarnings("removal")
-  private static final MeltingFuel EMPTY = new MeltingFuel(new ResourceLocation("missingno"), FluidIngredient.EMPTY, 0, 0, 0);
+  private static final MeltingFuel EMPTY = new MeltingFuel(new ResourceLocation("missingno"), null, 0, 0, 0);
   /** Temperature for solid fuels in the heater */
   private static MeltingFuel SOLID = EMPTY;
   /** List of all recipes */
@@ -52,7 +52,7 @@ public class MeltingFuelLookup {
       return;
     }
     LISTENER.checkClear();
-    if (fuel.getInput() != FluidIngredient.EMPTY) {
+    if (fuel.getInput() != null) {
       RECIPES.add(fuel);
     } else if (SOLID == EMPTY) {
       SOLID = fuel;

@@ -1,21 +1,27 @@
 package slimeknights.tconstruct.tables.network;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.network.NetworkEvent.Context;
-import slimeknights.mantle.network.packet.BlockEntityPacket;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import slimeknights.mantle.recipe.helper.RecipeHelper;
 import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.common.network.TinkerBlockEntityPayload;
+import slimeknights.tconstruct.common.network.TinkerPayload;
 import slimeknights.tconstruct.tables.block.entity.table.CraftingStationBlockEntity;
 
 /**
  * Packet to send the current crafting recipe to a player who opens the crafting station.
  * TODO 1.21: make record.
  */
-public class UpdateCraftingRecipePacket implements BlockEntityPacket<CraftingStationBlockEntity> {
+public class UpdateCraftingRecipePacket implements TinkerBlockEntityPayload<CraftingStationBlockEntity> {
+  public static final Type<UpdateCraftingRecipePacket> TYPE = TinkerPayload.type("update_crafting_recipe_packet");
+  public static final StreamCodec<RegistryFriendlyByteBuf,UpdateCraftingRecipePacket> CODEC = TinkerPayload.codec(UpdateCraftingRecipePacket::new, (buffer, packet) -> packet.encode(buffer));
+  @Override public Type<UpdateCraftingRecipePacket> type() { return TYPE; }
+
   private final BlockPos pos;
   private final ResourceLocation recipe;
   public UpdateCraftingRecipePacket(BlockPos pos, CraftingRecipe recipe) {
@@ -23,13 +29,13 @@ public class UpdateCraftingRecipePacket implements BlockEntityPacket<CraftingSta
     this.recipe = recipe.getId();
   }
 
-  public UpdateCraftingRecipePacket(FriendlyByteBuf buffer) {
+  public UpdateCraftingRecipePacket(RegistryFriendlyByteBuf buffer) {
     this.pos = buffer.readBlockPos();
     this.recipe = buffer.readResourceLocation();
   }
 
   @Override
-  public void encode(FriendlyByteBuf buffer) {
+  public void encode(RegistryFriendlyByteBuf buffer) {
     buffer.writeBlockPos(pos);
     buffer.writeResourceLocation(recipe);
   }
@@ -40,12 +46,12 @@ public class UpdateCraftingRecipePacket implements BlockEntityPacket<CraftingSta
   }
 
   @Override
-  public Class<CraftingStationBlockEntity> type() {
+  public Class<CraftingStationBlockEntity> blockEntityType() {
     return CraftingStationBlockEntity.class;
   }
 
   @Override
-  public void handleBlockEntity(Context context, CraftingStationBlockEntity be) {
+  public void handleBlockEntity(IPayloadContext context, CraftingStationBlockEntity be) {
     Level level = be.getLevel();
     assert level != null;
     CraftingRecipe recipe = RecipeHelper.getRecipe(level.getRecipeManager(), this.recipe, CraftingRecipe.class).orElse(null);

@@ -14,8 +14,9 @@ import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.common.IngredientLoadable;
 import slimeknights.mantle.data.loadable.field.ContextKey;
@@ -25,7 +26,6 @@ import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.IMultiRecipe;
 import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
 import slimeknights.mantle.recipe.helper.TypeAwareRecipeSerializer;
-import slimeknights.mantle.recipe.ingredient.FluidIngredient;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,7 +36,7 @@ import java.util.List;
  * TODO 1.21: move to {@link slimeknights.tconstruct.library.recipe.casting.potion}
  */
 public class PotionCastingRecipe implements ICastingRecipe, IMultiRecipe<IDisplayableCastingRecipe> {
-  protected static final LoadableField<FluidIngredient, PotionCastingRecipe> FLUID_FIELD = FluidIngredient.LOADABLE.requiredField("fluid", r -> r.fluid);
+  protected static final LoadableField<SizedFluidIngredient, PotionCastingRecipe> FLUID_FIELD = Loadables.SIZED_FLUID_INGREDIENT.requiredField("fluid", r -> r.fluid);
   protected static final LoadableField<Integer, PotionCastingRecipe> COOLING_TIME_FIELD = IntLoadable.FROM_ONE.defaultField("cooling_time", 5, r -> r.coolingTime);
   public static final RecordLoadable<PotionCastingRecipe> LOADER = RecordLoadable.create(
     LoadableRecipeSerializer.TYPED_SERIALIZER.requiredField(), ContextKey.ID.requiredField(), LoadableRecipeSerializer.RECIPE_GROUP,
@@ -55,13 +55,13 @@ public class PotionCastingRecipe implements ICastingRecipe, IMultiRecipe<IDispla
   /** Input on the casting table, always consumed */
   protected final Ingredient bottle;
   /** Potion ingredient, typically just the potion tag */
-  protected final FluidIngredient fluid;
+  protected final SizedFluidIngredient fluid;
   /** Potion item result, will be given the proper NBT */
   protected final Item result;
   /** Cooling time for this recipe, used for tipped arrows */
   protected final int coolingTime;
 
-  public PotionCastingRecipe(TypeAwareRecipeSerializer<?> serializer, ResourceLocation id, String group, Ingredient bottle, FluidIngredient fluid, Item result, int coolingTime) {
+  public PotionCastingRecipe(TypeAwareRecipeSerializer<?> serializer, ResourceLocation id, String group, Ingredient bottle, SizedFluidIngredient fluid, Item result, int coolingTime) {
     this.serializer = serializer;
     this.id = id;
     this.group = group;
@@ -84,7 +84,7 @@ public class PotionCastingRecipe implements ICastingRecipe, IMultiRecipe<IDispla
 
   @Override
   public int getFluidAmount(ICastingContainer inv) {
-    return fluid.getAmount(inv.getFluid());
+    return fluid.amount();
   }
 
   @Override
@@ -127,7 +127,7 @@ public class PotionCastingRecipe implements ICastingRecipe, IMultiRecipe<IDispla
       // next, it's time to do the fluids
       // we want an order of Mod 1 Potion 1, Mod 1 Potion 2, ..., Mod 2 Potion 1, ...
       // this is potentially displaying multiple fluids from the fluid tag
-      List<FluidStack> potionFluids = this.fluid.getFluids();
+      List<FluidStack> potionFluids = List.of(this.fluid.getFluids());
       int totalSize = results.size() * potionFluids.size();
       List<ItemStack> displayResults = new ArrayList<>(totalSize);
       List<FluidStack> displayFluids = new ArrayList<>(totalSize);

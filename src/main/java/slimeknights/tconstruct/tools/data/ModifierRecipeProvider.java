@@ -12,12 +12,14 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.Tags.Fluids;
+import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.crafting.CompoundIngredient;
 import net.minecraftforge.common.crafting.DifferenceIngredient;
 import net.minecraftforge.common.crafting.IntersectionIngredient;
-import net.minecraftforge.fluids.FluidType;
+import net.neoforged.neoforge.fluids.FluidType;
+import net.neoforged.neoforge.fluids.crafting.FluidIngredient;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
 import slimeknights.mantle.datagen.MantleTags;
 import slimeknights.mantle.recipe.condition.TagFilledCondition;
@@ -25,9 +27,8 @@ import slimeknights.mantle.recipe.data.ItemNameIngredient;
 import slimeknights.mantle.recipe.helper.ItemOutput;
 import slimeknights.mantle.recipe.helper.SimpleFinishedRecipe;
 import slimeknights.mantle.recipe.ingredient.EntityIngredient;
-import slimeknights.mantle.recipe.ingredient.FluidContainerIngredient;
-import slimeknights.mantle.recipe.ingredient.FluidIngredient;
 import slimeknights.mantle.recipe.ingredient.SizedIngredient;
+import slimeknights.mantle.recipe.ingredient.item.FluidContainerIngredient;
 import slimeknights.mantle.registration.object.WoodBlockObject;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
@@ -124,7 +125,7 @@ public class ModifierRecipeProvider extends BaseRecipeProvider {
                             .setCast(TinkerTables.pattern, true)
                             .save(consumer, prefix(TinkerModifiers.ironReinforcement, folder));
     ItemCastingRecipeBuilder.tableRecipe(TinkerModifiers.searedReinforcement)
-                            .setFluid(FluidIngredient.of(TinkerFluids.searedStone.ingredient(FluidValues.BRICK), TinkerFluids.scorchedStone.ingredient(FluidValues.BRICK)))
+                            .setFluid(new SizedFluidIngredient(FluidIngredient.of(TinkerFluids.searedStone.get(), TinkerFluids.scorchedStone.get()), FluidValues.BRICK))
                             .setCoolingTime(getTemperature(TinkerFluids.searedStone), FluidValues.BRICK)
                             .setCast(TinkerTables.pattern, true)
                             .save(consumer, prefix(TinkerModifiers.searedReinforcement, folder));
@@ -1747,7 +1748,7 @@ public class ModifierRecipeProvider extends BaseRecipeProvider {
     ModifierRemovalRecipeBuilder.removal()
       .addInput(CompoundIngredient.of(
         FluidContainerIngredient.fromFluid(TinkerFluids.venom),
-        FluidContainerIngredient.fromIngredient(TinkerFluids.venom.ingredient(FluidValues.BOTTLE), Ingredient.of(TinkerFluids.venomBottle)))
+        FluidContainerIngredient.withDisplay(TinkerFluids.venom.ingredient(), FluidValues.BOTTLE, TinkerFluids.venomBottle))
       )
       .modifierPredicate(removable)
       .save(consumer, location(worktableFolder + "remove_modifier_venom"));
@@ -1806,11 +1807,11 @@ public class ModifierRecipeProvider extends BaseRecipeProvider {
     IJsonPredicate<ModifierId> blacklist = ModifierPredicate.tag(TinkerTags.Modifiers.INVISIBLE_INK_BLACKLIST).inverted();
     ModifierSetWorktableRecipeBuilder.setAdding(hiddenModifiers)
                                      .modifierPredicate(blacklist)
-                                     .addInput(FluidContainerIngredient.fromIngredient(TinkerFluids.skySlime.ingredient(FluidValues.BOTTLE), Ingredient.of(TinkerFluids.slimeBottle.get(SlimeType.SKY))))
+                                     .addInput(FluidContainerIngredient.withDisplay(TinkerFluids.skySlime.ingredient(), FluidValues.BOTTLE, TinkerFluids.slimeBottle.get(SlimeType.SKY)))
                                      .save(consumer, location(worktableFolder + "invisible_ink_adding"));
     ModifierSetWorktableRecipeBuilder.setRemoving(hiddenModifiers)
                                      .modifierPredicate(blacklist)
-                                     .addInput(FluidContainerIngredient.fromIngredient(FluidIngredient.of(Fluids.MILK, FluidType.BUCKET_VOLUME), Ingredient.of(Items.MILK_BUCKET)))
+                                     .addInput(FluidContainerIngredient.withDisplay(FluidIngredient.single(Fluids.MILK), FluidType.BUCKET_VOLUME, Items.MILK_BUCKET))
                                      .save(consumer, location(worktableFolder + "invisible_ink_removing"));
 
     // swapping hands

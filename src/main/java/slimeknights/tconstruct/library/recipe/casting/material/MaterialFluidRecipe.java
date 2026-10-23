@@ -6,17 +6,19 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
+import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.primitive.BooleanLoadable;
 import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.ICustomOutputRecipe;
-import slimeknights.mantle.recipe.ingredient.FluidIngredient;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariant;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
+import slimeknights.tconstruct.library.recipe.TinkerFluidIngredients;
 import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
 import slimeknights.tconstruct.library.recipe.casting.ICastingContainer;
 import slimeknights.tconstruct.library.recipe.material.IDisplayMaterialRecipe;
@@ -29,18 +31,18 @@ import java.util.List;
 public class MaterialFluidRecipe implements ICustomOutputRecipe<ICastingContainer>, IDisplayMaterialRecipe {
   public static final RecordLoadable<MaterialFluidRecipe> LOADER = RecordLoadable.create(
     ContextKey.ID.requiredField(),
-    FluidIngredient.LOADABLE.requiredField("fluid", r -> r.fluid),
+    Loadables.SIZED_FLUID_INGREDIENT.requiredField("fluid", r -> r.fluid),
     IntLoadable.FROM_ZERO.requiredField("temperature", r -> r.temperature),
     MaterialVariantId.LOADABLE.nullableField("input", r -> r.input != null ? r.input.getVariant() : null),
     MaterialVariantId.LOADABLE.nullableField("output", r -> r.output.getVariant()),
     BooleanLoadable.INSTANCE.defaultField("hide_in_book", false, false, r -> r.hideInBook),
     MaterialFluidRecipe::new);
   /** Empty recipe instance, used as a fallback */
-  public static final MaterialFluidRecipe EMPTY = new MaterialFluidRecipe(TConstruct.getResource("missingno"), FluidIngredient.EMPTY, 0, null, MaterialId.UNKNOWN);
+  public static final MaterialFluidRecipe EMPTY = new MaterialFluidRecipe(TConstruct.getResource("missingno"), null, 0, null, MaterialId.UNKNOWN);
 
   @Getter
   private final ResourceLocation id;
-  private final FluidIngredient fluid;
+  @Nullable private final SizedFluidIngredient fluid;
   @Getter
   private final int temperature;
   /** Material base for composite */
@@ -52,13 +54,13 @@ public class MaterialFluidRecipe implements ICustomOutputRecipe<ICastingContaine
   @Getter
   private final boolean hideInBook;
 
-  /** @deprecated use {@link #MaterialFluidRecipe(ResourceLocation, FluidIngredient, int, MaterialVariantId, MaterialVariantId, boolean)} */
+  /** @deprecated use {@link #MaterialFluidRecipe(ResourceLocation, SizedFluidIngredient, int, MaterialVariantId, MaterialVariantId, boolean)} */
   @Deprecated(forRemoval = true)
-  public MaterialFluidRecipe(ResourceLocation id, FluidIngredient fluid, int temperature, @Nullable MaterialVariantId inputId, MaterialVariantId outputId) {
+  public MaterialFluidRecipe(ResourceLocation id, @Nullable SizedFluidIngredient fluid, int temperature, @Nullable MaterialVariantId inputId, MaterialVariantId outputId) {
     this(id, fluid, temperature, inputId, outputId, false);
   }
 
-  protected MaterialFluidRecipe(ResourceLocation id, FluidIngredient fluid, int temperature, @Nullable MaterialVariantId inputId, MaterialVariantId outputId, boolean hideInBook) {
+  protected MaterialFluidRecipe(ResourceLocation id, @Nullable SizedFluidIngredient fluid, int temperature, @Nullable MaterialVariantId inputId, MaterialVariantId outputId, boolean hideInBook) {
     this.id = id;
     this.fluid = fluid;
     this.temperature = temperature;
@@ -70,7 +72,7 @@ public class MaterialFluidRecipe implements ICustomOutputRecipe<ICastingContaine
 
   /** Checks if this recipe is valid for the given fluid and material */
   public boolean matches(Fluid fluid) {
-    return !output.isUnknown() && this.fluid.test(fluid);
+    return !output.isUnknown() && this.fluid != null && TinkerFluidIngredients.matchesFluid(this.fluid, fluid);
   }
 
   /** Checks if this recipe is valid for the given fluid and material */
@@ -81,13 +83,13 @@ public class MaterialFluidRecipe implements ICustomOutputRecipe<ICastingContaine
 
   /** Gets the amount of fluid to cast this recipe */
   public int getFluidAmount(Fluid fluid) {
-    return this.fluid.getAmount(fluid);
+    return TinkerFluidIngredients.amountFor(this.fluid, fluid);
   }
 
   /** Gets a list of fluids for display */
   @Override
   public List<FluidStack> getFluids() {
-    return fluid.getFluids();
+    return TinkerFluidIngredients.displayFluids(fluid);
   }
 
   @Override

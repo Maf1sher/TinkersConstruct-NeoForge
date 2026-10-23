@@ -12,10 +12,11 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.material.Fluid;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
+import org.jetbrains.annotations.Nullable;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
 import slimeknights.mantle.recipe.helper.TypeAwareRecipeSerializer;
-import slimeknights.mantle.recipe.ingredient.FluidIngredient;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
@@ -33,7 +34,7 @@ public class PotionCastingRecipeBuilder extends AbstractRecipeBuilder<PotionCast
   private final ModifierId modifier;
   private final TypeAwareRecipeSerializer<? extends PotionCastingRecipe> recipeSerializer;
   private Ingredient bottle = Ingredient.EMPTY;
-  private FluidIngredient fluid = FluidIngredient.EMPTY;
+  @Nullable private SizedFluidIngredient fluid;
   @Setter @Accessors(chain = true)
   private int coolingTime = 5;
 
@@ -116,7 +117,7 @@ public class PotionCastingRecipeBuilder extends AbstractRecipeBuilder<PotionCast
    * @return  Builder instance
    */
   public PotionCastingRecipeBuilder setFluid(TagKey<Fluid> tagIn, int amount) {
-    return this.setFluid(FluidIngredient.of(tagIn, amount));
+    return this.setFluid(SizedFluidIngredient.of(tagIn, amount));
   }
 
   /**
@@ -124,7 +125,7 @@ public class PotionCastingRecipeBuilder extends AbstractRecipeBuilder<PotionCast
    * @param fluid  Fluid ingredient instance
    * @return  Builder instance
    */
-  public PotionCastingRecipeBuilder setFluid(FluidIngredient fluid) {
+  public PotionCastingRecipeBuilder setFluid(SizedFluidIngredient fluid) {
     this.fluid = fluid;
     return this;
   }
@@ -171,7 +172,7 @@ public class PotionCastingRecipeBuilder extends AbstractRecipeBuilder<PotionCast
 
   @Override
   public void save(Consumer<FinishedRecipe> consumer, ResourceLocation id) {
-    if (this.fluid == FluidIngredient.EMPTY) {
+    if (this.fluid == null) {
       throw new IllegalStateException("Casting recipes require a fluid input");
     }
     if (this.coolingTime < 0) {

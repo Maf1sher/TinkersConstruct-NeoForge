@@ -2,16 +2,19 @@ package slimeknights.tconstruct.common.network;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.items.IItemHandlerModifiable;
-import net.minecraftforge.network.NetworkEvent.Context;
-import slimeknights.mantle.network.packet.IThreadsafePacket;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public class InventorySlotSyncPacket implements IThreadsafePacket {
+public class InventorySlotSyncPacket implements TinkerPayload {
+  public static final Type<InventorySlotSyncPacket> TYPE = TinkerPayload.type("inventory_slot_sync_packet");
+  public static final StreamCodec<RegistryFriendlyByteBuf,InventorySlotSyncPacket> CODEC = TinkerPayload.codec(InventorySlotSyncPacket::new, (buffer, packet) -> packet.encode(buffer));
+  @Override public Type<InventorySlotSyncPacket> type() { return TYPE; }
+
 
   public final ItemStack itemStack;
   public final int slot;
@@ -23,22 +26,24 @@ public class InventorySlotSyncPacket implements IThreadsafePacket {
     this.pos = pos;
   }
 
-  public InventorySlotSyncPacket(FriendlyByteBuf buffer) {
+  public InventorySlotSyncPacket(RegistryFriendlyByteBuf buffer) {
     this.itemStack = buffer.readItem();
     this.slot = buffer.readShort();
     this.pos = buffer.readBlockPos();
   }
 
   @Override
-  public void encode(FriendlyByteBuf packetBuffer) {
+  public void encode(RegistryFriendlyByteBuf packetBuffer) {
     packetBuffer.writeItem(this.itemStack);
     packetBuffer.writeShort(this.slot);
     packetBuffer.writeBlockPos(this.pos);
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
-    HandleClient.handle(this);
+  public void handle(IPayloadContext context) {
+    enqueue(context, () -> {
+      HandleClient.handle(this);
+    });
   }
 
   /** Safely runs client side only code in a method only called on client */
@@ -46,16 +51,13 @@ public class InventorySlotSyncPacket implements IThreadsafePacket {
     private static void handle(InventorySlotSyncPacket packet) {
       Level world = Minecraft.getInstance().level;
       if (world != null) {
-        BlockEntity te = world.getBlockEntity(packet.pos);
-        if (te != null) {
-          te.getCapability(ForgeCapabilities.ITEM_HANDLER)
-            .filter(cap -> cap instanceof IItemHandlerModifiable)
-            .ifPresent(cap -> {
+        world.getCapability(Capabilities.ItemHandler.BLOCK, packet.pos, null)
+          .filter(cap -> cap instanceof IItemHandlerModifiable)
+          .ifPresent(cap -> {
               ((IItemHandlerModifiable)cap).setStackInSlot(packet.slot, packet.itemStack);
               //noinspection ConstantConditions
               Minecraft.getInstance().levelRenderer.blockChanged(null, packet.pos, null, null, 0);
-            });
-        }
+          });
       }
     }
   }

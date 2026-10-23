@@ -20,12 +20,12 @@ import net.minecraftforge.common.crafting.CompoundIngredient;
 import net.minecraftforge.common.crafting.DifferenceIngredient;
 import net.minecraftforge.common.crafting.conditions.OrCondition;
 import net.minecraftforge.fluids.FluidType;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import slimeknights.mantle.datagen.MantleTags;
 import slimeknights.mantle.recipe.condition.TagCombinationCondition;
 import slimeknights.mantle.recipe.condition.TagFilledCondition;
 import slimeknights.mantle.recipe.helper.FluidOutput;
 import slimeknights.mantle.recipe.helper.ItemOutput;
-import slimeknights.mantle.recipe.ingredient.FluidIngredient;
 import slimeknights.mantle.registration.object.FluidObject;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.data.BaseRecipeProvider;
@@ -347,7 +347,7 @@ public class MaterialRecipeProvider extends BaseRecipeProvider implements IMater
     TagKey<Fluid> creosote = getFluidTag(COMMON, "creosote");
     MaterialFluidRecipeBuilder.material(MaterialIds.treatedWood)
       .setInputId(MaterialIds.wood)
-      .setFluid(FluidIngredient.of(creosote, 125))
+      .setFluid(SizedFluidIngredient.of(creosote, 125))
       .setTemperature(600)
       .save(withCondition(consumer, new TagFilledCondition<>(creosote)), location(folder + "composite/treated_wood"));
     MaterialMeltingRecipeBuilder.material(MaterialIds.ironwood, TinkerFluids.moltenIron, FluidValues.INGOT)

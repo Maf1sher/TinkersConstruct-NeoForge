@@ -3,28 +3,33 @@ package slimeknights.tconstruct.library.materials.definition;
 import com.google.common.collect.ImmutableMap;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Rarity;
-import net.minecraftforge.network.NetworkEvent.Context;
-import slimeknights.mantle.network.packet.IThreadsafePacket;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import slimeknights.tconstruct.common.network.TinkerPayload;
 import slimeknights.tconstruct.library.materials.MaterialRegistry;
 import slimeknights.tconstruct.library.utils.GenericTagUtil;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Map;
 
 @Getter
 @AllArgsConstructor
-public class UpdateMaterialsPacket implements IThreadsafePacket {
+public class UpdateMaterialsPacket implements TinkerPayload {
+  public static final Type<UpdateMaterialsPacket> TYPE = TinkerPayload.type("update_materials_packet");
+  public static final StreamCodec<RegistryFriendlyByteBuf,UpdateMaterialsPacket> CODEC = TinkerPayload.codec(UpdateMaterialsPacket::new, (buffer, packet) -> packet.encode(buffer));
+  @Override public Type<UpdateMaterialsPacket> type() { return TYPE; }
+
   private final Map<MaterialId,IMaterial> materials;
   private final Map<MaterialId,MaterialId> redirects;
   private final Map<TagKey<IMaterial>,List<IMaterial>> tags;
 
-  public UpdateMaterialsPacket(FriendlyByteBuf buffer) {
+  public UpdateMaterialsPacket(RegistryFriendlyByteBuf buffer) {
     int materialCount = buffer.readInt();
     ImmutableMap.Builder<MaterialId,IMaterial> materials = ImmutableMap.builder();
 
@@ -52,7 +57,7 @@ public class UpdateMaterialsPacket implements IThreadsafePacket {
   }
 
   @Override
-  public void encode(FriendlyByteBuf buffer) {
+  public void encode(RegistryFriendlyByteBuf buffer) {
     buffer.writeInt(this.materials.size());
     for (IMaterial material : this.materials.values()) {
       buffer.writeResourceLocation(material.getIdentifier());
@@ -71,7 +76,9 @@ public class UpdateMaterialsPacket implements IThreadsafePacket {
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
-    MaterialRegistry.updateMaterialsFromServer(this);
+  public void handle(IPayloadContext context) {
+    enqueue(context, () -> {
+      MaterialRegistry.updateMaterialsFromServer(this);
+    });
   }
 }

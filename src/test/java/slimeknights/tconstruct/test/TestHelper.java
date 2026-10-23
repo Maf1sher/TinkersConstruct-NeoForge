@@ -1,5 +1,9 @@
 package slimeknights.tconstruct.test;
 
+import io.netty.buffer.Unpooled;
+import net.minecraft.core.BuiltInRegistries;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
@@ -28,6 +32,12 @@ public class TestHelper {
   @SuppressWarnings("removal")
   public static ResourceLocation id(String name) {
     return new ResourceLocation(MOD_ID, name);
+  }
+
+  /** Creates a registry-aware buffer for NeoForge payload and Mantle stream-codec tests. */
+  public static RegistryFriendlyByteBuf registryBuffer() {
+    RegistryAccess registries = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
+    return new RegistryFriendlyByteBuf(Unpooled.buffer(), registries);
   }
 
   /** Helper to fetch traits from the trait hook */

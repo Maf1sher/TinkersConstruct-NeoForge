@@ -2,22 +2,24 @@ package slimeknights.tconstruct.library.modifiers.fluid;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import org.jetbrains.annotations.ApiStatus.Internal;
+import org.jetbrains.annotations.Nullable;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.primitive.BooleanLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
-import slimeknights.mantle.recipe.ingredient.FluidIngredient;
 import slimeknights.tconstruct.library.modifiers.fluid.FluidEffectContext.Block;
 import slimeknights.tconstruct.library.modifiers.fluid.FluidEffectContext.Entity;
+import slimeknights.tconstruct.library.recipe.TinkerFluidIngredients;
 
 import java.util.List;
 
 /** Data class to connect fluids to fluid effects */
-public record FluidEffects(FluidIngredient ingredient, List<FluidEffect<? super FluidEffectContext.Block>> blockEffects, List<FluidEffect<? super FluidEffectContext.Entity>> entityEffects, boolean hidden) {
+public record FluidEffects(@Nullable SizedFluidIngredient ingredient, List<FluidEffect<? super FluidEffectContext.Block>> blockEffects, List<FluidEffect<? super FluidEffectContext.Entity>> entityEffects, boolean hidden) {
   public static final RecordLoadable<FluidEffects> LOADABLE = RecordLoadable.create(
-    FluidIngredient.LOADABLE.requiredField("fluid", e -> e.ingredient),
+    Loadables.SIZED_FLUID_INGREDIENT.requiredField("fluid", e -> e.ingredient),
     FluidEffect.BLOCK_EFFECTS.list(0).defaultField("block_effects", List.of(), e -> e.blockEffects),
     FluidEffect.ENTITY_EFFECTS.list(0).defaultField("entity_effects", List.of(), e -> e.entityEffects),
     BooleanLoadable.INSTANCE.defaultField("hidden", false, false, e -> e.hidden),
@@ -36,12 +38,12 @@ public record FluidEffects(FluidIngredient ingredient, List<FluidEffect<? super 
    * @return  True if this recipe handles the given fluid
    */
   public boolean matches(Fluid fluid) {
-    return ingredient.test(fluid);
+    return ingredient != null && TinkerFluidIngredients.matchesFluid(ingredient, fluid);
   }
 
   /** Gets the amount of fluid needed for a single level */
   public int getAmount(Fluid fluid) {
-    return ingredient.getAmount(fluid);
+    return TinkerFluidIngredients.amountFor(ingredient, fluid);
   }
 
 
@@ -72,6 +74,9 @@ public record FluidEffects(FluidIngredient ingredient, List<FluidEffect<? super 
   /** Runs the effects for a generic context */
   private <C extends FluidEffectContext> int apply(FluidStack fluid, float level, C context, List<FluidEffect<? super C>> effects, FluidAction action) {
     int amountPerLevel = getAmount(fluid.getFluid());
+    if (amountPerLevel <= 0 || effects.isEmpty()) {
+      return 0;
+    }
     float scale;
     if (fluid.getAmount() >= amountPerLevel * level) {
       scale = level;

@@ -9,8 +9,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.AbstractArrow.Pickup;
+import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
@@ -46,8 +46,8 @@ import slimeknights.tconstruct.library.modifiers.modules.ModifierModule;
 import slimeknights.tconstruct.library.module.HookProvider;
 import slimeknights.tconstruct.library.module.ModuleHook;
 import slimeknights.tconstruct.library.recipe.FluidValues;
-import slimeknights.tconstruct.library.tools.capability.fluid.ToolFluidCapability;
 import slimeknights.tconstruct.library.tools.capability.fluid.ToolFluidCapability.FluidModifierHook;
+import slimeknights.tconstruct.library.tools.capability.fluid.ToolFluidCapability;
 import slimeknights.tconstruct.library.tools.capability.fluid.ToolTankHelper;
 import slimeknights.tconstruct.library.tools.nbt.IModDataView;
 import slimeknights.tconstruct.library.tools.nbt.IToolContext;
@@ -101,7 +101,7 @@ public enum SmashingModule implements ModifierModule, FluidModifierHook, Project
   /** Gets the capacity for the given fluid */
   private static int getAmount(Fluid fluid) {
     FluidEffects effects = FluidEffectManager.INSTANCE.find(fluid);
-    return effects.hasEffects() ? effects.ingredient().getAmount(fluid) : 0;
+    return effects.hasEffects() ? effects.getAmount(fluid) : 0;
   }
 
   /** Gets the capacity for the given fluid */

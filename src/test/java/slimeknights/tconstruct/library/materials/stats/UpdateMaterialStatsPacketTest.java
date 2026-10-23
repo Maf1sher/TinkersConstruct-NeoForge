@@ -1,13 +1,13 @@
 package slimeknights.tconstruct.library.materials.stats;
 
-import io.netty.buffer.Unpooled;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import org.junit.jupiter.api.Test;
 import slimeknights.mantle.data.registry.IdAwareComponentRegistry;
 import slimeknights.tconstruct.fixture.MaterialFixture;
 import slimeknights.tconstruct.fixture.MaterialStatsFixture;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.test.BaseMcTest;
+import slimeknights.tconstruct.test.TestHelper;
 import slimeknights.tconstruct.tools.stats.HandleMaterialStats;
 import slimeknights.tconstruct.tools.stats.HeadMaterialStats;
 import slimeknights.tconstruct.tools.stats.StatlessMaterialStats;
@@ -64,7 +64,7 @@ class UpdateMaterialStatsPacketTest extends BaseMcTest {
   }
 
   private UpdateMaterialStatsPacket sendAndReceivePacket(Map<MaterialId, Collection<IMaterialStats>> materialToStats) {
-    FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
+    RegistryFriendlyByteBuf buffer = TestHelper.registryBuffer();
 
     UpdateMaterialStatsPacket packetToEncode = new UpdateMaterialStatsPacket(materialToStats);
     packetToEncode.encode(buffer);

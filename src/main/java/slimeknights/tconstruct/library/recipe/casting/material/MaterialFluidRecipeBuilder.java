@@ -7,9 +7,9 @@ import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
-import slimeknights.mantle.recipe.ingredient.FluidIngredient;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 
 import javax.annotation.Nullable;
@@ -27,7 +27,7 @@ public class MaterialFluidRecipeBuilder extends AbstractRecipeBuilder<MaterialFl
   private final MaterialVariantId outputId;
   /** Fluid used for casting */
   @Setter
-  private FluidIngredient fluid = FluidIngredient.EMPTY;
+  @Nullable private SizedFluidIngredient fluid;
   /** Temperature for cooling time calculations */
   @Setter
   private int temperature = -1;
@@ -44,7 +44,7 @@ public class MaterialFluidRecipeBuilder extends AbstractRecipeBuilder<MaterialFl
    * @return  Builder instance
    */
   public MaterialFluidRecipeBuilder setFluidAndTemp(FluidStack fluidStack) {
-    this.fluid = FluidIngredient.of(fluidStack);
+    this.fluid = SizedFluidIngredient.of(fluidStack);
     if (this.temperature == -1) {
       this.temperature = getTemperature(fluidStack);
     }
@@ -57,7 +57,7 @@ public class MaterialFluidRecipeBuilder extends AbstractRecipeBuilder<MaterialFl
    * @param amount  Fluid amount
    */
   public MaterialFluidRecipeBuilder setFluid(TagKey<Fluid> tagIn, int amount) {
-    setFluid(FluidIngredient.of(tagIn, amount));
+    setFluid(SizedFluidIngredient.of(tagIn, amount));
     return this;
   }
 
@@ -68,7 +68,7 @@ public class MaterialFluidRecipeBuilder extends AbstractRecipeBuilder<MaterialFl
 
   @Override
   public void save(Consumer<FinishedRecipe> consumer, ResourceLocation id) {
-    if (this.fluid == FluidIngredient.EMPTY) {
+    if (this.fluid == null) {
       throw new IllegalStateException("Material fluid recipes require a fluid input");
     }
     if (this.temperature < 0) {
