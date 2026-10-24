@@ -30,8 +30,8 @@ class UpdateMaterialPacketTest extends BaseMcTest {
     // send a packet over the buffer
     RegistryFriendlyByteBuf buffer = TestHelper.registryBuffer();
     UpdateMaterialsPacket packetToEncode = new UpdateMaterialsPacket(materials, redirects, Collections.emptyMap());
-    packetToEncode.encode(buffer);
-    UpdateMaterialsPacket decoded = new UpdateMaterialsPacket(buffer);
+    UpdateMaterialsPacket.CODEC.encode(buffer, packetToEncode);
+    UpdateMaterialsPacket decoded = UpdateMaterialsPacket.CODEC.decode(buffer);
 
     // parse results
     Map<MaterialId,IMaterial> parsed = decoded.getMaterials();

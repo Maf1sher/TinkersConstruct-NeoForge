@@ -45,6 +45,10 @@ import slimeknights.tconstruct.tools.network.SyncProjectileModifiersPacket;
 import slimeknights.tconstruct.tools.network.TinkerControlPacket;
 import slimeknights.tconstruct.tools.network.ToolContainerFluidUpdatePacket;
 
+import java.util.Arrays;
+import java.util.function.BiConsumer;
+import java.util.function.Predicate;
+
 /** Registers and sends Tinkers' Construct payloads. */
 public class TinkerNetwork {
   private static final String PROTOCOL_VERSION = "1";
@@ -173,20 +177,37 @@ public class TinkerNetwork {
 
   /** Sends a collection of payloads to the player(s) covered by a datapack sync event. */
   public static void syncPackets(OnDatapackSyncEvent event, CustomPacketPayload... payloads) {
+    syncPackets(event, payloads, TinkerNetwork::isSyncEligible, TinkerNetwork::sendSyncPayloads);
+  }
+
+  static void syncPackets(OnDatapackSyncEvent event, CustomPacketPayload[] payloads,
+                          Predicate<ServerPlayer> isEligible, BiConsumer<ServerPlayer,CustomPacketPayload[]> sender) {
     if (payloads.length == 0) {
       return;
     }
     ServerPlayer targetedPlayer = event.getPlayer();
     if (targetedPlayer != null) {
-      if (!targetedPlayer.connection.getConnection().isMemoryConnection() && !(targetedPlayer instanceof FakePlayer)) {
-        PacketDistributor.sendToPlayer(targetedPlayer, payloads[0], java.util.Arrays.copyOfRange(payloads, 1, payloads.length));
+      if (isEligible.test(targetedPlayer)) {
+        sender.accept(targetedPlayer, payloads);
       }
     } else {
       for (ServerPlayer player : event.getPlayerList().getPlayers()) {
-        if (!player.connection.getConnection().isMemoryConnection() && !(player instanceof FakePlayer)) {
-          PacketDistributor.sendToPlayer(player, payloads[0], java.util.Arrays.copyOfRange(payloads, 1, payloads.length));
+        if (isEligible.test(player)) {
+          sender.accept(player, payloads);
         }
       }
     }
+  }
+
+  private static boolean isSyncEligible(ServerPlayer player) {
+    return isSyncEligible(player.connection.getConnection().isMemoryConnection(), player instanceof FakePlayer);
+  }
+
+  static boolean isSyncEligible(boolean memoryConnection, boolean fakePlayer) {
+    return !memoryConnection && !fakePlayer;
+  }
+
+  private static void sendSyncPayloads(ServerPlayer player, CustomPacketPayload[] payloads) {
+    PacketDistributor.sendToPlayer(player, payloads[0], Arrays.copyOfRange(payloads, 1, payloads.length));
   }
 }
