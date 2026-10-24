@@ -27,13 +27,15 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fluids.FluidType;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.fluids.FluidType;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.registries.RegisterEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import slimeknights.mantle.block.GaugeBlock;
-import slimeknights.mantle.fluid.transfer.FluidContainerTransferManager;
+import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer;
 import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
 import slimeknights.mantle.recipe.helper.TypeAwareRecipeSerializer;
 import slimeknights.mantle.registration.object.BuildingBlockObject;
@@ -127,6 +129,8 @@ import slimeknights.tconstruct.smeltery.data.SmelteryRecipeProvider;
 import slimeknights.tconstruct.smeltery.item.CopperCanItem;
 import slimeknights.tconstruct.smeltery.item.DummyMaterialItem;
 import slimeknights.tconstruct.smeltery.item.TankItem;
+import slimeknights.tconstruct.smeltery.item.TankItemFluidHandler;
+import slimeknights.tconstruct.smeltery.item.CopperCanFluidHandler;
 import slimeknights.tconstruct.smeltery.menu.AlloyerContainerMenu;
 import slimeknights.tconstruct.smeltery.menu.HeatingStructureContainerMenu;
 import slimeknights.tconstruct.smeltery.menu.MelterContainerMenu;
@@ -461,11 +465,31 @@ public final class TinkerSmeltery extends TinkerModule {
     });
   }
 
-  @SuppressWarnings("removal")
+  @SubscribeEvent
+  void registerFluidCapabilities(RegisterCapabilitiesEvent event) {
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, tank.get(), (blockEntity, side) -> blockEntity.getTank());
+    for (TankType type : TankType.values()) {
+      registerTankItem(event, searedTank.get(type));
+      registerTankItem(event, scorchedTank.get(type));
+    }
+    registerTankItem(event, searedCastingTank.get());
+    registerTankItem(event, searedFluidCannon.get());
+    registerTankItem(event, scorchedFluidCannon.get());
+    registerTankItem(event, endFluidCannon.get());
+    registerTankItem(event, searedLantern.get());
+    registerTankItem(event, scorchedLantern.get());
+    event.registerItem(Capabilities.FluidHandler.ITEM, (stack, context) -> new CopperCanFluidHandler(stack), copperCan.get());
+  }
+
+  private static void registerTankItem(RegisterCapabilitiesEvent event, ItemLike item) {
+    event.registerItem(Capabilities.FluidHandler.ITEM,
+      (stack, context) -> new TankItemFluidHandler((TankItem)stack.getItem(), stack), item);
+  }
+
   @SubscribeEvent
   void registerSerializers(RegisterEvent event) {
     if (event.getRegistryKey() == Registries.RECIPE_SERIALIZER) {
-      FluidContainerTransferManager.TRANSFER_LOADERS.registerDeserializer(EmptyPotionTransfer.ID, EmptyPotionTransfer.DESERIALIZER);
+      IFluidContainerTransfer.LOADER.register(EmptyPotionTransfer.ID, EmptyPotionTransfer.LOADER);
     }
   }
 

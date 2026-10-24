@@ -20,7 +20,7 @@ import net.neoforged.neoforge.common.Tags;
 import net.minecraftforge.common.crafting.CompoundIngredient;
 import net.minecraftforge.common.crafting.DifferenceIngredient;
 import net.neoforged.neoforge.common.conditions.OrCondition;
-import net.minecraftforge.fluids.FluidType;
+import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import slimeknights.mantle.datagen.MantleTags;
 import slimeknights.mantle.recipe.condition.TagCombinationCondition;

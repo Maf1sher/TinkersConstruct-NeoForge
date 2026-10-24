@@ -2,20 +2,20 @@ package slimeknights.tconstruct.fluids;
 
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.world.item.alchemy.PotionUtils;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ModelEvent.RegisterGeometryLoaders;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.ModelEvent.RegisterGeometryLoaders;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import slimeknights.mantle.registration.object.FlowingFluidObject;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.ClientEventBase;
 import slimeknights.tconstruct.library.client.model.FluidContainerModel;
 
-@EventBusSubscriber(modid = TConstruct.MOD_ID, value = Dist.CLIENT, bus = Bus.MOD)
+@EventBusSubscriber(modid = TConstruct.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class FluidClientEvents extends ClientEventBase {
   @SubscribeEvent
   static void clientSetup(final FMLClientSetupEvent event) {
@@ -36,7 +36,7 @@ public class FluidClientEvents extends ClientEventBase {
 
   @SubscribeEvent
   static void itemColors(final RegisterColorHandlersEvent.Item event) {
-    event.register((stack, index) -> index > 0 ? -1 : PotionUtils.getColor(stack), TinkerFluids.potion.asItem());
+    event.register((stack, index) -> index > 0 ? -1 : stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).getColor(), TinkerFluids.potion.asItem());
   }
 
   @SubscribeEvent

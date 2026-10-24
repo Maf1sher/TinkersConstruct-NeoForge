@@ -8,10 +8,10 @@ import mezz.jei.api.runtime.IIngredientManager;
 import mezz.jei.api.runtime.IIngredientManager.IIngredientListener;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
+import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import slimeknights.tconstruct.library.fluid.EmptyFluidHandlerItem;
 
 import java.util.ArrayList;
@@ -28,7 +28,10 @@ public record TankHidingIngredientListener(IIngredientManager manager, List<Item
       if (!fluid.isEmpty()) {
         for (Item item : tanks) {
           ItemStack tank = new ItemStack(item);
-          IFluidHandlerItem handler = tank.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).orElse(EmptyFluidHandlerItem.INSTANCE);
+          IFluidHandlerItem handler = tank.getCapability(Capabilities.FluidHandler.ITEM);
+          if (handler == null) {
+            handler = EmptyFluidHandlerItem.INSTANCE;
+          }
           if (handler.getTanks() > 0 && handler.fill(fluid, FluidAction.EXECUTE) > 0) {
             list.add(handler.getContainer());
           }
