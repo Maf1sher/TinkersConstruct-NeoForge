@@ -2,10 +2,9 @@ package slimeknights.tconstruct.library.tools.capability;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.ItemCapability;
+import net.neoforged.neoforge.energy.IEnergyStorage;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.modules.ModifierModule;
 import slimeknights.tconstruct.library.modifiers.modules.build.ModifierTraitModule;
@@ -16,6 +15,7 @@ import slimeknights.tconstruct.library.tools.stat.ToolStatId;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 
 import java.util.function.Supplier;
+import javax.annotation.Nullable;
 
 /** Standard implementation of energy capability on a tool. Not currently used in the mod directly, but should help addons have more unity. */
 public record ToolEnergyCapability(Supplier<? extends IToolStackView> tool) implements IEnergyStorage {
@@ -128,17 +128,15 @@ public record ToolEnergyCapability(Supplier<? extends IToolStackView> tool) impl
 
   /** Provider instance for a fluid cap */
   public static class Provider implements IToolCapabilityProvider {
-    private final LazyOptional<IEnergyStorage> energyCap;
-    public Provider(Supplier<? extends IToolStackView> toolStack) {
-      this.energyCap = LazyOptional.of(() -> new ToolEnergyCapability(toolStack));
-    }
+    private final Supplier<? extends IToolStackView> toolStack;
+    public Provider(Supplier<? extends IToolStackView> toolStack) { this.toolStack = toolStack; }
 
     @Override
-    public <T> LazyOptional<T> getCapability(IToolStackView tool, Capability<T> cap) {
-      if (cap == ForgeCapabilities.ENERGY && tool.getStats().getInt(MAX_STAT) > 0) {
-        return energyCap.cast();
+    public Object getCapability(IToolStackView tool, ItemCapability<?, @Nullable Void> capability) {
+      if (capability == Capabilities.EnergyStorage.ITEM && tool.getStats().getInt(MAX_STAT) > 0) {
+        return new ToolEnergyCapability(toolStack);
       }
-      return LazyOptional.empty();
+      return null;
     }
   }
 }

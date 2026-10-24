@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.library.tools.part;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -9,6 +10,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
@@ -35,6 +37,16 @@ public class MaterialItem extends Item implements IMaterialItem {
     super(properties);
   }
 
+  /* Stack nbt helpers */
+
+
+  /** Gets a copy of the stack's tool NBT, or null if it has none */
+  @Nullable
+  public static CompoundTag getStackNBT(ItemStack stack) {
+    CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
+    return customData == null ? null : customData.copyTag();
+  }
+
   /** Gets the material ID for the given NBT compound */
   public static MaterialVariantId getMaterialId(@Nullable CompoundTag nbt) {
     if (nbt != null) {
@@ -51,7 +63,7 @@ public class MaterialItem extends Item implements IMaterialItem {
 
   @Override
   public MaterialVariantId getMaterial(ItemStack stack) {
-    return getMaterialId(stack.getTag());
+    return getMaterialId(getStackNBT(stack));
   }
 
   @Nullable

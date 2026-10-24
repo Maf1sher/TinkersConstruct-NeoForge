@@ -16,24 +16,21 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.ModelEvent.RegisterGeometryLoaders;
-import net.minecraftforge.client.event.MovementInputUpdateEvent;
-import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
-import net.minecraftforge.client.settings.KeyConflictContext;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent.Phase;
-import net.minecraftforge.event.TickEvent.PlayerTickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.ModelEvent.RegisterGeometryLoaders;
+import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
+import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
+import net.neoforged.neoforge.client.settings.KeyConflictContext;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import slimeknights.mantle.client.ResourceColorManager;
 import slimeknights.mantle.client.SafeClientAccess;
 import slimeknights.mantle.client.TooltipKey;
@@ -94,7 +91,7 @@ import static slimeknights.tconstruct.TConstruct.getResource;
 import static slimeknights.tconstruct.library.client.model.tools.ToolModel.registerItemColors;
 
 @SuppressWarnings("unused")
-@EventBusSubscriber(modid = TConstruct.MOD_ID, value = Dist.CLIENT, bus = Bus.MOD)
+@EventBusSubscriber(modid = TConstruct.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class ToolClientEvents extends ClientEventBase {
   /** Keybinding for interacting using a helmet */
   private static final KeyMapping HELMET_INTERACT = new KeyMapping(TConstruct.makeTranslationKey("key", "helmet_interact"), KeyConflictContext.IN_GAME, InputConstants.getKey("key.keyboard.z"), "key.categories.tconstruct");
@@ -164,8 +161,8 @@ public class ToolClientEvents extends ClientEventBase {
 
   @SubscribeEvent
   static void clientSetupEvent(FMLClientSetupEvent event) {
-    MinecraftForge.EVENT_BUS.addListener(ToolClientEvents::handleKeyBindings);
-    MinecraftForge.EVENT_BUS.addListener(ToolClientEvents::handleInput);
+    NeoForge.EVENT_BUS.addListener(ToolClientEvents::handleKeyBindings);
+    NeoForge.EVENT_BUS.addListener(ToolClientEvents::handleInput);
     AbstractArmorModel.init();
 
     // keybinds
@@ -300,18 +297,20 @@ public class ToolClientEvents extends ClientEventBase {
   private static boolean wasLeggingsInteracting = false;
 
   /** Called on player tick to handle keybinding presses */
-  private static void handleKeyBindings(PlayerTickEvent event) {
+  // 1.21.1: PlayerTickEvent moved to net.neoforged.neoforge.event.tick and split into Pre/Post, replacing the Phase enum; Pre fires on tick start on both sides so an explicit side check is unnecessary
+  @SuppressWarnings("removal")
+  private static void handleKeyBindings(PlayerTickEvent.Pre event) {
     Minecraft minecraft = Minecraft.getInstance();
-    if (minecraft.player != null && minecraft.player == event.player && event.phase == Phase.START && event.side == LogicalSide.CLIENT && !minecraft.player.isSpectator()) {
+    if (minecraft.player != null && minecraft.player == event.getEntity() && !minecraft.player.isSpectator()) {
 
       // jumping in mid air for double jump
       // ensure we pressed the key since the last tick, holding should not use all your jumps at once
       boolean isJumping = minecraft.options.keyJump.isDown();
       if (!wasJumping && isJumping) {
-        if (TinkerEffects.antigravity.get().antigravityJump(event.player)) {
+        if (TinkerEffects.antigravity.get().antigravityJump(event.getEntity())) {
           TinkerNetwork.getInstance().sendToServer(TinkerControlPacket.ANTIGRAVITY_JUMP);
         }
-        else if (DoubleJumpHandler.extraJump(event.player)) {
+        else if (DoubleJumpHandler.extraJump(event.getEntity())) {
           TinkerNetwork.getInstance().sendToServer(TinkerControlPacket.DOUBLE_JUMP);
         }
       }
@@ -321,12 +320,12 @@ public class ToolClientEvents extends ClientEventBase {
       boolean isHelmetInteracting = HELMET_INTERACT.isDown();
       if (!wasHelmetInteracting && isHelmetInteracting) {
         TooltipKey key = SafeClientAccess.getTooltipKey();
-        if (InteractionHandler.startArmorInteract(event.player, EquipmentSlot.HEAD, key)) {
+        if (InteractionHandler.startArmorInteract(event.getEntity(), EquipmentSlot.HEAD, key)) {
           TinkerNetwork.getInstance().sendToServer(TinkerControlPacket.getStartHelmetInteract(key));
         }
       }
       if (wasHelmetInteracting && !isHelmetInteracting) {
-        if (InteractionHandler.stopArmorInteract(event.player, EquipmentSlot.HEAD)) {
+        if (InteractionHandler.stopArmorInteract(event.getEntity(), EquipmentSlot.HEAD)) {
           TinkerNetwork.getInstance().sendToServer(TinkerControlPacket.STOP_HELMET_INTERACT);
         }
       }
@@ -335,12 +334,12 @@ public class ToolClientEvents extends ClientEventBase {
       boolean isLeggingsInteract = LEGGINGS_INTERACT.isDown();
       if (!wasLeggingsInteracting && isLeggingsInteract) {
         TooltipKey key = SafeClientAccess.getTooltipKey();
-        if (InteractionHandler.startArmorInteract(event.player, EquipmentSlot.LEGS, key)) {
+        if (InteractionHandler.startArmorInteract(event.getEntity(), EquipmentSlot.LEGS, key)) {
           TinkerNetwork.getInstance().sendToServer(TinkerControlPacket.getStartLeggingsInteract(key));
         }
       }
       if (wasLeggingsInteracting && !isLeggingsInteract) {
-        if (InteractionHandler.stopArmorInteract(event.player, EquipmentSlot.LEGS)) {
+        if (InteractionHandler.stopArmorInteract(event.getEntity(), EquipmentSlot.LEGS)) {
           TinkerNetwork.getInstance().sendToServer(TinkerControlPacket.STOP_LEGGINGS_INTERACT);
         }
       }

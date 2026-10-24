@@ -3,11 +3,11 @@ package slimeknights.tconstruct.library.utils;
 import lombok.Getter;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent.LeftClickBlock;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent.LeftClickBlock.Action;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock.Action;
+import net.neoforged.neoforge.event.level.BlockDropsEvent;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability;
@@ -30,8 +30,8 @@ public class BlockSideHitListener {
       return;
     }
     init = true;
-    MinecraftForge.EVENT_BUS.addListener(BlockSideHitListener::onLeftClickBlock);
-    MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, BlockSideHitListener::breakBlock);
+    NeoForge.EVENT_BUS.addListener(BlockSideHitListener::onLeftClickBlock);
+    NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, BlockSideHitListener::breakBlock);
   }
 
   /** Called when the player left-clicks a block to store the face */
@@ -52,11 +52,13 @@ public class BlockSideHitListener {
     }
   }
 
-  /** Called on block break to store the last break XP */
-  private static void breakBlock(BlockEvent.BreakEvent event) {
-    TinkerDataCapability.Holder data = TinkerDataCapability.getData(event.getPlayer());
-    if (data != null) {
-      data.put(LAST_XP, event.getExpToDrop());
+  /** Called on block break to store the last drop experience. In 1.21.1 the BreakEvent no longer carries XP, so we track it at drop time */
+  private static void breakBlock(BlockDropsEvent event) {
+    if (event.getBreaker() instanceof Player player) {
+      TinkerDataCapability.Holder data = TinkerDataCapability.getData(player);
+      if (data != null) {
+        data.put(LAST_XP, event.getDroppedExperience());
+      }
     }
   }
 

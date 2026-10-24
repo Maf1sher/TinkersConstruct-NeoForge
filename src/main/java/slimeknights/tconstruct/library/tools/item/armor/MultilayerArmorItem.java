@@ -6,7 +6,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import slimeknights.tconstruct.library.client.armor.ArmorModelManager.ArmorModelDispatcher;
 import slimeknights.tconstruct.library.tools.definition.ModifiableArmorMaterial;
 import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
@@ -19,27 +19,24 @@ import java.util.function.Consumer;
 public class MultilayerArmorItem extends ModifiableArmorItem {
   private final ResourceLocation name;
   public MultilayerArmorItem(ModifiableArmorMaterial material, ArmorItem.Type slot, Properties properties) {
-    this(material, slot, properties, material.getId());
-  }
-
-  public MultilayerArmorItem(ModifiableArmorMaterial material, ArmorItem.Type slot, Properties properties, ResourceLocation name) {
     super(material, slot, properties);
-    this.name = name;
+    this.name = material.getId();
   }
 
-  @SuppressWarnings("removal")
-  public MultilayerArmorItem(ArmorMaterial material, ArmorItem.Type slot, Properties properties, ToolDefinition toolDefinition) {
-    this(material, slot, properties, toolDefinition, new ResourceLocation(material.getName()));
-  }
-
-  public MultilayerArmorItem(ArmorMaterial material, ArmorItem.Type slot, Properties properties, ToolDefinition toolDefinition, ResourceLocation name) {
+  /** Used by data-driven creation where the tool definition is provided manually */
+  public MultilayerArmorItem(ModifiableArmorMaterial material, ArmorItem.Type slot, Properties properties, ToolDefinition toolDefinition, ResourceLocation name) {
     super(material, slot, properties, toolDefinition);
     this.name = name;
   }
 
+  /** Used by data-driven creation where the tool definition is provided manually */
+  public MultilayerArmorItem(DummyArmorMaterial material, ArmorItem.Type slot, Properties properties, ToolDefinition toolDefinition) {
+    this(material, slot, properties, toolDefinition, material.getId());
+  }
+
   @Nullable
   @Override
-  public String getArmorTexture(ItemStack stack, Entity entity, EquipmentSlot slot, String type) {
+  public ResourceLocation getArmorTexture(ItemStack stack, Entity entity, EquipmentSlot slot, ArmorMaterial.Layer layer, boolean innerModel) {
     return ArmorUtil.getDummyArmorTexture(slot);
   }
 

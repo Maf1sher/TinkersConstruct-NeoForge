@@ -11,11 +11,10 @@ import com.google.gson.JsonSerializer;
 import com.google.gson.JsonSyntaxException;
 import io.netty.handler.codec.DecoderException;
 import lombok.RequiredArgsConstructor;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.crafting.CraftingHelper;
+import com.mojang.serialization.JsonOps;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.util.JsonHelper;
 import slimeknights.tconstruct.library.recipe.partbuilder.Pattern;
@@ -106,10 +105,11 @@ public abstract class LayoutIcon {
     @Override
     public JsonObject toJson() {
       JsonObject json = new JsonObject();
-      json.add("item", Loadables.ITEM.serialize(stack.getItem()));
-      CompoundTag tag = stack.getTag();
-      if (tag != null) {
-        json.addProperty("nbt", tag.toString());
+      // 1.21.1 item format from ItemStack.CODEC replaces the old "item"/"nbt" keys
+      json.add("id", Loadables.ITEM.serialize(stack.getItem()));
+      int count = stack.getCount();
+      if (count != 1) {
+        json.addProperty("count", count);
       }
       return json;
     }
@@ -159,8 +159,9 @@ public abstract class LayoutIcon {
         Pattern pattern = new Pattern(JsonHelper.getResourceLocation(object, "pattern"));
         return new PatternIcon(pattern);
       }
-      if (object.has("item")) {
-        ItemStack stack = CraftingHelper.getItemStack(object, true);
+      // accept both the legacy "item" key and the 1.21.1 "id" key; the codec reports a clear error for legacy keys
+      if (object.has("item") || object.has("id")) {
+        ItemStack stack = itemStackFromJson(object);
         return new ItemStackIcon(stack);
       }
       // not sure why this would be needed, but might as well
@@ -168,6 +169,13 @@ public abstract class LayoutIcon {
         return EMPTY;
       }
       throw new JsonSyntaxException("LayoutButtonIcon must have either pattern or item");
+    }
+
+    /** Parses an item stack from JSON in the 1.21.1 format (replacement for CraftingHelper.getItemStack); the item field is required so empty stacks cannot be parsed here */
+    private static ItemStack itemStackFromJson(JsonObject object) {
+      return ItemStack.CODEC.parse(JsonOps.INSTANCE, object)
+        .resultOrPartial(msg -> { throw new JsonSyntaxException(msg); })
+        .orElseThrow();
     }
 
     @Override

@@ -25,7 +25,7 @@ public class MaterialBlockItem extends BlockItem implements IMaterialItem {
 
   @Override
   public MaterialVariantId getMaterial(ItemStack stack) {
-    return MaterialItem.getMaterialId(stack.getTag());
+    return MaterialItem.getMaterialId(MaterialItem.getStackNBT(stack));
   }
 
   @Override

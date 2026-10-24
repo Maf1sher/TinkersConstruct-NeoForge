@@ -4,8 +4,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
+import net.neoforged.neoforge.capabilities.ItemCapability;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
@@ -70,14 +69,14 @@ public interface BlockItemProviderModifierHook {
     }
 
     class Provider implements ToolCapabilityProvider.IToolCapabilityProvider {
-        private final LazyOptional<BlockItemProviderCapability> lazy;
-        public Provider(Supplier<? extends IToolStackView> tool) {
-            lazy = LazyOptional.of(() -> new CapabilityImpl(tool.get()));
-        }
+        public Provider(Supplier<? extends IToolStackView> tool) {}
 
         @Override
-        public <T> LazyOptional<T> getCapability(IToolStackView tool, Capability<T> cap) {
-            return BlockItemProviderCapability.CAPABILITY.orEmpty(cap, lazy);
+        public Object getCapability(IToolStackView tool, ItemCapability<?, @Nullable Void> capability) {
+            if (capability == BlockItemProviderCapability.CAPABILITY) {
+                return new CapabilityImpl(tool);
+            }
+            return null;
         }
     }
 }

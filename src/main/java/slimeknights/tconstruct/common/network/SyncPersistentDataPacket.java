@@ -39,7 +39,7 @@ public class SyncPersistentDataPacket implements TinkerPayload {
     private static void handle(SyncPersistentDataPacket packet) {
       Player player = Minecraft.getInstance().player;
       if (player != null) {
-        player.getCapability(PersistentDataCapability.CAPABILITY).ifPresent(data -> data.copyFrom(packet.data));
+        player.getData(PersistentDataCapability.DATA).copyFrom(packet.data);
       }
     }
   }

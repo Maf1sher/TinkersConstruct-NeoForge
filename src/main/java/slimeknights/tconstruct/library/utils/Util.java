@@ -18,9 +18,9 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeI18n;
+import net.minecraft.locale.Language;
 import net.neoforged.neoforge.common.conditions.ICondition;
-import net.minecraftforge.fml.ModList;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.ModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -74,7 +74,8 @@ public class Util {
    * @return  True if it can be translated
    */
   public static boolean canTranslate(String key) {
-    return !ForgeI18n.getPattern(key).equals(key);
+    // in 1.20.1 Forge this was checked against the untranslated format pattern, on Neo the language map is directly available
+    return Language.getInstance().has(key);
   }
 
   /**

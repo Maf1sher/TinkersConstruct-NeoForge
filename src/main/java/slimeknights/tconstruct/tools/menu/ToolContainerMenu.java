@@ -14,15 +14,14 @@ import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.IItemHandlerModifiable;
-import net.minecraftforge.items.ItemStackHandler;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
+import net.neoforged.neoforge.items.ItemStackHandler;
 import slimeknights.mantle.fluid.FluidTransferHelper;
 import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer.TransferDirection;
 import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer.TransferResult;
-import slimeknights.mantle.inventory.EmptyItemHandler;
 import slimeknights.mantle.inventory.SmartItemHandlerSlot;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.config.Config.ToolSyncType;
@@ -116,11 +115,17 @@ public class ToolContainerMenu extends AbstractContainerMenu {
       includeOffhand = ModifierUtil.checkVolatileFlag(stack, ToolInventoryCapability.INCLUDE_OFFHAND);
     }
     // if the stack looks like it could be our tool, fetch the handler from it
+    // note ToolStack.isInitialized is equivalent to the old hasTag() check on modifiable stacks
     IItemHandler handler;
-    if (stack.hasTag() && stack.is(TinkerTags.Items.MODIFIABLE)) {
-      handler = stack.getCapability(ForgeCapabilities.ITEM_HANDLER).filter(cap -> cap instanceof IItemHandlerModifiable).orElse(EmptyItemHandler.INSTANCE);
-      // wrong number of slots means something went wrong, use a dummy
-      if (handler.getSlots() != size) {
+    if (ToolStack.isInitialized(stack) && stack.is(TinkerTags.Items.MODIFIABLE)) {
+      IItemHandlerModifiable toolHandler = stack.getCapability(Capabilities.ItemHandler.ITEM) instanceof IItemHandlerModifiable modifiable ? modifiable : null;
+      if (toolHandler != null) {
+        handler = toolHandler;
+        // wrong number of slots means something went wrong, use a dummy
+        if (handler.getSlots() != size) {
+          handler = new ItemStackHandler(size);
+        }
+      } else {
         handler = new ItemStackHandler(size);
       }
     } else {

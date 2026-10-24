@@ -42,7 +42,7 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.ToolActions;
+import net.neoforged.neoforge.common.ItemAbilities;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.common.conditions.WithConditions;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -496,19 +496,19 @@ public class AdvancementsProvider extends GenericDataProvider {
     // pickaxes that mine stone tier grant upgrade tool advancement
     grantAdvancement(resource("internal/stone_pickaxe"), AdvancementIds.STONE_PICK, builder -> builder.addCriterion("stone_pick", hasToolStack(
       ToolStackPredicate.tag(TinkerTags.Items.HARVEST),
-      new ToolActionPredicate(ToolActions.PICKAXE_DIG),
+      new ToolActionPredicate(ItemAbilities.PICKAXE_DIG),
       new StatInSetPredicate<>(ToolStats.HARVEST_TIER, Tiers.STONE)
     )));
     // pickaxes that mine iron tier grant iron tools advancement
     grantAdvancement(resource("internal/iron_pickaxe"), AdvancementIds.IRON_PICK, builder -> builder.addCriterion("iron_pick", hasToolStack(
       ToolStackPredicate.tag(TinkerTags.Items.HARVEST),
-      new ToolActionPredicate(ToolActions.PICKAXE_DIG),
+      new ToolActionPredicate(ItemAbilities.PICKAXE_DIG),
       new StatInSetPredicate<>(ToolStats.HARVEST_TIER, Tiers.IRON)
     )));
     // anything with tilling and netherite grants netherite hoe
     grantAdvancement(resource("internal/netherite_hoe"), AdvancementIds.NETHERITE_HOE, builder -> builder.addCriterion("iron_pick", hasToolStack(
       ToolStackPredicate.tag(TinkerTags.Items.INTERACTABLE_RIGHT),
-      new ToolActionPredicate(ToolActions.HOE_TILL),
+      new ToolActionPredicate(ItemAbilities.HOE_TILL),
       new VolatileDataPredicate(AdvancementIds.NETHERITE)
     )));
     // boots with the snow boots flag can walk on powder snow

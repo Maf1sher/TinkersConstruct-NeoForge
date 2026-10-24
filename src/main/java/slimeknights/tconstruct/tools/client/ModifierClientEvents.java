@@ -123,7 +123,7 @@ public class ModifierClientEvents {
   /** Handles the zoom modifier zooming */
   @SubscribeEvent
   static void handleZoom(ComputeFovModifierEvent event) {
-    event.getPlayer().getCapability(TinkerDataCapability.CAPABILITY).ifPresent(data -> {
+    TinkerDataCapability.Holder data = TinkerDataCapability.getData(event.getPlayer());
       float newFov = event.getNewFovModifier();
 
       // scaled effects only apply if we have FOV scaling, nothing to do if 0
@@ -149,7 +149,6 @@ public class ModifierClientEvents {
         newFov *= constZoom.getValue();
       }
       event.setNewFovModifier(newFov);
-    });
   }
 
 

@@ -2,14 +2,13 @@ package slimeknights.tconstruct.library.events.teleport;
 
 import lombok.Getter;
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.event.entity.EntityTeleportEvent;
-import net.minecraftforge.eventbus.api.Cancelable;
+import net.neoforged.bus.api.ICancellableEvent;
+import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 
 /** Event fired when an entity teleports via a tool modifier. Subclasses may have more context. */
-@Cancelable
 @Getter
-public class ModifierTeleportEvent extends EntityTeleportEvent {
+public class ModifierTeleportEvent extends EntityTeleportEvent implements ICancellableEvent {
   private final ModifierEntry modifier;
   public ModifierTeleportEvent(Entity entity, double targetX, double targetY, double targetZ, ModifierEntry modifier) {
     super(entity, targetX, targetY, targetZ);

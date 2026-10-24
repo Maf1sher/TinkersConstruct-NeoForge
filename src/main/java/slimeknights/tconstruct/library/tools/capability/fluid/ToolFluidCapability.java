@@ -4,9 +4,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.ItemCapability;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import slimeknights.tconstruct.TConstruct;
@@ -318,17 +317,19 @@ public class ToolFluidCapability extends FluidModifierHookIterator<ModifierEntry
 
   /** Provider instance for a fluid cap */
   public static class Provider implements IToolCapabilityProvider {
-    private final LazyOptional<IFluidHandlerItem> fluidCap;
+    private final ItemStack stack;
+    private final Supplier<? extends IToolStackView> toolStack;
     public Provider(ItemStack stack, Supplier<? extends IToolStackView> toolStack) {
-      this.fluidCap = LazyOptional.of(() -> new ToolFluidCapability(stack, toolStack));
+      this.stack = stack;
+      this.toolStack = toolStack;
     }
 
     @Override
-    public <T> LazyOptional<T> getCapability(IToolStackView tool, Capability<T> cap) {
-      if (cap == ForgeCapabilities.FLUID_HANDLER_ITEM && tool.getVolatileData().getInt(TOTAL_TANKS) > 0) {
-        return fluidCap.cast();
+    public Object getCapability(IToolStackView tool, ItemCapability<?, @Nullable Void> capability) {
+      if (capability == Capabilities.FluidHandler.ITEM && tool.getVolatileData().getInt(TOTAL_TANKS) > 0) {
+        return new ToolFluidCapability(stack, toolStack);
       }
-      return LazyOptional.empty();
+      return null;
     }
   }
 }

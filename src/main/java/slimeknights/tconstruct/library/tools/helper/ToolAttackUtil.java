@@ -25,9 +25,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.entity.PartEntity;
-import net.minecraftforge.event.entity.player.CriticalHitEvent;
+import net.neoforged.neoforge.common.CommonHooks;
+import net.neoforged.neoforge.entity.PartEntity;
+import net.neoforged.neoforge.event.entity.player.CriticalHitEvent;
 import slimeknights.mantle.util.CombatHelper;
 import slimeknights.mantle.util.OffhandCooldownTracker;
 import slimeknights.tconstruct.TConstruct;
@@ -111,9 +111,10 @@ public class ToolAttackUtil {
 
     float criticalModifier = isCritical ? 1.5f : 1.0f;
     if (attackerPlayer != null) {
-      CriticalHitEvent hitResult = ForgeHooks.getCriticalHit(attackerPlayer, target, isCritical, criticalModifier);
-      if (hitResult != null) {
-        criticalModifier = hitResult.getDamageModifier();
+      CriticalHitEvent hitResult = CommonHooks.fireCriticalHit(attackerPlayer, target, isCritical, criticalModifier);
+      // the event is always fired in 1.21.1; only use its multiplier for actual (or modifier forced) criticals
+      if (isCritical || hitResult.isCriticalHit()) {
+        criticalModifier = hitResult.getDamageMultiplier();
       } else {
         criticalModifier = 1;
       }

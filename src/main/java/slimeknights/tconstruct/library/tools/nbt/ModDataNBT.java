@@ -7,7 +7,9 @@ import lombok.Getter;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.common.util.INBTSerializable;
 
 import java.util.function.BiFunction;
 
@@ -18,7 +20,7 @@ import java.util.function.BiFunction;
  */
 @EqualsAndHashCode
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class ModDataNBT implements IModDataView {
+public class ModDataNBT implements IModDataView, INBTSerializable<CompoundTag> {
   /** Compound representing modifier data */
   @Getter(AccessLevel.PROTECTED)
   private final CompoundTag data;
@@ -110,6 +112,16 @@ public class ModDataNBT implements IModDataView {
   /** Gets a copy of the internal data, generally should only be used for syncing, no reason to call directly */
   public CompoundTag getCopy() {
     return data.copy();
+  }
+
+  @Override
+  public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+    return getCopy();
+  }
+
+  @Override
+  public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+    copyFrom(nbt);
   }
 
   /**

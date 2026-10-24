@@ -1,14 +1,16 @@
 package slimeknights.tconstruct.library.utils;
 
-import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
-import net.minecraftforge.common.ForgeI18n;
-import net.minecraftforge.fml.ModList;
-import org.apache.commons.lang3.text.WordUtils;
+import net.minecraft.locale.Language;
+import net.neoforged.fml.ModList;
+import org.apache.commons.lang3.StringUtils;
+import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import slimeknights.mantle.data.listener.ISafeManagerReloadListener;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Logic to get the display name for a resource domain
@@ -29,14 +31,20 @@ public class DomainDisplayName {
    * @return  Formatted domain name
    */
   private static String formatDomainName(String domain) {
-    return WordUtils.capitalize(DASH_UNDERSCORE.matcher(domain).replaceAll(" "));
+    // replacements for WordUtils, which no longer ships with commons-lang3
+    String[] words = DASH_UNDERSCORE.matcher(domain).replaceAll(" ").split(" ");
+    StringBuilder builder = new StringBuilder();
+    for (String word : words) {
+      builder.append(StringUtils.capitalize(word)).append(' ');
+    }
+    return builder.toString().trim();
   }
 
   /** Gets the name for a mod ID, uncached */
   private static String nameForUncached(String domain) {
     // first, check if the resource pack translated the thing
     String langKey = "domain." + domain + ".display_name";
-    String translated = ForgeI18n.getPattern(langKey);
+    String translated = Language.getInstance().getOrDefault(langKey);
     if (!translated.equals(langKey)) {
       return translated;
     }

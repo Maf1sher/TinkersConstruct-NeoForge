@@ -118,7 +118,7 @@ public class TConstruct {
     bus.register(new TinkerTables());
     bus.register(new TinkerModifiers(bus));
     bus.register(new TinkerToolParts());
-    bus.register(new TinkerTools());
+    bus.register(new TinkerTools(bus));
     // smeltery
     bus.register(new TinkerSmeltery());
     bus.register(new TinkerFluids());

@@ -37,7 +37,7 @@ public interface IMaterialItem extends ItemLike, IMaterialUser {
   /** Sets the material on the existing stack, bypassing the valid material check. */
   default ItemStack setMaterialForced(ItemStack stack, MaterialVariantId material) {
     // FIXME: it is odd that we assume the NBT format in this method but not in getMaterial, should be consistent in the implementation location
-    stack.getOrCreateTag().putString(MATERIAL_TAG, material.toString());
+    CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.putString(MATERIAL_TAG, material.toString()));
     return stack;
   }
 

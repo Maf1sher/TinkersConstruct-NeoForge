@@ -10,15 +10,20 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.mojang.serialization.JsonOps;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
+import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraftforge.common.crafting.CraftingHelper;
+import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.common.conditions.ICondition.IContext;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
@@ -52,6 +57,9 @@ public class StationSlotLayoutLoader extends SimpleJsonResourceReloadListener {
     .create();
   private static final StationSlotLayoutLoader INSTANCE = new StationSlotLayoutLoader();
 
+  /** JSON keys that can hold conditions, the first is the 1.21.1 NeoForge structure */
+  private static final List<String> CONDITION_KEYS = List.of("neoforge:conditions", "conditions");
+
   /** Map of name to slot layout */
   private Map<ResourceLocation, StationSlotLayout> layoutMap = Collections.emptyMap();
   /** List of layouts that must be loaded for the game to work properly */
@@ -63,6 +71,8 @@ public class StationSlotLayoutLoader extends SimpleJsonResourceReloadListener {
 
   /** Context for parsing conditions */
   private IContext conditionContext = IContext.EMPTY;
+  /** Registry access used to parse conditions, set when reload listeners are added */
+  private RegistryAccess registryAccess = null;
 
   private StationSlotLayoutLoader() {
     super(GSON, FOLDER);
@@ -92,7 +102,7 @@ public class StationSlotLayoutLoader extends SimpleJsonResourceReloadListener {
       try {
         // skip empty objects, allows disabling a slot at a lower datapack
         JsonObject object = GsonHelper.convertToJsonObject(value, "station_layout");
-        if (!object.entrySet().isEmpty() && CraftingHelper.processConditions(object, "conditions", conditionContext)) {
+        if (!object.entrySet().isEmpty() && processConditions(object)) {
           // just need a valid slot information
           StationSlotLayout layout = GSON.fromJson(object, StationSlotLayout.class);
           int size = layout.getInputSlots().size() + (layout.getToolSlot().isHidden() ? 0 : 1);
@@ -112,6 +122,26 @@ public class StationSlotLayoutLoader extends SimpleJsonResourceReloadListener {
     if (!missing.isEmpty()) {
       log.error("Failed to load the following required layouts: {}", String.join(", ", missing));
     }
+  }
+
+  /**
+   * Processes conditions from a layout JSON object, comparable to the removed CraftingHelper.processConditions.
+   * 1.21.1 handles conditions through codecs reading the "neoforge:conditions" key; the legacy plain "conditions" key is kept for backwards compat.
+   */
+  private boolean processConditions(JsonObject object) {
+    RegistryAccess registries = this.registryAccess;
+    if (registries == null) {
+      log.error("No registry access for condition processing, assuming conditions true");
+      return true;
+    }
+    RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registries);
+    for (String key : CONDITION_KEYS) {
+      if (object.has(key)) {
+        List<ICondition> conditions = ICondition.LIST_CODEC.parse(ops, object.get(key)).getOrThrow(msg -> new JsonParseException("Failed to parse " + key + " for station layout: " + msg));
+        return conditions.stream().allMatch(condition -> condition.test(conditionContext));
+      }
+    }
+    return true;
   }
 
   /** Gets a layout by name */
@@ -137,6 +167,7 @@ public class StationSlotLayoutLoader extends SimpleJsonResourceReloadListener {
   private void addDataPackListeners(final AddReloadListenerEvent event) {
     event.addListener(this);
     conditionContext = event.getConditionContext();
+    registryAccess = event.getRegistryAccess();
   }
 
 
@@ -157,12 +188,17 @@ public class StationSlotLayoutLoader extends SimpleJsonResourceReloadListener {
   private static class IngredientSerializer implements JsonSerializer<Ingredient>, JsonDeserializer<Ingredient> {
     @Override
     public Ingredient deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-      return Ingredient.fromJson(json);
+      // 1.21.1 replaced Ingredient.fromJson/toJson with codecs
+      return Ingredient.CODEC.parse(JsonOps.INSTANCE, json)
+        .resultOrPartial(msg -> { throw new JsonParseException("Unable to parse ingredient: " + msg); })
+        .orElseThrow();
     }
 
     @Override
     public JsonElement serialize(Ingredient ingredient, Type typeOfSrc, JsonSerializationContext context) {
-      return ingredient.toJson();
+      return Ingredient.CODEC.encodeStart(JsonOps.INSTANCE, ingredient)
+        .resultOrPartial(msg -> { throw new JsonParseException("Unable to serialize ingredient: " + msg); })
+        .orElseThrow();
     }
   }
 }

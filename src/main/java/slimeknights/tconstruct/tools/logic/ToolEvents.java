@@ -33,18 +33,17 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.ProjectileImpactEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingDamageEvent;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingTickEvent;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingVisibilityEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.Event.Result;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEvent.LivingVisibilityEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.tick.EntityTickEvent;
+import slimeknights.mantle.registration.MantleData;
+import slimeknights.tconstruct.library.events.TinkerToolEvent.Result;
 import slimeknights.mantle.data.predicate.damage.DamageSourcePredicate;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerEffect;
@@ -93,7 +92,7 @@ import java.util.Objects;
 /**
  * Event subscriber for tool events
  */
-@EventBusSubscriber(modid = TConstruct.MOD_ID, bus = Bus.FORGE)
+@EventBusSubscriber(modid = TConstruct.MOD_ID)
 public class ToolEvents {
   @SuppressWarnings("removal")
   @SubscribeEvent
@@ -196,8 +195,10 @@ public class ToolEvents {
     }
   }
 
+  // Merges the old attack and hurt handlers: NeoForge replaces both with LivingIncomingDamageEvent, which fires
+  // before vanilla armor math, so our protection math here is pre-armor and its result feeds into vanilla's reduction
   @SubscribeEvent(priority = EventPriority.LOW)
-  static void livingAttack(LivingAttackEvent event) {
+  static void onIncomingDamage(LivingIncomingDamageEvent event) {
     LivingEntity entity = event.getEntity();
     // client side always returns false, so this should be fine?
     if (entity.level().isClientSide() || entity.isDeadOrDying()) {
@@ -236,50 +237,26 @@ public class ToolEvents {
     // next, consider the attacker is wearing modifiable armor
     Entity attacker = source.getEntity();
     if (attacker instanceof LivingEntity livingAttacker) {
-      context = new EquipmentContext(livingAttacker);
-      if (context.hasModifiableArmor()) {
+      EquipmentContext attackerContext = new EquipmentContext(livingAttacker);
+      if (attackerContext.hasModifiableArmor()) {
         for (EquipmentSlot slotType : ModifiableArmorMaterial.ARMOR_SLOTS) {
-          IToolStackView toolStack = context.getToolInSlot(slotType);
+          IToolStackView toolStack = attackerContext.getToolInSlot(slotType);
           if (toolStack != null && !toolStack.isBroken()) {
             for (ModifierEntry entry : toolStack.getModifierList()) {
-              entry.getHook(ModifierHooks.DAMAGE_DEALT).onDamageDealt(toolStack, entry, context, slotType, entity, source, amount, isDirectDamage);
+              entry.getHook(ModifierHooks.DAMAGE_DEALT).onDamageDealt(toolStack, entry, attackerContext, slotType, entity, source, amount, isDirectDamage);
             }
           }
         }
       }
     }
-  }
 
-  /**
-   * Determines how much to damage armor based on the given damage to the player
-   * @param damage  Amount to damage the player
-   * @return  Amount to damage the armor
-   */
-  private static int getArmorDamage(float damage) {
-    damage /= 4;
-    if (damage < 1) {
-      return 1;
-    }
-    return (int)damage;
-  }
-
-  /** Modifier ID used for the extra correction damage on armor. Needs to be a "real modifier" for the tag so we use protection as a reasonable enough source. */
-  private static final ModifierId ARMOR_DAMAGE = new ModifierId(TConstruct.MOD_ID, "protection");
-
-  // low priority to minimize conflict as we apply reduction as if we are the final change to damage before vanilla
-  @SuppressWarnings("removal")
-  @SubscribeEvent(priority = EventPriority.LOW)
-  static void livingHurt(LivingHurtEvent event) {
-    LivingEntity entity = event.getEntity();
-
-    // determine if there is any modifiable armor, if not nothing to do
-    DamageSource source = event.getSource();
-    EquipmentContext context = new EquipmentContext(entity);
+    // Damage boost and reduction logic, merged from the old LivingHurtEvent handler. We apply our own protection
+    // math here; since this event fires before vanilla armor steps, the result feeds into vanilla's reduction after.
+    // low priority to minimize conflict as we apply reduction as if we are the final change to damage before vanilla
+    float originalDamage = amount;
     int vanillaModifier = 0;
     float modifierValue = 0;
-    float originalDamage = event.getAmount();
 
-    Entity attacker = source.getEntity();
     if (attacker instanceof LivingEntity living) {
       // boost damage based on monster's melee weapon
       if (Config.COMMON.allowMonsterMeleeModifiers.get() && source.is(TinkerTags.DamageTypes.MODIFIER_WHITELIST) && !living.getType().is(TinkerTags.EntityTypes.DAMAGE_MODIFIER_BLACKLIST)) {
@@ -416,35 +393,57 @@ public class ToolEvents {
     }
   }
 
+  /**
+   * Determines how much to damage armor based on the given damage to the player
+   * @param damage  Amount to damage the player
+   * @return  Amount to damage the armor
+   */
+  private static int getArmorDamage(float damage) {
+    damage /= 4;
+    if (damage < 1) {
+      return 1;
+    }
+    return (int)damage;
+  }
+
+  /** Modifier ID used for the extra correction damage on armor. Needs to be a "real modifier" for the tag so we use protection as a reasonable enough source. */
+  private static final ModifierId ARMOR_DAMAGE = new ModifierId(TConstruct.MOD_ID, "protection");
+
+  /** Runs before final damage is applied, letting armor modifiers modify the final damage taken */
   @SubscribeEvent
-  static void livingDamage(LivingDamageEvent event) {
+  static void damagePre(LivingDamageEvent.Pre event) {
     LivingEntity entity = event.getEntity();
     DamageSource source = event.getSource();
 
     // give modifiers a chance to respond to damage happening
-    float amount = event.getAmount();
     EquipmentContext context = new EquipmentContext(entity);
     if (context.hasModifiableArmor()) {
-      amount = ModifyDamageModifierHook.modifyDamageTaken(ModifierHooks.MODIFY_DAMAGE, context, source, amount, OnAttackedModifierHook.isDirectDamage(source));
-      event.setAmount(amount);
-      if (amount <= 0) {
-        event.setCanceled(true);
-      }
+      float newDamage = event.getNewDamage();
+      newDamage = ModifyDamageModifierHook.modifyDamageTaken(ModifierHooks.MODIFY_DAMAGE, context, source, newDamage, OnAttackedModifierHook.isDirectDamage(source));
+      // no negative damage, zero stops the remaining damage naturally
+      event.setNewDamage(Math.max(newDamage, 0));
     }
+  }
+
+  /** Runs after damage is applied, handling monster melee hit effects and dragon scale drops */
+  @SubscribeEvent
+  static void damagePost(LivingDamageEvent.Post event) {
+    LivingEntity entity = event.getEntity();
+    DamageSource source = event.getSource();
 
     // for remaining code, ensure amount is not more than they will take
-    amount = Math.min(amount, entity.getHealth());
+    float amount = Math.min(event.getNewDamage(), entity.getHealth());
 
     // apply post hit modifier effects. Done regardless of damage dealt - don't care if absorption took it all
     if (Config.COMMON.allowMonsterMeleeModifiers.get() && source.is(TinkerTags.DamageTypes.MODIFIER_WHITELIST)) {
-      Entity attacker = event.getSource().getEntity();
+      Entity attacker = source.getEntity();
       if (attacker != null && !attacker.getType().is(TinkerTags.EntityTypes.DAMAGE_MODIFIER_BLACKLIST) && attacker instanceof LivingEntity living) {
         ItemStack weapon = living.getMainHandItem();
         if (!weapon.isEmpty()) {
           if (weapon.is(TinkerTags.Items.MELEE_WEAPON)) {
             // already know we are not a player
             IToolStackView tool = ToolStack.from(weapon);
-            ToolAttackContext meleeContext = ToolAttackContext.attacker(living, null).target(event.getEntity()).applyAttributes().build();
+            ToolAttackContext meleeContext = ToolAttackContext.attacker(living, null).target(entity).applyAttributes().build();
             for (ModifierEntry entry : tool.getModifiers()) {
               entry.getHook(ModifierHooks.MONSTER_MELEE_HIT).onMonsterMeleeHit(tool, entry, meleeContext, amount);
             }
@@ -455,7 +454,7 @@ public class ToolEvents {
           if (!unarmed.isEmpty() && unarmed.is(TinkerTags.Items.UNARMED)) {
             // already know we are not a player
             IToolStackView tool = ToolStack.from(unarmed);
-            ToolAttackContext meleeContext = ToolAttackContext.attacker(living, null).target(event.getEntity()).applyAttributes().addBaseDamage(tool.getStats().get(ToolStats.ATTACK_DAMAGE)).slot(EquipmentSlot.CHEST, InteractionHand.MAIN_HAND).build();
+            ToolAttackContext meleeContext = ToolAttackContext.attacker(living, null).target(entity).applyAttributes().addBaseDamage(tool.getStats().get(ToolStats.ATTACK_DAMAGE)).slot(EquipmentSlot.CHEST, InteractionHand.MAIN_HAND).build();
             for (ModifierEntry entry : tool.getModifiers()) {
               entry.getHook(ModifierHooks.MONSTER_MELEE_HIT).onMonsterMeleeHit(tool, entry, meleeContext, amount);
             }
@@ -474,8 +473,11 @@ public class ToolEvents {
 
   /** Called the modifier hook when an entity's position changes */
   @SubscribeEvent
-  static void livingWalk(LivingTickEvent event) {
-    LivingEntity living = event.getEntity();
+  static void livingWalk(EntityTickEvent.Post event) {
+    // EntityTickEvent fires for all entities, this hook only cares about living ones
+    if (!(event.getEntity() instanceof LivingEntity living)) {
+      return;
+    }
     // this event runs before vanilla updates prevBlockPos
     BlockPos pos = living.blockPosition();
     if (!living.isSpectator() && !living.level().isClientSide() && living.isAlive() && !Objects.equals(living.lastPos, pos)) {

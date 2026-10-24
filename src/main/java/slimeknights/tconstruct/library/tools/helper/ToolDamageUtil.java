@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.library.tools.helper;
 
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -8,6 +9,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
@@ -29,7 +31,13 @@ public class ToolDamageUtil {
    * @param stack  Tool stack
    */
   public static void breakTool(ItemStack stack) {
-    stack.getOrCreateTag().putBoolean(ToolStack.TAG_BROKEN, true);
+    CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
+    CompoundTag nbt = customData != null ? customData.getUnsafe() : null;
+    if (nbt == null) {
+      nbt = new CompoundTag();
+      stack.set(DataComponents.CUSTOM_DATA, CustomData.of(nbt));
+    }
+    nbt.putBoolean(ToolStack.TAG_BROKEN, true);
   }
 
   /**
@@ -38,8 +46,8 @@ public class ToolDamageUtil {
    * @return  True if broken
    */
   public static boolean isBroken(ItemStack stack) {
-    CompoundTag nbt = stack.getTag();
-    return nbt != null && nbt.getBoolean(ToolStack.TAG_BROKEN);
+    CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
+    return customData != null && customData.getUnsafe().getBoolean(ToolStack.TAG_BROKEN);
   }
 
   /**

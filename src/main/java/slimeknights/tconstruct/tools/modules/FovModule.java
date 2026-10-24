@@ -44,7 +44,7 @@ public record FovModule(LevelingValue value, FovAction action) implements Modifi
   @Override
   public void onEquip(IToolStackView tool, ModifierEntry modifier, EquipmentChangeContext context) {
     if (!tool.isBroken()) {
-      TinkerDataCapability.Holder data = LogicHelper.orElseNull(context.getTinkerData());
+      TinkerDataCapability.Holder data = context.getTinkerData().orElse(null);
       if (data != null) {
         data.computeIfAbsent(TinkerDataKeys.FOV_MODIFIER).set(getKey(modifier, context), action.apply(value.compute(modifier.getEffectiveLevel())));
       }
@@ -54,7 +54,7 @@ public record FovModule(LevelingValue value, FovAction action) implements Modifi
   @Override
   public void onUnequip(IToolStackView tool, ModifierEntry modifier, EquipmentChangeContext context) {
     if (!tool.isBroken()) {
-      TinkerDataCapability.Holder data = LogicHelper.orElseNull(context.getTinkerData());
+      TinkerDataCapability.Holder data = context.getTinkerData().orElse(null);
       if (data != null) {
         data.computeIfAbsent(TinkerDataKeys.FOV_MODIFIER).remove(getKey(modifier, context));
       }

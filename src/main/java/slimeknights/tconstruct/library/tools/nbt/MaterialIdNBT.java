@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -156,7 +157,7 @@ public class MaterialIdNBT {
    * @return  MaterialNBT instance
    */
   public static MaterialIdNBT from(ItemStack stack) {
-    CompoundTag nbt = stack.getTag();
+    CompoundTag nbt = ToolStack.getStackNBT(stack);
     if (nbt != null) {
       return readFromNBT(nbt.getList(ToolStack.TAG_MATERIALS, Tag.TAG_STRING));
     }
@@ -165,7 +166,7 @@ public class MaterialIdNBT {
 
   /** Helper to quickly fetch a single material ID from a stack. Use {@link #from(ItemStack)} and {@link #getMaterial(int)} instead if you need to parse multiple. */
   public static MaterialVariantId getMaterial(ItemStack stack, int index) {
-    CompoundTag nbt = stack.getTag();
+    CompoundTag nbt = ToolStack.getStackNBT(stack);
     if (nbt != null) {
       ListTag list = nbt.getList(ToolStack.TAG_MATERIALS, Tag.TAG_STRING);
       if (index < list.size()) {
@@ -177,7 +178,7 @@ public class MaterialIdNBT {
 
   /** Writes this material list to the given stack */
   public ItemStack updateStack(ItemStack stack) {
-    stack.getOrCreateTag().put(ToolStack.TAG_MATERIALS, serializeToNBT());
+    CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.put(ToolStack.TAG_MATERIALS, serializeToNBT()));
     return stack;
   }
 

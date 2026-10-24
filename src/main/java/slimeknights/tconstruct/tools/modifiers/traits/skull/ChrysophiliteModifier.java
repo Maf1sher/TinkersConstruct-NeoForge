@@ -37,7 +37,7 @@ public class ChrysophiliteModifier extends NoLevelsModifier {
   @Deprecated(forRemoval = true)
   public static int getTotalGold(@Nullable Entity entity) {
     return Optional.ofNullable(entity)
-                   .flatMap(e -> e.getCapability(TinkerDataCapability.CAPABILITY).resolve())
+                   .map(TinkerDataCapability::getData)
                    .map(data -> data.get(ChrysophiliteModifier.TOTAL_GOLD))
                    .map(TotalGold::getTotalGold)
                    .orElse(0);

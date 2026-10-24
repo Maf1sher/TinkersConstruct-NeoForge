@@ -20,8 +20,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.ToolActions;
+import net.neoforged.neoforge.common.CommonHooks;
+import net.neoforged.neoforge.common.ItemAbilities;
+import net.neoforged.neoforge.event.level.BlockEvent;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
@@ -67,7 +68,7 @@ public class ToolHarvestLogic {
   public static int getDamage(IToolStackView tool, Level world, BlockPos pos, BlockState state) {
     if (state.getDestroySpeed(world, pos) == 0 || !tool.hasTag(TinkerTags.Items.HARVEST)) {
       // tools that can shear take damage from instant break for non-fire
-      return (!state.is(BlockTags.FIRE) && ModifierUtil.canPerformAction(tool, ToolActions.SHEARS_DIG)) ? 1 : 0;
+      return (!state.is(BlockTags.FIRE) && ModifierUtil.canPerformAction(tool, ItemAbilities.SHEARS_DIG)) ? 1 : 0;
     }
     // if it lacks the harvest tag, it takes double damage (swords for instance)
     return tool.hasTag(TinkerTags.Items.HARVEST_PRIMARY) ? 1 : 2;
@@ -120,18 +121,20 @@ public class ToolHarvestLogic {
    * @param tool      Tool instance
    * @param stack     Stack instance for vanilla functions
    * @param context   Harvest context
-   * @param useLastXP If true, fetches the XP from {@link BlockSideHitListener} instead of firing the event. Prevents firing {@link net.minecraftforge.event.level.BlockEvent.BreakEvent} twice.
+   * @param useLastXP If true, skips firing the break event as it already ran in vanilla logic. Prevents firing {@link net.neoforged.neoforge.event.level.BlockEvent.BreakEvent} twice.
    * @return  True if broken
    */
   protected static boolean breakBlock(IToolStackView tool, ItemStack stack, ToolHarvestContext context, boolean useLastXP) {
-    // have to rerun the event to get the EXP, also ensures extra blocks broken get EXP properly
+    // have to rerun the event to ensure extra blocks broken get EXP properly, in 1.21.1 the event carries no XP
     ServerPlayer player = Objects.requireNonNull(context.getPlayer());
     ServerLevel world = context.getWorld();
     BlockPos pos = context.getPos();
     GameType type = player.gameMode.getGameModeForPlayer();
-    int exp = useLastXP ? BlockSideHitListener.getLastXP(player) : ForgeHooks.onBlockBreakEvent(world, type, player, pos);
-    if (exp == -1) {
-      return false;
+    if (!useLastXP) {
+      BlockEvent.BreakEvent event = CommonHooks.fireBlockBreak(world, type, player, pos, context.getState());
+      if (event.isCanceled()) {
+        return false;
+      }
     }
     // checked after the Forge hook, so we have to recheck
     // TODO: is this needed? Seems its called inside ForgeHooks.onBlockBreakEvent
@@ -160,10 +163,7 @@ public class ToolHarvestLogic {
       block.playerDestroy(world, player, pos, state, te, stack);
     }
 
-    // drop XP
-    if (removed && exp > 0) {
-      block.popExperience(world, pos, exp);
-    }
+    // XP drops: in 1.21.1 experience flows through the block loot pipeline (onDestroyedByPlayer -> spawnAfterBreak), no manual pop
 
     // handle modifiers if not broken
     // broken means we are using "empty hand"
