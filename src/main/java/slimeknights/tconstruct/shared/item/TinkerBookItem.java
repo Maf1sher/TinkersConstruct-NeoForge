@@ -2,7 +2,7 @@ package slimeknights.tconstruct.shared.item;
 
 import net.minecraft.world.item.ItemStack;
 import slimeknights.mantle.client.book.BookScreenOpener;
-import slimeknights.mantle.item.AbstractBookItem;
+import slimeknights.mantle.item.book.AbstractBookItem;
 import slimeknights.tconstruct.library.client.book.TinkerBook;
 
 public class TinkerBookItem extends AbstractBookItem {

@@ -18,7 +18,7 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidStack;
 import org.joml.Matrix4f;
-import slimeknights.mantle.client.screen.ElementScreen;
+import slimeknights.mantle.client.screen.element.TextureElement;
 import slimeknights.tconstruct.library.recipe.partbuilder.Pattern;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -203,25 +203,25 @@ public final class GuiUtil {
   }
 
   /**
-   * Draws an upwards progress bar. TODO: is this just {@link slimeknights.mantle.client.screen.ScalableElementScreen}?
+   * Draws an upwards progress bar. TODO: is this just {@link slimeknights.mantle.client.screen.element.TextureElement}?
    * @param element   Element to draw
    * @param x         X position to start
    * @param y         Y position to start
    * @param progress  Progress between 0 and 1
    */
-  public static void drawProgressUp(GuiGraphics graphics, ElementScreen element, int x, int y, float progress) {
+  public static void drawProgressUp(GuiGraphics graphics, TextureElement element, int x, int y, float progress) {
     int height;
     if (progress > 1) {
-      height = element.h;
+      height = element.height();
     } else if (progress < 0) {
       height = 0;
     } else {
       // add an extra 0.5 so it rounds instead of flooring
-      height = (int)(progress * element.h + 0.5);
+      height = (int)(progress * element.height() + 0.5);
     }
     // amount to offset element by for the height
-    int deltaY = element.h - height;
-    graphics.blit(element.texture, x, y + deltaY, element.x, element.y + deltaY, element.w, height, element.texW, element.texH);
+    int deltaY = element.height() - height;
+    graphics.blit(element.texture(), x, y + deltaY, element.u(), element.v() + deltaY, element.width(), height, element.texWidth(), element.texHeight());
   }
 
   /**

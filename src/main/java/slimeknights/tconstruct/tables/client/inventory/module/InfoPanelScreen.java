@@ -11,11 +11,10 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import slimeknights.mantle.client.screen.ElementScreen;
 import slimeknights.mantle.client.screen.ModuleScreen;
 import slimeknights.mantle.client.screen.MultiModuleScreen;
-import slimeknights.mantle.client.screen.ScalableElementScreen;
-import slimeknights.mantle.client.screen.SliderWidget;
+import slimeknights.mantle.client.screen.element.TextureElement;
+import slimeknights.mantle.client.screen.widget.SliderWidget;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.tables.client.inventory.widget.BorderWidget;
 
@@ -34,24 +33,24 @@ public class InfoPanelScreen<P extends MultiModuleScreen<?>, C extends AbstractC
 
   protected static ResourceLocation BACKGROUND_IMAGE = TConstruct.getResource("textures/gui/panel.png");
 
-  protected static final ElementScreen TOP_LEFT = new ElementScreen(BACKGROUND_IMAGE, 0, 0, 4, 4, 256, 256);
-  protected static final ElementScreen TOP_RIGHT = TOP_LEFT.move(resW + 4, 0, 4, 4);
-  protected static final ElementScreen BOTTOM_LEFT = TOP_LEFT.move(0, resH + 4, 4, 4);
-  protected static final ElementScreen BOTTOM_RIGHT = TOP_LEFT.move(resW + 4, resH + 4, 4, 4);
+  protected static final TextureElement TOP_LEFT = new TextureElement(BACKGROUND_IMAGE, 0, 0, 4, 4, 256, 256);
+  protected static final TextureElement TOP_RIGHT = TOP_LEFT.move(resW + 4, 0, 4, 4);
+  protected static final TextureElement BOTTOM_LEFT = TOP_LEFT.move(0, resH + 4, 4, 4);
+  protected static final TextureElement BOTTOM_RIGHT = TOP_LEFT.move(resW + 4, resH + 4, 4, 4);
 
-  protected static final ScalableElementScreen TOP = new ScalableElementScreen(BACKGROUND_IMAGE, 4, 0, resW, 4, 256, 256);
-  protected static final ScalableElementScreen BOTTOM = TOP.move(4, 4 + resH, resW, 4);
-  protected static final ScalableElementScreen LEFT = TOP.move(0, 4, 4, resH);
-  protected static final ScalableElementScreen RIGHT = TOP.move(4 + resW, 4, 4, resH);
+  protected static final TextureElement TOP = new TextureElement(BACKGROUND_IMAGE, 4, 0, resW, 4, 256, 256);
+  protected static final TextureElement BOTTOM = TOP.move(4, 4 + resH, resW, 4);
+  protected static final TextureElement LEFT = TOP.move(0, 4, 4, resH);
+  protected static final TextureElement RIGHT = TOP.move(4 + resW, 4, 4, resH);
 
-  protected static final ScalableElementScreen BACKGROUND = TOP.move(4, 4, resW, resH);
+  protected static final TextureElement BACKGROUND = TOP.move(4, 4, resW, resH);
 
-  protected static final ElementScreen SLIDER_NORMAL = TOP_LEFT.move(0, 83, 3, 5);
-  protected static final ElementScreen SLIDER_HOVER = SLIDER_NORMAL.shift(SLIDER_NORMAL.w, 0);
+  protected static final TextureElement SLIDER_NORMAL = TOP_LEFT.move(0, 83, 3, 5);
+  protected static final TextureElement SLIDER_HOVER = SLIDER_NORMAL.shift(SLIDER_NORMAL.width(), 0);
 
-  protected static final ScalableElementScreen SLIDER_BAR = TOP.move(0, 88, 3, 8);
-  protected static final ElementScreen SLIDER_TOP = TOP_LEFT.move(3, 88, 3, 4);
-  protected static final ElementScreen SLIDER_BOTTOM = TOP_LEFT.move(3, 92, 3, 4);
+  protected static final TextureElement SLIDER_BAR = TOP.move(0, 88, 3, 8);
+  protected static final TextureElement SLIDER_TOP = TOP_LEFT.move(3, 88, 3, 4);
+  protected static final TextureElement SLIDER_BOTTOM = TOP_LEFT.move(3, 92, 3, 4);
 
   protected BorderWidget border = new BorderWidget();
 
@@ -327,7 +326,7 @@ public class InfoPanelScreen<P extends MultiModuleScreen<?>, C extends AbstractC
   @Override
   protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY) {
     this.border.draw(graphics);
-    BACKGROUND.drawScaled(graphics, this.leftPos + 4, this.topPos + 4, this.imageWidth - 8, this.imageHeight - 8);
+    BACKGROUND.drawTiled(graphics, this.leftPos + 4, this.topPos + 4, 0, this.imageWidth - 8, this.imageHeight - 8);
 
     float y = 5 + this.topPos;
     float x = 5 + this.leftPos;

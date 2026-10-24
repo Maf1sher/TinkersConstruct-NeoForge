@@ -65,9 +65,7 @@ public abstract class HeatingControllerBlock extends ControllerBlock {
     super.setPlacedBy(world, pos, state, placer, stack);
     if (world.getBlockEntity(pos) instanceof HeatingStructureBlockEntity te) {
       // update controller texture
-      if (stack.hasTag()) {
-        te.updateTexture(RetexturedHelper.getTextureName(stack));
-      }
+      te.updateTexture(RetexturedHelper.getTexture(stack));
       // check structure
       te.updateStructure();
     }

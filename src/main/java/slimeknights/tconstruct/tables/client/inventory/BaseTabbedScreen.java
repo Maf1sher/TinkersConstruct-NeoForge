@@ -9,8 +9,8 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import slimeknights.mantle.client.screen.ElementScreen;
 import slimeknights.mantle.client.screen.MultiModuleScreen;
+import slimeknights.mantle.client.screen.element.TextureElement;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.GuiUtil;
 import slimeknights.tconstruct.library.client.Icons;
@@ -52,12 +52,12 @@ public class BaseTabbedScreen<TILE extends BlockEntity, CONTAINER extends Tabbed
     return this.tile;
   }
 
-  protected void drawIcon(GuiGraphics graphics, Slot slot, ElementScreen element) {
+  protected void drawIcon(GuiGraphics graphics, Slot slot, TextureElement element) {
     RenderSystem.setShaderTexture(0, Icons.ICONS);
     element.draw(graphics, slot.x + this.cornerX - 1, slot.y + this.cornerY - 1);
   }
 
-  protected void drawIconEmpty(GuiGraphics graphics, Slot slot, ElementScreen element) {
+  protected void drawIconEmpty(GuiGraphics graphics, Slot slot, TextureElement element) {
     if (slot.hasItem()) {
       return;
     }

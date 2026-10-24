@@ -1,16 +1,17 @@
 package slimeknights.tconstruct.library.tools.definition.module.material;
 
+import com.google.gson.JsonObject;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ArmorItem;
-import slimeknights.mantle.data.loadable.IAmLoadable;
 import slimeknights.mantle.data.loadable.field.LoadableField;
-import slimeknights.mantle.data.loadable.mapping.EitherLoadable;
+import slimeknights.mantle.data.loadable.mapping.DispatchLoadable;
 import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.mantle.util.typed.TypedMap;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.materials.MaterialRegistry;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
@@ -30,12 +31,25 @@ import java.util.Set;
 
 /** Module for repairing a tool using a non-tool part material */
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class MaterialRepairModule implements MaterialRepairToolHook, ToolModule, IAmLoadable.Record {
+public class MaterialRepairModule implements MaterialRepairToolHook, ToolModule {
   private static final List<ModuleHook<?>> DEFAULT_HOOKS = HookProvider.<MaterialRepairModule>defaultHooks(ToolHooks.MATERIAL_REPAIR);
   private static final LoadableField<MaterialId,MaterialRepairModule> MATERIAL_FIELD = MaterialId.PARSER.requiredField("material", m -> m.material);
   private static final RecordLoadable<MaterialRepairModule> CONSTANT = RecordLoadable.create(MATERIAL_FIELD, IntLoadable.FROM_ONE.requiredField("durability", MaterialRepairModule::getRepairAmount), MaterialRepairModule::new);
   private static final RecordLoadable<StatType> STAT_TYPE = RecordLoadable.create(MATERIAL_FIELD, MaterialStatsId.PARSER.requiredField("stat_type", m -> m.statType), MaterialRepairModule::of);
-  public static final RecordLoadable<MaterialRepairModule> LOADER = EitherLoadable.<MaterialRepairModule>record().key("durability", CONSTANT).key("stat_type", STAT_TYPE).build(CONSTANT);
+  public static final RecordLoadable<MaterialRepairModule> LOADER = DispatchLoadable.<MaterialRepairModule>builder()
+    .direct(CONSTANT, "durability")
+    .direct(STAT_TYPE, "stat_type")
+    .network(CONSTANT)
+    .build(MaterialRepairModule::serialize);
+
+  /** Serializes with the record matching the concrete module variant. */
+  private static void serialize(MaterialRepairModule module, JsonObject json, TypedMap context) {
+    if (module instanceof StatType statType) {
+      STAT_TYPE.serializeInto(statType, json, context);
+    } else {
+      CONSTANT.serializeInto(module, json, context);
+    }
+  }
 
   /** Material used for repairing */
   protected final MaterialId material;
@@ -63,7 +77,6 @@ public class MaterialRepairModule implements MaterialRepairToolHook, ToolModule,
     return new ArmorBuilder(material);
   }
 
-  @Override
   public RecordLoadable<? extends MaterialRepairModule> loadable() {
     return CONSTANT;
   }
@@ -104,8 +117,7 @@ public class MaterialRepairModule implements MaterialRepairToolHook, ToolModule,
       this.statType = statType;
     }
 
-    @Override
-    public RecordLoadable<StatType> loadable() {
+    public RecordLoadable<? extends MaterialRepairModule> loadable() {
       return STAT_TYPE;
     }
 

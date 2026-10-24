@@ -20,8 +20,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.tuple.Pair;
-import slimeknights.mantle.client.screen.ElementScreen;
-import slimeknights.mantle.client.screen.TabsWidget;
+import slimeknights.mantle.client.screen.element.TextureElement;
+import slimeknights.mantle.client.screen.widget.TabsWidget;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
 import slimeknights.tconstruct.tables.block.ITabbedBlock;
@@ -33,10 +33,10 @@ import java.util.List;
 
 public class TinkerTabsWidget implements Renderable, GuiEventListener, NarratableEntry {
   private static final ResourceLocation TAB_IMAGE = TConstruct.getResource("textures/gui/icons.png");
-  protected static final ElementScreen TAB_ELEMENT = new ElementScreen(TAB_IMAGE, 0, 18, 26, 30, 256, 256);
-  protected static final ElementScreen ACTIVE_TAB_L_ELEMENT = new ElementScreen(TAB_IMAGE, 26, 18, 26, 30, 256, 256);
-  protected static final ElementScreen ACTIVE_TAB_C_ELEMENT = new ElementScreen(TAB_IMAGE, 52, 18, 26, 30, 256, 256);
-  protected static final ElementScreen ACTIVE_TAB_R_ELEMENT = new ElementScreen(TAB_IMAGE, 78, 18, 26, 30, 256, 256);
+  protected static final TextureElement TAB_ELEMENT = new TextureElement(TAB_IMAGE, 0, 18, 26, 30, 256, 256);
+  protected static final TextureElement ACTIVE_TAB_L_ELEMENT = new TextureElement(TAB_IMAGE, 26, 18, 26, 30, 256, 256);
+  protected static final TextureElement ACTIVE_TAB_C_ELEMENT = new TextureElement(TAB_IMAGE, 52, 18, 26, 30, 256, 256);
+  protected static final TextureElement ACTIVE_TAB_R_ELEMENT = new TextureElement(TAB_IMAGE, 78, 18, 26, 30, 256, 256);
 
   private final int leftPos;
   private final int topPos;
@@ -55,8 +55,8 @@ public class TinkerTabsWidget implements Renderable, GuiEventListener, Narratabl
     this.tabs = new TabsWidget(parent, TAB_ELEMENT, TAB_ELEMENT, TAB_ELEMENT, ACTIVE_TAB_L_ELEMENT, ACTIVE_TAB_C_ELEMENT, ACTIVE_TAB_R_ELEMENT);
 
     int count = tabs.size();
-    this.imageWidth = count * ACTIVE_TAB_C_ELEMENT.w + (count - 1) * this.tabs.spacing;
-    this.imageHeight = ACTIVE_TAB_C_ELEMENT.h;
+    this.imageWidth = count * ACTIVE_TAB_C_ELEMENT.width() + (count - 1) * this.tabs.spacing;
+    this.imageHeight = ACTIVE_TAB_C_ELEMENT.height();
 
     this.leftPos = parent.cornerX + 4;
     this.topPos = parent.cornerY - this.imageHeight;

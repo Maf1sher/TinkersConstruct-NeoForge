@@ -5,24 +5,23 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
-import slimeknights.mantle.client.screen.ElementScreen;
 import slimeknights.mantle.client.screen.ModuleScreen;
 import slimeknights.mantle.client.screen.MultiModuleScreen;
-import slimeknights.mantle.client.screen.ScalableElementScreen;
-import slimeknights.mantle.client.screen.SliderWidget;
+import slimeknights.mantle.client.screen.element.TextureElement;
+import slimeknights.mantle.client.screen.widget.SliderWidget;
 
 public class DynamicContainerScreen<P extends MultiModuleScreen<?>, C extends AbstractContainerMenu> extends ModuleScreen<P,C> {
 
   // Graphic Resources
-  protected static final ScalableElementScreen slot = GenericScreen.slot;
-  private static final ScalableElementScreen slotEmpty = GenericScreen.slotEmpty;
+  protected static final TextureElement slot = GenericScreen.slot;
+  private static final TextureElement slotEmpty = GenericScreen.slotEmpty;
 
-  protected static final ElementScreen sliderNormal = GenericScreen.sliderNormal;
-  protected static final ElementScreen sliderLow = GenericScreen.sliderLow;
-  protected static final ElementScreen sliderHigh = GenericScreen.sliderHigh;
-  protected static final ElementScreen sliderTop = GenericScreen.sliderTop;
-  protected static final ElementScreen sliderBottom = GenericScreen.sliderBottom;
-  protected static final ScalableElementScreen sliderBackground = GenericScreen.sliderBackground;
+  protected static final TextureElement sliderNormal = GenericScreen.sliderNormal;
+  protected static final TextureElement sliderLow = GenericScreen.sliderLow;
+  protected static final TextureElement sliderHigh = GenericScreen.sliderHigh;
+  protected static final TextureElement sliderTop = GenericScreen.sliderTop;
+  protected static final TextureElement sliderBottom = GenericScreen.sliderBottom;
+  protected static final TextureElement sliderBackground = GenericScreen.sliderBackground;
 
   protected SliderWidget slider = new SliderWidget(sliderNormal, sliderHigh, sliderLow, sliderTop, sliderBottom, sliderBackground);
 
@@ -60,8 +59,8 @@ public class DynamicContainerScreen<P extends MultiModuleScreen<?>, C extends Ab
     this.topPos = parentY + yOffset;
 
     // calculate rows and columns from space
-    this.columns = this.imageWidth / slot.w;
-    this.rows = this.imageHeight / slot.h;
+    this.columns = this.imageWidth / slot.width();
+    this.rows = this.imageHeight / slot.height();
 
     this.sliderActive = slotCount > this.columns * this.rows;
 
@@ -69,7 +68,7 @@ public class DynamicContainerScreen<P extends MultiModuleScreen<?>, C extends Ab
 
     // recalculate columns with slider
     if (sliderActive) {
-      this.columns = (imageWidth - slider.width) / slot.w;
+      this.columns = (imageWidth - slider.width) / slot.width();
       this.updateSlider();
     }
 
@@ -160,8 +159,8 @@ public class DynamicContainerScreen<P extends MultiModuleScreen<?>, C extends Ab
         if (this.shouldDrawSlot(slot)) {
           // calc position of the slot
           int offset = slot.getSlotIndex() - this.firstSlotId;
-          int x = (offset % this.columns) * DynamicContainerScreen.slot.w;
-          int y = (offset / this.columns) * DynamicContainerScreen.slot.h;
+          int x = (offset % this.columns) * DynamicContainerScreen.slot.width();
+          int y = (offset / this.columns) * DynamicContainerScreen.slot.height();
 
           slot.x = xOffset + x + 1;
           slot.y = yOffset + y + 1;
@@ -183,19 +182,19 @@ public class DynamicContainerScreen<P extends MultiModuleScreen<?>, C extends Ab
 
     // fully filled rows
     int fullRows = (this.lastSlotId - this.firstSlotId) / this.columns;
-    int w = this.columns * slot.w;
+    int w = this.columns * slot.width();
     int y;
 
-    for (y = 0; y < fullRows * slot.h && y < this.imageHeight; y += slot.h) {
-      slot.drawScaledX(graphics, this.leftPos, this.topPos + y, w);
+    for (y = 0; y < fullRows * slot.height() && y < this.imageHeight; y += slot.height()) {
+      slot.drawScaledRight(graphics, this.leftPos, this.topPos + y, 0, w);
     }
 
     // draw partial row and unused slots
     int slotsLeft = (this.lastSlotId - this.firstSlotId) % this.columns;
     if (slotsLeft > 0) {
-      slot.drawScaledX(graphics, this.leftPos, this.topPos + y, slotsLeft * slot.w);
+      slot.drawScaledRight(graphics, this.leftPos, this.topPos + y, 0, slotsLeft * slot.width());
       // empty slots that don't exist
-      slotEmpty.drawScaledX(graphics, this.leftPos + slotsLeft * slot.w, this.topPos + y, w - slotsLeft * slot.w);
+      slotEmpty.drawScaledRight(graphics, this.leftPos + slotsLeft * slot.width(), this.topPos + y, 0, w - slotsLeft * slot.width());
     }
   }
 }

@@ -1,5 +1,5 @@
 {
-  "loader": "mantle:nbt_key",
+  "loader": "mantle:item_key",
   "parent": "forge:item/default",
   "textures": {
     "default":    "tconstruct:item/arrow/crystalshot_random",

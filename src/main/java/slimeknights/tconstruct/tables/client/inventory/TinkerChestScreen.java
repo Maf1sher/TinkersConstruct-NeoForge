@@ -10,7 +10,6 @@ import slimeknights.tconstruct.tables.menu.TinkerChestContainerMenu;
 
 public class TinkerChestScreen extends BaseTabbedScreen<AbstractChestBlockEntity,TabbedContainerMenu<AbstractChestBlockEntity>> {
   // TODO: can this safely be removed? its unused
-  //protected static final ScalableElementScreen BACKGROUND = new ScalableElementScreen(7 + 18, 7, 18, 18);
   public ScalingChestScreen<AbstractChestBlockEntity> scalingChestScreen;
 
   public TinkerChestScreen(TabbedContainerMenu<AbstractChestBlockEntity> container, Inventory playerInventory, Component title) {

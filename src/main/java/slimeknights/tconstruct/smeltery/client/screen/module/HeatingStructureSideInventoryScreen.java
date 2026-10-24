@@ -4,7 +4,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import slimeknights.mantle.client.screen.ScalableElementScreen;
+import slimeknights.mantle.client.screen.element.TextureElement;
 import slimeknights.tconstruct.smeltery.block.entity.controller.HeatingStructureBlockEntity;
 import slimeknights.tconstruct.smeltery.client.screen.HeatingStructureScreen;
 import slimeknights.tconstruct.tables.client.inventory.module.SideInventoryScreen;
@@ -16,8 +16,8 @@ public class HeatingStructureSideInventoryScreen extends SideInventoryScreen<Hea
   // TODO: read from a proper place
   public HeatingStructureSideInventoryScreen(HeatingStructureScreen parent, SideInventoryContainer<? extends HeatingStructureBlockEntity> container, Inventory playerInventory, int slotCount, int columns) {
     super(parent, container, playerInventory, Component.empty(), slotCount, columns, false, true);
-    slot = new ScalableElementScreen(SLOT_LOCATION, 0, 238, 22, 18, 256, 256);
-    slotEmpty = new ScalableElementScreen(SLOT_LOCATION, 22, 238, 22, 18, 256, 256);
+    slot = new TextureElement(SLOT_LOCATION, 0, 238, 22, 18, 256, 256);
+    slotEmpty = new TextureElement(SLOT_LOCATION, 22, 238, 22, 18, 256, 256);
     yOffset = 4;
   }
 

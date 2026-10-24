@@ -17,9 +17,8 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.lwjgl.glfw.GLFW;
-import slimeknights.mantle.client.screen.ElementScreen;
 import slimeknights.mantle.client.screen.ModuleScreen;
-import slimeknights.mantle.client.screen.ScalableElementScreen;
+import slimeknights.mantle.client.screen.element.TextureElement;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
@@ -65,21 +64,21 @@ public class TinkerStationScreen extends ToolTableScreen<TinkerStationBlockEntit
   // texture
   private static final ResourceLocation TINKER_TEXTURE = TConstruct.getResource("textures/gui/tinker.png");
   // texture elements
-  private static final ElementScreen ACTIVE_TEXT_FIELD = new ElementScreen(TINKER_TEXTURE, 0, 232, 90, 12, 256, 256);
-  private static final ElementScreen ITEM_COVER = ACTIVE_TEXT_FIELD.move(176, 18, 70, 64);
+  private static final TextureElement ACTIVE_TEXT_FIELD = new TextureElement(TINKER_TEXTURE, 0, 232, 90, 12, 256, 256);
+  private static final TextureElement ITEM_COVER = ACTIVE_TEXT_FIELD.move(176, 18, 70, 64);
   // slots
-  private static final ElementScreen SLOT_BACKGROUND = ACTIVE_TEXT_FIELD.move(176, 0, 18, 18);
-  private static final ElementScreen SLOT_BORDER = ACTIVE_TEXT_FIELD.move(194, 0, 18, 18);
-  private static final ElementScreen SLOT_SPACE_TOP = ACTIVE_TEXT_FIELD.move(0, 198, 18, 2);
-  private static final ElementScreen SLOT_SPACE_BOTTOM = ACTIVE_TEXT_FIELD.move(0, 196, 18, 2);
+  private static final TextureElement SLOT_BACKGROUND = ACTIVE_TEXT_FIELD.move(176, 0, 18, 18);
+  private static final TextureElement SLOT_BORDER = ACTIVE_TEXT_FIELD.move(194, 0, 18, 18);
+  private static final TextureElement SLOT_SPACE_TOP = ACTIVE_TEXT_FIELD.move(0, 198, 18, 2);
+  private static final TextureElement SLOT_SPACE_BOTTOM = ACTIVE_TEXT_FIELD.move(0, 196, 18, 2);
   // panel
-  private static final ElementScreen PANEL_SPACE_LEFT = ACTIVE_TEXT_FIELD.move(0, 196, 5, 4);
-  private static final ElementScreen PANEL_SPACE_RIGHT = ACTIVE_TEXT_FIELD.move(9, 196, 9, 4);
-  private static final ElementScreen LEFT_BEAM = ACTIVE_TEXT_FIELD.move(0, 202, 2, 7);
-  private static final ElementScreen RIGHT_BEAM = ACTIVE_TEXT_FIELD.move(131, 202, 2, 7);
-  private static final ScalableElementScreen CENTER_BEAM = new ScalableElementScreen(TINKER_TEXTURE, 2, 202, 129, 7, 256, 256);
+  private static final TextureElement PANEL_SPACE_LEFT = ACTIVE_TEXT_FIELD.move(0, 196, 5, 4);
+  private static final TextureElement PANEL_SPACE_RIGHT = ACTIVE_TEXT_FIELD.move(9, 196, 9, 4);
+  private static final TextureElement LEFT_BEAM = ACTIVE_TEXT_FIELD.move(0, 202, 2, 7);
+  private static final TextureElement RIGHT_BEAM = ACTIVE_TEXT_FIELD.move(131, 202, 2, 7);
+  private static final TextureElement CENTER_BEAM = new TextureElement(TINKER_TEXTURE, 2, 202, 129, 7, 256, 256);
   // text boxes
-  private static final ElementScreen TEXT_BOX = ACTIVE_TEXT_FIELD.move(0, 244, 90, 12);
+  private static final TextureElement TEXT_BOX = ACTIVE_TEXT_FIELD.move(0, 244, 90, 12);
 
   /** Number of button columns in the UI */
   public static final int COLUMN_COUNT = 6;
@@ -90,14 +89,14 @@ public class TinkerStationScreen extends ToolTableScreen<TinkerStationBlockEntit
   private static final int DISABLE_ARMOR_STAND_AFTER = COLUMN_COUNT * 6;
 
   // configurable elements
-  protected ElementScreen buttonDecorationTop = SLOT_SPACE_TOP;
-  protected ElementScreen buttonDecorationBot = SLOT_SPACE_BOTTOM;
-  protected ElementScreen panelDecorationL = PANEL_SPACE_LEFT;
-  protected ElementScreen panelDecorationR = PANEL_SPACE_RIGHT;
+  protected TextureElement buttonDecorationTop = SLOT_SPACE_TOP;
+  protected TextureElement buttonDecorationBot = SLOT_SPACE_BOTTOM;
+  protected TextureElement panelDecorationL = PANEL_SPACE_LEFT;
+  protected TextureElement panelDecorationR = PANEL_SPACE_RIGHT;
 
-  protected ElementScreen leftBeam = ACTIVE_TEXT_FIELD.move(0, 0, 0, 0);
-  protected ElementScreen rightBeam = ACTIVE_TEXT_FIELD.move(0, 0, 0, 0);
-  protected ScalableElementScreen centerBeam = CENTER_BEAM.move(0, 0, 0, 0);
+  protected TextureElement leftBeam = ACTIVE_TEXT_FIELD.move(0, 0, 0, 0);
+  protected TextureElement rightBeam = ACTIVE_TEXT_FIELD.move(0, 0, 0, 0);
+  protected TextureElement centerBeam = CENTER_BEAM.move(0, 0, 0, 0);
 
   /** Gets the default layout to apply, the "repair" button */
   @Nonnull @Getter
@@ -160,7 +159,7 @@ public class TinkerStationScreen extends ToolTableScreen<TinkerStationBlockEntit
     this.cornerY += 4;
 
     this.tinkerInfo.xOffset = 2;
-    this.tinkerInfo.yOffset = this.centerBeam.h + this.panelDecorationL.h;
+    this.tinkerInfo.yOffset = this.centerBeam.height() + this.panelDecorationL.height();
     this.modifierInfo.xOffset = this.tinkerInfo.xOffset;
     this.modifierInfo.yOffset = this.tinkerInfo.yOffset + this.tinkerInfo.imageHeight + 4;
 
@@ -204,7 +203,7 @@ public class TinkerStationScreen extends ToolTableScreen<TinkerStationBlockEntit
     // init after we set the enable boolean
     super.init();
     this.buttonsScreen = new TinkerStationButtonsWidget(this, this.cornerX - TinkerStationButtonsWidget.width(COLUMN_COUNT) - 2,
-      this.cornerY + this.centerBeam.h + this.buttonDecorationTop.h, layouts, buttonsStyle);
+      this.cornerY + this.centerBeam.height() + this.buttonDecorationTop.height(), layouts, buttonsStyle);
 
     this.setupArmorStandPreview(-55, armorY, 35);
 
@@ -382,23 +381,27 @@ public class TinkerStationScreen extends ToolTableScreen<TinkerStationBlockEntit
     }
 
     // sidebar beams
-    x = this.buttonsScreen.getLeftPos() - this.leftBeam.w;
+    x = this.buttonsScreen.getLeftPos() - this.leftBeam.width();
     y = this.cornerY;
     // draw the beams at the top
     this.leftBeam.draw(graphics, x, y);
-    x += this.leftBeam.w;
-    x += this.centerBeam.drawScaledX(graphics, x, y, this.buttonsScreen.getImageWidth());
+    x += this.leftBeam.width();
+    int beamWidth = this.buttonsScreen.getImageWidth();
+    this.centerBeam.drawScaledRight(graphics, x, y, 0, beamWidth);
+    x += beamWidth;
     this.rightBeam.draw(graphics, x, y);
 
-    x = tinkerInfo.leftPos - this.leftBeam.w;
+    x = tinkerInfo.leftPos - this.leftBeam.width();
     this.leftBeam.draw(graphics, x, y);
-    x += this.leftBeam.w;
-    x += this.centerBeam.drawScaledX(graphics, x, y, this.tinkerInfo.imageWidth);
+    x += this.leftBeam.width();
+    beamWidth = this.tinkerInfo.imageWidth;
+    this.centerBeam.drawScaledRight(graphics, x, y, 0, beamWidth);
+    x += beamWidth;
     this.rightBeam.draw(graphics, x, y);
 
     // draw the decoration for the buttons
     for (SlotButtonItem button : this.buttonsScreen.getButtons()) {
-      this.buttonDecorationTop.draw(graphics, button.getX(), button.getY() - this.buttonDecorationTop.h);
+      this.buttonDecorationTop.draw(graphics, button.getX(), button.getY() - this.buttonDecorationTop.height());
       // don't draw the bottom for the buttons in the last row
       if (button.buttonId < this.buttonsScreen.getButtons().size() - COLUMN_COUNT) {
         this.buttonDecorationBot.draw(graphics, button.getX(), button.getY() + button.getHeight());
@@ -406,10 +409,10 @@ public class TinkerStationScreen extends ToolTableScreen<TinkerStationBlockEntit
     }
 
     // draw the decorations for the panels
-    this.panelDecorationL.draw(graphics, this.tinkerInfo.leftPos + 5, this.tinkerInfo.topPos - this.panelDecorationL.h);
-    this.panelDecorationR.draw(graphics, this.tinkerInfo.guiRight() - 5 - this.panelDecorationR.w, this.tinkerInfo.topPos - this.panelDecorationR.h);
-    this.panelDecorationL.draw(graphics, this.modifierInfo.leftPos + 5, this.modifierInfo.topPos - this.panelDecorationL.h);
-    this.panelDecorationR.draw(graphics, this.modifierInfo.guiRight() - 5 - this.panelDecorationR.w, this.modifierInfo.topPos - this.panelDecorationR.h);
+    this.panelDecorationL.draw(graphics, this.tinkerInfo.leftPos + 5, this.tinkerInfo.topPos - this.panelDecorationL.height());
+    this.panelDecorationR.draw(graphics, this.tinkerInfo.guiRight() - 5 - this.panelDecorationR.width(), this.tinkerInfo.topPos - this.panelDecorationR.height());
+    this.panelDecorationL.draw(graphics, this.modifierInfo.leftPos + 5, this.modifierInfo.topPos - this.panelDecorationL.height());
+    this.panelDecorationR.draw(graphics, this.modifierInfo.guiRight() - 5 - this.panelDecorationR.width(), this.modifierInfo.topPos - this.panelDecorationR.height());
 
     // render slot background icons
     for (int i = 0; i <= maxInputs; i++) {
@@ -555,8 +558,8 @@ public class TinkerStationScreen extends ToolTableScreen<TinkerStationBlockEntit
     this.tinkerInfo.wood();
     this.modifierInfo.wood();
 
-    this.buttonDecorationTop = SLOT_SPACE_TOP.shift(SLOT_SPACE_TOP.w, 0);
-    this.buttonDecorationBot = SLOT_SPACE_BOTTOM.shift(SLOT_SPACE_BOTTOM.w, 0);
+    this.buttonDecorationTop = SLOT_SPACE_TOP.shift(SLOT_SPACE_TOP.width(), 0);
+    this.buttonDecorationBot = SLOT_SPACE_BOTTOM.shift(SLOT_SPACE_BOTTOM.width(), 0);
     this.panelDecorationL = PANEL_SPACE_LEFT.shift(18, 0);
     this.panelDecorationR = PANEL_SPACE_RIGHT.shift(18, 0);
 
@@ -569,14 +572,14 @@ public class TinkerStationScreen extends ToolTableScreen<TinkerStationBlockEntit
     this.tinkerInfo.metal();
     this.modifierInfo.metal();
 
-    this.buttonDecorationTop = SLOT_SPACE_TOP.shift(SLOT_SPACE_TOP.w * 2, 0);
-    this.buttonDecorationBot = SLOT_SPACE_BOTTOM.shift(SLOT_SPACE_BOTTOM.w * 2, 0);
+    this.buttonDecorationTop = SLOT_SPACE_TOP.shift(SLOT_SPACE_TOP.width() * 2, 0);
+    this.buttonDecorationBot = SLOT_SPACE_BOTTOM.shift(SLOT_SPACE_BOTTOM.width() * 2, 0);
     this.panelDecorationL = PANEL_SPACE_LEFT.shift(18 * 2, 0);
     this.panelDecorationR = PANEL_SPACE_RIGHT.shift(18 * 2, 0);
 
-    this.leftBeam = LEFT_BEAM.shift(0, LEFT_BEAM.h);
-    this.rightBeam = RIGHT_BEAM.shift(0, RIGHT_BEAM.h);
-    this.centerBeam = CENTER_BEAM.shift(0, CENTER_BEAM.h);
+    this.leftBeam = LEFT_BEAM.shift(0, LEFT_BEAM.height());
+    this.rightBeam = RIGHT_BEAM.shift(0, RIGHT_BEAM.height());
+    this.centerBeam = CENTER_BEAM.shift(0, CENTER_BEAM.height());
   }
 
   @Override

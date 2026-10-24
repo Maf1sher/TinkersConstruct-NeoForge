@@ -9,7 +9,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
-import slimeknights.mantle.client.screen.ElementScreen;
+import slimeknights.mantle.client.screen.element.TextureElement;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.fluid.SimpleFluidTank;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
@@ -37,13 +37,13 @@ public class ToolContainerScreen extends AbstractContainerScreen<ToolContainerMe
   private static final ResourceLocation TEXTURE = TConstruct.getResource("textures/gui/tool_inventory.png");
 
   /** Slot background for 3x3 crafting grid */
-  private static final ElementScreen CRAFTING_SLOTS = new ElementScreen(TEXTURE, 176, 74, 54, 54, 256, 256);
+  private static final TextureElement CRAFTING_SLOTS = new TextureElement(TEXTURE, 176, 74, 54, 54, 256, 256);
   /** Result slot for 3x3 crafting grid */
-  private static final ElementScreen CRAFTING_RESULT = CRAFTING_SLOTS.move(176, 20, 62, 54);
+  private static final TextureElement CRAFTING_RESULT = CRAFTING_SLOTS.move(176, 20, 62, 54);
   /** Full 2x2 crafting grid */
-  private static final ElementScreen INVENTORY_CRAFTING = CRAFTING_SLOTS.move(176, 128, 74, 36);
+  private static final TextureElement INVENTORY_CRAFTING = CRAFTING_SLOTS.move(176, 128, 74, 36);
   /** Fluid bar to draw at the bottom of the UI */
-  private static final ElementScreen FLUID_TANK = CRAFTING_SLOTS.move(0, 224, 176, 14);
+  private static final TextureElement FLUID_TANK = CRAFTING_SLOTS.move(0, 224, 176, 14);
 
   /** Max number of rows in the repeat slots background */
   private static final int REPEAT_BACKGROUND_SIZE = 6 * SLOT_SIZE;
@@ -85,7 +85,7 @@ public class ToolContainerScreen extends AbstractContainerScreen<ToolContainerMe
     this.imageHeight = UI_START + TITLE_SIZE + PLAYER_INVENTORY_HEIGHT + this.inventoryRows * SLOT_SIZE + craftingHeight;
     SimpleFluidTank tank = menu.getTank();
     if (tank.getCapacity() > 0) {
-      this.imageHeight += FLUID_TANK.h;
+      this.imageHeight += FLUID_TANK.height();
       this.tank = new GuiTankModule(this, tank, 8, this.imageHeight - PLAYER_INVENTORY_HEIGHT - 9, 160, 8, true, null);
     } else {
       this.tank = null;
@@ -140,7 +140,7 @@ public class ToolContainerScreen extends AbstractContainerScreen<ToolContainerMe
     // draw tank if we have capacity
     if (tank != null) {
       FLUID_TANK.draw(graphics, xStart, yStart + slotBackground);
-      slotBackground += FLUID_TANK.h;
+      slotBackground += FLUID_TANK.height();
     }
     // draw the player inventory background
     graphics.blit(TEXTURE, xStart, yStart + slotBackground, 0, PLAYER_INVENTORY_START, this.imageWidth, PLAYER_INVENTORY_HEIGHT);

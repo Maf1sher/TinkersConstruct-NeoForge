@@ -3,6 +3,7 @@ package slimeknights.tconstruct.tables.block.entity.chest;
 import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
@@ -69,8 +70,8 @@ public abstract class AbstractChestBlockEntity extends NameableBlockEntity {
   }
 
   @Override
-  public void saveAdditional(CompoundTag tags) {
-    super.saveAdditional(tags);
+  public void saveAdditional(CompoundTag tags, Provider registries) {
+    super.saveAdditional(tags, registries);
     // move the items from the serialized result
     // we don't care about the size and need it here for compat with old worlds
     CompoundTag handlerNBT = itemHandler.serializeNBT();
@@ -86,8 +87,8 @@ public abstract class AbstractChestBlockEntity extends NameableBlockEntity {
   }
 
   @Override
-  public void load(CompoundTag tags) {
-    super.load(tags);
+  public void loadAdditional(CompoundTag tags, Provider registries) {
+    super.loadAdditional(tags, registries);
     readInventory(tags);
   }
 }

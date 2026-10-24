@@ -8,8 +8,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
-import slimeknights.mantle.client.screen.ElementScreen;
 import slimeknights.mantle.client.screen.MultiModuleScreen;
+import slimeknights.mantle.client.screen.element.TextureElement;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.GuiUtil;
 import slimeknights.tconstruct.smeltery.block.controller.ControllerBlock;
@@ -28,13 +28,13 @@ import java.util.Optional;
 
 public class HeatingStructureScreen extends MultiModuleScreen<HeatingStructureContainerMenu> implements IScreenWithFluidTank {
   public static final ResourceLocation BACKGROUND = TConstruct.getResource("textures/gui/heating_structure.png");
-  private static final ElementScreen SCALA = new ElementScreen(BACKGROUND, 176, 0, 80, 106, 256, 256);
+  private static final TextureElement SCALA = new TextureElement(BACKGROUND, 176, 0, 80, 106, 256, 256);
   // slot modes
-  private static final ElementScreen MODE_AUTO = SCALA.move(176, 186, 16, 16);
-  private static final ElementScreen MODE_EMPTY = MODE_AUTO.shift(16, 0);
-  private static final ElementScreen MODE_FILL = MODE_EMPTY.shift(16, 0);
-  private static final ElementScreen BUCKET_ICON = MODE_FILL.shift(16, 0);
-  private static final ElementScreen BUTTON_HOVER = SCALA.move(176, 202, 18, 18);
+  private static final TextureElement MODE_AUTO = SCALA.move(176, 186, 16, 16);
+  private static final TextureElement MODE_EMPTY = MODE_AUTO.shift(16, 0);
+  private static final TextureElement MODE_FILL = MODE_EMPTY.shift(16, 0);
+  private static final TextureElement BUCKET_ICON = MODE_FILL.shift(16, 0);
+  private static final TextureElement BUTTON_HOVER = SCALA.move(176, 202, 18, 18);
 
   /** Tooltips for buckets */
   private static final Component TOOLTIP_CLICKABLE = TConstruct.makeTranslation("gui", "tank.bucket.clickable").withStyle(ChatFormatting.GRAY);

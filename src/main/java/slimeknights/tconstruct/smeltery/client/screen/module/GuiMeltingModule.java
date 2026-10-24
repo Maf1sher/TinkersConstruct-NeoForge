@@ -7,8 +7,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
-import slimeknights.mantle.client.screen.ElementScreen;
-import slimeknights.mantle.client.screen.ScalableElementScreen;
+import slimeknights.mantle.client.screen.element.TextureElement;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.GuiUtil;
 import slimeknights.tconstruct.smeltery.block.entity.module.MeltingModuleInventory;
@@ -44,7 +43,7 @@ public class GuiMeltingModule {
       Slot slot = menu.slots.get(i + indexOffset);
       if (slot.hasItem() && slotPredicate.test(slot)) {
         // determine the bar to draw and the progress
-        ScalableElementScreen bar = progressBars.progress;
+        TextureElement bar = progressBars.progress;
 
         int index = slot.getSlotIndex(); // note this is the inventory index, not the index in the slots list
         int currentTemp = inventory.getCurrentTime(index);
@@ -118,7 +117,7 @@ public class GuiMeltingModule {
   }
 
   /** Contains all common progress bars */
-  public record ProgressBars(ScalableElementScreen progress, ScalableElementScreen noHeat, ScalableElementScreen noSpace, ScalableElementScreen unmeltable) {
+  public record ProgressBars(TextureElement progress, TextureElement noHeat, TextureElement noSpace, TextureElement unmeltable) {
     public ProgressBars {
       assert sameSize(progress, noHeat);
       assert sameSize(progress, noSpace);
@@ -126,28 +125,28 @@ public class GuiMeltingModule {
     }
 
     /** Checks that two elements are the same size */
-    private static boolean sameSize(ElementScreen left, ElementScreen right) {
-      return left.w == right.w && left.h == right.h && left.texW == right.texW && left.texH == right.texH;
+    private static boolean sameSize(TextureElement left, TextureElement right) {
+      return left.width() == right.width() && left.height() == right.height() && left.texWidth() == right.texWidth() && left.texHeight() == right.texHeight();
     }
 
     /** Gets the progress bar width */
     public int width() {
-      return progress.w;
+      return progress.width();
     }
 
     /** Gets the progress bar height */
     public int height() {
-      return progress.h;
+      return progress.height();
     }
   }
 
   /** Creates all 4 progress bars at the common location */
   public static ProgressBars makeProgressBars(ResourceLocation background) {
     return new ProgressBars(
-      new ScalableElementScreen(background, 176, 150, 3, 16, 256, 256),
-      new ScalableElementScreen(background, 179, 150, 3, 16, 256, 256),
-      new ScalableElementScreen(background, 182, 150, 3, 16, 256, 256),
-      new ScalableElementScreen(background, 185, 150, 3, 16, 256, 256)
+      new TextureElement(background, 176, 150, 3, 16, 256, 256),
+      new TextureElement(background, 179, 150, 3, 16, 256, 256),
+      new TextureElement(background, 182, 150, 3, 16, 256, 256),
+      new TextureElement(background, 185, 150, 3, 16, 256, 256)
     );
   }
 }

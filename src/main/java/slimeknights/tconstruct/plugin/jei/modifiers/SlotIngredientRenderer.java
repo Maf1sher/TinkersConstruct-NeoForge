@@ -13,7 +13,7 @@ import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.TooltipFlag;
-import slimeknights.mantle.client.model.NBTKeyModel;
+import slimeknights.mantle.client.model.ItemKeyModel;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.tools.SlotType;
 import slimeknights.tconstruct.library.tools.SlotType.SlotCount;
@@ -85,7 +85,7 @@ public enum SlotIngredientRenderer implements IIngredientRenderer<SlotCount> {
     ModelManager modelManager = minecraft.getModelManager();
     // gets the model for the item, its a sepcial one that gives us texture info
     BakedModel model = minecraft.getItemRenderer().getItemModelShaper().getItemModel(TinkerModifiers.creativeSlotItem.get());
-    if (model != null && model.getOverrides() instanceof NBTKeyModel.Overrides overrides) {
+    if (model != null && model.getOverrides() instanceof ItemKeyModel.Overrides overrides) {
       Material material = overrides.getTexture(slotType == null ? "slotless" : slotType.getName());
       return modelManager.getAtlas(material.atlasLocation()).getSprite(material.texture());
     } else {

@@ -33,8 +33,8 @@ public class ScalingChestScreen<T extends BlockEntity> extends DynamicContainerS
     this.topPos = parentY + this.yOffset;
 
     // calculate rows and columns from space
-    this.columns = (this.imageWidth - this.slider.width) / slot.w;
-    this.rows = this.imageHeight / slot.h;
+    this.columns = (this.imageWidth - this.slider.width) / slot.width();
+    this.rows = this.imageHeight / slot.height();
 
     this.updateSlider();
     this.updateSlots();

@@ -5,7 +5,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import slimeknights.mantle.client.screen.ElementScreen;
+import slimeknights.mantle.client.screen.element.TextureElement;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.GuiUtil;
 import slimeknights.tconstruct.smeltery.block.entity.controller.MelterBlockEntity;
@@ -17,9 +17,9 @@ import slimeknights.tconstruct.smeltery.menu.MelterContainerMenu;
 
 public class MelterScreen extends AbstractContainerScreen<MelterContainerMenu> implements IScreenWithFluidTank {
   private static final ResourceLocation BACKGROUND = TConstruct.getResource("textures/gui/melter.png");
-  private static final ElementScreen SCALA = new ElementScreen(BACKGROUND, 176, 0, 52, 52, 256, 256);
-  private static final ElementScreen FUEL_SLOT = new ElementScreen(BACKGROUND, 176, 52, 18, 36, 256, 256);
-  private static final ElementScreen FUEL_TANK = new ElementScreen(BACKGROUND, 194, 52, 14, 38, 256, 256);
+  private static final TextureElement SCALA = new TextureElement(BACKGROUND, 176, 0, 52, 52, 256, 256);
+  private static final TextureElement FUEL_SLOT = new TextureElement(BACKGROUND, 176, 52, 18, 36, 256, 256);
+  private static final TextureElement FUEL_TANK = new TextureElement(BACKGROUND, 194, 52, 14, 38, 256, 256);
 
   private final GuiMeltingModule melting;
   private final GuiFuelModule fuel;
