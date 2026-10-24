@@ -3,6 +3,7 @@ package slimeknights.tconstruct.library.recipe.casting.container;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
@@ -16,7 +17,6 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
-import net.minecraftforge.registries.ForgeRegistries;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.primitive.IntLoadable;
@@ -115,7 +115,7 @@ public class ContainerFillingRecipe implements ICastingRecipe, IMultiRecipe<IDis
   public List<IDisplayableCastingRecipe> getRecipes(RegistryAccess access) {
     if (displayRecipes == null) {
       // filter fluid registry to just fluids we care about
-      List<FluidStack> fluids = ForgeRegistries.FLUIDS.getValues().stream()
+      List<FluidStack> fluids = BuiltInRegistries.FLUID.stream()
         .filter(fluid -> {
           // skip flowing fluids (redundant to source), fluids with no bucket (probably internal), and fluids hidden from recipe viewers (they be hidden)
           if (fluid.isSource(fluid.defaultFluidState()) && !fluid.is(TinkerTags.Fluids.HIDE_IN_CREATIVE_TANKS)) {
