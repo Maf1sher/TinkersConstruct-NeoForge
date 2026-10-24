@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
-import net.minecraftforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -180,7 +180,7 @@ public final class TinkerTables extends TinkerModule {
   @SubscribeEvent
   void gatherData(final GatherDataEvent event) {
     DataGenerator generator = event.getGenerator();
-    generator.addProvider(event.includeServer(), new TableRecipeProvider(generator.getPackOutput()));
+    generator.addProvider(event.includeServer(), new TableRecipeProvider(generator.getPackOutput(), event.getLookupProvider()));
   }
 
   /** Adds all relevant items to the creative tab, called in the general tab */

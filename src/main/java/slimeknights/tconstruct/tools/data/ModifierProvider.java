@@ -31,7 +31,7 @@ import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.ToolActions;
-import net.minecraftforge.common.crafting.conditions.IConditionBuilder;
+import net.neoforged.neoforge.common.conditions.IConditionBuilder;
 import net.minecraftforge.fluids.FluidType;
 import slimeknights.mantle.client.TooltipKey;
 import slimeknights.mantle.data.predicate.IJsonPredicate;

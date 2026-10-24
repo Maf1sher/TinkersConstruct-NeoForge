@@ -1,6 +1,8 @@
 package slimeknights.tconstruct.shared;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
@@ -25,13 +27,15 @@ import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import net.neoforged.neoforge.common.NeoForge;
-import net.minecraftforge.common.crafting.CraftingHelper;
+import net.neoforged.neoforge.common.conditions.ICondition;
+import net.neoforged.neoforge.common.crafting.CraftingHelper;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import slimeknights.mantle.data.predicate.block.BlockPredicate;
 import slimeknights.mantle.data.predicate.damage.DamageSourcePredicate;
 import slimeknights.mantle.data.predicate.entity.LivingEntityPredicate;
@@ -160,17 +164,17 @@ public final class TinkerCommons extends TinkerModule {
   public static final DeferredHolder<?, ParticleType<FluidParticleData>> fluidParticle = PARTICLE_TYPES.register("fluid", FluidParticleData.Type::new);
 
   /* Loot conditions */
-  public static final DeferredHolder<?, LootItemConditionType> lootConfig = LOOT_CONDITIONS.register(ConfigEnabledCondition.ID.getPath(), () -> new LootItemConditionType(ConfigEnabledCondition.SERIALIZER));
-  public static final DeferredHolder<?, LootItemConditionType> lootBlockOrEntity = LOOT_CONDITIONS.register("block_or_entity", () -> new LootItemConditionType(new BlockOrEntityCondition.ConditionSerializer()));
-  public static final DeferredHolder<?, LootItemConditionType> hasLootContextSet = LOOT_CONDITIONS.register("has_context_set", () -> new LootItemConditionType(new HasLootContextSetCondition.Serializer()));
+  public static final DeferredHolder<?, LootItemConditionType> lootConfig = LOOT_CONDITIONS.register(ConfigEnabledCondition.ID.getPath(), () -> new LootItemConditionType(ConfigEnabledCondition.CODEC));
+  public static final DeferredHolder<?, LootItemConditionType> lootBlockOrEntity = LOOT_CONDITIONS.register("block_or_entity", () -> new LootItemConditionType(BlockOrEntityCondition.CODEC));
+  public static final DeferredHolder<?, LootItemConditionType> hasLootContextSet = LOOT_CONDITIONS.register("has_context_set", () -> new LootItemConditionType(HasLootContextSetCondition.CODEC));
   /** @deprecated use {@link slimeknights.mantle.loot.MantleLoot#TAG_FILLED} */
   @SuppressWarnings("removal")
   @Deprecated(forRemoval = true)
-  public static final DeferredHolder<?, LootItemConditionType> lootTagNotEmptyCondition = LOOT_CONDITIONS.register("tag_not_empty", () -> new LootItemConditionType(new TagNotEmptyCondition.ConditionSerializer()));
+  public static final DeferredHolder<?, LootItemConditionType> lootTagNotEmptyCondition = LOOT_CONDITIONS.register("tag_not_empty", () -> new LootItemConditionType(TagNotEmptyCondition.CODEC));
   /** @deprecated use {@link slimeknights.mantle.loot.MantleLoot#TAG_PREFERENCE} */
   @SuppressWarnings("removal")
   @Deprecated(forRemoval = true)
-  public static final DeferredHolder<?, LootPoolEntryType> lootTagPreference = LOOT_ENTRIES.register("tag_preference", () -> new LootPoolEntryType(new TagPreferenceLootEntry.Serializer()));
+  public static final DeferredHolder<?, LootPoolEntryType> lootTagPreference = LOOT_ENTRIES.register("tag_preference", () -> new LootPoolEntryType(TagPreferenceLootEntry.CODEC));
 
   /* Slime Balls are edible, believe it or not */
   public static final EnumObject<SlimeType, Item> slimeball = new EnumObject.Builder<SlimeType, Item>(SlimeType.class)
@@ -193,19 +197,18 @@ public final class TinkerCommons extends TinkerModule {
   @SuppressWarnings("removal")
   @SubscribeEvent
   void registerRecipeSerializers(RegisterEvent event) {
-    if (event.getRegistryKey() == Registries.RECIPE_SERIALIZER) {
+    if (event.getRegistryKey() == NeoForgeRegistries.Keys.CONDITION_CODECS) {
+      Registry<MapCodec<? extends ICondition>> registry = java.util.Objects.requireNonNull(event.getRegistry(NeoForgeRegistries.Keys.CONDITION_CODECS));
+      Registry.register(registry, ConfigEnabledCondition.ID, ConfigEnabledCondition.CODEC);
+      Registry.register(registry, TConstruct.getResource("tag_intersection_present"), TagIntersectionPresentCondition.CODEC);
+      Registry.register(registry, TConstruct.getResource("tag_difference_present"), TagDifferencePresentCondition.CODEC);
+      Registry.register(registry, TConstruct.getResource("tag_not_empty"), TagNotEmptyCondition.CODEC);
+    } else if (event.getRegistryKey() == Registries.RECIPE_SERIALIZER) {
       CraftingHelper.register(NoContainerIngredient.ID, NoContainerIngredient.Serializer.INSTANCE);
       CraftingHelper.register(BlockTagIngredient.Serializer.ID, BlockTagIngredient.Serializer.INSTANCE);
       CraftingHelper.register(InstrumentIngredient.ID, InstrumentIngredient.SERIALIZER);
-      CraftingHelper.register(ConfigEnabledCondition.SERIALIZER);
       CriteriaTriggers.register(CONTAINER_OPENED_TRIGGER);
 
-      //noinspection removal
-      CraftingHelper.register(TagIntersectionPresentCondition.SERIALIZER);
-      //noinspection removal
-      CraftingHelper.register(TagDifferencePresentCondition.SERIALIZER);
-      //noinspection removal
-      CraftingHelper.register(new TagNotEmptyCondition.ConditionSerializer());
       // mantle
       DamageSourcePredicate.LOADER.register(getResource("direct"), TinkerPredicate.DIRECT_DAMAGE.getLoader());
       // entity
@@ -245,7 +248,7 @@ public final class TinkerCommons extends TinkerModule {
     generator.addProvider(client, new TinkerBlockStateProvider(output, existingFileHelper));
     generator.addProvider(client, new RenderFluidProvider(output));
     generator.addProvider(client, new RenderItemProvider(output));
-    generator.addProvider(event.includeServer(), new CommonRecipeProvider(output));
+    generator.addProvider(event.includeServer(), new CommonRecipeProvider(output, event.getLookupProvider()));
   }
 
   /** Adds all relevant items to the creative tab */

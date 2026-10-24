@@ -1,8 +1,9 @@
 package slimeknights.tconstruct.shared.data;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeCategory;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
@@ -13,8 +14,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.WeatheringCopper.WeatherState;
-import net.minecraftforge.common.Tags;
-import slimeknights.mantle.recipe.data.ConsumerWrapperBuilder;
+import net.neoforged.neoforge.common.Tags;
 import slimeknights.mantle.recipe.data.ICommonRecipeHelper;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.data.BaseRecipeProvider;
@@ -31,11 +31,11 @@ import slimeknights.tconstruct.tables.TinkerTables;
 import slimeknights.tconstruct.world.TinkerWorld;
 
 import java.util.Locale;
-import java.util.function.Consumer;
+import java.util.concurrent.CompletableFuture;
 
 public class CommonRecipeProvider extends BaseRecipeProvider implements ICommonRecipeHelper {
-  public CommonRecipeProvider(PackOutput output) {
-    super(output);
+  public CommonRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
+    super(output, registries);
   }
 
   @Override
@@ -44,12 +44,12 @@ public class CommonRecipeProvider extends BaseRecipeProvider implements ICommonR
   }
 
   @Override
-  protected void buildRecipes(Consumer<FinishedRecipe> consumer) {
+  protected void buildRecipes(RecipeOutput consumer) {
     this.addCommonRecipes(consumer);
     this.addMaterialRecipes(consumer);
   }
 
-  private void addCommonRecipes(Consumer<FinishedRecipe> consumer) {
+  private void addCommonRecipes(RecipeOutput consumer) {
     // firewood and lavawood
     String folder = "common/firewood/";
     slabStairsCrafting(consumer, TinkerMaterials.blazewood, folder, false);
@@ -188,7 +188,7 @@ public class CommonRecipeProvider extends BaseRecipeProvider implements ICommonR
     }
     // fix vanilla recipes not using tinkers glass
     String glassVanillaFolder = folder + "vanilla/";
-    Consumer<FinishedRecipe> vanillaGlassConsumer = withCondition(consumer, ConfigEnabledCondition.GLASS_RECIPE_FIX);
+    RecipeOutput vanillaGlassConsumer = consumer.withConditions(ConfigEnabledCondition.GLASS_RECIPE_FIX);
     ShapedRecipeBuilder.shaped(RecipeCategory.MISC, Blocks.BEACON)
                        .define('S', Items.NETHER_STAR)
                        .define('G', Tags.Items.GLASS_COLORLESS)
@@ -230,11 +230,7 @@ public class CommonRecipeProvider extends BaseRecipeProvider implements ICommonR
                           .requires(Blocks.GRAVEL)
                           .requires(Blocks.GRAVEL)
                           .unlockedBy("has_item", has(Blocks.GRAVEL))
-                          .save(
-                            ConsumerWrapperBuilder.wrap()
-                                                  .addCondition(ConfigEnabledCondition.GRAVEL_TO_FLINT)
-                                                  .build(consumer),
-                            location("common/flint"));
+                           .save(consumer.withConditions(ConfigEnabledCondition.GRAVEL_TO_FLINT), location("common/flint"));
 
     // allow crafting the blast furnace in the nether
     ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, Blocks.BLAST_FURNACE)
@@ -259,7 +255,7 @@ public class CommonRecipeProvider extends BaseRecipeProvider implements ICommonR
                           .save(consumer, location("common/cheese_ingot_from_block"));
   }
 
-  private void addMaterialRecipes(Consumer<FinishedRecipe> consumer) {
+  private void addMaterialRecipes(RecipeOutput consumer) {
     String folder = "common/materials/";
 
     // ores

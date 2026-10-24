@@ -1,7 +1,8 @@
 package slimeknights.tconstruct.tools.data.material;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.InstrumentTags;
@@ -15,10 +16,10 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.common.Tags;
+import net.neoforged.neoforge.common.Tags;
 import net.minecraftforge.common.crafting.CompoundIngredient;
 import net.minecraftforge.common.crafting.DifferenceIngredient;
-import net.minecraftforge.common.crafting.conditions.OrCondition;
+import net.neoforged.neoforge.common.conditions.OrCondition;
 import net.minecraftforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import slimeknights.mantle.datagen.MantleTags;
@@ -46,14 +47,14 @@ import slimeknights.tconstruct.tools.recipe.severing.SheepShearingRecipe;
 import slimeknights.tconstruct.world.TinkerWorld;
 
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.concurrent.CompletableFuture;
 
 import static slimeknights.mantle.Mantle.COMMON;
 import static slimeknights.tconstruct.library.recipe.melting.IMeltingRecipe.getTemperature;
 
 public class MaterialRecipeProvider extends BaseRecipeProvider implements IMaterialRecipeHelper {
-  public MaterialRecipeProvider(PackOutput packOutput) {
-    super(packOutput);
+  public MaterialRecipeProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> registries) {
+    super(packOutput, registries);
   }
 
   @Override
@@ -62,19 +63,19 @@ public class MaterialRecipeProvider extends BaseRecipeProvider implements IMater
   }
 
   @Override
-  protected void buildRecipes(Consumer<FinishedRecipe> consumer) {
+  protected void buildRecipes(RecipeOutput consumer) {
     addMaterialItems(consumer);
     addMaterialSmeltery(consumer);
   }
 
-  private void addMaterialItems(Consumer<FinishedRecipe> consumer) {
+  private void addMaterialItems(RecipeOutput consumer) {
     String folder = "tools/materials/";
     // tier 1
     materialRecipe(consumer, MaterialIds.wood,   Ingredient.of(Tags.Items.RODS_WOODEN), 1, 2, folder + "wood/sticks");
     // planks
     materialRecipe(consumer, MaterialIds.crimson,  Ingredient.of(Items.CRIMSON_PLANKS),  1, 1, folder + "wood/planks/crimson");
     materialRecipe(consumer, MaterialIds.warped,   Ingredient.of(Items.WARPED_PLANKS),   1, 1, folder + "wood/planks/warped");
-    materialRecipe(withCondition(consumer, TagCombinationCondition.difference(ItemTags.PLANKS, TinkerTags.Items.VARIANT_PLANKS)), MaterialIds.wood,
+    materialRecipe(consumer.withConditions(TagCombinationCondition.difference(ItemTags.PLANKS, TinkerTags.Items.VARIANT_PLANKS)), MaterialIds.wood,
                    DifferenceIngredient.of(Ingredient.of(ItemTags.PLANKS), Ingredient.of(TinkerTags.Items.VARIANT_PLANKS)), 1, 1, folder + "wood/planks/default");
     // logs
     // standard wood, different recipes just swap the leftovers
@@ -89,7 +90,7 @@ public class MaterialRecipeProvider extends BaseRecipeProvider implements IMater
     // variant wood, swaps the variant as well
     materialRecipe(consumer, MaterialIds.crimson,  Ingredient.of(ItemTags.CRIMSON_STEMS), 4, 1, ItemOutput.fromItem(Blocks.CRIMSON_PLANKS),  folder + "wood/logs/crimson");
     materialRecipe(consumer, MaterialIds.warped,   Ingredient.of(ItemTags.WARPED_STEMS),  4, 1, ItemOutput.fromItem(Blocks.WARPED_PLANKS),   folder + "wood/logs/warped");
-    materialRecipe(withCondition(consumer, TagCombinationCondition.difference(ItemTags.LOGS, TinkerTags.Items.VARIANT_LOGS)), MaterialIds.wood,
+    materialRecipe(consumer.withConditions(TagCombinationCondition.difference(ItemTags.LOGS, TinkerTags.Items.VARIANT_LOGS)), MaterialIds.wood,
                    DifferenceIngredient.of(Ingredient.of(ItemTags.LOGS), Ingredient.of(TinkerTags.Items.VARIANT_LOGS)), 4, 1,
                    ItemOutput.fromItem(Items.STICK, 2), folder + "wood/logs/default");
     // bamboo
@@ -226,7 +227,7 @@ public class MaterialRecipeProvider extends BaseRecipeProvider implements IMater
     metalMaterialRecipe(consumer, MaterialIds.silver, folder, "silver", true);
     metalMaterialRecipe(consumer, MaterialIds.lead, folder, "lead", true);
     metalMaterialRecipe(consumer, MaterialIds.aluminum, folder, "aluminum", true);
-    materialRecipe(withCondition(consumer, tagCondition("treated_wood")),  MaterialIds.treatedWood, Ingredient.of(getItemTag(COMMON, "treated_wood")), 1, 1, folder + "treated_wood");
+    materialRecipe(consumer.withConditions(tagCondition("treated_wood")),  MaterialIds.treatedWood, Ingredient.of(getItemTag(COMMON, "treated_wood")), 1, 1, folder + "treated_wood");
     // no whitestone, use repair kits
     // tier 3 (mod integration)
     metalMaterialRecipe(consumer, MaterialIds.bronze, folder, "bronze", true);
@@ -234,7 +235,7 @@ public class MaterialRecipeProvider extends BaseRecipeProvider implements IMater
     metalMaterialRecipe(consumer, MaterialIds.invar, folder, "invar", true);
     metalMaterialRecipe(consumer, MaterialIds.pewter, folder, "pewter", true);
     materialRecipe(
-      withCondition(consumer, new OrCondition(ConfigEnabledCondition.FORCE_INTEGRATION_MATERIALS, tagCondition("ingots/uranium"))),
+      consumer.withConditions(new OrCondition(List.of(ConfigEnabledCondition.FORCE_INTEGRATION_MATERIALS, tagCondition("ingots/uranium")))),
       MaterialIds.necronium, Ingredient.of(TinkerMaterials.necroniumBone), 1, 1, folder + "necronium");
     metalMaterialRecipe(consumer, MaterialIds.electrum, folder, "electrum", true);
     metalMaterialRecipe(consumer, MaterialIds.steeleaf, folder, "steeleaf", true);
@@ -254,7 +255,7 @@ public class MaterialRecipeProvider extends BaseRecipeProvider implements IMater
     materialRecipe(consumer, MaterialIds.cheese,     Ingredient.of(TinkerCommons.cheeseBlock),  4, 1, folder + "cheese_block");
     // goat horns
     // fallback recipe if mods add a new goat horn variant
-    materialRecipe(withCondition(consumer, new TagCombinationCondition<>(List.of(InstrumentTags.GOAT_HORNS), TinkerTags.Instruments.VARIANT_HORNS)),
+    materialRecipe(consumer.withConditions(new TagCombinationCondition<>(List.of(InstrumentTags.GOAT_HORNS), TinkerTags.Instruments.VARIANT_HORNS)),
       MaterialIds.horn, InstrumentIngredient.of(Items.GOAT_HORN, TinkerTags.Instruments.VARIANT_HORNS), 4, 1, folder + "horn/default");
     hornMaterial(consumer, Instruments.PONDER_GOAT_HORN, folder);
     hornMaterial(consumer, Instruments.SING_GOAT_HORN,   folder);
@@ -266,7 +267,7 @@ public class MaterialRecipeProvider extends BaseRecipeProvider implements IMater
     hornMaterial(consumer, Instruments.DREAM_GOAT_HORN,  folder);
   }
 
-  private void addMaterialSmeltery(Consumer<FinishedRecipe> consumer) {
+  private void addMaterialSmeltery(RecipeOutput consumer) {
     String folder = "tools/materials/";
 
     // melting and casting
@@ -349,10 +350,10 @@ public class MaterialRecipeProvider extends BaseRecipeProvider implements IMater
       .setInputId(MaterialIds.wood)
       .setFluid(SizedFluidIngredient.of(creosote, 125))
       .setTemperature(600)
-      .save(withCondition(consumer, new TagFilledCondition<>(creosote)), location(folder + "composite/treated_wood"));
+      .save(consumer.withConditions(new TagFilledCondition<>(creosote)), location(folder + "composite/treated_wood"));
     MaterialMeltingRecipeBuilder.material(MaterialIds.ironwood, TinkerFluids.moltenIron, FluidValues.INGOT)
       .addByproduct(TinkerFluids.moltenGold.result(FluidValues.NUGGET))
-      .save(withCondition(consumer, tagCondition("ingots/ironwood")), location(folder + "melting/ironwood"));
+      .save(consumer.withConditions(tagCondition("ingots/ironwood")), location(folder + "melting/ironwood"));
     // tier 3 compat
     compatMeltingCasting(consumer, MaterialIds.constantan, TinkerFluids.moltenConstantan, "nickel", folder);
     compatMeltingCasting(consumer, MaterialIds.invar,      TinkerFluids.moltenInvar,      "nickel", folder);
@@ -361,20 +362,20 @@ public class MaterialRecipeProvider extends BaseRecipeProvider implements IMater
     compatMeltingCasting(consumer, MaterialIds.steeleaf,   TinkerFluids.moltenSteeleaf, folder);
     // pewter has two different ores that let it appear, tin and lead
     materialMeltingCasting(
-      withCondition(consumer, new OrCondition(tagCondition("ingots/pewter"), tagCondition("ingots/tin"), tagCondition("ingots/lead"))),
+      consumer.withConditions(new OrCondition(List.of(tagCondition("ingots/pewter"), tagCondition("ingots/tin"), tagCondition("ingots/lead")))),
       MaterialIds.pewter, TinkerFluids.moltenPewter, folder);
-    materialMeltingComposite(withCondition(consumer, tagCondition("ingots/uranium")), MaterialIds.necroticBone, MaterialIds.necronium, TinkerFluids.moltenUranium, FluidValues.INGOT, folder);
-    materialMeltingComposite(withCondition(consumer, new OrCondition(tagCondition("ingots/brass"), tagCondition("ingots/zinc"))),
+    materialMeltingComposite(consumer.withConditions(tagCondition("ingots/uranium")), MaterialIds.necroticBone, MaterialIds.necronium, TinkerFluids.moltenUranium, FluidValues.INGOT, folder);
+    materialMeltingComposite(consumer.withConditions(new OrCondition(List.of(tagCondition("ingots/brass"), tagCondition("ingots/zinc")))),
                              MaterialIds.slimewood, MaterialIds.platedSlimewood, TinkerFluids.moltenBrass, FluidValues.INGOT, folder);
     // tier 4 compat
-    Consumer<FinishedRecipe> fieryConsumer = withCondition(consumer, tagCondition("ingots/fiery"));
+    RecipeOutput fieryConsumer = consumer.withConditions(tagCondition("ingots/fiery"));
     materialComposite(fieryConsumer, MaterialIds.iron, MaterialIds.fiery, TinkerFluids.fieryLiquid, FluidValues.BOTTLE, folder);
     MaterialMeltingRecipeBuilder.material(MaterialIds.fiery, TinkerFluids.fieryLiquid, FluidValues.BOTTLE)
       .addByproduct(TinkerFluids.moltenIron.result(FluidValues.INGOT))
       .save(fieryConsumer, location(folder + "melting/fiery"));
     // nicrosil has three different ores that let it appear, tin, nickel, and chromium
     materialMeltingCasting(
-      withCondition(consumer, new OrCondition(tagCondition("ingots/nicrosil"), tagCondition("ingots/tin"), tagCondition("ingots/nickel"), tagCondition("ingots/chromium"))),
+      consumer.withConditions(new OrCondition(List.of(tagCondition("ingots/nicrosil"), tagCondition("ingots/tin"), tagCondition("ingots/nickel"), tagCondition("ingots/chromium")))),
       MaterialIds.nicrosil, TinkerFluids.moltenNicrosil, folder);
 
     // slimesuit - slime
@@ -394,13 +395,13 @@ public class MaterialRecipeProvider extends BaseRecipeProvider implements IMater
   }
 
   /** Adds a recipe casting whitestone from the given fluid */
-  private void whitestoneCasting(Consumer<FinishedRecipe> consumer, FluidObject<?> fluid, String folder) {
+  private void whitestoneCasting(RecipeOutput consumer, FluidObject<?> fluid, String folder) {
     String name = TinkerFluids.withoutMolten(fluid);
-    materialComposite(withCondition(consumer, tagCondition("ingots/" + name)), MaterialIds.rock, MaterialIds.whitestoneComposite, fluid, FluidValues.INGOT, folder, "whitestone_from_" + name);
+    materialComposite(consumer.withConditions(tagCondition("ingots/" + name)), MaterialIds.rock, MaterialIds.whitestoneComposite, fluid, FluidValues.INGOT, folder, "whitestone_from_" + name);
   }
 
   /** Adds recipes to clean leather with venom */
-  private void venomCleaning(Consumer<FinishedRecipe> consumer, MaterialVariantId input, String folder, String name) {
+  private void venomCleaning(RecipeOutput consumer, MaterialVariantId input, String folder, String name) {
     MaterialFluidRecipeBuilder.material(MaterialIds.leather)
       .setInputId(input)
       .setFluid(TinkerFluids.venom.ingredient(FluidValues.SIP))
@@ -410,7 +411,7 @@ public class MaterialRecipeProvider extends BaseRecipeProvider implements IMater
   }
 
   /** Adds a recipe for crafting a goat horn material */
-  private void hornMaterial(Consumer<FinishedRecipe> consumer, ResourceKey<Instrument> instrument, String folder) {
+  private void hornMaterial(RecipeOutput consumer, ResourceKey<Instrument> instrument, String folder) {
     ResourceLocation key = instrument.location();
     materialRecipe(consumer, MaterialVariantId.create(MaterialIds.horn, key.toLanguageKey()), InstrumentIngredient.of(Items.GOAT_HORN, instrument), 4, 1, folder + "horn/" + key.getPath());
   }

@@ -782,10 +782,10 @@ public final class TinkerModifiers extends TinkerModule {
    * Loot
    */
   public static final DeferredHolder<?, MapCodec<ModifierLootModifier>> modifierLootModifier = GLOBAL_LOOT_MODIFIERS.register("modifier_hook", () -> ModifierLootModifier.CODEC);
-  public static final DeferredHolder<?, LootItemConditionType> hasModifierLootCondition = LOOT_CONDITIONS.register("has_modifier", () -> new LootItemConditionType(new HasModifierLootCondition.ConditionSerializer()));
-  public static final DeferredHolder<?, LootItemFunctionType> modifierBonusFunction = LOOT_FUNCTIONS.register("modifier_bonus", () -> new LootItemFunctionType(new ModifierBonusLootFunction.Serializer()));
-  public static final DeferredHolder<?, LootItemConditionType> chrysophiliteLootCondition = LOOT_CONDITIONS.register("has_chrysophilite", () -> new LootItemConditionType(ChrysophiliteLootCondition.SERIALIZER));
-  public static final DeferredHolder<?, LootItemFunctionType> chrysophiliteBonusFunction = LOOT_FUNCTIONS.register("chrysophilite_bonus", () -> new LootItemFunctionType(ChrysophiliteBonusFunction.SERIALIZER));
+  public static final DeferredHolder<?, LootItemConditionType> hasModifierLootCondition = LOOT_CONDITIONS.register("has_modifier", () -> new LootItemConditionType(HasModifierLootCondition.CODEC));
+  public static final DeferredHolder<?, LootItemFunctionType> modifierBonusFunction = LOOT_FUNCTIONS.register("modifier_bonus", () -> new LootItemFunctionType(ModifierBonusLootFunction.CODEC));
+  public static final DeferredHolder<?, LootItemConditionType> chrysophiliteLootCondition = LOOT_CONDITIONS.register("has_chrysophilite", () -> new LootItemConditionType(ChrysophiliteLootCondition.CODEC));
+  public static final DeferredHolder<?, LootItemFunctionType> chrysophiliteBonusFunction = LOOT_FUNCTIONS.register("chrysophilite_bonus", () -> new LootItemFunctionType(ChrysophiliteBonusFunction.CODEC));
 
   /*
    * Events
@@ -1117,7 +1117,7 @@ public final class TinkerModifiers extends TinkerModule {
     PackOutput packOutput = generator.getPackOutput();
     boolean server = event.includeServer();
     generator.addProvider(server, new ModifierProvider(packOutput));
-    generator.addProvider(server, new ModifierRecipeProvider(packOutput));
+    generator.addProvider(server, new ModifierRecipeProvider(packOutput, event.getLookupProvider()));
     generator.addProvider(server, new FluidEffectProvider(packOutput));
     generator.addProvider(server, new ModifierTagProvider(packOutput, event.getExistingFileHelper()));
     generator.addProvider(server, new EnchantmentToModifierProvider(packOutput));

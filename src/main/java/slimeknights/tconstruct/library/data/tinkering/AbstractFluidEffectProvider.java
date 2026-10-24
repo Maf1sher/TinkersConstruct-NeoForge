@@ -18,9 +18,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.common.crafting.conditions.ModLoadedCondition;
-import net.minecraftforge.common.crafting.conditions.OrCondition;
+import net.neoforged.neoforge.common.conditions.ICondition;
+import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
+import net.neoforged.neoforge.common.conditions.OrCondition;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import slimeknights.mantle.data.GenericDataProvider;
@@ -226,7 +226,7 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
       for (int i = 0; i < names.length; i++) {
         conditions[i+1] = new TagFilledCondition<>(ItemTags.create(commonResource("ingots/" + names[i])));
       }
-      return addCondition(new OrCondition(conditions));
+      return addCondition(new OrCondition(List.of(conditions)));
     }
 
     /** Adds an effect to the given fluid */

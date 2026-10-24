@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
@@ -13,7 +13,6 @@ import org.jetbrains.annotations.Nullable;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
 
-import java.util.function.Consumer;
 
 import static slimeknights.tconstruct.library.recipe.melting.IMeltingRecipe.getTemperature;
 
@@ -56,16 +55,15 @@ public class MeltingFuelBuilder extends AbstractRecipeBuilder<MeltingFuelBuilder
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer) {
+  public void save(RecipeOutput output) {
     if (input == null || input.getFluids().length == 0) {
       throw new IllegalStateException("Must have at least one fluid for dynamic input");
     }
-    save(consumer, Loadables.FLUID.getKey(input.getFluids()[0].getFluid()));
+    save(output, Loadables.FLUID.getKey(input.getFluids()[0].getFluid()));
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer, ResourceLocation id) {
-    ResourceLocation advancementId = this.buildOptionalAdvancement(id, "melting_fuel");
-    consumer.accept(new LoadableFinishedRecipe<>(new MeltingFuel(id, input, duration, temperature, rate), MeltingFuel.LOADER, advancementId));
+  public void save(RecipeOutput output, ResourceLocation id) {
+    LoadableFinishedRecipe.save(output, id, MeltingFuel.LOADER, new MeltingFuel(id, input, duration, temperature, rate), buildOptionalAdvancement(output, id, "melting_fuel"));
   }
 }

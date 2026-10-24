@@ -1,49 +1,35 @@
 package slimeknights.tconstruct.library.data.recipe;
 
-import com.google.gson.JsonObject;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import slimeknights.mantle.data.loadable.common.NBTLoadable;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.world.item.component.CustomData;
+import net.neoforged.neoforge.common.conditions.ICondition;
 
 import javax.annotation.Nullable;
-import java.util.function.Consumer;
-
-/** Helper to add NBT to vanilla recipes. Forge adds support but not the builders */
-public record CraftingNBTWrapper(FinishedRecipe recipe, CompoundTag nbt) implements FinishedRecipe {
+/** Helper to add custom data to shaped recipe results while preserving their serializer. */
+public record CraftingNBTWrapper(RecipeOutput output, CompoundTag nbt) implements RecipeOutput {
   @Override
-  public void serializeRecipeData(JsonObject json) {
-    recipe.serializeRecipeData(json);
-    JsonObject result = GsonHelper.getAsJsonObject(json, "result");
-    result.add("nbt", NBTLoadable.DISALLOW_STRING.serialize(nbt));
+  public Advancement.Builder advancement() {
+    return output.advancement();
   }
 
   @Override
-  public ResourceLocation getId() {
-    return recipe.getId();
+  public void accept(ResourceLocation id, Recipe<?> recipe, @Nullable AdvancementHolder advancement, ICondition... conditions) {
+    if (!(recipe instanceof ShapedRecipe shaped)) {
+      throw new IllegalArgumentException("Custom-data output requires a shaped recipe, got " + recipe.getClass().getName());
+    }
+    shaped.result.set(DataComponents.CUSTOM_DATA, CustomData.of(nbt.copy()));
+    output.accept(id, recipe, advancement, conditions);
   }
 
-  @Override
-  public RecipeSerializer<?> getType() {
-    return recipe.getType();
-  }
-
-  @Nullable
-  @Override
-  public JsonObject serializeAdvancement() {
-    return recipe.serializeAdvancement();
-  }
-
-  @Nullable
-  @Override
-  public ResourceLocation getAdvancementId() {
-    return recipe.getAdvancementId();
-  }
-
-  /** Creates a wrapped consumer, adding the given NBT */
-  public static Consumer<FinishedRecipe> wrap(Consumer<FinishedRecipe> base, CompoundTag nbt) {
-    return recipe -> base.accept(new CraftingNBTWrapper(recipe, nbt));
+  /** Creates a wrapped recipe output, adding the given custom data to result stacks. */
+  public static RecipeOutput wrap(RecipeOutput base, CompoundTag nbt) {
+    return new CraftingNBTWrapper(base, nbt);
   }
 }

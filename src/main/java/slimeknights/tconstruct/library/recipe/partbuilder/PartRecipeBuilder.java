@@ -3,7 +3,7 @@ package slimeknights.tconstruct.library.recipe.partbuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
@@ -11,7 +11,6 @@ import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
 import slimeknights.tconstruct.library.tools.part.IMaterialItem;
 
-import java.util.function.Consumer;
 
 /** Builder for a material item part crafting recipe in {@link PartRecipe}. */
 @Setter
@@ -51,12 +50,12 @@ public class PartRecipeBuilder extends AbstractRecipeBuilder<PartRecipeBuilder> 
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumerIn) {
-    this.save(consumerIn, Loadables.ITEM.getKey(this.output.asItem()));
+  public void save(RecipeOutput output) {
+    this.save(output, Loadables.ITEM.getKey(this.output.asItem()));
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumerIn, ResourceLocation id) {
+  public void save(RecipeOutput output, ResourceLocation id) {
     if (this.outputAmount <= 0) {
       throw new IllegalStateException("recipe " + id + " must output at least 1");
     }
@@ -66,7 +65,6 @@ public class PartRecipeBuilder extends AbstractRecipeBuilder<PartRecipeBuilder> 
     if (this.pattern == null) {
       throw new IllegalStateException("recipe " + id + " has no pattern associated with it");
     }
-    ResourceLocation advancementId = this.buildOptionalAdvancement(id, "parts");
-    consumerIn.accept(new LoadableFinishedRecipe<>(new PartRecipe(id, group, pattern, patternItem, cost, allowUncraftable, output, outputAmount), PartRecipe.LOADER, advancementId));
+    LoadableFinishedRecipe.save(output, id, PartRecipe.LOADER, new PartRecipe(id, group, pattern, patternItem, cost, allowUncraftable, this.output, outputAmount), buildOptionalAdvancement(output, id, "parts"));
   }
 }

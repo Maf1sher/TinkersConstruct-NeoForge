@@ -10,9 +10,9 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Rarity;
-import net.minecraftforge.common.crafting.conditions.AndCondition;
-import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.common.crafting.conditions.OrCondition;
+import net.neoforged.neoforge.common.conditions.AndCondition;
+import net.neoforged.neoforge.common.conditions.ICondition;
+import net.neoforged.neoforge.common.conditions.OrCondition;
 import slimeknights.mantle.Mantle;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.mantle.recipe.condition.TagFilledCondition;
@@ -165,7 +165,7 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
     ICondition condition = new OrCondition(Stream.concat(
       Stream.of(ConfigEnabledCondition.FORCE_INTEGRATION_MATERIALS),
       Arrays.stream(tagNames).map(AbstractMaterialDataProvider::tagExistsCondition)
-    ).toArray(ICondition[]::new));
+    ).toList());
     addMaterial(location, tier, order, craftable, false, condition);
   }
 
@@ -184,14 +184,14 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
   /** @deprecated use {@link MaterialBuilder#compatAlloy(ICondition...)} */
   @Deprecated
   protected void addCompatAlloy(MaterialId location, int tier, int order, ICondition... alloyConditions) {
-    ICondition condition = new OrCondition(
+    ICondition condition = new OrCondition(List.of(
       // if forced
       ConfigEnabledCondition.FORCE_INTEGRATION_MATERIALS,
       // or we have the matching alloy ingot
       tagExistsCondition("ingots/" + location.getPath()),
       // or we allow ingotless alloys and have all alloy components
-      new AndCondition(Util.prepend(alloyConditions, ConfigEnabledCondition.ALLOW_INGOTLESS_ALLOYS))
-    );
+      new AndCondition(List.of(Util.prepend(alloyConditions, ConfigEnabledCondition.ALLOW_INGOTLESS_ALLOYS)))
+    ));
     addMaterial(location, tier, order, false, false, condition);
   }
 
@@ -279,7 +279,7 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
 
     /** Adds the compat material conditions */
     private MaterialBuilder compat(Stream<ICondition> conditions) {
-      return condition(new OrCondition(Stream.concat(Stream.of(ConfigEnabledCondition.FORCE_INTEGRATION_MATERIALS), conditions).toArray(ICondition[]::new)));
+      return condition(new OrCondition(Stream.concat(Stream.of(ConfigEnabledCondition.FORCE_INTEGRATION_MATERIALS), conditions).toList()));
     }
 
     /** Adds the compat material conditions */
@@ -304,14 +304,14 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
 
     /** Adds the compat material condition for the given nested conditions */
     public MaterialBuilder compatAlloy(ICondition... alloyConditions) {
-      return condition(new OrCondition(
+      return condition(new OrCondition(List.of(
         // if forced
         ConfigEnabledCondition.FORCE_INTEGRATION_MATERIALS,
         // or we have the matching alloy ingot
         tagExistsCondition("ingots/" + id.getPath()),
         // or we allow ingotless alloys and have all alloy components
-        new AndCondition(Util.prepend(alloyConditions, ConfigEnabledCondition.ALLOW_INGOTLESS_ALLOYS))
-      ));
+        new AndCondition(List.of(Util.prepend(alloyConditions, ConfigEnabledCondition.ALLOW_INGOTLESS_ALLOYS)))
+      )));
     }
 
     /** Adds the compat material condition for a list of ingot options, alloy is enabled if any of them are enabled */
@@ -320,7 +320,7 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
       if (conditions.length == 1) {
         return compatAlloy(conditions[0]);
       }
-      return compatAlloy(new OrCondition(conditions));
+      return compatAlloy(new OrCondition(List.of(conditions)));
     }
 
 
@@ -346,7 +346,7 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
       if (conditions.length == 1) {
         combined = conditions[0];
       } else if (conditions.length > 1) {
-        combined = new AndCondition(conditions);
+        combined = new AndCondition(List.of(conditions));
       }
       return redirect(new JsonRedirect(id, combined));
     }
@@ -361,7 +361,7 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
       if (count == 1) {
         condition = conditions.get(0);
       } else if (count > 1) {
-        condition = new AndCondition(conditions.toArray(new ICondition[0]));
+        condition = new AndCondition(new ArrayList<>(conditions));
       }
       JsonRedirect[] redirects = null;
       if (!this.redirects.isEmpty()) {

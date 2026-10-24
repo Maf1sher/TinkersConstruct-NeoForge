@@ -18,8 +18,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -180,7 +180,7 @@ public final class TinkerTools extends TinkerModule {
       .build());
 
   /** Loot function type for tool add data */
-  public static final DeferredHolder<?, LootItemFunctionType> lootAddToolData = LOOT_FUNCTIONS.register("add_tool_data", () -> new LootItemFunctionType(AddToolDataFunction.SERIALIZER));
+  public static final DeferredHolder<?, LootItemFunctionType> lootAddToolData = LOOT_FUNCTIONS.register("add_tool_data", () -> new LootItemFunctionType(AddToolDataFunction.CODEC));
 
   /*
    * Items
@@ -395,8 +395,8 @@ public final class TinkerTools extends TinkerModule {
     ExistingFileHelper existingFileHelper = event.getExistingFileHelper();
     boolean server = event.includeServer();
     boolean client = event.includeClient();
-    generator.addProvider(server, new ToolsRecipeProvider(packOutput));
-    generator.addProvider(server, new MaterialRecipeProvider(packOutput));
+    generator.addProvider(server, new ToolsRecipeProvider(packOutput, event.getLookupProvider()));
+    generator.addProvider(server, new MaterialRecipeProvider(packOutput, event.getLookupProvider()));
     MaterialDataProvider materials = new MaterialDataProvider(packOutput);
     generator.addProvider(server, materials);
     generator.addProvider(server, new MaterialStatsDataProvider(packOutput, materials));

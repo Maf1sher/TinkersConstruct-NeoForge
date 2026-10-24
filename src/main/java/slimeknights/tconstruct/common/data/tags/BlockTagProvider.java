@@ -10,9 +10,9 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Tiers;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.common.data.BlockTagsProvider;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.common.data.BlockTagsProvider;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import slimeknights.mantle.datagen.MantleTags;
 import slimeknights.mantle.registration.object.BuildingBlockObject;
 import slimeknights.mantle.registration.object.EnumObject;
@@ -51,8 +51,8 @@ import static net.minecraft.tags.BlockTags.MINEABLE_WITH_SHOVEL;
 import static net.minecraft.tags.BlockTags.NEEDS_DIAMOND_TOOL;
 import static net.minecraft.tags.BlockTags.NEEDS_IRON_TOOL;
 import static net.minecraft.tags.BlockTags.NEEDS_STONE_TOOL;
-import static net.minecraftforge.common.Tags.Blocks.NEEDS_GOLD_TOOL;
-import static net.minecraftforge.common.Tags.Blocks.NEEDS_NETHERITE_TOOL;
+import static net.neoforged.neoforge.common.Tags.Blocks.NEEDS_GOLD_TOOL;
+import static net.neoforged.neoforge.common.Tags.Blocks.NEEDS_NETHERITE_TOOL;
 import static slimeknights.mantle.Mantle.commonResource;
 import static slimeknights.tconstruct.common.TinkerTags.Blocks.MINEABLE_MELTING_BLACKLIST;
 import static slimeknights.tconstruct.common.TinkerTags.Blocks.UNREPLACABLE_BY_LIQUID;
@@ -183,7 +183,7 @@ public class BlockTagProvider extends BlockTagsProvider {
     // vanilla is not tagged, so tag it
     this.tag(TinkerTags.Blocks.WORKBENCHES)
         .add(Blocks.CRAFTING_TABLE, TinkerTables.craftingStation.get())
-        .addOptionalTag(new ResourceLocation("forge:workbench")); // some mods use a non-standard name here, so support it I guess
+        .addOptionalTag(commonResource("workbench")); // some mods use a non-standard name here, so support it I guess
     this.tag(TinkerTags.Blocks.TABLES)
         .add(TinkerTables.craftingStation.get(), TinkerTables.partBuilder.get(), TinkerTables.tinkerStation.get());
 

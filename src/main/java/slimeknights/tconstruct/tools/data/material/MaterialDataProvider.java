@@ -2,11 +2,13 @@ package slimeknights.tconstruct.tools.data.material;
 
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.FluidTags;
-import net.minecraftforge.common.crafting.conditions.OrCondition;
+import net.neoforged.neoforge.common.conditions.OrCondition;
 import slimeknights.mantle.recipe.condition.TagFilledCondition;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.data.material.AbstractMaterialDataProvider;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
+
+import java.util.List;
 
 import static slimeknights.mantle.Mantle.commonResource;
 
@@ -166,7 +168,7 @@ public class MaterialDataProvider extends AbstractMaterialDataProvider {
     material("platinum").redirect(MaterialIds.searedStone);
     material("tungsten")
       .redirect(MaterialIds.lead, tagExistsCondition("ingots/lead"))
-      .redirect(MaterialIds.invar, new OrCondition(tagExistsCondition("ingots/invar"), tagExistsCondition("ingots/nickel")))
+      .redirect(MaterialIds.invar, new OrCondition(List.of(tagExistsCondition("ingots/invar"), tagExistsCondition("ingots/nickel"))))
       .redirect(MaterialIds.iron);
   }
 

@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -15,18 +15,16 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.common.crafting.ConditionalRecipe;
+import net.neoforged.neoforge.common.Tags;
 import net.minecraftforge.common.crafting.DifferenceIngredient;
 import net.minecraftforge.common.crafting.IntersectionIngredient;
-import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.common.crafting.conditions.ItemExistsCondition;
-import net.minecraftforge.common.crafting.conditions.TrueCondition;
+import net.neoforged.neoforge.common.conditions.NotCondition;
+import net.neoforged.neoforge.common.conditions.ICondition;
+import net.neoforged.neoforge.common.conditions.ItemExistsCondition;
 import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import slimeknights.mantle.recipe.condition.TagCombinationCondition;
 import slimeknights.mantle.recipe.condition.TagFilledCondition;
-import slimeknights.mantle.recipe.data.ConsumerWrapperBuilder;
 import slimeknights.mantle.recipe.data.ItemNameIngredient;
 import slimeknights.mantle.recipe.helper.FluidOutput;
 import slimeknights.mantle.recipe.helper.ItemOutput;
@@ -40,6 +38,8 @@ import slimeknights.tconstruct.library.recipe.melting.MeltingRecipeBuilder;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -64,7 +64,7 @@ public class SmelteryRecipeBuilder {
   private static final int[] UNDAMAGABLE = {0};
 
   /** Consumer for recipe results */
-  private final Consumer<FinishedRecipe> consumer;
+  private final RecipeOutput consumer;
   /** Resource name, domain is location for results and name is tag root */
   private final ResourceLocation name;
   /** Fluid object to generate results and ingredients, takes top priority */
@@ -106,13 +106,13 @@ public class SmelteryRecipeBuilder {
 
   /** Creates a builder for the given fluid object */
   @CheckReturnValue
-  public static SmelteryRecipeBuilder fluid(Consumer<FinishedRecipe> consumer, ResourceLocation name, FluidObject<?> fluid) {
+  public static SmelteryRecipeBuilder fluid(RecipeOutput consumer, ResourceLocation name, FluidObject<?> fluid) {
     return new SmelteryRecipeBuilder(consumer, name, fluid, null, null).temperature(getTemperature(fluid));
   }
 
   /** Creates a builder for the given fluid and tags. Tag will be used for inputs and fluid for outputs */
   @CheckReturnValue
-  public static SmelteryRecipeBuilder fluid(Consumer<FinishedRecipe> consumer, ResourceLocation name, @Nullable Fluid fluid, @Nullable TagKey<Fluid> fluidTag) {
+  public static SmelteryRecipeBuilder fluid(RecipeOutput consumer, ResourceLocation name, @Nullable Fluid fluid, @Nullable TagKey<Fluid> fluidTag) {
     assert fluid != null || fluidTag != null;
     SmelteryRecipeBuilder builder = new SmelteryRecipeBuilder(consumer, name, null, fluid, fluidTag);
     if (fluid != null) {
@@ -123,13 +123,13 @@ public class SmelteryRecipeBuilder {
 
   /** Creates a builder for the given fluid, used as input and output */
   @CheckReturnValue
-  public static SmelteryRecipeBuilder fluid(Consumer<FinishedRecipe> consumer, ResourceLocation name, Fluid fluid) {
+  public static SmelteryRecipeBuilder fluid(RecipeOutput consumer, ResourceLocation name, Fluid fluid) {
     return fluid(consumer, name, fluid, null);
   }
 
   /** Creates a builder for the given fluid tags, used as input and output */
   @CheckReturnValue
-  public static SmelteryRecipeBuilder fluid(Consumer<FinishedRecipe> consumer, ResourceLocation name, TagKey<Fluid> fluidTag) {
+  public static SmelteryRecipeBuilder fluid(RecipeOutput consumer, ResourceLocation name, TagKey<Fluid> fluidTag) {
     return fluid(consumer, name, null, fluidTag);
   }
 
@@ -197,12 +197,8 @@ public class SmelteryRecipeBuilder {
 
   /** Adds the given conditions to the given builder */
   @CheckReturnValue
-  private Consumer<FinishedRecipe> withCondition(ICondition... conditions) {
-    ConsumerWrapperBuilder builder = ConsumerWrapperBuilder.wrap();
-    for (ICondition condition : conditions) {
-      builder.addCondition(condition);
-    }
-    return builder.build(consumer);
+  private RecipeOutput withCondition(ICondition... conditions) {
+    return consumer.withConditions(conditions);
   }
 
   /** Creates a condition for a tag being empty */
@@ -273,7 +269,7 @@ public class SmelteryRecipeBuilder {
 
   /** Adds a recipe for melting an item from a tag */
   private void tagMelting(float scale, String output, float factor, ResourceLocation tagName, boolean damagable, boolean forceOptional) {
-    Consumer<FinishedRecipe> wrapped = optional || forceOptional ? withCondition(tagCondition(tagName)) : consumer;
+    RecipeOutput wrapped = optional || forceOptional ? withCondition(tagCondition(tagName)) : consumer;
     MeltingRecipeBuilder builder = MeltingRecipeBuilder.melting(Ingredient.of(ItemTags.create(tagName)), result((int) (baseUnit * scale)), temperature, factor);
     if (damagable) {
       builder.setDamagable(damageUnits());
@@ -289,7 +285,7 @@ public class SmelteryRecipeBuilder {
     assert oreRate != null;
     assert baseUnit != 0;
     String tagName = tagPrefix + this.name.getPath();
-    Consumer<FinishedRecipe> wrapped;
+    RecipeOutput wrapped;
     Ingredient baseIngredient = Ingredient.of(itemTag(tagName));
     Ingredient ingredient;
     // not everyone sets size, so treat singular as the fallback, means we want anything in the tag that is not sparse or dense
@@ -318,29 +314,32 @@ public class SmelteryRecipeBuilder {
               .setOre(oreRate, oreByproducts[0].getOreRate())
               .save(wrapped, location);
     } else {
-      // multiple options, will need a conditonal recipe
-      ConditionalRecipe.Builder builder = ConditionalRecipe.builder();
+      // Encode each fallback as a separate condition-gated recipe. NeoForge recipe conditions apply to a whole recipe,
+      // so alternatives need exclusive conditions and distinct IDs.
+      List<ICondition> unavailable = new ArrayList<>();
       boolean alwaysPresent = false;
-      for (IByproduct byproduct : oreByproducts) {
-        // found an always present byproduct? no need to tag and we are done
+      for (int i = 0; i < oreByproducts.length; i++) {
+        IByproduct byproduct = oreByproducts[i];
         alwaysPresent = byproduct.isAlwaysPresent();
-        if (alwaysPresent) {
-          builder.addCondition(TrueCondition.INSTANCE);
-        } else {
-          builder.addCondition(tagCondition("ingots/" + byproduct.getName()));
+        ICondition available = alwaysPresent ? null : tagCondition("ingots/" + byproduct.getName());
+        List<ICondition> branchConditions = new ArrayList<>(unavailable);
+        if (!alwaysPresent) {
+          branchConditions.add(available);
         }
-        builder.addRecipe(supplier.get().addByproduct(byproduct.getFluid(scale)).setOre(oreRate, byproduct.getOreRate())::save);
+        RecipeOutput branchOutput = branchConditions.isEmpty() ? wrapped : wrapped.withConditions(branchConditions.toArray(ICondition[]::new));
+        ResourceLocation branchId = i == 0 ? location : location.withSuffix("_byproduct_" + i);
+        supplier.get().addByproduct(byproduct.getFluid(scale)).setOre(oreRate, byproduct.getOreRate()).save(branchOutput, branchId);
 
         if (alwaysPresent) {
           break;
         }
+        unavailable.add(new NotCondition(available));
       }
-      // not always present? add a recipe with no byproducts as a final fallback
+      // If no byproduct tag is present, retain the base recipe without a byproduct.
       if (!alwaysPresent) {
-        builder.addCondition(TrueCondition.INSTANCE);
-        builder.addRecipe(supplier.get()::save);
+        RecipeOutput fallbackOutput = wrapped.withConditions(unavailable.toArray(ICondition[]::new));
+        supplier.get().save(fallbackOutput, location.withSuffix("_fallback"));
       }
-      builder.build(wrapped, location);
     }
   }
 
@@ -352,7 +351,7 @@ public class SmelteryRecipeBuilder {
     if (unitByproducts.length > 0) {
       throw new IllegalArgumentException("Cannot cast using a cast for a fluid with byproducts");
     }
-    Consumer<FinishedRecipe> wrapped = optional || forceOptional ? withCondition(tagCondition(tagName)) : consumer;
+    RecipeOutput wrapped = optional || forceOptional ? withCondition(tagCondition(tagName)) : consumer;
     ItemOutput output = ItemOutput.fromTag(itemTag(tagName));
     int amount = (int) (baseUnit * scale);
     SizedFluidIngredient fluid = ingredient(amount);
@@ -370,7 +369,7 @@ public class SmelteryRecipeBuilder {
 
   /** Recipe to composite cast */
   private void tagCasting(float scale, String outputName, Ingredient cast, String tagName, boolean forceOptional) {
-    Consumer<FinishedRecipe> wrapped = optional || forceOptional ? withCondition(tagCondition(tagName)) : consumer;
+    RecipeOutput wrapped = optional || forceOptional ? withCondition(tagCondition(tagName)) : consumer;
     ItemOutput output = ItemOutput.fromTag(itemTag(tagName));
     int amount = (int) (baseUnit * scale);
     SizedFluidIngredient fluid = ingredient(amount);
@@ -384,7 +383,7 @@ public class SmelteryRecipeBuilder {
   /** Recipe to cast the block */
   public SmelteryRecipeBuilder blockCasting(int factor, Ingredient cast, boolean forceOptional) {
     String tagName = "storage_blocks/" + this.name.getPath();
-    Consumer<FinishedRecipe> wrapped = optional || forceOptional ? withCondition(tagCondition(tagName)) : consumer;
+    RecipeOutput wrapped = optional || forceOptional ? withCondition(tagCondition(tagName)) : consumer;
     ItemCastingRecipeBuilder.basinRecipe(ItemOutput.fromTag(itemTag(tagName)))
       .setFluid(ingredient(baseUnit * factor))
       .setCoolingTime(temperature, baseUnit * factor)

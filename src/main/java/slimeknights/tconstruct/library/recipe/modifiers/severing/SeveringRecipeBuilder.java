@@ -3,7 +3,7 @@ package slimeknights.tconstruct.library.recipe.modifiers.severing;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
 import slimeknights.mantle.data.loadable.Loadables;
@@ -12,7 +12,6 @@ import slimeknights.mantle.recipe.helper.ItemOutput;
 import slimeknights.mantle.recipe.ingredient.EntityIngredient;
 
 import javax.annotation.Nullable;
-import java.util.function.Consumer;
 
 /** Builder for entity melting recipes */
 @Setter
@@ -47,17 +46,17 @@ public class SeveringRecipeBuilder extends AbstractRecipeBuilder<SeveringRecipeB
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer) {
-    save(consumer, Loadables.ITEM.getKey(output.get().getItem()));
+  public void save(RecipeOutput recipeOutput) {
+    save(recipeOutput, Loadables.ITEM.getKey(output.get().getItem()));
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer, ResourceLocation id) {
-    ResourceLocation advancementId = this.buildOptionalAdvancement(id, "severing");
+  public void save(RecipeOutput recipeOutput, ResourceLocation id) {
+    var advancement = buildOptionalAdvancement(recipeOutput, id, "severing");
     if (childOutput != null) {
-      consumer.accept(new LoadableFinishedRecipe<>(new AgeableSeveringRecipe(id, ingredient, output, childOutput, baseChance, lootingBonus), AgeableSeveringRecipe.LOADER, advancementId));
+      LoadableFinishedRecipe.save(recipeOutput, id, AgeableSeveringRecipe.LOADER, new AgeableSeveringRecipe(id, ingredient, output, childOutput, baseChance, lootingBonus), advancement);
     } else {
-      consumer.accept(new LoadableFinishedRecipe<>(new SeveringRecipe(id, ingredient, output, baseChance, lootingBonus), SeveringRecipe.LOADER, advancementId));
+      LoadableFinishedRecipe.save(recipeOutput, id, SeveringRecipe.LOADER, new SeveringRecipe(id, ingredient, output, baseChance, lootingBonus), advancement);
     }
   }
 }

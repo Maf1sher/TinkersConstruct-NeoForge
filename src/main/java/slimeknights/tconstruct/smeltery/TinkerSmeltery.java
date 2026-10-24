@@ -26,7 +26,7 @@ import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
-import net.minecraftforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -121,6 +121,7 @@ import slimeknights.tconstruct.smeltery.block.entity.controller.AlloyerBlockEnti
 import slimeknights.tconstruct.smeltery.block.entity.controller.FoundryBlockEntity;
 import slimeknights.tconstruct.smeltery.block.entity.controller.MelterBlockEntity;
 import slimeknights.tconstruct.smeltery.block.entity.controller.SmelteryBlockEntity;
+import slimeknights.tconstruct.smeltery.data.CeramicsOptionalRecipeProvider;
 import slimeknights.tconstruct.smeltery.data.FluidContainerTransferProvider;
 import slimeknights.tconstruct.smeltery.data.SmelteryRecipeProvider;
 import slimeknights.tconstruct.smeltery.item.CopperCanItem;
@@ -473,7 +474,8 @@ public final class TinkerSmeltery extends TinkerModule {
     boolean server = event.includeServer();
     DataGenerator generator = event.getGenerator();
     PackOutput packOutput = generator.getPackOutput();
-    generator.addProvider(server, new SmelteryRecipeProvider(packOutput));
+    generator.addProvider(server, new SmelteryRecipeProvider(packOutput, event.getLookupProvider()));
+    generator.addProvider(server, new CeramicsOptionalRecipeProvider(packOutput));
     generator.addProvider(server, new FluidContainerTransferProvider(packOutput));
   }
 

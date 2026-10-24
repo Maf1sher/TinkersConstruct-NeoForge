@@ -46,14 +46,14 @@ import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraftforge.common.PlantType;
-import net.minecraftforge.common.world.BiomeModifier;
-import net.minecraftforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.common.world.BiomeModifier;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
 import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent.Operation;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import slimeknights.mantle.registration.object.EntityObject;
 import slimeknights.mantle.registration.object.EnumObject;
@@ -266,10 +266,10 @@ public final class TinkerWorld extends TinkerModule {
   public static final ResourceKey<ConfiguredFeature<?,?>> configuredEnderGeode = key(Registries.CONFIGURED_FEATURE, "ender_geode");
   public static final ResourceKey<PlacedFeature> placedEnderGeode = key(Registries.PLACED_FEATURE, "ender_geode");
 
-  public static final ResourceKey<BiomeModifier> spawnEarthGeode = key(ForgeRegistries.Keys.BIOME_MODIFIERS, "earth_geode");
-  public static final ResourceKey<BiomeModifier> spawnSkyGeode = key(ForgeRegistries.Keys.BIOME_MODIFIERS, "sky_geode");
-  public static final ResourceKey<BiomeModifier> spawnIchorGeode = key(ForgeRegistries.Keys.BIOME_MODIFIERS, "ichor_geode");
-  public static final ResourceKey<BiomeModifier> spawnEnderGeode = key(ForgeRegistries.Keys.BIOME_MODIFIERS, "ender_geode");
+  public static final ResourceKey<BiomeModifier> spawnEarthGeode = key(NeoForgeRegistries.Keys.BIOME_MODIFIERS, "earth_geode");
+  public static final ResourceKey<BiomeModifier> spawnSkyGeode = key(NeoForgeRegistries.Keys.BIOME_MODIFIERS, "sky_geode");
+  public static final ResourceKey<BiomeModifier> spawnIchorGeode = key(NeoForgeRegistries.Keys.BIOME_MODIFIERS, "ichor_geode");
+  public static final ResourceKey<BiomeModifier> spawnEnderGeode = key(NeoForgeRegistries.Keys.BIOME_MODIFIERS, "ender_geode");
 
   // heads
   public static final EnumObject<TinkerHeadType,SkullBlock> heads = BLOCKS.registerEnumNoItem(TinkerHeadType.values(), "head", TinkerWorld::makeHead);
@@ -299,9 +299,9 @@ public final class TinkerWorld extends TinkerModule {
                       .sized(2.04F, 2.04F)
                       .setCustomClientFactory((spawnEntity, world) -> TinkerWorld.terracubeEntity.get().create(world)), 0xAFB9D6, 0xA1A7B1);
 
-  public static final ResourceKey<BiomeModifier> spawnOverworldSlime = key(ForgeRegistries.Keys.BIOME_MODIFIERS, "spawn_overworld_slime");
-  public static final ResourceKey<BiomeModifier> spawnTerracube = key(ForgeRegistries.Keys.BIOME_MODIFIERS, "spawn_terracube");
-  public static final ResourceKey<BiomeModifier> spawnEndSlime = key(ForgeRegistries.Keys.BIOME_MODIFIERS, "spawn_end_slime");
+  public static final ResourceKey<BiomeModifier> spawnOverworldSlime = key(NeoForgeRegistries.Keys.BIOME_MODIFIERS, "spawn_overworld_slime");
+  public static final ResourceKey<BiomeModifier> spawnTerracube = key(NeoForgeRegistries.Keys.BIOME_MODIFIERS, "spawn_terracube");
+  public static final ResourceKey<BiomeModifier> spawnEndSlime = key(NeoForgeRegistries.Keys.BIOME_MODIFIERS, "spawn_end_slime");
 
   /*
    * Particles
@@ -313,7 +313,7 @@ public final class TinkerWorld extends TinkerModule {
   /*
    * Features
    */
-  public static ResourceKey<BiomeModifier> spawnCobaltOre = key(ForgeRegistries.Keys.BIOME_MODIFIERS, "cobalt_ore");
+  public static ResourceKey<BiomeModifier> spawnCobaltOre = key(NeoForgeRegistries.Keys.BIOME_MODIFIERS, "cobalt_ore");
   // small veins, standard distribution
   public static ResourceKey<ConfiguredFeature<?,?>> configuredSmallCobaltOre = key(Registries.CONFIGURED_FEATURE, "cobalt_ore_small");
   public static ResourceKey<PlacedFeature> placedSmallCobaltOre = key(Registries.PLACED_FEATURE, "cobalt_ore_small");
@@ -414,7 +414,7 @@ public final class TinkerWorld extends TinkerModule {
     DataGenerator generator = event.getGenerator();
     boolean server = event.includeServer();
     PackOutput packOutput = generator.getPackOutput();
-    generator.addProvider(server, new WorldRecipeProvider(packOutput));
+    generator.addProvider(server, new WorldRecipeProvider(packOutput, event.getLookupProvider()));
     generator.addProvider(server, new MobEquipmentProvider(packOutput));
   }
 

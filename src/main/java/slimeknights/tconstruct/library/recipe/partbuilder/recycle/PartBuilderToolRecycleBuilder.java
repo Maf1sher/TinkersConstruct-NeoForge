@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
@@ -17,7 +17,6 @@ import slimeknights.tconstruct.tables.recipe.PartBuilderToolRecycle;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -50,13 +49,12 @@ public class PartBuilderToolRecycleBuilder extends AbstractRecipeBuilder<PartBui
 
   @SuppressWarnings("deprecation")
   @Override
-  public void save(Consumer<FinishedRecipe> consumer) {
-    save(consumer, BuiltInRegistries.ITEM.getKey(tools.getMatchingStacks().get(0).getItem()));
+  public void save(RecipeOutput output) {
+    save(output, BuiltInRegistries.ITEM.getKey(tools.getMatchingStacks().get(0).getItem()));
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer, ResourceLocation id) {
-    ResourceLocation advancementId = buildOptionalAdvancement(id, "parts");
-    consumer.accept(new LoadableFinishedRecipe<>(new PartBuilderToolRecycle(id, tools, pattern, parts), PartBuilderToolRecycle.LOADER, advancementId));
+  public void save(RecipeOutput output, ResourceLocation id) {
+    LoadableFinishedRecipe.save(output, id, PartBuilderToolRecycle.LOADER, new PartBuilderToolRecycle(id, tools, pattern, parts), buildOptionalAdvancement(output, id, "parts"));
   }
 }
