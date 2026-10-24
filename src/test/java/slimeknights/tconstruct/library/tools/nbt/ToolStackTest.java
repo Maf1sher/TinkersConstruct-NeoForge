@@ -3,9 +3,11 @@ package slimeknights.tconstruct.library.tools.nbt;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Tiers;
+import net.minecraft.world.item.component.CustomData;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import slimeknights.tconstruct.fixture.MaterialFixture;
@@ -94,7 +96,7 @@ class ToolStackTest extends ToolItemTest {
     ToolStack tool = ToolStack.from(Items.DIAMOND_PICKAXE, ToolDefinition.EMPTY, new CompoundTag());
     tool.setBrokenRaw(true);
     ItemStack stack = tool.createStack();
-    assertThat(stack.getTag()).isEqualTo(tool.getNbt());
+    assertThat(getCustomData(stack)).isEqualTo(tool.getNbt());
   }
 
   @Test
@@ -105,8 +107,9 @@ class ToolStackTest extends ToolItemTest {
     tool.setBrokenRaw(true);
 
     ItemStack stack = tool.updateStack(new ItemStack(Items.DIAMOND_PICKAXE));
-    assertThat(stack.getTag()).isEqualTo(tool.getNbt());
-    assertThat(stack.getTag()).isNotSameAs(tool.getNbt());
+    assertThat(getCustomData(stack)).isEqualTo(tool.getNbt());
+    assertThat(stack.get(DataComponents.CUSTOM_DATA).getUnsafe()).isNotSameAs(tool.getNbt());
+    assertThat(stack.getDamageValue()).isZero();
   }
 
   @Test
@@ -132,6 +135,10 @@ class ToolStackTest extends ToolItemTest {
     assertThat(nbt.contains(ToolStack.TAG_DAMAGE)).isTrue();
     assertThat(nbt.getTagType(ToolStack.TAG_DAMAGE)).isEqualTo(Tag.TAG_INT);
     assertThat(nbt.getInt(ToolStack.TAG_DAMAGE)).isEqualTo(1);
+  }
+
+  private static CompoundTag getCustomData(ItemStack stack) {
+    return stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
   }
 
   @Test

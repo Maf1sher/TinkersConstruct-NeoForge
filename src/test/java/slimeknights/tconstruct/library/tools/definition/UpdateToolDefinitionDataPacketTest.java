@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.common.ToolActions;
+import net.neoforged.neoforge.common.ItemAbilities;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import slimeknights.mantle.data.predicate.block.BlockPredicate;
@@ -87,7 +87,7 @@ class UpdateToolDefinitionDataPacketTest extends BaseMcTest {
       .module(ToolSlotsModule.builder().slots(SlotType.UPGRADE, 5).slots(SlotType.ABILITY, 8).build())
       // traits
       .module(ToolTraitsModule.builder().trait(ModifierFixture.TEST_1, 10).build())
-      .module(ToolActionsModule.of(ToolActions.AXE_DIG, ToolActions.SHOVEL_FLATTEN))
+      .module(ToolActionsModule.of(ItemAbilities.AXE_DIG, ItemAbilities.SHOVEL_FLATTEN))
       // behavior
       .module(new IsEffectiveModule(BlockPredicate.set(Blocks.GRANITE), true))
       .module(new CircleAOEIterator(7, true))
@@ -177,8 +177,8 @@ class UpdateToolDefinitionDataPacketTest extends BaseMcTest {
     assertThat(actionModule).isInstanceOf(ToolActionsModule.class);
     assertThat(((ToolActionsModule) actionModule).actions()).hasSize(2);
     IToolStackView tool = mock(IToolStackView.class);
-    assertThat(parsed.getHook(ToolHooks.TOOL_ACTION).canPerformAction(tool, ToolActions.AXE_DIG)).isTrue();
-    assertThat(parsed.getHook(ToolHooks.TOOL_ACTION).canPerformAction(tool, ToolActions.SHOVEL_FLATTEN)).isTrue();
+    assertThat(parsed.getHook(ToolHooks.TOOL_ACTION).canPerformAction(tool, ItemAbilities.AXE_DIG)).isTrue();
+    assertThat(parsed.getHook(ToolHooks.TOOL_ACTION).canPerformAction(tool, ItemAbilities.SHOVEL_FLATTEN)).isTrue();
 
     // harvest
     IsEffectiveToolHook harvestLogic = parsed.getHook(ToolHooks.IS_EFFECTIVE);
