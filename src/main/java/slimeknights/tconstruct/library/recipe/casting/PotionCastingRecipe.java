@@ -1,6 +1,8 @@
 package slimeknights.tconstruct.library.recipe.casting;
 
 import lombok.Getter;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -9,23 +11,24 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import slimeknights.mantle.data.loadable.Loadables;
-import slimeknights.mantle.data.loadable.common.IngredientLoadable;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.field.LoadableField;
 import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
-import slimeknights.mantle.recipe.IMultiRecipe;
+import slimeknights.mantle.recipe.MultiNamedRecipe;
+import slimeknights.mantle.recipe.NamedRecipe;
+import slimeknights.tconstruct.library.utils.RecipeHelper;
 import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
-import slimeknights.mantle.recipe.helper.TypeAwareRecipeSerializer;
+import slimeknights.tconstruct.library.recipe.helper.TypeAwareRecipeSerializer;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,12 +38,12 @@ import java.util.List;
  * Recipe for casting a fluid onto an item, copying the fluid NBT to the item.
  * TODO 1.21: move to {@link slimeknights.tconstruct.library.recipe.casting.potion}
  */
-public class PotionCastingRecipe implements ICastingRecipe, IMultiRecipe<IDisplayableCastingRecipe> {
+public class PotionCastingRecipe implements ICastingRecipe, MultiNamedRecipe<IDisplayableCastingRecipe> {
   protected static final LoadableField<SizedFluidIngredient, PotionCastingRecipe> FLUID_FIELD = Loadables.SIZED_FLUID_INGREDIENT.requiredField("fluid", r -> r.fluid);
   protected static final LoadableField<Integer, PotionCastingRecipe> COOLING_TIME_FIELD = IntLoadable.FROM_ONE.defaultField("cooling_time", 5, r -> r.coolingTime);
   public static final RecordLoadable<PotionCastingRecipe> LOADER = RecordLoadable.create(
     LoadableRecipeSerializer.TYPED_SERIALIZER.requiredField(), ContextKey.ID.requiredField(), LoadableRecipeSerializer.RECIPE_GROUP,
-    IngredientLoadable.DISALLOW_EMPTY.requiredField("bottle", r -> r.bottle),
+    Loadables.ITEM_INGREDIENT_NONEMPTY.requiredField("bottle", r -> r.bottle),
     FLUID_FIELD,
     Loadables.ITEM.requiredField("result", r -> r.result),
     COOLING_TIME_FIELD,
@@ -114,15 +117,20 @@ public class PotionCastingRecipe implements ICastingRecipe, IMultiRecipe<IDispla
   // TODO 1.21: consider making this a display recipe instead of a multirecipe
   protected List<IDisplayableCastingRecipe> displayRecipes = null;
 
+
   @Override
-  public List<IDisplayableCastingRecipe> getRecipes(RegistryAccess access) {
+  public List<NamedRecipe<IDisplayableCastingRecipe>> getRecipes(ResourceLocation id, HolderLookup.Provider provider) {
+    return RecipeHelper.named(id, displayRecipes(provider));
+  }
+/** Lazily loaded list of display recipes for JEI */
+  private List<IDisplayableCastingRecipe> displayRecipes(HolderLookup.Provider access) {
     if (displayRecipes == null) {
-      Collection<Potion> potions = ForgeRegistries.POTIONS.getValues();
+      Collection<Potion> potions = NeoNeoForgeRegistries.POTIONS.getValues();
       List<ItemStack> results = new ArrayList<>(potions.size());
       // first, make all the potion items
       for (Potion potion : potions) {
         if (potion == Potions.EMPTY) continue;
-        results.add(PotionUtils.setPotion(new ItemStack(this.result), potion));
+        results.add(PotionContents.createItemStack(this.result, BuiltInRegistries.POTION.wrapAsHolder(potion)));
       }
       // next, it's time to do the fluids
       // we want an order of Mod 1 Potion 1, Mod 1 Potion 2, ..., Mod 2 Potion 1, ...

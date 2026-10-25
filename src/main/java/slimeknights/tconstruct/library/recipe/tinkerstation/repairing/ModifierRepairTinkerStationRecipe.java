@@ -2,6 +2,8 @@ package slimeknights.tconstruct.library.recipe.tinkerstation.repairing;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -16,7 +18,9 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
-import slimeknights.mantle.recipe.IMultiRecipe;
+import slimeknights.mantle.recipe.MultiNamedRecipe;
+import slimeknights.mantle.recipe.NamedRecipe;
+import slimeknights.tconstruct.library.utils.RecipeHelper;
 import slimeknights.mantle.util.RegistryHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
@@ -50,7 +54,7 @@ import java.util.List;
  * @see slimeknights.tconstruct.library.modifiers.modules.behavior.MaterialRepairModule
  */
 @RequiredArgsConstructor
-public class ModifierRepairTinkerStationRecipe implements ITinkerStationRecipe, IModifierRepairRecipe, IMultiRecipe<IDisplayToolTinkering> {
+public class ModifierRepairTinkerStationRecipe implements ITinkerStationRecipe, IModifierRepairRecipe, MultiNamedRecipe<IDisplayToolTinkering> {
   private static final String TOOLTIP_KEY = TConstruct.makeTranslationKey("recipe", "tool_repair.modifier");
   private static final String KEY_AMOUNT = TConstruct.makeTranslationKey("recipe", "modifier.amount");
   public static final RecordLoadable<ModifierRepairTinkerStationRecipe> LOADER = RecordLoadable.create(ContextKey.ID.requiredField(), MODIFIER_FIELD, INGREDIENT_FIELD, REPAIR_AMOUNT_FIELD, ModifierRepairTinkerStationRecipe::new);
@@ -136,8 +140,13 @@ public class ModifierRepairTinkerStationRecipe implements ITinkerStationRecipe, 
   /* JEI */
   private List<IDisplayToolTinkering> displayRecipes;
 
+
   @Override
-  public List<IDisplayToolTinkering> getRecipes(RegistryAccess access) {
+  public List<NamedRecipe<IDisplayToolTinkering>> getRecipes(ResourceLocation id, HolderLookup.Provider provider) {
+    return RecipeHelper.named(id, displayRecipes(provider));
+  }
+/** Lazily loaded list of display recipes for JEI */
+  private List<IDisplayToolTinkering> displayRecipes(HolderLookup.Provider access) {
     if (displayRecipes == null) {
       displayRecipes = List.of(new DisplayRecipe(id, this, false));
     }

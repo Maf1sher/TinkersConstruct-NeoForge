@@ -12,7 +12,7 @@ import net.minecraft.world.level.ItemLike;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
-import slimeknights.mantle.recipe.ingredient.SizedIngredient;
+import net.neoforged.neoforge.common.crafting.SizedIngredient;
 import slimeknights.tconstruct.library.json.predicate.material.MaterialPredicate;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
@@ -93,7 +93,7 @@ public class MaterialSwappingRecipeBuilder extends AbstractRecipeBuilder<Materia
 
   /** Adds an extra ingredient requirement */
   public MaterialSwappingRecipeBuilder addExtraRequirement(Ingredient ingredient) {
-    return addExtraRequirement(SizedIngredient.of(ingredient));
+    return addExtraRequirement(new SizedIngredient(ingredient));
   }
 
   /** Adds an extra ingredient requirement */

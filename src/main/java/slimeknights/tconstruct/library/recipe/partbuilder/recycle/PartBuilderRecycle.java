@@ -1,6 +1,8 @@
 package slimeknights.tconstruct.library.recipe.partbuilder.recycle;
 
 import lombok.Getter;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
@@ -10,10 +12,12 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
-import slimeknights.mantle.data.loadable.common.IngredientLoadable;
+import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
-import slimeknights.mantle.recipe.IMultiRecipe;
+import slimeknights.mantle.recipe.MultiNamedRecipe;
+import slimeknights.mantle.recipe.NamedRecipe;
+import slimeknights.tconstruct.library.utils.RecipeHelper;
 import slimeknights.mantle.recipe.helper.ItemOutput;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
@@ -34,7 +38,7 @@ import java.util.stream.Stream;
 import static slimeknights.tconstruct.tables.recipe.PartBuilderToolRecycle.NO_MODIFIERS;
 
 /** Recipe for recycling a vanilla tool or a tinkers tool with no materials in the part builder */
-public class PartBuilderRecycle implements IPartBuilderRecipe, IMultiRecipe<IDisplayPartBuilderRecipe> {
+public class PartBuilderRecycle implements IPartBuilderRecipe, MultiNamedRecipe<IDisplayPartBuilderRecipe> {
   /** Title for the screen */
   private static final Component RECYCLING = TConstruct.makeTranslation("recipe", "recycling");
   /** General instructions for recycling */
@@ -47,8 +51,8 @@ public class PartBuilderRecycle implements IPartBuilderRecipe, IMultiRecipe<IDis
   /** Loader instance */
   public static final RecordLoadable<PartBuilderRecycle> LOADER = RecordLoadable.create(
     ContextKey.ID.requiredField(),
-    IngredientLoadable.DISALLOW_EMPTY.requiredField("tool", r -> r.tool),
-    IngredientLoadable.DISALLOW_EMPTY.requiredField("pattern", r -> r.pattern),
+    Loadables.ITEM_INGREDIENT_NONEMPTY.requiredField("tool", r -> r.tool),
+    Loadables.ITEM_INGREDIENT_NONEMPTY.requiredField("pattern", r -> r.pattern),
     Pattern.PARSER.mapWithValues(ItemOutput.Loadable.REQUIRED_STACK).requiredField("results", r -> r.results),
     PartBuilderRecycle::new);
 
@@ -181,8 +185,13 @@ public class PartBuilderRecycle implements IPartBuilderRecipe, IMultiRecipe<IDis
   /* JEI */
   private List<IDisplayPartBuilderRecipe> displayRecipes;
 
+
   @Override
-  public List<IDisplayPartBuilderRecipe> getRecipes(RegistryAccess access) {
+  public List<NamedRecipe<IDisplayPartBuilderRecipe>> getRecipes(ResourceLocation id, HolderLookup.Provider provider) {
+    return RecipeHelper.named(id, displayRecipes(provider));
+  }
+/** Lazily loaded list of display recipes for JEI */
+  private List<IDisplayPartBuilderRecipe> displayRecipes(HolderLookup.Provider access) {
     if (displayRecipes == null) {
       List<ItemStack> patternItems = List.of(pattern.getItems());
       displayRecipes = Arrays.stream(tool.getItems()).map(tool -> DisplayPartRecipe.id(id)

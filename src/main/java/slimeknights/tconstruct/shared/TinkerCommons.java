@@ -70,6 +70,7 @@ import slimeknights.tconstruct.library.json.predicate.HasMobEffectPredicate;
 import slimeknights.tconstruct.library.json.predicate.TinkerPredicate;
 import slimeknights.tconstruct.library.recipe.ingredient.BlockTagIngredient;
 import slimeknights.tconstruct.library.recipe.ingredient.InstrumentIngredient;
+import slimeknights.tconstruct.library.recipe.ingredient.ItemNameIngredient;
 import slimeknights.tconstruct.library.recipe.ingredient.MaterialIngredient;
 import slimeknights.tconstruct.library.recipe.ingredient.MaterialValueIngredient;
 import slimeknights.tconstruct.library.recipe.ingredient.NoContainerIngredient;
@@ -215,6 +216,8 @@ public final class TinkerCommons extends TinkerModule {
       // material ingredients used to register in TinkerMaterials, which is outside the migration scope here
       Registry.register(registry, MaterialIngredient.ID, (IngredientType<?>) MaterialIngredient.TYPE);
       Registry.register(registry, MaterialValueIngredient.ID, (IngredientType<?>) MaterialValueIngredient.TYPE);
+      // replaces the removed Mantle datagen helper of the same name
+      Registry.register(registry, ItemNameIngredient.ID, (IngredientType<?>) ItemNameIngredient.TYPE);
     } else if (event.getRegistryKey() == Registries.RECIPE_SERIALIZER) {
       CriteriaTriggers.register(CONTAINER_OPENED_TRIGGER);
 

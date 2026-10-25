@@ -48,7 +48,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.minecraftforge.fml.ModList;
 import slimeknights.mantle.client.SafeClientAccess;
-import slimeknights.mantle.recipe.helper.RecipeHelper;
+import slimeknights.tconstruct.library.utils.RecipeHelper;
 import slimeknights.mantle.registration.object.FluidObject;
 import slimeknights.mantle.util.RetexturedHelper;
 import slimeknights.tconstruct.TConstruct;

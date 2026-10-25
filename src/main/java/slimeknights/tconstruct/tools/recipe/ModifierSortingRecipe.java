@@ -5,11 +5,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
+import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.ErrorFactory;
 import slimeknights.mantle.data.loadable.array.ArrayLoadable;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
-import slimeknights.mantle.recipe.ingredient.SizedIngredient;
+import net.neoforged.neoforge.common.crafting.SizedIngredient;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
@@ -43,7 +44,7 @@ public class ModifierSortingRecipe extends AbstractWorktableRecipe {
 
   public static final RecordLoadable<ModifierSortingRecipe> LOADER = RecordLoadable.create(
     ContextKey.ID.requiredField(),
-    SizedIngredient.LOADABLE.list(ArrayLoadable.COMPACT).validate((list, error) -> {
+    Loadables.SIZED_ITEM_INGREDIENT.list(ArrayLoadable.COMPACT).validate((list, error) -> {
       if ((error == ErrorFactory.RUNTIME || error == ErrorFactory.JSON_SYNTAX_ERROR) && list.size() > 1) {
         TConstruct.LOG.warn("Using multiple ingredients for the modifier sorting recipe is deprecated. Use just a single input.");
       }

@@ -1,6 +1,8 @@
 package slimeknights.tconstruct.library.recipe.modifiers.adding;
 
 import com.google.common.collect.Streams;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -8,7 +10,9 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
-import slimeknights.mantle.recipe.IMultiRecipe;
+import slimeknights.mantle.recipe.MultiNamedRecipe;
+import slimeknights.mantle.recipe.NamedRecipe;
+import slimeknights.tconstruct.library.utils.RecipeHelper;
 import slimeknights.mantle.recipe.helper.ItemOutput;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
@@ -24,7 +28,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /** Combination of {@link MultilevelModifierRecipe} into {@link IncrementalModifierRecipe}. */
-public class MultilevelIncrementalModifierRecipe extends IncrementalModifierRecipe implements IMultiRecipe<IDisplayModifierRecipe> {
+public class MultilevelIncrementalModifierRecipe extends IncrementalModifierRecipe implements MultiNamedRecipe<IDisplayModifierRecipe> {
   public static final RecordLoadable<MultilevelIncrementalModifierRecipe> LOADER = RecordLoadable.create(
     ContextKey.ID.requiredField(), INPUT_FIELD, AMOUNT_FIELD, NEEDED_FIELD,
     TOOLS_FIELD, MAX_TOOL_SIZE_FIELD, RESULT_FIELD, LEFTOVER_FIELD, ALLOW_CRYSTAL_FIELD,
@@ -104,8 +108,13 @@ public class MultilevelIncrementalModifierRecipe extends IncrementalModifierReci
 
   private List<IDisplayModifierRecipe> displayRecipes = null;
 
+
   @Override
-  public List<IDisplayModifierRecipe> getRecipes(RegistryAccess access) {
+  public List<NamedRecipe<IDisplayModifierRecipe>> getRecipes(ResourceLocation id, HolderLookup.Provider provider) {
+    return RecipeHelper.named(id, displayRecipes(provider));
+  }
+/** Lazily loaded list of display recipes for JEI */
+  private List<IDisplayModifierRecipe> displayRecipes(HolderLookup.Provider access) {
     if (displayRecipes == null) {
       // this instance is a proper display recipe for the first level entry, for the rest build display instances with unique requirements keys
       DisplayModifierRecipe.Builder builder = DisplayModifierRecipe.builder()

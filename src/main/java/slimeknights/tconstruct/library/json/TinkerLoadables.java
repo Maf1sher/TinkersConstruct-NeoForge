@@ -12,12 +12,13 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Instrument;
 import net.minecraft.world.item.Items;
+import java.util.Locale;
 import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.Tiers;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
-import net.minecraftforge.common.TierSortingRegistry;
 import net.minecraftforge.common.loot.LootModifierManager;
 import slimeknights.mantle.client.TooltipKey;
 import slimeknights.mantle.data.loadable.Loadable;
@@ -73,17 +74,17 @@ public class TinkerLoadables {
   public static final StringLoadable<SimpleParticleType> SIMPLE_PARTICLE = instance(Loadables.PARTICLE_TYPE, SimpleParticleType.class, "Expected particle type to be instance of SimpleParticleType");
   public static final StringLoadable<BlockItem> BLOCK_ITEM = instance(Loadables.ITEM, BlockItem.class, "Expected item to be instance of BlockItem");
 
-  /** Tier loadable from the forge tier sorting registry */
+  /** Tier loadable, mapping the vanilla tier enum by entry name; replaces the removed Forge tier sorting registry */
   public static final StringLoadable<Tier> TIER = Loadables.RESOURCE_LOCATION.xmap((id, error) -> {
-    Tier tier = TierSortingRegistry.byName(id);
-    if (tier != null) {
-      return tier;
+    for (Tiers tier : Tiers.values()) {
+      if (id.getPath().equals(tier.name().toLowerCase(Locale.ROOT))) {
+        return tier;
+      }
     }
     throw error.create("Unknown harvest tier " + id);
   }, (tier, error) -> {
-    ResourceLocation id = TierSortingRegistry.getName(tier);
-    if (id != null) {
-      return id;
+    if (tier instanceof Tiers enumTier) {
+      return ResourceLocation.withDefaultNamespace(enumTier.name().toLowerCase(Locale.ROOT));
     }
     throw error.create("Attempt to serialize unregistered tier " + tier);
   });

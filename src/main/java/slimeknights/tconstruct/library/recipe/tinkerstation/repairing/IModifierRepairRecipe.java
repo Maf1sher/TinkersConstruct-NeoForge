@@ -1,7 +1,7 @@
 package slimeknights.tconstruct.library.recipe.tinkerstation.repairing;
 
 import net.minecraft.world.item.crafting.Ingredient;
-import slimeknights.mantle.data.loadable.common.IngredientLoadable;
+import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.field.LoadableField;
 import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
@@ -12,7 +12,7 @@ import slimeknights.tconstruct.library.modifiers.ModifierId;
 public interface IModifierRepairRecipe {
   /* Fields */
   LoadableField<ModifierId,IModifierRepairRecipe> MODIFIER_FIELD = ModifierId.PARSER.requiredField("modifier", IModifierRepairRecipe::getModifier);
-  LoadableField<Ingredient,IModifierRepairRecipe> INGREDIENT_FIELD = IngredientLoadable.DISALLOW_EMPTY.requiredField("ingredient", IModifierRepairRecipe::getIngredient);
+  LoadableField<Ingredient,IModifierRepairRecipe> INGREDIENT_FIELD = Loadables.ITEM_INGREDIENT_NONEMPTY.requiredField("ingredient", IModifierRepairRecipe::getIngredient);
   LoadableField<Integer,IModifierRepairRecipe> REPAIR_AMOUNT_FIELD = IntLoadable.FROM_ONE.requiredField("repair_amount", IModifierRepairRecipe::getRepairAmount);
 
   /** Gets the modifier needed to perform this recipe */

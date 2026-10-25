@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
+import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

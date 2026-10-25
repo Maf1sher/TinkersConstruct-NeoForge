@@ -4,7 +4,7 @@ import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.common.crafting.CompoundIngredient;
+
 import slimeknights.mantle.recipe.helper.ItemOutput;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.registration.CastItemObject;
@@ -134,11 +134,11 @@ public interface IToolRecipeHelper extends ICastCreationHelper {
     // Material Casting
     partCasting(output, part, cast, cost, partFolder);
     // Cast Casting
-    castCreation(output, CompoundIngredient.of(Ingredient.of(dummyPart), MaterialIngredient.of(part)), cast, castFolder, id(part).getPath());
+    castCreation(output, Ingredient.of(dummyPart, MaterialIngredient.of(part)), cast, castFolder, id(part).getPath());
     // dummy part builder recipe
     ItemPartRecipeBuilder.item(cast.getName(), ItemOutput.fromItem(dummyPart))
                          .material(MaterialIds.rock, cost)
-                         .setPatternItem(CompoundIngredient.of(Ingredient.of(TinkerTags.Items.DEFAULT_PATTERNS), Ingredient.of(cast.get())))
+                         .setPatternItem(Ingredient.of(Ingredient.of(TinkerTags.Items.DEFAULT_PATTERNS), cast.get()))
                           .save(output, location(partFolder + "builder/" + cast.getName().getPath()));
   }
 
@@ -155,7 +155,7 @@ public interface IToolRecipeHelper extends ICastCreationHelper {
     // Part Builder
     PartRecipeBuilder.partRecipe(part)
                      .setPattern(id)
-                     .setPatternItem(CompoundIngredient.of(Ingredient.of(TinkerTags.Items.DEFAULT_PATTERNS), Ingredient.of(cast.get())))
+                     .setPatternItem(Ingredient.of(Ingredient.of(TinkerTags.Items.DEFAULT_PATTERNS), cast.get()))
                      .setCost(cost)
                       .save(output, location(partFolder + "builder/" + id.getPath()));
     // casting

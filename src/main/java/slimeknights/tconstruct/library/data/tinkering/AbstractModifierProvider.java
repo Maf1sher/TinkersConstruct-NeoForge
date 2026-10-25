@@ -5,8 +5,9 @@ import com.google.gson.JsonObject;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
-import net.minecraftforge.common.crafting.CraftingHelper;
+
 import net.neoforged.neoforge.common.conditions.ICondition;
+import slimeknights.mantle.util.JsonHelper;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.tconstruct.library.json.JsonRedirect;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
@@ -118,7 +119,7 @@ public abstract class AbstractModifierProvider extends GenericDataProvider {
         json.add("redirects", array);
       }
       if (condition != null) {
-        json.add("condition", CraftingHelper.serialize(condition));
+        json.add("condition", JsonHelper.serialize(ICondition.CODEC, condition));
       }
       return json;
     }

@@ -5,7 +5,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
-import slimeknights.mantle.recipe.ingredient.SizedIngredient;
+import net.neoforged.neoforge.common.crafting.SizedIngredient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,7 @@ public abstract class AbstractSizedIngredientRecipeBuilder<T extends AbstractSiz
    * @return  Builder instance
    */
   public T addInput(Ingredient ingredient) {
-    return addInput(SizedIngredient.of(ingredient));
+    return addInput(new SizedIngredient(ingredient));
   }
 
   /**

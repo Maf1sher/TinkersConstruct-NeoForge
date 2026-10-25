@@ -2,6 +2,8 @@ package slimeknights.tconstruct.library.recipe.melting;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import lombok.Getter;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -14,7 +16,9 @@ import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
-import slimeknights.mantle.recipe.IMultiRecipe;
+import slimeknights.mantle.recipe.MultiNamedRecipe;
+import slimeknights.mantle.recipe.NamedRecipe;
+import slimeknights.tconstruct.library.utils.RecipeHelper;
 import slimeknights.mantle.recipe.helper.FluidOutput;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariant;
@@ -29,7 +33,7 @@ import java.util.List;
 /**
  * Recipe to melt all castable tool parts of a given material
  */
-public class MaterialMeltingRecipe implements IMeltingRecipe, IMultiRecipe<IDisplayableMeltingRecipe> {
+public class MaterialMeltingRecipe implements IMeltingRecipe, MultiNamedRecipe<IDisplayableMeltingRecipe> {
   public static final RecordLoadable<MaterialMeltingRecipe> LOADER = RecordLoadable.create(
     ContextKey.ID.requiredField(),
     MaterialVariantId.LOADABLE.requiredField("input", r -> r.input.getVariant()),
@@ -107,8 +111,13 @@ public class MaterialMeltingRecipe implements IMeltingRecipe, IMultiRecipe<IDisp
   /* JEI display */
   private List<IDisplayableMeltingRecipe> multiRecipes = null;
 
+
   @Override
-  public List<IDisplayableMeltingRecipe> getRecipes(RegistryAccess access) {
+  public List<NamedRecipe<IDisplayableMeltingRecipe>> getRecipes(ResourceLocation id, HolderLookup.Provider provider) {
+    return RecipeHelper.named(id, displayRecipes(provider));
+  }
+/** Lazily loaded list of display recipes for JEI */
+  private List<IDisplayableMeltingRecipe> displayRecipes(HolderLookup.Provider access) {
     if (multiRecipes == null) {
       if (input.get().isHidden()) {
         multiRecipes = List.of();

@@ -65,7 +65,7 @@ public class PotionFluidType extends FluidType {
   }
 
   /** Resolves the legacy fluid NBT potion ID against the current registry. */
-  private static Optional<Holder<Potion>> getPotion(@Nullable CompoundTag tag) {
+  public static Optional<Holder<Potion>> getPotion(@Nullable CompoundTag tag) {
     if (tag == null || !tag.contains("Potion", Tag.TAG_STRING)) {
       return Optional.empty();
     }

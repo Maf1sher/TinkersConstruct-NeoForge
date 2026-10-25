@@ -17,7 +17,7 @@ import slimeknights.mantle.data.loadable.primitive.BooleanLoadable;
 import slimeknights.mantle.data.loadable.primitive.StringLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
-import slimeknights.mantle.recipe.ingredient.SizedIngredient;
+import net.neoforged.neoforge.common.crafting.SizedIngredient;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.json.predicate.modifier.ModifierPredicate;
 import slimeknights.tconstruct.library.modifiers.Modifier;
@@ -165,7 +165,7 @@ public class EnchantmentConvertingRecipe extends AbstractWorktableRecipe {
         for (int i = 0; i < inv.getInputCount(); i++) {
           if (i != used) {
             ItemStack stack = inv.getInput(i);
-            if (!stack.isEmpty() && ingredient.getAmountNeeded() * level <= stack.getCount() && ingredient.test(stack)) {
+            if (!stack.isEmpty() && ingredient.count() * level <= stack.getCount() && ingredient.test(stack)) {
               used = i;
               continue inputLoop;
             }

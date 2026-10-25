@@ -24,7 +24,6 @@ import org.jetbrains.annotations.ApiStatus.Internal;
 import slimeknights.mantle.client.TooltipKey;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.array.ArrayLoadable;
-import slimeknights.mantle.data.loadable.common.IngredientLoadable;
 import slimeknights.mantle.data.loadable.primitive.FloatLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.tconstruct.common.TinkerDamageTypes;
@@ -91,7 +90,7 @@ public record FireballModule(List<FireballType> options, DamageTypePair damageTy
    */
   protected record FireballType(Ingredient match, @Nullable DamageTypePair damageType, float damageMultiplier, List<ModifierEntry> ammoModifiers) {
     public static final RecordLoadable<FireballType> LOADABLE = RecordLoadable.create(
-      IngredientLoadable.DISALLOW_EMPTY.requiredField("match", FireballType::match),
+      Loadables.ITEM_INGREDIENT_NONEMPTY.requiredField("match", FireballType::match),
       DamageTypePair.LOADER.nullableField("damage_type", FireballType::damageType),
       FloatLoadable.FROM_ZERO.defaultField("damage_multiplier", 1f, false, FireballType::damageMultiplier),
       ModifierEntry.LOADABLE.list(0).defaultField("ammo_modifiers", List.of(), false, FireballType::ammoModifiers),

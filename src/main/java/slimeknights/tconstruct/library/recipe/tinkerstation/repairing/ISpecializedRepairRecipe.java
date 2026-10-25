@@ -1,7 +1,7 @@
 package slimeknights.tconstruct.library.recipe.tinkerstation.repairing;
 
 import net.minecraft.world.item.crafting.Ingredient;
-import slimeknights.mantle.data.loadable.common.IngredientLoadable;
+import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.field.LoadableField;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 
@@ -9,7 +9,7 @@ import slimeknights.tconstruct.library.materials.definition.MaterialId;
 @Deprecated(forRemoval = true)
 public interface ISpecializedRepairRecipe {
   /* Fields */
-  LoadableField<Ingredient,ISpecializedRepairRecipe> TOOL_FIELD = IngredientLoadable.DISALLOW_EMPTY.requiredField("tool", ISpecializedRepairRecipe::getTool);
+  LoadableField<Ingredient,ISpecializedRepairRecipe> TOOL_FIELD = Loadables.ITEM_INGREDIENT_NONEMPTY.requiredField("tool", ISpecializedRepairRecipe::getTool);
   LoadableField<MaterialId,ISpecializedRepairRecipe> REPAIR_MATERIAL_FIELD = MaterialId.PARSER.requiredField("repair_material", ISpecializedRepairRecipe::getRepairMaterial);
 
   /** Gets the tool ingredient from the recipe */

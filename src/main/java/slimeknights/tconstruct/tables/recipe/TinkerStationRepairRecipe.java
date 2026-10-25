@@ -3,6 +3,8 @@ package slimeknights.tconstruct.tables.recipe;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
@@ -15,7 +17,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.ApiStatus.Internal;
-import slimeknights.mantle.recipe.IMultiRecipe;
+import slimeknights.mantle.recipe.MultiNamedRecipe;
+import slimeknights.mantle.recipe.NamedRecipe;
+import slimeknights.tconstruct.library.utils.RecipeHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
@@ -58,7 +62,7 @@ import java.util.stream.IntStream;
  * @see slimeknights.mantle.recipe.helper.SimpleFinishedRecipe
  */
 @RequiredArgsConstructor
-public class TinkerStationRepairRecipe implements ITinkerStationRecipe, IMultiRecipe<IDisplayCraftingTinkering> {
+public class TinkerStationRepairRecipe implements ITinkerStationRecipe, MultiNamedRecipe<IDisplayCraftingTinkering> {
   public static final Component TITLE = TConstruct.makeTranslation("recipe", "tool_repair");
   private static final Component TOOLTIP = TConstruct.makeTranslation("recipe", "tool_repair.tooltip");
   private static final List<Component> INFORMATION = List.of(TITLE, TConstruct.makeTranslation("recipe", "tool_repair.crafting_table").withStyle(ChatFormatting.GRAY));
@@ -258,8 +262,13 @@ public class TinkerStationRepairRecipe implements ITinkerStationRecipe, IMultiRe
 
   private List<IDisplayCraftingTinkering> displayRecipes;
 
+
   @Override
-  public List<IDisplayCraftingTinkering> getRecipes(RegistryAccess access) {
+  public List<NamedRecipe<IDisplayCraftingTinkering>> getRecipes(ResourceLocation id, HolderLookup.Provider provider) {
+    return RecipeHelper.named(id, displayRecipes(provider));
+  }
+/** Lazily loaded list of display recipes for JEI */
+  private List<IDisplayCraftingTinkering> displayRecipes(HolderLookup.Provider access) {
     if (displayRecipes == null) {
       CompoundTag stats = StatsNBT.builder().set(ToolStats.DURABILITY, 1000).build().serializeToNBT();
       MaterialNBT displayMaterials = new MaterialNBT(IntStream.range(0, 5).mapToObj(i -> MaterialVariant.of(ToolBuildHandler.getRenderMaterial(i))).toList());

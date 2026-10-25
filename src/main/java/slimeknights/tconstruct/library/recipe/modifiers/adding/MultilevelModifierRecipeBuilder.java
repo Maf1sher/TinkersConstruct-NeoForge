@@ -6,7 +6,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
-import slimeknights.mantle.recipe.ingredient.SizedIngredient;
+import net.neoforged.neoforge.common.crafting.SizedIngredient;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
 
 import java.util.ArrayList;
@@ -47,7 +47,7 @@ public class MultilevelModifierRecipeBuilder extends AbstractMultilevelModifierR
    * @return  Builder instance
    */
   public MultilevelModifierRecipeBuilder addInput(Ingredient ingredient) {
-    return addInput(SizedIngredient.of(ingredient));
+    return addInput(new SizedIngredient(ingredient));
   }
 
   /**
