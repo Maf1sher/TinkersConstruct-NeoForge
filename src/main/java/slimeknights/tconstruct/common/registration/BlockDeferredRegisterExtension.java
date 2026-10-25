@@ -5,7 +5,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.material.MapColor;
-import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredItem;
 import slimeknights.mantle.registration.deferred.BlockDeferredRegister;
 import slimeknights.tconstruct.common.registration.GeodeItemObject.BudSize;
 
@@ -32,7 +32,7 @@ public class BlockDeferredRegisterExtension extends BlockDeferredRegister {
    * @return The geode block
    */
   public GeodeItemObject registerGeode(String name, MapColor color, SoundType blockSound, SoundEvent chimeSound, Map<BudSize,SoundType> clusterSounds, int baseLight, Item.Properties props) {
-    DeferredHolder<?, Item> shard = itemRegister.register(name, () -> new Item(props));
+    DeferredItem<Item> shard = itemRegister.register(name, () -> new Item(props));
     return new GeodeItemObject(shard, this, color, blockSound, chimeSound, clusterSounds, baseLight, props);
   }
 }

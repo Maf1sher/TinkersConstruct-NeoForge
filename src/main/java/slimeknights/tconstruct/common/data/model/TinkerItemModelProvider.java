@@ -10,7 +10,7 @@ import net.neoforged.neoforge.client.model.generators.ItemModelBuilder;
 import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
 import net.neoforged.neoforge.client.model.generators.ModelFile.UncheckedModelFile;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
-import slimeknights.mantle.registration.object.ItemObject;
+import net.neoforged.neoforge.registries.DeferredItem;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.registration.CastItemObject;
 import slimeknights.tconstruct.gadgets.TinkerGadgets;
@@ -183,12 +183,12 @@ public class TinkerItemModelProvider extends ItemModelProvider {
   }
 
   /** Creates a part model with the given texture */
-  private MaterialModelBuilder<ItemModelBuilder> part(ItemObject<? extends MaterialItem> part, String texture) {
+  private MaterialModelBuilder<ItemModelBuilder> part(DeferredItem<? extends MaterialItem> part, String texture) {
     return part(part.getId(), texture);
   }
 
   /** Creates a part model in the parts folder */
-  private void part(ItemObject<? extends MaterialItem> part) {
+  private void part(DeferredItem<? extends MaterialItem> part) {
     part(part, "parts/" + part.getId().getPath());
   }
 
