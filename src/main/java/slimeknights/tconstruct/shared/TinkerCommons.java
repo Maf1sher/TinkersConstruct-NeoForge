@@ -28,7 +28,7 @@ import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.conditions.ICondition;
-import net.neoforged.neoforge.common.crafting.CraftingHelper;
+import net.neoforged.neoforge.common.crafting.IngredientType;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
@@ -69,6 +69,8 @@ import slimeknights.tconstruct.library.json.predicate.HasMobEffectPredicate;
 import slimeknights.tconstruct.library.json.predicate.TinkerPredicate;
 import slimeknights.tconstruct.library.recipe.ingredient.BlockTagIngredient;
 import slimeknights.tconstruct.library.recipe.ingredient.InstrumentIngredient;
+import slimeknights.tconstruct.library.recipe.ingredient.MaterialIngredient;
+import slimeknights.tconstruct.library.recipe.ingredient.MaterialValueIngredient;
 import slimeknights.tconstruct.library.recipe.ingredient.NoContainerIngredient;
 import slimeknights.tconstruct.library.utils.SlimeBounceHandler;
 import slimeknights.tconstruct.shared.block.BetterPaneBlock;
@@ -203,10 +205,16 @@ public final class TinkerCommons extends TinkerModule {
       Registry.register(registry, TConstruct.getResource("tag_intersection_present"), TagIntersectionPresentCondition.CODEC);
       Registry.register(registry, TConstruct.getResource("tag_difference_present"), TagDifferencePresentCondition.CODEC);
       Registry.register(registry, TConstruct.getResource("tag_not_empty"), TagNotEmptyCondition.CODEC);
+    } else if (event.getRegistryKey() == NeoForgeRegistries.Keys.INGREDIENT_TYPES) {
+      // custom ingredient types; JSON "type" keys stay identical to the legacy Forge serializer IDs
+      Registry<IngredientType<?>> registry = event.getRegistry(NeoForgeRegistries.Keys.INGREDIENT_TYPES);
+      Registry.register(registry, NoContainerIngredient.ID, (IngredientType<?>) NoContainerIngredient.TYPE);
+      Registry.register(registry, BlockTagIngredient.ID, (IngredientType<?>) BlockTagIngredient.TYPE);
+      Registry.register(registry, InstrumentIngredient.ID, (IngredientType<?>) InstrumentIngredient.TYPE);
+      // material ingredients used to register in TinkerMaterials, which is outside the migration scope here
+      Registry.register(registry, MaterialIngredient.ID, (IngredientType<?>) MaterialIngredient.TYPE);
+      Registry.register(registry, MaterialValueIngredient.ID, (IngredientType<?>) MaterialValueIngredient.TYPE);
     } else if (event.getRegistryKey() == Registries.RECIPE_SERIALIZER) {
-      CraftingHelper.register(NoContainerIngredient.ID, NoContainerIngredient.Serializer.INSTANCE);
-      CraftingHelper.register(BlockTagIngredient.Serializer.ID, BlockTagIngredient.Serializer.INSTANCE);
-      CraftingHelper.register(InstrumentIngredient.ID, InstrumentIngredient.SERIALIZER);
       CriteriaTriggers.register(CONTAINER_OPENED_TRIGGER);
 
       // mantle

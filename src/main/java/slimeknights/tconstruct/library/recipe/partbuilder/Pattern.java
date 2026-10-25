@@ -28,10 +28,6 @@ public class Pattern extends ResourceId {
     super(location);
   }
 
-  private Pattern(String namespace, String path, @Nullable Dummy pDummy) {
-    super(namespace, path, pDummy);
-  }
-
   /**
    * Gets the translation key for this pattern
    * @return  Translation key
@@ -53,7 +49,7 @@ public class Pattern extends ResourceId {
    * @return  Pattern texture
    */
   public ResourceLocation getTexture() {
-    return withPrefix("gui/tinker_pattern/");
+    return getLocation().withPrefix("gui/tinker_pattern/");
   }
 
   /** Checks if this pattern matches the give item, typically a tool part. */
@@ -65,13 +61,13 @@ public class Pattern extends ResourceId {
   /** {@return Pattern ID, or null if invalid} */
   @Nullable
   public static Pattern tryParse(String string) {
-    return tryParse(string, (namespace, path) -> new Pattern(namespace, path, null));
+    return tryParse(string, Pattern::new);
   }
 
   /** {@return Pattern ID, or null if invalid} */
   @Nullable
   public static Pattern tryBuild(String namespace, String path) {
-    return tryBuild(namespace, path, (n, p) -> new Pattern(namespace, path, null));
+    return tryBuild(namespace, path, Pattern::new);
   }
 
   /** Gets the pattern for the given item ID */

@@ -1,7 +1,9 @@
 package slimeknights.tconstruct.library.tools.stat;
 
 import com.google.gson.JsonSyntaxException;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import slimeknights.mantle.data.loadable.ErrorFactory;
 import slimeknights.mantle.data.loadable.primitive.StringLoadable;
@@ -52,7 +54,7 @@ public class ToolStats {
   /** Logs an error message for unsupported stats */
   private static void logUnsupportedConditional(INumericToolStat<?> stat) {
     // TODO 1.21: make this error instead of log
-    ResourceLocation id = stat.getName();
+    ToolStatId id = stat.getName();
     if (TConstruct.MOD_ID.equals(id.getNamespace())) {
       TConstruct.LOG.error("Tool stat {} does not support conditional stats but is used in a conditional stat loader.", id);
     } else {
@@ -212,12 +214,12 @@ public class ToolStats {
   /** @deprecated use {@link #LOADER} with {@link slimeknights.mantle.data.loadable.Loadable#decode(FriendlyByteBuf)} */
   @Deprecated(forRemoval = true)
   public static IToolStat<?> fromNetwork(FriendlyByteBuf buffer) {
-    return LOADER.decode(buffer);
+    return LOADER.decode(new RegistryFriendlyByteBuf(buffer, RegistryAccess.EMPTY));
   }
 
   /** @deprecated use {@link #NUMERIC_LOADER} with {@link slimeknights.mantle.data.loadable.Loadable#decode(FriendlyByteBuf)} */
   @Deprecated(forRemoval = true)
   public static INumericToolStat<?> numericFromNetwork(FriendlyByteBuf buffer) {
-    return NUMERIC_LOADER.decode(buffer);
+    return NUMERIC_LOADER.decode(new RegistryFriendlyByteBuf(buffer, RegistryAccess.EMPTY));
   }
 }

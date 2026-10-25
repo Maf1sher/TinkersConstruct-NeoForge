@@ -2,18 +2,22 @@ package slimeknights.tconstruct.library.recipe.ingredient;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.network.FriendlyByteBuf;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.MapCodec;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.IIngredientSerializer;
-import net.minecraftforge.common.crafting.VanillaIngredientSerializer;
+import net.neoforged.neoforge.common.crafting.IngredientType;
+import slimeknights.mantle.data.codec.JsonMapCodec;
 import slimeknights.mantle.data.loadable.field.LoadableField;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
+import slimeknights.mantle.network.codec.StreamableCodec;
+import slimeknights.mantle.util.typed.TypedMap;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.json.TinkerLoadables;
 import slimeknights.tconstruct.library.json.predicate.material.MaterialPredicate;
@@ -29,12 +33,56 @@ import java.util.Arrays;
 import java.util.stream.Stream;
 
 /**
- * Extension of the vanilla ingredient to display materials on items and support matching by materials
+ * Custom ingredient wrapping a vanilla ingredient to support matching by materials and displaying material variants.
+ * JSON layout is the legacy Forge one: vanilla single-value ingredients stay flat, anything else nests under {@code "match"}.
  */
 public class MaterialIngredient extends NestedIngredient {
+  private static final LoadableField<IJsonPredicate<MaterialVariantId>,MaterialIngredient> MATERIAL_FIELD = new MaterialPredicateField<>("material", i -> i.material);
+
+  /** Ingredient type, replace for the old Forge serializer; registered in TinkerCommons */
+  public static final ResourceLocation ID = TConstruct.getResource("material");
+
+  /** Codec keeping the legacy JSON layout: {@code {"type": "tconstruct:material", ..., "material": ...}} */
+  public static final MapCodec<MaterialIngredient> CODEC = new JsonMapCodec<>() {
+    @Override
+    protected MaterialIngredient deserialize(JsonObject json, DynamicOps<?> ops) {
+      Ingredient ingredient = decodeNestedJson(json);
+      IJsonPredicate<MaterialVariantId> material = MATERIAL_FIELD.get(json, TypedMap.EMPTY);
+      // deprecated tag field
+      if (json.has("material_tag")) {
+        TConstruct.LOG.warn("Using deprecated tag field on material ingredient");
+        IJsonPredicate<MaterialVariantId> tagPredicate = MaterialPredicate.tag(TinkerLoadables.MATERIAL_TAGS.getIfPresent(json, "material_tag"));
+        if (material == MaterialPredicate.ANY) {
+          material = tagPredicate;
+        } else {
+          material = MaterialPredicate.and(material, tagPredicate);
+        }
+      }
+      return new MaterialIngredient(ingredient, material);
+    }
+
+    @Override
+    protected JsonObject serialize(MaterialIngredient ingredient, DynamicOps<?> ops) {
+      JsonObject result = new JsonObject();
+      encodeNestedJson(ingredient.nested, result);
+      MATERIAL_FIELD.serializeInto(ingredient, result, TypedMap.EMPTY);
+      return result;
+    }
+  };
+
+  /** Network codec: nested ingredient followed by the material predicate, matching the old byte layout */
+  public static final StreamCodec<RegistryFriendlyByteBuf, MaterialIngredient> STREAM_CODEC = StreamCodec.composite(
+    Ingredient.CONTENTS_STREAM_CODEC, MaterialIngredient::getNested,
+    new StreamableCodec<IJsonPredicate<MaterialVariantId>>(MaterialPredicate.LOADER), MaterialIngredient::getMaterial,
+    MaterialIngredient::new);
+
+  /** Ingredient type, replaces the old Forge serializer; registered in TinkerCommons */
+  public static final IngredientType<MaterialIngredient> TYPE = new IngredientType<>(CODEC, STREAM_CODEC);
+
   private final IJsonPredicate<MaterialVariantId> material;
   @Nullable
   private ItemStack[] materialStacks;
+
   protected MaterialIngredient(Ingredient nested, IJsonPredicate<MaterialVariantId> material) {
     super(nested);
     this.material = material;
@@ -42,6 +90,7 @@ public class MaterialIngredient extends NestedIngredient {
 
   /** @deprecated use {@link #MaterialIngredient(Ingredient, IJsonPredicate)} */
   @Deprecated(forRemoval = true)
+  @SuppressWarnings({"unused", "DeprecatedIsStillUsed"})
   protected MaterialIngredient(Ingredient nested, MaterialVariantId material, @Nullable TagKey<IMaterial> tag) {
     this(nested, makePredicate(material, tag));
   }
@@ -59,6 +108,11 @@ public class MaterialIngredient extends NestedIngredient {
       }
     }
     return predicate;
+  }
+
+  /** @return the material filter for this ingredient */
+  public IJsonPredicate<MaterialVariantId> getMaterial() {
+    return material;
   }
 
   /** Creates an ingredient matching the given materials */
@@ -136,11 +190,11 @@ public class MaterialIngredient extends NestedIngredient {
 
   @Override
   public boolean test(@Nullable ItemStack stack) {
-    // check super first, should be faster
-    if (stack == null || stack.isEmpty() || !super.test(stack)) {
+    // check nested first, should be faster
+    if (stack == null || stack.isEmpty() || !nested.test(stack)) {
       return false;
     }
-    // no need to read material NBT if the material is the any predicate
+    // no need to read material data if the material is the any predicate
     if (material != MaterialPredicate.ANY) {
       return material.matches(IMaterialItem.getMaterialFromStack(stack));
     }
@@ -148,10 +202,10 @@ public class MaterialIngredient extends NestedIngredient {
   }
 
   @Override
-  public ItemStack[] getItems() {
+  public Stream<ItemStack> getItems() {
     if (materialStacks == null) {
       if (!MaterialRegistry.isFullyLoaded()) {
-        return nested.getItems();
+        return Arrays.stream(nested.getItems());
       }
       // no material? apply all materials for variants
       Stream<ItemStack> items = Arrays.stream(nested.getItems());
@@ -159,31 +213,15 @@ public class MaterialIngredient extends NestedIngredient {
       items = items.flatMap(stack -> MaterialRecipeCache.getAllVariants().stream()
         .filter(material::matches)
         .map(mat -> IMaterialItem.withMaterial(stack, mat))
-        .filter(ItemStack::hasTag));
+        .filter(stack -> stack.has(net.minecraft.core.component.DataComponents.CUSTOM_DATA)));
       materialStacks = items.distinct().toArray(ItemStack[]::new);
     }
-    return materialStacks;
+    return Arrays.stream(materialStacks);
   }
 
   @Override
-  public JsonElement toJson() {
-    JsonElement parent = nested.toJson();
-    JsonObject result;
-    if (nested.isVanilla() && parent.isJsonObject()) {
-      result = parent.getAsJsonObject();
-    } else {
-      result = new JsonObject();
-      result.add("match", parent);
-    }
-    result.addProperty("type", Serializer.ID.toString());
-    Serializer.MATERIAL_FIELD.serialize(this, result);
-    return result;
-  }
-
-  @Override
-  protected void invalidate() {
-    super.invalidate();
-    this.materialStacks = null;
+  public IngredientType<?> getType() {
+    return TYPE;
   }
 
   @Override
@@ -192,51 +230,19 @@ public class MaterialIngredient extends NestedIngredient {
   }
 
   @Override
-  public IIngredientSerializer<? extends Ingredient> getSerializer() {
-    return Serializer.INSTANCE;
+  public boolean equals(Object other) {
+    if (this == other) {
+      return true;
+    }
+    if (other == null || getClass() != other.getClass()) {
+      return false;
+    }
+    MaterialIngredient that = (MaterialIngredient)other;
+    return nested.equals(that.nested) && material.equals(that.material);
   }
 
-  /** Serializer instance */
-  public enum Serializer implements IIngredientSerializer<MaterialIngredient> {
-    INSTANCE;
-    public static final ResourceLocation ID = TConstruct.getResource("material");
-    private static final LoadableField<IJsonPredicate<MaterialVariantId>,MaterialIngredient> MATERIAL_FIELD = new MaterialPredicateField<>("material", i -> i.material);
-
-    @Override
-    public MaterialIngredient parse(JsonObject json) {
-      // if we have match, parse as a nested object. Without match, just parse the object as vanilla
-      Ingredient ingredient;
-      if (json.has("match")) {
-        ingredient = CraftingHelper.getIngredient(json.get("match"), false);
-      } else {
-        ingredient = VanillaIngredientSerializer.INSTANCE.parse(json);
-      }
-      IJsonPredicate<MaterialVariantId> material = MATERIAL_FIELD.get(json);
-      // deprecated tag field
-      if (json.has("material_tag")) {
-        TConstruct.LOG.warn("Using deprecated tag field on material ingredient");
-        IJsonPredicate<MaterialVariantId> tagPredicate = MaterialPredicate.tag(TinkerLoadables.MATERIAL_TAGS.getIfPresent(json, "material_tag"));
-        if (material == MaterialPredicate.ANY) {
-          material = tagPredicate;
-        } else {
-          material = MaterialPredicate.and(material, tagPredicate);
-        }
-      }
-      return new MaterialIngredient(ingredient, material);
-    }
-
-    @Override
-    public MaterialIngredient parse(FriendlyByteBuf buffer) {
-      return new MaterialIngredient(
-        Ingredient.fromNetwork(buffer),
-        MATERIAL_FIELD.decode(buffer)
-      );
-    }
-
-    @Override
-    public void write(FriendlyByteBuf buffer, MaterialIngredient ingredient) {
-      ingredient.nested.toNetwork(buffer);
-      MATERIAL_FIELD.encode(buffer, ingredient);
-    }
+  @Override
+  public int hashCode() {
+    return nested.hashCode() * 31 + material.hashCode();
   }
 }

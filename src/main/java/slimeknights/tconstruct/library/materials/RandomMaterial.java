@@ -310,7 +310,7 @@ public abstract class RandomMaterial implements IHaveLoader {
 
     @Override
     public RecordLoadable<? extends RandomMaterial> getLoader() {
-      return LOADER.getConditionalLoader();
+      return new ConditionalLoadable<>(LOADER, null);
     }
   }
 

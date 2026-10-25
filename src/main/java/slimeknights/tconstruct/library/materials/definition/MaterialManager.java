@@ -80,7 +80,7 @@ public class MaterialManager extends SimpleJsonResourceReloadListener {
   /** Modifier tags loaded from JSON */
   private Map<TagKey<IMaterial>,List<IMaterial>> tags = Collections.emptyMap();
   /** Map from modifier to tags on the modifier */
-  private Map<MaterialId,Set<TagKey<IMaterial>>> reverseTags = Collections.emptyMap();
+  private Map<ResourceLocation,Set<TagKey<IMaterial>>> reverseTags = Collections.emptyMap();
   /** Context for conditions */
   @Setter
   private IContext conditionContext = IContext.EMPTY;
@@ -139,7 +139,7 @@ public class MaterialManager extends SimpleJsonResourceReloadListener {
 
   /** Gets the set of tags for a material */
   public Stream<TagKey<IMaterial>> getTagKeys(MaterialId id) {
-    return reverseTags.getOrDefault(id, Set.of()).stream();
+    return reverseTags.getOrDefault(id.getLocation(), Set.of()).stream();
   }
 
   /**
@@ -147,7 +147,7 @@ public class MaterialManager extends SimpleJsonResourceReloadListener {
    * @return  True if the modifier is in the tag
    */
   public boolean isIn(MaterialId id, TagKey<IMaterial> tag) {
-    return reverseTags.getOrDefault(id, Collections.emptySet()).contains(tag);
+    return reverseTags.getOrDefault(id.getLocation(), Collections.emptySet()).contains(tag);
   }
 
   /**
@@ -192,7 +192,7 @@ public class MaterialManager extends SimpleJsonResourceReloadListener {
     this.materials = materials;
     this.redirects = redirects;
     this.tags = tags;
-    this.reverseTags = GenericTagUtil.reverseTags(IMaterial::getIdentifier, tags);
+    this.reverseTags = GenericTagUtil.reverseTags(mat -> mat.getIdentifier().getLocation(), tags);
     onMaterialUpdate();
   }
 
@@ -231,7 +231,7 @@ public class MaterialManager extends SimpleJsonResourceReloadListener {
     // load modifier tags
     TagLoader<IMaterial> tagLoader = new TagLoader<>(id -> getMaterial(new MaterialId(id)), TAG_FOLDER);
     this.tags = GenericTagUtil.mapLoaderResults(REGISTRY_KEY, tagLoader.loadAndBuild(resourceManagerIn));
-    this.reverseTags = GenericTagUtil.reverseTags(IMaterial::getIdentifier, tags);
+    this.reverseTags = GenericTagUtil.reverseTags(mat -> mat.getIdentifier().getLocation(), tags);
     log.info("Loaded {} material tags for {} materials in {} ms", tags.size(), reverseTags.size(), (System.nanoTime() - timeStep) / 1000000f);
   }
 

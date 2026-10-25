@@ -2,6 +2,7 @@ package slimeknights.tconstruct.library.materials.stats;
 
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import net.minecraft.resources.ResourceLocation;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.data.loadable.record.SingletonLoader;
@@ -43,6 +44,12 @@ public class MaterialStatType<T extends IMaterialStats> implements IdAwareObject
     this.loadable = loadable;
     this.defaultStats = defaultStatsProvider.apply(this);
     this.canRepair = defaultStats instanceof IRepairableMaterialStats;
+  }
+
+  /** Gets the ID of this stat type, matching {@link slimeknights.mantle.registration.object.IdAwareObject} */
+  @Override
+  public ResourceLocation id() {
+    return this.id.getLocation();
   }
 
   /** Creates a stat type that always resolves to the same instance */

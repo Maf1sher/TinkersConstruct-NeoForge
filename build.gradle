@@ -211,4 +211,8 @@ publishing {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+    // NOTE for future slices: any explicit --compilerArgs (e.g. '-Xmaxerrs 5000') silently
+    // disables Lombok annotation processing in this Gradle 9.2.1 + ModDevGradle setup.
+    // Error inventories therefore stay at javac's default 100-error cap; read them via
+    // scripts/log-errors.sh and iterate in batches instead.
 }

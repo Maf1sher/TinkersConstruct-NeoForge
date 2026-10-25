@@ -5,7 +5,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.netty.handler.codec.EncoderException;
 import net.minecraft.ResourceLocationException;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import slimeknights.mantle.data.loadable.primitive.StringLoadable;
 import slimeknights.mantle.util.typed.TypedMap;
@@ -17,7 +17,7 @@ import java.util.function.Function;
  * Helper to parse variants of resource locations, doubles as a loadable.
  * @see ResourceId
  */
-public record IdParser<T extends ResourceLocation>(Function<String, T> constructor, String name) implements StringLoadable<T> {
+public record IdParser<T extends ResourceId>(Function<String, T> constructor, String name) implements StringLoadable<T> {
   /**
    * Creates a new ID from the given string
    * @param string  String
@@ -42,18 +42,18 @@ public record IdParser<T extends ResourceLocation>(Function<String, T> construct
   }
 
   @Override
-  public String getString(T object) {
+  public String getString(T object, TypedMap context) {
     return object.toString();
   }
 
   @Override
-  public T decode(FriendlyByteBuf buf, TypedMap context) {
+  public T decode(RegistryFriendlyByteBuf buf, TypedMap context) {
     return constructor.apply(buf.readUtf(Short.MAX_VALUE));
   }
 
   @Override
-  public void encode(FriendlyByteBuf buffer, T object) throws EncoderException {
-    buffer.writeResourceLocation(object);
+  public void encode(RegistryFriendlyByteBuf buffer, T object, TypedMap context) throws EncoderException {
+    buffer.writeResourceLocation(object.getLocation());
   }
 
 
@@ -94,7 +94,7 @@ public record IdParser<T extends ResourceLocation>(Function<String, T> construct
     String string = reader.getString().substring(start, reader.getCursor());
     String[] parts = decompose(defaultDomain, string);
     try {
-      return new ResourceLocation(parts[0], parts[1]);
+      return ResourceLocation.fromNamespaceAndPath(parts[0], parts[1]);
     } catch (ResourceLocationException ex) {
       reader.setCursor(start);
       throw ResourceLocation.ERROR_INVALID.createWithContext(reader);

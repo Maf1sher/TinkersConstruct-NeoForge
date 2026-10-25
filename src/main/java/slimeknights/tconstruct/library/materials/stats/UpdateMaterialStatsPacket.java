@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.apache.logging.log4j.Logger;
 import slimeknights.mantle.data.loadable.Loadable;
@@ -44,7 +43,7 @@ public class UpdateMaterialStatsPacket implements TinkerPayload {
       int statCount = buffer.readInt();
       List<IMaterialStats> statList = new ArrayList<>();
       for (int j = 0; j < statCount; j++) {
-        ResourceLocation statId = null;
+        MaterialStatsId statId = null;
         try {
           MaterialStatType<?> statType = statTypeLoader.decode(buffer);
           statId = statType.getId();
@@ -58,11 +57,10 @@ public class UpdateMaterialStatsPacket implements TinkerPayload {
     }
   }
 
-  @Override
   public void encode(RegistryFriendlyByteBuf buffer) {
     buffer.writeInt(materialToStats.size());
     materialToStats.forEach((materialId, stats) -> {
-      buffer.writeResourceLocation(materialId);
+      buffer.writeResourceLocation(materialId.getLocation());
       buffer.writeInt(stats.size());
       for (IMaterialStats stat : stats) {
         encodeStat(buffer, stat, stat.getType(), materialId);

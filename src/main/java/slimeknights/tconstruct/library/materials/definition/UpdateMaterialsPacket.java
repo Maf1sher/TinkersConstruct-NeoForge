@@ -40,7 +40,7 @@ public class UpdateMaterialsPacket implements TinkerPayload {
       Rarity rarity = buffer.readEnum(Rarity.class);
       boolean craftable = buffer.readBoolean();
       boolean hidden = buffer.readBoolean();
-      materials.put(id, new Material(id, tier, sortOrder, rarity, craftable, hidden));
+      materials.put(id, new Material(id.getLocation(), tier, sortOrder, rarity, craftable, hidden));
     }
     this.materials = materials.build();
     // process redirects
@@ -56,11 +56,10 @@ public class UpdateMaterialsPacket implements TinkerPayload {
     this.tags = GenericTagUtil.decodeTags(buffer, MaterialManager.REGISTRY_KEY, id -> this.materials.get(new MaterialId(id)));
   }
 
-  @Override
   public void encode(RegistryFriendlyByteBuf buffer) {
     buffer.writeInt(this.materials.size());
     for (IMaterial material : this.materials.values()) {
-      buffer.writeResourceLocation(material.getIdentifier());
+      buffer.writeResourceLocation(material.getIdentifier().getLocation());
       buffer.writeVarInt(material.getTier());
       buffer.writeVarInt(material.getSortOrder());
       buffer.writeEnum(material.getRarity());

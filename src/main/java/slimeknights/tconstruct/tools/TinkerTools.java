@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.tools;
 
 import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
@@ -18,11 +19,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.common.crafting.CraftingHelper;
+import net.neoforged.neoforge.common.crafting.IngredientType;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import slimeknights.mantle.registration.object.EnumObject;
@@ -313,9 +315,12 @@ public final class TinkerTools extends TinkerModule {
   }
 
   void registerRecipeSerializers(RegisterEvent event) {
-    if (event.getRegistryKey() == Registries.RECIPE_SERIALIZER) {
+    if (event.getRegistryKey() == NeoForgeRegistries.Keys.INGREDIENT_TYPES) {
+      // custom ingredient type; JSON "type" key stays identical to the legacy Forge serializer ID
+      Registry<IngredientType<?>> registry = event.getRegistry(NeoForgeRegistries.Keys.INGREDIENT_TYPES);
+      Registry.register(registry, ToolHookIngredient.ID, (IngredientType<?>) ToolHookIngredient.TYPE);
+    } else if (event.getRegistryKey() == Registries.RECIPE_SERIALIZER) {
       ItemPredicate.register(ToolStackItemPredicate.ID, ToolStackItemPredicate::deserialize);
-      CraftingHelper.register(ToolHookIngredient.Serializer.ID, ToolHookIngredient.Serializer.INSTANCE);
 
       // register tool stats that are not defined directly in the class; safer than static init registration
       ToolStats.register(OverslimeModule.OVERSLIME_STAT);

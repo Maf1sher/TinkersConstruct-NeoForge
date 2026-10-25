@@ -11,6 +11,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
 import slimeknights.mantle.recipe.helper.ItemOutput;
+import slimeknights.tconstruct.common.recipe.LoadableFinishedRecipe;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 
 
@@ -59,7 +60,7 @@ public class MaterialRecipeBuilder extends AbstractRecipeBuilder<MaterialRecipeB
 
   @Override
   public void save(RecipeOutput output) {
-    this.save(output, material.getId());
+    this.save(output, material.getId().getLocation());
   }
 
   @Override

@@ -8,14 +8,13 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.items.ItemHandlerHelper;
-import slimeknights.mantle.data.loadable.common.IngredientLoadable;
+import slimeknights.mantle.data.loadable.common.CodecLoadable;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.ICustomOutputRecipe;
-import slimeknights.mantle.recipe.container.ISingleStackContainer;
 import slimeknights.mantle.recipe.helper.ItemOutput;
 import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
+import slimeknights.mantle.recipe.input.SingleItemInput;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariant;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
@@ -28,18 +27,18 @@ import java.util.List;
 /**
  * Recipe to get the material from an ingredient
  */
-public class MaterialRecipe implements ICustomOutputRecipe<ISingleStackContainer>, IMaterialValue, IDisplayMaterialRecipe {
+public class MaterialRecipe implements ICustomOutputRecipe<SingleItemInput>, IMaterialValue, IDisplayMaterialRecipe {
   /** Empty material instance for the cache */
   @SuppressWarnings("removal")
-  public static final MaterialRecipe EMPTY = new MaterialRecipe(new ResourceLocation("missingno"), "", Ingredient.EMPTY, 0, 0, MaterialId.UNKNOWN, ItemOutput.EMPTY);
+  public static final MaterialRecipe EMPTY = new MaterialRecipe(ResourceLocation.fromNamespaceAndPath("minecraft", "missingno"), "", Ingredient.EMPTY, 0, 0, MaterialId.UNKNOWN, ItemOutput.EMPTY);
   public static final RecordLoadable<MaterialRecipe> LOADER = RecordLoadable.create(
     ContextKey.ID.requiredField(),
     LoadableRecipeSerializer.RECIPE_GROUP,
-    IngredientLoadable.DISALLOW_EMPTY.requiredField("ingredient", MaterialRecipe::getIngredient),
+    new CodecLoadable.Direct<>(Ingredient.CODEC_NONEMPTY, Ingredient.CONTENTS_STREAM_CODEC).requiredField("ingredient", MaterialRecipe::getIngredient),
     IMaterialValue.VALUE_FIELD,
     IMaterialValue.NEEDED_FIELD,
     MaterialVariantId.LOADABLE.requiredField("material", r -> r.getMaterial().getVariant()),
-    ItemOutput.Loadable.OPTIONAL_STACK.emptyField("leftover", r -> r.leftover),
+    ItemOutput.OPTIONAL_STACK_LOADABLE.defaultField("leftover", ItemOutput.EMPTY, r -> r.leftover),
     MaterialRecipe::new);
 
   /** Vanilla requires 4 ingots for full repair, we drop it down to 3 to mesh better with nuggets and blocks and to fit small head costs better */
@@ -112,8 +111,8 @@ public class MaterialRecipe implements ICustomOutputRecipe<ISingleStackContainer
   /* Material methods */
 
   @Override
-  public boolean matches(ISingleStackContainer inv, Level worldIn) {
-    return !material.isUnknown() && this.ingredient.test(inv.getStack());
+  public boolean matches(SingleItemInput inv, Level worldIn) {
+    return !material.isUnknown() && this.ingredient.test(inv.getItem());
   }
 
   @Override
@@ -128,10 +127,11 @@ public class MaterialRecipe implements ICustomOutputRecipe<ISingleStackContainer
   @Override
   public List<ItemStack> getDisplayItems() {
     if (displayItems == null) {
+      ItemStack[] items = ingredient.getItems();
       if (needed > 1) {
-        displayItems = Arrays.stream(ingredient.getItems()).map(stack -> ItemHandlerHelper.copyStackWithSize(stack, needed)).toList();
+        displayItems = Arrays.stream(items).map(stack -> stack.copyWithCount(needed)).toList();
       } else {
-        displayItems = List.of(ingredient.getItems());
+        displayItems = List.of(items);
       }
     }
     return displayItems;

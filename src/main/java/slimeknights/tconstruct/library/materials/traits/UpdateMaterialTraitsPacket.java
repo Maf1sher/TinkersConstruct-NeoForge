@@ -31,11 +31,10 @@ public class UpdateMaterialTraitsPacket implements TinkerPayload {
     }
   }
 
-  @Override
   public void encode(RegistryFriendlyByteBuf buffer) {
     buffer.writeInt(materialToTraits.size());
     materialToTraits.forEach((materialId, traits) -> {
-      buffer.writeResourceLocation(materialId);
+      buffer.writeResourceLocation(materialId.getLocation());
       traits.write(buffer);
     });
   }

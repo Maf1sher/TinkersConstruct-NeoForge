@@ -2,7 +2,7 @@ package slimeknights.tconstruct.library.json.predicate.material;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import slimeknights.mantle.data.loadable.field.LoadableField;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
 import slimeknights.mantle.util.typed.TypedMap;
@@ -31,7 +31,7 @@ public record MaterialPredicateField<P>(String key, Function<P, IJsonPredicate<M
   }
 
   @Override
-  public void serialize(P parent, JsonObject json) {
+  public void serializeInto(P parent, JsonObject json, TypedMap context) {
     IJsonPredicate<MaterialVariantId> predicate = getter.apply(parent);
     if (predicate != MaterialPredicate.ANY) {
       // if compact serializing, serialize the legacy style predicate
@@ -55,18 +55,18 @@ public record MaterialPredicateField<P>(String key, Function<P, IJsonPredicate<M
 
       // force serialized form to be a json object, as compact is misleading
       JsonObject serialized = new JsonObject();
-      MaterialPredicate.LOADER.serialize(predicate, serialized);
+      MaterialPredicate.LOADER.serializeInto(predicate, serialized, TypedMap.EMPTY);
       json.add(key, serialized);
     }
   }
 
   @Override
-  public IJsonPredicate<MaterialVariantId> decode(FriendlyByteBuf buffer, TypedMap context) {
+  public IJsonPredicate<MaterialVariantId> decode(RegistryFriendlyByteBuf buffer, TypedMap context) {
     return MaterialPredicate.LOADER.decode(buffer, context);
   }
 
   @Override
-  public void encode(FriendlyByteBuf buffer, P parent) {
-    MaterialPredicate.LOADER.encode(buffer, getter.apply(parent));
+  public void encode(RegistryFriendlyByteBuf buffer, P parent, TypedMap context) {
+    MaterialPredicate.LOADER.encode(buffer, getter.apply(parent), context);
   }
 }
