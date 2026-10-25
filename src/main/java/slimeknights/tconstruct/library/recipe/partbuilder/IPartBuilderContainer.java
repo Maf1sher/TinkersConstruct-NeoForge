@@ -1,7 +1,7 @@
 package slimeknights.tconstruct.library.recipe.partbuilder;
 
 import net.minecraft.world.item.ItemStack;
-import slimeknights.mantle.recipe.container.ISingleStackContainer;
+import slimeknights.mantle.recipe.input.SingleItemInput;
 import slimeknights.tconstruct.library.recipe.material.IMaterialValue;
 
 import javax.annotation.Nullable;
@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 /**
  * Inventory interface for the part builder
  */
-public interface IPartBuilderContainer extends ISingleStackContainer {
+public interface IPartBuilderContainer extends SingleItemInput {
   /**
    * Gets the material recipe based on the current slot contents
    * @return  Material recipe, or null if the slot contents are not a valid material
@@ -29,8 +29,16 @@ public interface IPartBuilderContainer extends ISingleStackContainer {
    */
   //ResourceLocation getPattern();
 
-  /** @deprecated use {{@link #getStack()}} */
-  @Deprecated
+  /** Gets the stack in the material slot */
+  ItemStack getStack();
+
+  /** Gets the material slot's stack via the single item input API */
+  @Override
+  default ItemStack getItem() {
+    return getStack();
+  }
+
+  /** Gets the item at the given index: index 0 is the material, index 1 is the pattern */
   @Override
   default ItemStack getItem(int index) {
     return switch (index) {
@@ -45,10 +53,8 @@ public interface IPartBuilderContainer extends ISingleStackContainer {
     return getStack().isEmpty() && getPatternStack().isEmpty();
   }
 
-  /** @deprecated always 2, not useful */
-  @Deprecated
   @Override
-  default int getContainerSize() {
+  default int size() {
     return 2;
   }
 }

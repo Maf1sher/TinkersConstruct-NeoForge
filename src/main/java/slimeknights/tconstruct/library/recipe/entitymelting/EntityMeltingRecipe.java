@@ -13,7 +13,7 @@ import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.ICustomOutputRecipe;
-import slimeknights.mantle.recipe.container.IEmptyContainer;
+import slimeknights.mantle.recipe.input.NoItemInput;
 import slimeknights.mantle.recipe.helper.FluidOutput;
 import slimeknights.mantle.recipe.ingredient.EntityIngredient;
 import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
@@ -25,7 +25,7 @@ import java.util.Collection;
  * Recipe to melt an entity into a fluid
  */
 @RequiredArgsConstructor
-public class EntityMeltingRecipe implements ICustomOutputRecipe<IEmptyContainer> {
+public class EntityMeltingRecipe implements ICustomOutputRecipe<NoItemInput> {
   public static final RecordLoadable<EntityMeltingRecipe> LOADER = RecordLoadable.create(
     ContextKey.ID.requiredField(),
     EntityIngredient.LOADABLE.requiredField("entity", r -> r.ingredient),
@@ -85,7 +85,7 @@ public class EntityMeltingRecipe implements ICustomOutputRecipe<IEmptyContainer>
   /** @deprecated use {@link #matches(EntityType)}*/
   @Deprecated
   @Override
-  public boolean matches(IEmptyContainer inv, Level worldIn) {
+  public boolean matches(NoItemInput inv, Level worldIn) {
     return false;
   }
 }

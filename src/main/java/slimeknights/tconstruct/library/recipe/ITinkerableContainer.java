@@ -2,11 +2,11 @@ package slimeknights.tconstruct.library.recipe;
 
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import slimeknights.mantle.recipe.container.IRecipeContainer;
+import net.minecraft.world.item.crafting.RecipeInput;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 
 /** Container that contains a tinkerable stack and a number of inputs after */
-public interface ITinkerableContainer extends IRecipeContainer {
+public interface ITinkerableContainer extends RecipeInput {
   /**
    * Gets the stack in the tinkerable slot.
    *
@@ -40,8 +40,7 @@ public interface ITinkerableContainer extends IRecipeContainer {
 
   /* Base methods */
 
-  /** @deprecated use {@link #getInput(int)} */
-  @Deprecated
+  /** Gets the item at the given index: index 0 is the tinkerable, the rest are inputs in order */
   @Override
   default ItemStack getItem(int index) {
     if (index == 0) {
@@ -64,10 +63,8 @@ public interface ITinkerableContainer extends IRecipeContainer {
     return true;
   }
 
-  /** @deprecated use {@link #getInputCount()} */
-  @Deprecated
   @Override
-  default int getContainerSize() {
+  default int size() {
     return getInputCount() + 1;
   }
 

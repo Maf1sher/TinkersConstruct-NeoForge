@@ -1,12 +1,12 @@
 package slimeknights.tconstruct.library.recipe.molding;
 
 import net.minecraft.world.item.ItemStack;
-import slimeknights.mantle.recipe.container.IRecipeContainer;
+import net.minecraft.world.item.crafting.RecipeInput;
 
 /**
  * Inventory for molding recipes
  */
-public interface IMoldingContainer extends IRecipeContainer {
+public interface IMoldingContainer extends RecipeInput {
   /**
    * Gets the material being molded, typically sand
    * @return  Material item
@@ -22,8 +22,7 @@ public interface IMoldingContainer extends IRecipeContainer {
 
   /* Required methods */
 
-  /** @deprecated use {@link #getMaterial()} and {@link #getPattern()} */
-  @Deprecated
+  /** Gets the item at the given index: index 0 is the material, index 1 is the pattern */
   @Override
   default ItemStack getItem(int index) {
     return switch (index) {
@@ -34,7 +33,7 @@ public interface IMoldingContainer extends IRecipeContainer {
   }
 
   @Override
-  default int getContainerSize() {
+  default int size() {
     return 2;
   }
 
