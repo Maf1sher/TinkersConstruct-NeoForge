@@ -9,9 +9,9 @@ import net.minecraft.world.level.block.RailBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.Hopper;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 import slimeknights.mantle.inventory.EmptyItemHandler;
 
 public class DropperRailBlock extends RailBlock {
@@ -22,17 +22,17 @@ public class DropperRailBlock extends RailBlock {
 
   @Override
   public void onMinecartPass(BlockState state, Level world, BlockPos pos, AbstractMinecart cart) {
-    if (!cart.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.DOWN).isPresent() || !(cart instanceof Hopper)) {
+    if (!cart.getCapability(Capabilities.ItemHandler.ENTITY, Direction.DOWN).isPresent() || !(cart instanceof Hopper)) {
       return;
     }
     BlockEntity tileEntity = world.getBlockEntity(pos.below());
-    if (tileEntity == null || !tileEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.DOWN).isPresent()) {
+    if (tileEntity == null || !tileEntity.getCapability(Capabilities.ItemHandler.BLOCK, Direction.DOWN).isPresent()) {
       return;
     }
 
     // todo: fix this optional usage
-    IItemHandler itemHandlerCart = cart.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP).orElse(EmptyItemHandler.INSTANCE);
-    IItemHandler itemHandlerTE = tileEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP).orElse(EmptyItemHandler.INSTANCE);
+    IItemHandler itemHandlerCart = cart.getCapability(Capabilities.ItemHandler.ENTITY, null).orElse(EmptyItemHandler.INSTANCE);
+    IItemHandler itemHandlerTE = tileEntity.getCapability(Capabilities.ItemHandler.BLOCK, Direction.UP).orElse(EmptyItemHandler.INSTANCE);
 
     for (int i = 0; i < itemHandlerCart.getSlots(); i++) {
       ItemStack itemStack = itemHandlerCart.extractItem(i, 1, true);

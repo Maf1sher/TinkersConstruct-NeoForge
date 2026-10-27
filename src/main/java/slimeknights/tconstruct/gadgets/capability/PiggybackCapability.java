@@ -1,40 +1,29 @@
 package slimeknights.tconstruct.gadgets.capability;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.common.NeoForge;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.common.capabilities.CapabilityToken;
+import net.neoforged.neoforge.attachment.AttachmentType;
+import net.neoforged.neoforge.capabilities.EntityCapability;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import org.jetbrains.annotations.Nullable;
 import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.common.TinkerModule;
 
 /** Capability logic */
 public class PiggybackCapability {
-  private static final ResourceLocation ID = TConstruct.getResource("piggyback");
-  public static final Capability<PiggybackHandler> PIGGYBACK = CapabilityManager.get(new CapabilityToken<>() {});
+  /** Capability queried on players */
+  public static final EntityCapability<PiggybackHandler, @Nullable Void> PIGGYBACK =
+    EntityCapability.createVoid(TConstruct.getResource("piggyback"), PiggybackHandler.class);
+
+  /** Attachment storing each player's handler, lazily created so the sync cache persists between queries */
+  public static final DeferredHolder<?, AttachmentType<PiggybackHandler>> DATA = TinkerModule.ATTACHMENTS.register(
+    "piggyback", () -> AttachmentType.builder(holder -> new PiggybackHandler((Player) holder)).build());
 
   private PiggybackCapability() {}
 
-  /** Registers this capability */
-  public static void register(IEventBus modEventBus) {
-    modEventBus.addListener(EventPriority.NORMAL, false, RegisterCapabilitiesEvent.class, PiggybackCapability::register);
-    NeoForge.EVENT_BUS.addGenericListener(Entity.class, PiggybackCapability::attachCapability);
-  }
-
-  /** Registers the capability with the event bus */
-  private static void register(RegisterCapabilitiesEvent event) {
-    event.register(PiggybackHandler.class);
-  }
-
-  /** Event listener to attach the capability */
-  private static void attachCapability(AttachCapabilitiesEvent<Entity> event) {
-    if (event.getObject() instanceof Player) {
-      event.addCapability(ID, new PiggybackHandler((Player) event.getObject()));
-    }
+  /** Registers the capability provider so players can answer piggyback queries */
+  public static void register(RegisterCapabilitiesEvent event) {
+    event.registerEntity(PIGGYBACK, EntityType.PLAYER, (entity, context) -> entity.getData(DATA));
   }
 }
