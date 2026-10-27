@@ -24,9 +24,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.client.model.data.ModelData;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
@@ -95,15 +92,10 @@ public abstract class HeatingStructureBlockEntity extends NameableBlockEntity im
   /** Tank instance for this smeltery */
   @Getter
   protected final SmelteryTank<HeatingStructureBlockEntity> tank = new SmelteryTank<>(this);
-  /** Capability to pass to drains for fluid handling */
-  @Getter
-  private LazyOptional<IFluidHandler> fluidCapability = LazyOptional.empty();
 
   /** Inventory handling melting items */
   @Getter
   protected final MeltingModuleInventory meltingInventory = createMeltingInventory();
-
-  private final LazyOptional<IItemHandler> itemCapability = LazyOptional.of(() -> meltingInventory);
 
   /** Fuel module */
   @Getter
@@ -332,22 +324,16 @@ public abstract class HeatingStructureBlockEntity extends NameableBlockEntity im
 
   /* Capability */
 
-  @Override
-  public void invalidateCaps() {
-    super.invalidateCaps();
-    this.itemCapability.invalidate();
-    // fluidCapability is only used by drains, but still need to invalidate it so drains stop talking to an invalid smeltery
-    // on the chance we have no fluid capability (invalid structure), this will simply no-op internally
-    this.fluidCapability.invalidate();
+  /** Item handler for melting items, exposed through {@link net.neoforged.neoforge.capabilities.Capabilities.ItemHandler#BLOCK} */
+  public IItemHandler getItemHandler() {
+    return meltingInventory;
   }
 
-  @Nonnull
+  @Nullable
   @Override
-  public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing) {
-    if (capability == ForgeCapabilities.ITEM_HANDLER) {
-      return itemCapability.cast();
-    }
-    return super.getCapability(capability, facing);
+  public IFluidHandler getFluidHandler() {
+    // drains may only talk to a formed smeltery
+    return structure == null ? null : tank;
   }
 
 
@@ -397,21 +383,10 @@ public abstract class HeatingStructureBlockEntity extends NameableBlockEntity im
       TinkerNetwork.getInstance().sendToClientsAround(
         new StructureUpdatePacket(worldPosition, newStructure.getMinPos(), newStructure.getMaxPos(), newStructure.getTanks()), level, worldPosition);
 
-      // update tank capability, do first for update listeners on the drain blocks
-      if (!fluidCapability.isPresent()) {
-        fluidCapability = LazyOptional.of(() -> tank);
-      }
-
       // set master positions
       newStructure.assignMaster(this, oldStructure);
       setStructure(newStructure);
     } else {
-      // remove tank capability
-      if (fluidCapability.isPresent()) {
-        fluidCapability.invalidate();
-        fluidCapability = LazyOptional.empty();
-      }
-
       // clear positions
       if (oldStructure != null) {
         oldStructure.clearMaster(this);
@@ -628,9 +603,6 @@ public abstract class HeatingStructureBlockEntity extends NameableBlockEntity im
     }
     if (nbt.contains(TAG_STRUCTURE, Tag.TAG_COMPOUND)) {
       setStructure(multiblock.readFromTag(nbt.getCompound(TAG_STRUCTURE), this.worldPosition));
-      if (structure != null) {
-        fluidCapability = LazyOptional.of(() -> tank);
-      }
     }
     // only exists to be sent server to client in update packets
     if (nbt.contains(TAG_ERROR_POS, Tag.TAG_COMPOUND)) {

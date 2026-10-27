@@ -493,7 +493,7 @@ public class ToolInventoryCapability extends InventoryModifierHookIterator<Modif
     public Provider(ItemStack stack, Supplier<? extends IToolStackView> tool) {}
 
     @Override
-    public Object getCapability(IToolStackView tool, ItemCapability<?, @Nullable Void> capability) {
+    public Object getCapability(IToolStackView tool, ItemCapability<?, Void> capability) {
       if (capability == Capabilities.ItemHandler.ITEM && tool.getVolatileData().getInt(TOTAL_SLOTS) > 0) {
         return new ToolInventoryCapability(() -> tool);
       }

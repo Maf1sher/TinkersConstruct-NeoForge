@@ -24,9 +24,6 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
@@ -73,7 +70,6 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
   /** Special casting fluid tank */
   @Getter
   private final CastingFluidHandler tank = new CastingFluidHandler(this);
-  private final LazyOptional<CastingFluidHandler> holder = LazyOptional.of(() -> tank);
 
   /* Casting recipes */
   /** Recipe type for casting recipes, may be basin or table */
@@ -123,12 +119,10 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
     this.moldingInventory = new MoldingContainerWrapper(itemHandler, INPUT);
   }
 
-  @Override
-  @Nonnull
-  public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
-    if (capability == ForgeCapabilities.FLUID_HANDLER)
-      return holder.cast();
-    return super.getCapability(capability, facing);
+  /** Fluid handler for the casting tank, exposed through {@link net.neoforged.neoforge.capabilities.Capabilities.FluidHandler#BLOCK} */
+  @Nullable
+  public IFluidHandler getFluidHandler() {
+    return tank;
   }
 
   /**

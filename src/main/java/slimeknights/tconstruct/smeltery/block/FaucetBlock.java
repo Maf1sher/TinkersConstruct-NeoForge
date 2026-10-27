@@ -112,7 +112,6 @@ public class FaucetBlock extends Block implements EntityBlock {
   @Override
   public void neighborChanged(BlockState state, Level world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
     if (!world.isClientSide && world.getBlockEntity(pos) instanceof FaucetBlockEntity faucet) {
-      faucet.neighborChanged(fromPos);
       faucet.handleRedstone(world.hasNeighborSignal(pos));
     }
   }

@@ -38,7 +38,7 @@ public class ToolCapabilityProvider {
   /** Gets a capability value for the given stack, or null if no tool provider supplies it. */
   @Nullable
   @SuppressWarnings("unchecked")
-  public static <T> T getCapability(ItemStack stack, ItemCapability<T, @Nullable Void> capability) {
+  public static <T> T getCapability(ItemStack stack, ItemCapability<T, Void> capability) {
     ToolStack tool = ToolStack.from(stack);
     Supplier<ToolStack> toolSupplier = () -> tool;
     List<IToolCapabilityProvider> providers = PROVIDER_CONSTRUCTORS.stream()
@@ -64,6 +64,6 @@ public class ToolCapabilityProvider {
   @FunctionalInterface
   public interface IToolCapabilityProvider {
     /** Gets a capability on the given tool, or null when this provider does not supply it. */
-    Object getCapability(IToolStackView tool, ItemCapability<?, @Nullable Void> capability);
+    Object getCapability(IToolStackView tool, ItemCapability<?, Void> capability);
   }
 }

@@ -14,11 +14,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.model.data.ModelData;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.items.IItemHandler;
 import slimeknights.mantle.util.RetexturedHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.model.ModelProperties;
@@ -40,7 +36,12 @@ public class DuctBlockEntity extends SmelteryFluidIO implements MenuProvider {
 
   @Getter
   private final DuctItemHandler itemHandler = new DuctItemHandler(this);
-  private final LazyOptional<IItemHandler> itemCapability = LazyOptional.of(() -> itemHandler);
+  /** Handler from the parent smeltery the wrapper was created for */
+  @Nullable
+  private IFluidHandler fluidParent;
+  /** Wrapper filtering the parent handler by the item in this duct */
+  @Nullable
+  private DuctTankWrapper fluidWrapper;
 
   public DuctBlockEntity(BlockPos pos, BlockState state) {
     this(TinkerSmeltery.duct.get(), pos, state);
@@ -67,24 +68,21 @@ public class DuctBlockEntity extends SmelteryFluidIO implements MenuProvider {
 
   /* Capability */
 
-  @Nonnull
+  @Nullable
   @Override
-  public <C> LazyOptional<C> getCapability(Capability<C> capability, @Nullable Direction facing) {
-    if (capability == ForgeCapabilities.ITEM_HANDLER) {
-      return itemCapability.cast();
+  public IFluidHandler getFluidHandler() {
+    IFluidHandler parent = super.getFluidHandler();
+    if (parent == null) {
+      fluidParent = null;
+      fluidWrapper = null;
+      return null;
     }
-    return super.getCapability(capability, facing);
-  }
-
-  @Override
-  public void invalidateCaps() {
-    super.invalidateCaps();
-    itemCapability.invalidate();
-  }
-
-  @Override
-  protected LazyOptional<IFluidHandler> makeWrapper(LazyOptional<IFluidHandler> capability) {
-    return LazyOptional.of(() -> new DuctTankWrapper(capability.orElse(emptyInstance), itemHandler));
+    // rebuild the wrapper if the smeltery tank changed; the listener lists are weak, so the old wrapper can be dropped
+    if (parent != fluidParent) {
+      fluidParent = parent;
+      fluidWrapper = new DuctTankWrapper(parent, itemHandler);
+    }
+    return fluidWrapper;
   }
 
   @Nonnull

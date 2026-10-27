@@ -4,24 +4,30 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.wrapper.EmptyItemHandler;
 import slimeknights.mantle.client.screen.MultiModuleScreen;
 import slimeknights.mantle.inventory.BaseContainerMenu;
 import slimeknights.tconstruct.tables.block.entity.inventory.IScalingContainer;
 
-import java.util.Optional;
-
 public class ScalingChestScreen<T extends BlockEntity> extends DynamicContainerScreen<MultiModuleScreen<?>,BaseContainerMenu<T>> {
   private final IScalingContainer scaling;
   public ScalingChestScreen(MultiModuleScreen<?> parent, BaseContainerMenu<T> container, Inventory playerInventory, Component title) {
     super(parent, container, playerInventory, title);
     BlockEntity tile = container.getTile();
-    IItemHandler handler = Optional.ofNullable(tile)
-                                   .flatMap(t -> t.getCapability(ForgeCapabilities.ITEM_HANDLER).resolve())
-                                   .orElse(EmptyItemHandler.INSTANCE);
+    IItemHandler handler = EmptyItemHandler.INSTANCE;
+    if (tile != null) {
+      Level world = tile.getLevel();
+      if (world != null) {
+        IItemHandler cap = world.getCapability(Capabilities.ItemHandler.BLOCK, tile.getBlockPos(), null);
+        if (cap != null) {
+          handler = cap;
+        }
+      }
+    }
     this.scaling = handler instanceof IScalingContainer ? (IScalingContainer) handler : handler::getSlots;
     this.slotCount = scaling.getVisualSize();
     this.sliderActive = true;

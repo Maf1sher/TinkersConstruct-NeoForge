@@ -27,7 +27,7 @@ public interface BlockItemProviderCapability {
   /** Capability ID */
   ResourceLocation ID = TConstruct.getResource("block_provider");
   /** Capability type */
-  ItemCapability<BlockItemProviderCapability, @Nullable Void> CAPABILITY = ItemCapability.createVoid(ID, BlockItemProviderCapability.class);
+  ItemCapability<BlockItemProviderCapability, Void> CAPABILITY = ItemCapability.createVoid(ID, BlockItemProviderCapability.class);
 
   /** Registers this capability */
   @ApiStatus.Internal

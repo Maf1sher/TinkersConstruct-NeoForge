@@ -14,9 +14,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import slimeknights.mantle.block.entity.NameableBlockEntity;
 import slimeknights.tconstruct.TConstruct;
@@ -50,8 +47,6 @@ public class AlloyerBlockEntity extends NameableBlockEntity implements ITankBloc
   /** Tank for this mixer */
   @Getter
   protected final FluidTankAnimated tank = new FluidTankAnimated(TANK_CAPACITY, this);
-  /* Capability for return */
-  private final LazyOptional<IFluidHandler> tankHolder = LazyOptional.of(() -> tank);
 
   // modules
   /** Logic for a mixer alloying */
@@ -83,19 +78,9 @@ public class AlloyerBlockEntity extends NameableBlockEntity implements ITankBloc
    * Capability
    */
 
-  @Nonnull
-  @Override
-  public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing) {
-    if (capability == ForgeCapabilities.FLUID_HANDLER) {
-      return tankHolder.cast();
-    }
-    return super.getCapability(capability, facing);
-  }
-
-  @Override
-  public void invalidateCaps() {
-    super.invalidateCaps();
-    this.tankHolder.invalidate();
+  /** Fluid handler for the mixer tank, exposed through {@link net.neoforged.neoforge.capabilities.Capabilities.FluidHandler#BLOCK} */
+  public IFluidHandler getFluidHandler() {
+    return tank;
   }
 
 

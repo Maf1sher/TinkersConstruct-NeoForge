@@ -11,9 +11,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.Nullable;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
 import slimeknights.mantle.fluid.FluidTransferHelper;
@@ -28,8 +25,6 @@ public class ProxyTankBlockEntity extends MantleBlockEntity implements IFluidTan
   /** Direct access to the fluid handler and item handler */
   @Getter
   private final ProxyItemTank<ProxyTankBlockEntity> itemTank = new ProxyItemTank<>(this);
-  /** Capability instance for both items and fluids */
-  private final LazyOptional<ProxyItemTank<?>> capability = LazyOptional.of(() -> itemTank);
   /** Last comparator strength to reduce block updates */
   private int lastStrength = -1;
   protected ProxyTankBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
@@ -42,20 +37,6 @@ public class ProxyTankBlockEntity extends MantleBlockEntity implements IFluidTan
 
 
   /* Capability */
-
-  @Override
-  public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
-    if (cap == ForgeCapabilities.ITEM_HANDLER || cap == ForgeCapabilities.FLUID_HANDLER) {
-      return capability.cast();
-    }
-    return super.getCapability(cap, side);
-  }
-
-  @Override
-  public void invalidateCaps() {
-    super.invalidateCaps();
-    capability.invalidate();
-  }
 
 
   /* Comparators */

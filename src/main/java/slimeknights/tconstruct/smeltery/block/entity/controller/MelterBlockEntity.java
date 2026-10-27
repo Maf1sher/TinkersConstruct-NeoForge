@@ -16,9 +16,6 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.model.data.ModelData;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
@@ -56,8 +53,6 @@ public class MelterBlockEntity extends NameableBlockEntity implements ITankInven
   /** Internal fluid tank output */
   @Getter
   protected final FluidTankAnimated tank = new FluidTankAnimated(TANK_CAPACITY, this);
-  /** Capability holder for the tank */
-  private final LazyOptional<IFluidHandler> tankHolder = LazyOptional.of(() -> tank);
   /** Last comparator strength to reduce block updates */
   @Getter @Setter
   private int lastStrength = -1;
@@ -68,8 +63,6 @@ public class MelterBlockEntity extends NameableBlockEntity implements ITankInven
   /* Heating */
   /** Handles all the melting needs */
   private final MeltingModuleInventory meltingInventory = new MeltingModuleInventory(this, tank, Config.COMMON.melterOreRate, 3);
-  /** Capability holder for the tank */
-  private final LazyOptional<IItemHandler> inventoryHolder = LazyOptional.of(() -> meltingInventory);
 
   /** Fuel handling logic */
   @Getter
@@ -109,23 +102,9 @@ public class MelterBlockEntity extends NameableBlockEntity implements ITankInven
                     .with(ModelProperties.TANK_CAPACITY, tank.getCapacity()).build();
   }
 
-  @Nonnull
-  @Override
-  public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing) {
-    if (capability == ForgeCapabilities.FLUID_HANDLER) {
-      return tankHolder.cast();
-    }
-    if (capability == ForgeCapabilities.ITEM_HANDLER) {
-      return inventoryHolder.cast();
-    }
-    return super.getCapability(capability, facing);
-  }
-
-  @Override
-  public void invalidateCaps() {
-    super.invalidateCaps();
-    this.tankHolder.invalidate();
-    this.inventoryHolder.invalidate();
+  /** Fluid handler for the melter tank, exposed through {@link net.neoforged.neoforge.capabilities.Capabilities.FluidHandler#BLOCK} */
+  public IFluidHandler getFluidHandler() {
+    return tank;
   }
 
   /*

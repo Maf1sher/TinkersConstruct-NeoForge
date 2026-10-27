@@ -72,7 +72,7 @@ public interface BlockItemProviderModifierHook {
         public Provider(Supplier<? extends IToolStackView> tool) {}
 
         @Override
-        public Object getCapability(IToolStackView tool, ItemCapability<?, @Nullable Void> capability) {
+        public Object getCapability(IToolStackView tool, ItemCapability<?, Void> capability) {
             if (capability == BlockItemProviderCapability.CAPABILITY) {
                 return new CapabilityImpl(tool);
             }

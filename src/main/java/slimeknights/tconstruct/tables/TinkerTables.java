@@ -16,6 +16,8 @@ import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -167,6 +169,17 @@ public final class TinkerTables extends TinkerModule {
   // repair - standard
   public static final DeferredHolder<?, SimpleRecipeSerializer<TinkerStationRepairRecipe>> tinkerStationRepairSerializer = RECIPE_SERIALIZERS.register("tinker_station_repair", () -> new SimpleRecipeSerializer<>(TinkerStationRepairRecipe::new));
   public static final DeferredHolder<?, SimpleRecipeSerializer<CraftingTableRepairKitRecipe>> craftingTableRepairSerializer = RECIPE_SERIALIZERS.register("crafting_table_repair", () -> new SimpleRecipeSerializer<>(CraftingTableRepairKitRecipe::new));
+
+  @SubscribeEvent
+  void registerCapabilities(RegisterCapabilitiesEvent event) {
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, craftingStationTile.get(), (be, side) -> be.getItemHandler());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, tinkerStationTile.get(), (be, side) -> be.getItemHandler());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, partBuilderTile.get(), (be, side) -> be.getItemHandler());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, modifierWorktableTile.get(), (be, side) -> be.getItemHandler());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, tinkersChestTile.get(), (be, side) -> be.getItemHandler());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, partChestTile.get(), (be, side) -> be.getItemHandler());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, castChestTile.get(), (be, side) -> be.getItemHandler());
+  }
 
   @SubscribeEvent
   void commonSetup(final FMLCommonSetupEvent event) {

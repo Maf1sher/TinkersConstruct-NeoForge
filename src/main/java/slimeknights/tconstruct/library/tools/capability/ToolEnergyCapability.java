@@ -132,7 +132,7 @@ public record ToolEnergyCapability(Supplier<? extends IToolStackView> tool) impl
     public Provider(Supplier<? extends IToolStackView> toolStack) { this.toolStack = toolStack; }
 
     @Override
-    public Object getCapability(IToolStackView tool, ItemCapability<?, @Nullable Void> capability) {
+    public Object getCapability(IToolStackView tool, ItemCapability<?, Void> capability) {
       if (capability == Capabilities.EnergyStorage.ITEM && tool.getStats().getInt(MAX_STAT) > 0) {
         return new ToolEnergyCapability(toolStack);
       }

@@ -467,8 +467,34 @@ public final class TinkerSmeltery extends TinkerModule {
   }
 
   @SubscribeEvent
-  void registerFluidCapabilities(RegisterCapabilitiesEvent event) {
-    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, tank.get(), (blockEntity, side) -> blockEntity.getTank());
+  void registerCapabilities(RegisterCapabilitiesEvent event) {
+    // item handlers
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, melter.get(), (be, side) -> be.getItemHandler());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, smeltery.get(), (be, side) -> be.getItemHandler());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, foundry.get(), (be, side) -> be.getItemHandler());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, heater.get(), (be, side) -> be.getItemHandler());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, fluidCannon.get(), (be, side) -> be.getItemHandler());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, proxyTank.get(), (be, side) -> be.getItemTank());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, chute.get(), (be, side) -> be.getItemHandler());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, duct.get(), (be, side) -> be.getItemHandler());
+
+    // fluid handlers
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, tank.get(), (be, side) -> be.getTank());
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, lantern.get(), (be, side) -> be.getTank());
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, melter.get(), (be, side) -> be.getFluidHandler());
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, smeltery.get(), (be, side) -> be.getFluidHandler());
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, foundry.get(), (be, side) -> be.getFluidHandler());
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, alloyer.get(), (be, side) -> be.getFluidHandler());
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, fluidCannon.get(), (be, side) -> be.getTank());
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, basin.get(), (be, side) -> be.getFluidHandler());
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, table.get(), (be, side) -> be.getFluidHandler());
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, castingTank.get(), (be, side) -> be.getFluidHandler());
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, proxyTank.get(), (be, side) -> be.getItemTank());
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, channel.get(), (be, side) -> be.getFluidHandler(side));
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, drain.get(), (be, side) -> be.getFluidHandler());
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, duct.get(), (be, side) -> be.getFluidHandler());
+
+    // item fluid handlers on tanks and cans
     for (TankType type : TankType.values()) {
       registerTankItem(event, searedTank.get(type));
       registerTankItem(event, scorchedTank.get(type));

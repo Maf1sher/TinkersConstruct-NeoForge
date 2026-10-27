@@ -325,7 +325,7 @@ public class ToolFluidCapability extends FluidModifierHookIterator<ModifierEntry
     }
 
     @Override
-    public Object getCapability(IToolStackView tool, ItemCapability<?, @Nullable Void> capability) {
+    public Object getCapability(IToolStackView tool, ItemCapability<?, Void> capability) {
       if (capability == Capabilities.FluidHandler.ITEM && tool.getVolatileData().getInt(TOTAL_TANKS) > 0) {
         return new ToolFluidCapability(stack, toolStack);
       }

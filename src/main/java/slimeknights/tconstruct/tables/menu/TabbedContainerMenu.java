@@ -17,10 +17,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
-import net.neoforged.neoforge.items.wrapper.EmptyItemHandler;
 import org.apache.commons.lang3.tuple.Pair;
 import slimeknights.mantle.util.RegistryHelper;
 import slimeknights.tconstruct.common.TinkerTags;
@@ -112,6 +112,7 @@ public class TabbedContainerMenu<TILE extends BlockEntity> extends TriggeringMul
     if (world != null) {
       // detect side inventory
       BlockEntity inventoryTE = null;
+      IItemHandler inventoryHandler = null;
       Direction accessDir = null;
 
       BlockPos pos = tile.getBlockPos();
@@ -129,15 +130,19 @@ public class TabbedContainerMenu<TILE extends BlockEntity> extends TriggeringMul
         BlockEntity te = world.getBlockEntity(neighbor);
         if (te != null && isUsable(te, inv.player)) {
           // try internal access first
-          if (hasItemHandler(te, null)) {
+          IItemHandler handler = getItemHandler(te, null);
+          if (handler != null) {
             inventoryTE = te;
+            inventoryHandler = handler;
             break;
           }
 
           // try sided access next
           Direction side = dir.getOpposite();
-          if (hasItemHandler(te, side)) {
+          handler = getItemHandler(te, side);
+          if (handler != null) {
             inventoryTE = te;
+            inventoryHandler = handler;
             accessDir = side;
             break;
           }
@@ -146,7 +151,7 @@ public class TabbedContainerMenu<TILE extends BlockEntity> extends TriggeringMul
 
       // if we found something, add the side inventory
       if (inventoryTE != null) {
-        int invSlots = inventoryTE.getCapability(ForgeCapabilities.ITEM_HANDLER, accessDir).orElse(EmptyItemHandler.INSTANCE).getSlots();
+        int invSlots = inventoryHandler == null ? 0 : inventoryHandler.getSlots();
         int columns = Mth.clamp((invSlots - 1) / 9 + 1, 3, 6);
         this.addSubContainer(new SideInventoryContainer<>(TinkerTables.craftingStationContainer.get(), containerId, inv, inventoryTE, accessDir, -6 - 18 * 6, 8, columns), false);
       }
@@ -166,14 +171,20 @@ public class TabbedContainerMenu<TILE extends BlockEntity> extends TriggeringMul
   }
 
   /**
-   * Checks to see if the given Tile Entity has an item handler that's compatible with the side inventory
+   * Gets the item handler on the given tile entity, if it supports the side inventory
    * The Tile Entity's item handler must be an instance of IItemHandlerModifiable
    * @param tileEntity Tile to check
    * @param direction the given direction
-   * @return True if compatible.
+   * @return Item handler, or null if not compatible.
    */
-  private static boolean hasItemHandler(BlockEntity tileEntity, @Nullable Direction direction) {
-    return tileEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, direction).filter(cap -> cap instanceof IItemHandlerModifiable).isPresent();
+  @Nullable
+  private static IItemHandler getItemHandler(BlockEntity tileEntity, @Nullable Direction direction) {
+    Level world = tileEntity.getLevel();
+    if (world == null) {
+      return null;
+    }
+    IItemHandler handler = world.getCapability(Capabilities.ItemHandler.BLOCK, tileEntity.getBlockPos(), direction);
+    return handler instanceof IItemHandlerModifiable ? handler : null;
   }
 
 

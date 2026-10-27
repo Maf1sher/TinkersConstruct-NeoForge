@@ -21,9 +21,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.client.model.data.ModelData;
-import net.minecraftforge.common.capabilities.Capability;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.minecraftforge.common.util.LazyOptional;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -58,8 +56,6 @@ public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlo
   /** Internal fluid tank instance */
   @Getter
   protected final FluidTankAnimated tank;
-  /** Capability holder for the tank */
-  private final LazyOptional<IFluidHandler> fluidHolder;
   /** Last redstone state of the block */
   private boolean lastRedstone = false;
   /** Last comparator strength to reduce block updates */
@@ -100,7 +96,6 @@ public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlo
   protected CastingTankBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, ITankBlock block) {
     super(type, pos, state, NAME, 2, 1);
     tank = new FluidTankAnimated(block.getCapacity(), this);
-    fluidHolder = LazyOptional.of(() -> tank);
     itemHandler = new SidedInvWrapper(this, Direction.DOWN);
   }
 
@@ -235,19 +230,9 @@ public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlo
    * Tank methods
    */
 
-  @Override
-  @Nonnull
-  public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing) {
-    if (capability == ForgeCapabilities.FLUID_HANDLER) {
-      return fluidHolder.cast();
-    }
-    return super.getCapability(capability, facing);
-  }
-
-  @Override
-  public void invalidateCaps() {
-    super.invalidateCaps();
-    fluidHolder.invalidate();
+  /** Fluid handler for the casting tank, exposed through {@link net.neoforged.neoforge.capabilities.Capabilities.FluidHandler#BLOCK} */
+  public IFluidHandler getFluidHandler() {
+    return tank;
   }
 
   @Nonnull
