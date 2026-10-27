@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
-import slimeknights.mantle.inventory.EmptyItemHandler;
+import net.neoforged.neoforge.items.wrapper.EmptyItemHandler;
 
 public class DropperRailBlock extends RailBlock {
 

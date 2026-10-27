@@ -20,7 +20,7 @@ import slimeknights.tconstruct.shared.TinkerCommons;
 
 import java.util.List;
 
-/** @deprecated use {@link EdibleModule} and {@link slimeknights.mantle.loot.AddEntryLootModifier} */
+/** @deprecated use {@link EdibleModule} and {@link slimeknights.mantle.loot.modifier.AddEntryLootModifier} */
 @Deprecated(forRemoval = true)
 public class TastyModifier extends Modifier implements ProcessLootModifierHook {
   @Override

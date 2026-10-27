@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.common.data.loot;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ArmorItem;
@@ -15,9 +16,9 @@ import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
-import slimeknights.mantle.loot.AbstractLootTableInjectionProvider;
-import slimeknights.mantle.loot.LootTableInjection;
 import slimeknights.mantle.loot.function.SetFluidLootFunction;
+import slimeknights.mantle.loot.injection.AbstractLootTableInjectionProvider;
+import slimeknights.mantle.loot.injection.LootTableInjection;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.data.FakeRegistryEntry;
@@ -34,15 +35,17 @@ import slimeknights.tconstruct.tools.TinkerTools;
 import slimeknights.tconstruct.world.TinkerWorld;
 import slimeknights.tconstruct.world.block.FoliageType;
 
+import java.util.concurrent.CompletableFuture;
+
 /** Add all relevant loot to loot tables */
 public class LootTableInjectionProvider extends AbstractLootTableInjectionProvider {
-  public LootTableInjectionProvider(PackOutput packOutput) {
-    super(packOutput, TConstruct.MOD_ID);
+  public LootTableInjectionProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> registries) {
+    super(packOutput, TConstruct.MOD_ID, registries);
   }
 
   @SuppressWarnings("removal")
   @Override
-  protected void addTables() {
+  protected void addTables(HolderLookup.Provider lookup) {
     // slimy foliage injections
     // earth/sky
     inject("slimy_foliage_dungeon", "chests/simple_dungeon", ConfigEnabledCondition.SLIMY_LOOT_CHESTS)

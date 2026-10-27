@@ -856,7 +856,7 @@ public class ModifierRecipeProvider extends BaseRecipeProvider {
                          .setTools(TinkerTags.Items.GOLDEN_ARMOR)
                          .save(consumer.withConditions(new TagFilledCondition<>(TinkerTags.Items.GOLDEN_ARMOR)), prefix(TinkerModifiers.golden, defenseFolder));
     IncrementalModifierRecipeBuilder.modifier(ModifierIds.turtleShell)
-                                    .setInput(Items.SCUTE, 1, 5)
+                                    .setInput(Items.TURTLE_SCUTE, 1, 5)
                                     .setSlots(SlotType.DEFENSE, 1)
                                     .setTools(TinkerTags.Items.ARMOR)
                                     .saveSalvage(consumer, prefix(ModifierIds.turtleShell, defenseSalvage))
@@ -2031,7 +2031,7 @@ public class ModifierRecipeProvider extends BaseRecipeProvider {
     SpecialSeveringRecipeBuilder.serializer(TinkerModifiers.mooshroomDemushroomingSerializer).save(consumer, location(folder + "mooshroom_shroom"));
     // beshelling
     SeveringRecipeBuilder.severing(EntityIngredient.of(EntityType.TURTLE), Items.TURTLE_HELMET)
-                         .setChildOutput(ItemOutput.fromItem(Items.SCUTE))
+                         .setChildOutput(ItemOutput.fromItem(Items.TURTLE_SCUTE))
                          .save(consumer, location(folder + "turtle_shell"));
     // befleecing
     SpecialSeveringRecipeBuilder.serializer(TinkerModifiers.sheepShearing).save(consumer, location(folder + "sheep_wool"));

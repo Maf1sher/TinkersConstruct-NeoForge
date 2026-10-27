@@ -192,7 +192,7 @@ public class TConstruct {
     generator.addProvider(server, new TConstructLootTableProvider(packOutput));
     generator.addProvider(server, new AdvancementsProvider(packOutput, lookupProvider));
     generator.addProvider(server, new GlobalLootModifiersProvider(packOutput, lookupProvider));
-    generator.addProvider(server, new LootTableInjectionProvider(packOutput));
+    generator.addProvider(server, new LootTableInjectionProvider(packOutput, lookupProvider));
     generator.addProvider(server, new ConfigurationDataProvider(packOutput));
     generator.addProvider(server, new FunctionProvider(packOutput));
   }

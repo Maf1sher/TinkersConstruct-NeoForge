@@ -26,7 +26,7 @@ import slimeknights.mantle.fluid.tooltip.FluidTooltipHandler;
 import slimeknights.mantle.fluid.transfer.FluidContainerTransferManager;
 import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer.TransferDirection;
 import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer.TransferResult;
-import slimeknights.mantle.item.BlockTooltipItem;
+import slimeknights.mantle.item.tooltip.BlockTooltipItem;
 import slimeknights.mantle.registration.object.EnumObject;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;

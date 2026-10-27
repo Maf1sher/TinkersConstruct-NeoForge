@@ -1,5 +1,8 @@
 package slimeknights.tconstruct.common;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -26,8 +29,8 @@ public class TinkerEffect extends MobEffect {
 
   // override to change return type
   @Override
-  public TinkerEffect addAttributeModifier(Attribute pAttribute, String pUuid, double pAmount, Operation pOperation) {
-    super.addAttributeModifier(pAttribute, pUuid, pAmount, pOperation);
+  public TinkerEffect addAttributeModifier(Holder<Attribute> attribute, ResourceLocation id, double amount, Operation operation) {
+    super.addAttributeModifier(attribute, id, amount, operation);
     return this;
   }
 
@@ -86,7 +89,7 @@ public class TinkerEffect extends MobEffect {
    */
   @Deprecated
   public MobEffectInstance apply(LivingEntity entity, int duration, int amplifier, boolean showIcon) {
-    MobEffectInstance effect = new MobEffectInstance(this, duration, amplifier, false, false, showIcon);
+    MobEffectInstance effect = new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(this), duration, amplifier, false, false, showIcon);
     entity.addEffect(effect);
     return effect;
   }
@@ -115,7 +118,7 @@ public class TinkerEffect extends MobEffect {
    * @return  Amplifier, or -1 if inactive
    */
   public static int getAmplifier(LivingEntity entity, MobEffect effect) {
-    MobEffectInstance instance = entity.getEffect(effect);
+    MobEffectInstance instance = entity.getEffect(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effect));
     if (instance != null) {
       return instance.getAmplifier();
     }

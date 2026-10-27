@@ -20,11 +20,11 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemEntityPropertyC
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import net.neoforged.neoforge.common.data.GlobalLootModifierProvider;
 import net.neoforged.neoforge.common.loot.LootTableIdCondition;
-import slimeknights.mantle.loot.AddEntryLootModifier;
-import slimeknights.mantle.loot.ReplaceItemLootModifier;
 import slimeknights.mantle.loot.condition.BlockTagLootCondition;
-import slimeknights.mantle.loot.condition.ContainsItemModifierLootCondition;
 import slimeknights.mantle.loot.entry.TagPreferenceLootEntry;
+import slimeknights.mantle.loot.modifier.AddEntryLootModifier;
+import slimeknights.mantle.loot.modifier.ReplaceItemLootModifier;
+import slimeknights.mantle.loot.modifier.condition.ContainsItemModifierLootCondition;
 import slimeknights.mantle.recipe.condition.TagFilledCondition;
 import slimeknights.mantle.recipe.helper.ItemOutput;
 import slimeknights.tconstruct.TConstruct;
