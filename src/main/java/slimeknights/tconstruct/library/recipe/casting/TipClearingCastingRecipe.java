@@ -41,13 +41,13 @@ public class TipClearingCastingRecipe extends ModifierPotionCastingRecipe {
   @Override
   public boolean matches(ICastingContainer inv, Level level) {
     // must have the modifier, and the potion set
-    return super.matches(inv, level) && !ModifierUtil.getPersistentString(inv.getStack(), modifier).isEmpty();
+    return super.matches(inv, level) && !ModifierUtil.getPersistentString(inv.getStack(), modifier.getLocation()).isEmpty();
   }
 
   @Override
   public ItemStack assemble(ICastingContainer inv, RegistryAccess access) {
     ItemStack result = inv.getStack().copy();
-    ToolStack.from(result).getPersistentData().remove(modifier);
+    ToolStack.from(result).getPersistentData().remove(modifier.getLocation());
     return result;
   }
 

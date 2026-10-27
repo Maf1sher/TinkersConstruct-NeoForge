@@ -142,7 +142,7 @@ public class TinkerBlockStateProvider extends BlockStateProvider {
 
   /** Creates all models for the given wood block object */
   protected void addWood(WoodBlockObject wood, boolean trapdoorOrientable, RenderType doorRenderType) {
-    String plankPath = wood.getId().getPath();
+    String plankPath = wood.id().getPath();
     String name = plankPath.substring(0, plankPath.length() - "_planks".length());
     String folder = "block/wood/" + name + "/"; // forge model providers do not prefix with block if you have / in the path
     // helper to get textures for wood, since we put them in a nice folder

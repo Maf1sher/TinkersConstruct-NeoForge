@@ -180,7 +180,7 @@ public abstract class AbstractMaterialTraitDataProvider extends GenericDataProvi
 
     /** Gets the list for the given stat type */
     private List<ModifierEntry> getList(MaterialStatsId statsId, int size) {
-      return perStats.computeIfAbsent(statsId, k -> new ArrayList<>(size));
+      return perStats.computeIfAbsent(statsId.getLocation(), k -> new ArrayList<>(size));
     }
 
     /** Adds the passed traits to the builder. */

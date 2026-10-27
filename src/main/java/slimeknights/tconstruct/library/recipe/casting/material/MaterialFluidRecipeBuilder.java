@@ -62,7 +62,7 @@ public class MaterialFluidRecipeBuilder extends AbstractRecipeBuilder<MaterialFl
 
   @Override
   public void save(RecipeOutput output) {
-    save(output, outputId.getId());
+    save(output, outputId.getId().getLocation());
   }
 
   @Override

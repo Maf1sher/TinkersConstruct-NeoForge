@@ -55,7 +55,7 @@ public class TippingCastingRecipe extends ModifierPotionCastingRecipe {
       // but it can't match what is already on the stack
       CompoundTag fluidTag = inv.getFluidTag();
       return fluidTag != null && fluidTag.contains(POTION_TAG, Tag.TAG_STRING)
-        && !ModifierUtil.getPersistentString(inv.getStack(), modifier).equals(fluidTag.getString(POTION_TAG));
+        && !ModifierUtil.getPersistentString(inv.getStack(), modifier.getLocation()).equals(fluidTag.getString(POTION_TAG));
     }
     return false;
   }
@@ -65,7 +65,7 @@ public class TippingCastingRecipe extends ModifierPotionCastingRecipe {
     ItemStack result = inv.getStack().copy();
     CompoundTag tag = inv.getFluidTag();
     if (tag != null) {
-      ToolStack.from(result).getPersistentData().putString(modifier, tag.getString(POTION_TAG));
+      ToolStack.from(result).getPersistentData().putString(modifier.getLocation(), tag.getString(POTION_TAG));
     }
     return result;
   }

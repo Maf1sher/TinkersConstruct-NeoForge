@@ -37,7 +37,7 @@ public abstract class AbstractEnchantmentToModifierProvider extends GenericDataP
   /* Helpers */
 
   /** Helper to append the ? for optional modifiers */
-  private static String optionalId(ResourceLocation modifierId, boolean optional) {
+  private static String optionalId(ModifierId modifierId, boolean optional) {
     return optional ? modifierId.toString() + '?' : modifierId.toString();
   }
 

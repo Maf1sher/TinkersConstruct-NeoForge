@@ -44,7 +44,7 @@ public class ModifierIngredientHelper implements IIngredientHelper<ModifierEntry
 
   @Override
   public ResourceLocation getResourceLocation(ModifierEntry entry) {
-    return entry.getId();
+    return entry.getId().getLocation();
   }
 
   @Override

@@ -22,6 +22,11 @@ public class DummyArmorMaterial implements IdAwareObject {
   private final ResourceLocation id;
   private final SoundEvent equipSound;
 
+  @Override
+  public ResourceLocation id() {
+    return id;
+  }
+
   /** {@return a vanilla armor material with zero stats, as we bypass all the stat usages} */
   public ArmorMaterial toVanilla() {
     return new ArmorMaterial(Map.of(), 0, BuiltInRegistries.SOUND_EVENT.wrapAsHolder(equipSound), () -> Ingredient.EMPTY,

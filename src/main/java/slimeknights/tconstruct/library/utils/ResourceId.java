@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.library.utils;
 
 import net.minecraft.resources.ResourceLocation;
+import slimeknights.mantle.registration.object.IdAwareObject;
 
 import javax.annotation.Nullable;
 import java.util.function.BiFunction;
@@ -12,7 +13,7 @@ import java.util.function.BiFunction;
  * with code and data treating them as plain resource locations.
  * @see IdParser
  */
-public abstract class ResourceId implements Comparable<ResourceId> {
+public abstract class ResourceId implements Comparable<ResourceId>, IdAwareObject {
   /** Wrapped resource location */
   private final ResourceLocation location;
 
@@ -30,6 +31,12 @@ public abstract class ResourceId implements Comparable<ResourceId> {
 
   /** {@return the wrapped resource location} */
   public ResourceLocation getLocation() {
+    return location;
+  }
+
+  /** {@return the wrapped resource location, for compatibility with {@link IdAwareObject}} */
+  @Override
+  public ResourceLocation id() {
     return location;
   }
 

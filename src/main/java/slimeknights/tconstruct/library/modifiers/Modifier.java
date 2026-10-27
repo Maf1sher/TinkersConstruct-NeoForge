@@ -6,6 +6,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
@@ -109,6 +110,11 @@ public class Modifier implements IdAwareObject {
   @Override
   public ModifierId getId() {
     return Objects.requireNonNull(id, "Modifier has null registry name");
+  }
+
+  @Override
+  public ResourceLocation id() {
+    return getId().getLocation();
   }
 
   /** Checks if the modifier is in the given tag */

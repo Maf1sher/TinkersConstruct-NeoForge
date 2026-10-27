@@ -43,7 +43,6 @@ import slimeknights.tconstruct.library.json.predicate.modifier.SlotTypeModifierP
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
-import slimeknights.tconstruct.library.modifiers.util.LazyModifier;
 import slimeknights.tconstruct.library.recipe.FluidValues;
 import slimeknights.tconstruct.library.recipe.casting.ItemCastingRecipeBuilder;
 import slimeknights.tconstruct.library.recipe.casting.PotionCastingRecipeBuilder;
@@ -2089,16 +2088,6 @@ public class ModifierRecipeProvider extends BaseRecipeProvider {
                                       .disallowCrystal() // avoid redundancy, though in this case the end result is the same
                                       .save(consumer, wrap(modifier, recipeFolder, "_from_block"));
     }
-  }
-
-  /** Prefixes the modifier ID with the given prefix */
-  public ResourceLocation prefix(LazyModifier modifier, String prefix) {
-    return prefix(modifier.getId(), prefix);
-  }
-
-  /** Prefixes the modifier ID with the given prefix and suffix */
-  public ResourceLocation wrap(LazyModifier modifier, String prefix, String suffix) {
-    return wrap(modifier.getId(), prefix, suffix);
   }
 
   /**

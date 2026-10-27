@@ -10,10 +10,10 @@ import net.minecraft.data.PackOutput.Target;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import org.jetbrains.annotations.Contract;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.mantle.data.loadable.Loadables;
-import slimeknights.mantle.registration.object.IdAwareObject;
 import slimeknights.tconstruct.library.client.modifiers.DyedModifierModel;
 import slimeknights.tconstruct.library.client.modifiers.ModifierModelMapManager;
 import slimeknights.tconstruct.library.client.modifiers.NormalModifierModel;
@@ -136,12 +136,12 @@ public abstract class AbstractModifierModelMapProvider extends GenericDataProvid
   }
 
   /** Adds the given model to the tool */
-  protected Builder tool(IdAwareObject tool) {
+  protected Builder tool(DeferredHolder<?, ?> tool) {
     return tool(tool.getId());
   }
 
   /** Adds the given model to the tool variant */
-  protected Builder tool(IdAwareObject tool, String variant) {
+  protected Builder tool(DeferredHolder<?, ?> tool, String variant) {
     return tool(tool.getId(), variant);
   }
 

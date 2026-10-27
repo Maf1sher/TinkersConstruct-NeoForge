@@ -163,7 +163,7 @@ public abstract class AbstractModifierRecipeBuilder<T extends AbstractModifierRe
 
   @Override
   public void save(RecipeOutput output) {
-    save(output, result);
+    save(output, result.getLocation());
   }
 
   /**

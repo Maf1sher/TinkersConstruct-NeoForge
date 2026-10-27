@@ -65,7 +65,7 @@ public enum TippedModule implements ModifierModule, ProjectileLaunchModifierHook
 
   @Override
   public void onProjectileShoot(IToolStackView tool, ModifierEntry modifier, @Nullable LivingEntity shooter, ItemStack ammo, Projectile projectile, @Nullable AbstractArrow arrow, ModDataNBT persistentData, boolean primary) {
-    ResourceLocation key = modifier.getId();
+    ResourceLocation key = modifier.getId().getLocation();
     IModDataView toolData = tool.getPersistentData();
     if (toolData.contains(key, Tag.TAG_STRING)) {
       persistentData.putString(key, toolData.getString(key));
@@ -75,7 +75,7 @@ public enum TippedModule implements ModifierModule, ProjectileLaunchModifierHook
   @Nullable
   @Override
   public Component onRemoved(IToolStackView tool, Modifier modifier) {
-    tool.getPersistentData().remove(modifier.getId());
+    tool.getPersistentData().remove(modifier.getId().getLocation());
     return null;
   }
 
@@ -89,7 +89,7 @@ public enum TippedModule implements ModifierModule, ProjectileLaunchModifierHook
 
   @Override
   public boolean onProjectileHitEntity(ModifierNBT modifiers, ModDataNBT persistentData, ModifierEntry modifier, Projectile projectile, EntityHitResult hit, @Nullable LivingEntity attacker, @Nullable LivingEntity target) {
-    ResourceLocation key = modifier.getId();
+    ResourceLocation key = modifier.getId().getLocation();
     if (target != null && persistentData.contains(key, Tag.TAG_STRING)) {
       ResourceLocation id = ResourceLocation.tryParse(persistentData.getString(key));
       if (id != null) {
@@ -117,7 +117,7 @@ public enum TippedModule implements ModifierModule, ProjectileLaunchModifierHook
 
   @Override
   public void addTooltip(IToolStackView tool, ModifierEntry modifier, @Nullable Player player, List<Component> tooltip, TooltipKey tooltipKey, TooltipFlag tooltipFlag) {
-    ResourceLocation key = modifier.getId();
+    ResourceLocation key = modifier.getId().getLocation();
     IModDataView toolData = tool.getPersistentData();
     if (toolData.contains(key, Tag.TAG_STRING)) {
       ResourceLocation id = ResourceLocation.tryParse(toolData.getString(key));
@@ -133,7 +133,7 @@ public enum TippedModule implements ModifierModule, ProjectileLaunchModifierHook
 
   @Override
   public Component getDisplayName(IToolStackView tool, ModifierEntry entry, Component name, @Nullable RegistryAccess access) {
-    ResourceLocation key = entry.getId();
+    ResourceLocation key = entry.getId().getLocation();
     IModDataView toolData = tool.getPersistentData();
     if (toolData.contains(key, Tag.TAG_STRING)) {
       ResourceLocation id = ResourceLocation.tryParse(toolData.getString(key));

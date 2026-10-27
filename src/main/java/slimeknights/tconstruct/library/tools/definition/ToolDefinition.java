@@ -26,6 +26,11 @@ public class ToolDefinition implements IdAwareObject {
   @Getter
   protected ToolDefinitionData data = ToolDefinitionData.EMPTY;
 
+  @Override
+  public ResourceLocation id() {
+    return id;
+  }
+
   /** Creates and registers a new tool definition */
   public static ToolDefinition create(ResourceLocation id) {
     ToolDefinition definition = new ToolDefinition(id);
@@ -40,7 +45,7 @@ public class ToolDefinition implements IdAwareObject {
 
   /** Creates and registers a new tool definition */
   public static ToolDefinition create(IdAwareObject item) {
-    return create(item.getId());
+    return create(item.id());
   }
 
   /** Gets the given module from the tool */

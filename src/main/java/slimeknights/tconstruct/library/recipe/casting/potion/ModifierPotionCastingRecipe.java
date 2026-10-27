@@ -53,7 +53,7 @@ public abstract class ModifierPotionCastingRecipe extends PotionCastingRecipe {
   public List<ItemStack> addPotion(ItemStack stack, List<String> potions) {
     return potions.stream().map(id -> {
       ToolStack tool = ToolStack.copyFrom(stack);
-      tool.getPersistentData().putString(modifier, id);
+      tool.getPersistentData().putString(modifier.getLocation(), id);
       return tool.copyStack(stack);
     }).toList();
   }

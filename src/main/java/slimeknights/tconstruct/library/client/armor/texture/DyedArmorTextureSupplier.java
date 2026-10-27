@@ -68,7 +68,7 @@ public class DyedArmorTextureSupplier implements ArmorTextureSupplier {
   public ArmorTexture getArmorTexture(ItemStack stack, TextureType textureType, RegistryAccess access) {
     TintedArmorTexture texture = textures[textureType.ordinal()];
     if (texture != null && (alwaysRender || ModifierUtil.getModifierLevel(stack, modifier) > 0)) {
-      int color = ModifierUtil.getPersistentInt(stack, modifier, defaultColor);
+      int color = ModifierUtil.getPersistentInt(stack, modifier.getLocation(), defaultColor);
       return texture.color(0xFF000000 | color);
     }
     return ArmorTexture.EMPTY;

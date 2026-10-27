@@ -225,7 +225,7 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
   /** @deprecated use {@link MaterialBuilder#redirect(ResourceLocation, ICondition...)} */
   @Deprecated
   protected JsonRedirect conditionalRedirect(MaterialId id, @Nullable ICondition condition) {
-    return new JsonRedirect(id, condition);
+    return new JsonRedirect(id.getLocation(), condition);
   }
 
   /** @deprecated use {@link MaterialBuilder#redirect(ResourceLocation, ICondition...)} */

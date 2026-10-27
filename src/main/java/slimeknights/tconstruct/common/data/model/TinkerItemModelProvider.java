@@ -196,7 +196,7 @@ public class TinkerItemModelProvider extends ItemModelProvider {
   /** Creates models for the given cast object */
   private void cast(CastItemObject cast) {
     String name = cast.getName().getPath();
-    basicItem(cast.getId(), "cast/" + name);
+    basicItem(cast.id(), "cast/" + name);
     basicItem(cast.getSand(), "sand_cast/" + name);
     basicItem(cast.getRedSand(), "red_sand_cast/" + name);
   }

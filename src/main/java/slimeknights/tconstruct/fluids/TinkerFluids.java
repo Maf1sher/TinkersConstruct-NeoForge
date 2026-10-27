@@ -561,6 +561,6 @@ public final class TinkerFluids extends TinkerModule {
 
   /** Removes the "molten_" prefix from the fluids ID */
   public static String withoutMolten(FluidObject<?> fluid) {
-    return fluid.getId().getPath().substring(MOLTEN_LENGTH);
+    return fluid.id().getPath().substring(MOLTEN_LENGTH);
   }
 }

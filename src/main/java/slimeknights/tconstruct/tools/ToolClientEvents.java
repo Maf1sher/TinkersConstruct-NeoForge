@@ -282,7 +282,7 @@ public class ToolClientEvents extends ClientEventBase {
     event.register((stack, index) -> {
       ModifierId modifier = ModifierCrystalItem.getModifier(stack);
       if (modifier != null) {
-        return ResourceColorManager.getColor(Util.makeTranslationKey("modifier", modifier));
+        return ResourceColorManager.getColor(Util.makeTranslationKey("modifier", modifier.getLocation()));
       }
       return -1;
     }, TinkerModifiers.modifierCrystal);

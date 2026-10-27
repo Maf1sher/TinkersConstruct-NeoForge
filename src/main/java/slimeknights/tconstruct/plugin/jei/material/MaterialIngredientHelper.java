@@ -95,7 +95,7 @@ public class MaterialIngredientHelper implements IIngredientHelper<MaterialVaria
 
   @Override
   public ResourceLocation getResourceLocation(MaterialVariant material) {
-    return material.getId();
+    return material.getId().getLocation();
   }
 
   @Override

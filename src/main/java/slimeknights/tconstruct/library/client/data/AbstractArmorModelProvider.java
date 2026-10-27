@@ -4,6 +4,7 @@ import net.minecraft.data.CachedOutput;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
 import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.mantle.registration.object.IdAwareObject;
 import slimeknights.tconstruct.library.client.armor.ArmorModelManager;
@@ -54,6 +55,16 @@ public abstract class AbstractArmorModelProvider extends GenericDataProvider {
 
   /** Adds a model to the generator */
   protected void addModel(IdAwareObject name, Function<ResourceLocation,ArmorTextureSupplier[]> layers) {
+    addModel(name.getId(), layers.apply(name.getId()));
+  }
+
+  /** Adds a model to the generator */
+  protected void addModel(DeferredHolder<?, ?> name, ArmorTextureSupplier... layers) {
+    addModel(name.getId(), layers);
+  }
+
+  /** Adds a model to the generator */
+  protected void addModel(DeferredHolder<?, ?> name, Function<ResourceLocation,ArmorTextureSupplier[]> layers) {
     addModel(name.getId(), layers.apply(name.getId()));
   }
 }

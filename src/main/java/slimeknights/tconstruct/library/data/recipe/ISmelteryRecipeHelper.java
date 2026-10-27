@@ -34,7 +34,7 @@ public interface ISmelteryRecipeHelper extends ICastCreationHelper {
 
   /** Creates a smeltery builder for a molten fluid */
   default SmelteryRecipeBuilder molten(RecipeOutput consumer, FluidObject<?> fluid) {
-    return fluid(consumer, fluid.getId().getPath().substring("molten_".length()), fluid);
+    return fluid(consumer, fluid.id().getPath().substring("molten_".length()), fluid);
   }
 
 

@@ -11,6 +11,7 @@ import net.minecraft.tags.TagFile;
 import net.minecraft.tags.TagKey;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import slimeknights.mantle.data.GenericDataProvider;
+import slimeknights.tconstruct.library.utils.ResourceId;
 
 import java.util.List;
 import java.util.Map;
@@ -119,10 +120,26 @@ public abstract class AbstractTagProvider<T> extends GenericDataProvider {
       return this;
     }
 
+    /** Adds an ID wrapper to the tag */
+    public TagAppender<T> add(ResourceId... ids) {
+      for (ResourceId id : ids) {
+        this.internalBuilder.addElement(id.getLocation());
+      }
+      return this;
+    }
+
     /** Adds an optional ID to the tag */
     public TagAppender<T> addOptional(ResourceLocation... ids) {
       for (ResourceLocation id : ids) {
         this.internalBuilder.addOptionalElement(id);
+      }
+      return this;
+    }
+
+    /** Adds an optional ID wrapper to the tag */
+    public TagAppender<T> addOptional(ResourceId... ids) {
+      for (ResourceId id : ids) {
+        this.internalBuilder.addOptionalElement(id.getLocation());
       }
       return this;
     }
@@ -200,6 +217,20 @@ public abstract class AbstractTagProvider<T> extends GenericDataProvider {
       this.remove(first);
       for (ResourceLocation location : locations) {
         this.remove(location);
+      }
+      return this;
+    }
+
+    /**
+     * Adds multiple ID wrappers to the tag json's remove list. Callable during datageneration.
+     * @param first      The first ID of the elements to remove
+     * @param locations  The remaining IDs of the elements to remove
+     * @return The builder for chaining
+     */
+    public TagAppender<T> remove(ResourceId first, ResourceId... locations) {
+      internalBuilder.removeElement(first.getLocation(), modID);
+      for (ResourceId location : locations) {
+        internalBuilder.removeElement(location.getLocation(), modID);
       }
       return this;
     }

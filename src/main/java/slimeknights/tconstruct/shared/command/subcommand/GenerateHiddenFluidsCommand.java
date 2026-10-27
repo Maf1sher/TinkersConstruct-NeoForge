@@ -59,7 +59,7 @@ public class GenerateHiddenFluidsCommand {
         if (fluid instanceof FlowingFluidObject<?> flowing) {
           add.add(TagEntry.tag(flowing.getLocalTag().location()));
         } else {
-          add.add(TagEntry.element(compat.getFluid().getId()));
+          add.add(TagEntry.element(compat.getFluid().id()));
         }
       }
     }

@@ -47,6 +47,7 @@ import slimeknights.tconstruct.library.modifiers.impl.ComposableModifier;
 import slimeknights.tconstruct.library.modifiers.util.ModifierTooltip;
 import slimeknights.tconstruct.library.utils.GenericTagUtil;
 import slimeknights.tconstruct.library.utils.JsonUtils;
+import slimeknights.tconstruct.library.utils.ResourceId;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -465,7 +466,7 @@ public class ModifierManager extends SimpleJsonResourceReloadListener {
     private final ModContainer container;
 
     /** Validates the namespace of the container registering */
-    private void checkModNamespace(ResourceLocation name) {
+    private void checkModNamespace(ResourceId name) {
       // check mod container, should be the active mod
       // don't want mods registering stuff in Tinkers namespace, or Minecraft
       String activeMod = container.getNamespace();

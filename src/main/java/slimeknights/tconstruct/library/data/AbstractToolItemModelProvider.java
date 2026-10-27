@@ -14,11 +14,11 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.phys.Vec2;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import org.jetbrains.annotations.ApiStatus.NonExtendable;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.registration.object.EnumObject;
-import slimeknights.mantle.registration.object.IdAwareObject;
 import slimeknights.tconstruct.library.tools.item.ranged.ModifiableCrossbowItem;
 import slimeknights.tconstruct.library.tools.item.ranged.ModifiableLauncherItem;
 
@@ -61,7 +61,7 @@ public abstract class AbstractToolItemModelProvider extends GenericDataProvider 
   /* Model types */
 
   /** Creates models for blocking and broken for the given tool */
-  protected void tool(IdAwareObject tool, @Nullable JsonObject blocking, String... brokenParts) throws IOException {
+  protected void tool(DeferredHolder<?, ?> tool, @Nullable JsonObject blocking, String... brokenParts) throws IOException {
     ResourceLocation id = tool.getId();
     String name = id.getPath();
     if (blocking != null) {
@@ -180,17 +180,17 @@ public abstract class AbstractToolItemModelProvider extends GenericDataProvider 
   }
 
   /** Creates a model in the blocking folder with the given copied display */
-  protected void bow(IdAwareObject bow, JsonObject properties, boolean crossbow, String... pullingParts) throws IOException {
+  protected void bow(DeferredHolder<?, ?> bow, JsonObject properties, boolean crossbow, String... pullingParts) throws IOException {
     bow(bow, properties, crossbow ? AmmoType.CROSSBOW : AmmoType.BOW, pullingParts);
   }
 
   /** Creates a model in the blocking folder with the given copied display */
-  protected void bow(IdAwareObject bow, JsonObject properties, AmmoHandler ammo, String... pullingParts) throws IOException {
+  protected void bow(DeferredHolder<?, ?> bow, JsonObject properties, AmmoHandler ammo, String... pullingParts) throws IOException {
     pulling(bow, properties, ammo, "bowstring", 3, pullingParts);
   }
 
   /** Creates a model in the blocking folder with the given copied display */
-  protected void pulling(IdAwareObject bow, JsonObject blocking, AmmoHandler ammo, String brokenPart, int pullingCount, String... pullingParts) throws IOException {
+  protected void pulling(DeferredHolder<?, ?> bow, JsonObject blocking, AmmoHandler ammo, String brokenPart, int pullingCount, String... pullingParts) throws IOException {
     ResourceLocation id = bow.getId();
     String name = id.getPath();
     JsonObject base = readJson(id);
@@ -203,7 +203,7 @@ public abstract class AbstractToolItemModelProvider extends GenericDataProvider 
   }
 
   /** Creates models for blocking, broken and fully charged for the given tool */
-  protected void charged(IdAwareObject bow, JsonObject properties, String... brokenParts) throws IOException {
+  protected void charged(DeferredHolder<?, ?> bow, JsonObject properties, String... brokenParts) throws IOException {
     ResourceLocation id = bow.getId();
     String name = id.getPath();
     JsonObject base = readJson(id);
@@ -219,7 +219,7 @@ public abstract class AbstractToolItemModelProvider extends GenericDataProvider 
   }
 
   /** Creates a model in the blocking folder with the given copied display */
-  protected void staff(IdAwareObject staff, JsonObject properties) throws IOException {
+  protected void staff(DeferredHolder<?, ?> staff, JsonObject properties) throws IOException {
     ResourceLocation id = staff.getId();
     String path = id.getPath();
     String name = path.substring(0, path.length() - "_staff".length());
@@ -234,7 +234,7 @@ public abstract class AbstractToolItemModelProvider extends GenericDataProvider 
   }
 
   /** Adds broken and blocking models for the shield */
-  protected void shield(String setName, IdAwareObject shield, JsonObject properties, String... parts) throws IOException {
+  protected void shield(String setName, DeferredHolder<?, ?> shield, JsonObject properties, String... parts) throws IOException {
     ResourceLocation id = shield.getId();
     withDisplay("armor/" + setName + "/shield_blocking", id, Objects.requireNonNull(properties));
     transformTool("armor/" + setName + "/shield_broken", readJson(id), "", false, '_', "broken", parts);
@@ -246,7 +246,7 @@ public abstract class AbstractToolItemModelProvider extends GenericDataProvider 
   }
 
   /** Adds broken and blocking models for the armor item */
-  protected void armor(String overrideName, IdAwareObject item, String... textures) throws IOException {
+  protected void armor(String overrideName, DeferredHolder<?, ?> item, String... textures) throws IOException {
     armor(overrideName, item.getId(), textures);
   }
 
@@ -269,7 +269,7 @@ public abstract class AbstractToolItemModelProvider extends GenericDataProvider 
 
   /** Creates models for fishing rods cast and broken */
   @SuppressWarnings("SameParameterValue") // API
-  protected void fishingRod(IdAwareObject tool, @Nullable JsonObject blocking, String[] castParts, String[] brokenParts) throws IOException {
+  protected void fishingRod(DeferredHolder<?, ?> tool, @Nullable JsonObject blocking, String[] castParts, String[] brokenParts) throws IOException {
     ResourceLocation id = tool.getId();
     String name = id.getPath();
     JsonObject base = readJson(id);

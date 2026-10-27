@@ -167,8 +167,8 @@ public class MaterialDataProvider extends AbstractMaterialDataProvider {
     material("rotten_flesh").redirect(MaterialIds.leather);
     material("platinum").redirect(MaterialIds.searedStone);
     material("tungsten")
-      .redirect(MaterialIds.lead, tagExistsCondition("ingots/lead"))
-      .redirect(MaterialIds.invar, new OrCondition(List.of(tagExistsCondition("ingots/invar"), tagExistsCondition("ingots/nickel"))))
+      .redirect(MaterialIds.lead.getLocation(), tagExistsCondition("ingots/lead"))
+      .redirect(MaterialIds.invar.getLocation(), new OrCondition(List.of(tagExistsCondition("ingots/invar"), tagExistsCondition("ingots/nickel"))))
       .redirect(MaterialIds.iron);
   }
 

@@ -56,7 +56,7 @@ public class ModifierCrystalItem extends Item {
       if (modifier != ModifierManager.INSTANCE.getDefaultValue()) {
         modifierName = modifier.getDisplayName();
       } else {
-        modifierName = Component.translatable(Util.makeTranslationKey("modifier", id));
+        modifierName = Component.translatable(Util.makeTranslationKey("modifier", id.getLocation()));
       }
       return Component.translatable(getDescriptionId(stack) + ".format", modifierName).setStyle(modifierName.getStyle());
     }

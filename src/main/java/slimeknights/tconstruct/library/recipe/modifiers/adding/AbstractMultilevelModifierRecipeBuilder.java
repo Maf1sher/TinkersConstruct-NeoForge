@@ -164,6 +164,6 @@ public abstract class AbstractMultilevelModifierRecipeBuilder<T extends Abstract
 
   @Override
   public void save(RecipeOutput output) {
-    save(output, result);
+    save(output, result.getLocation());
   }
 }

@@ -615,7 +615,7 @@ public class ModifierProvider extends AbstractModifierProvider implements ICondi
     buildModifier(ModifierIds.dragonshot).addModule(ConditionalStatModule.stat(ToolStats.PROJECTILE_DAMAGE).holder(TinkerPredicate.AIRBORNE).eachLevel(1));
     buildModifier(ModifierIds.rebound).addModule(ConditionalPowerModule.builder()
       .formula()
-      .customVariable("bounces", new PersistentDataPowerVariable(ModifierIds.bounce, 1))
+      .customVariable("bounces", new PersistentDataPowerVariable(ModifierIds.bounce.getLocation(), 1))
       .constant(0.5f).multiply()
       .variable(LEVEL).multiply()
       .variable(MULTIPLIER).multiply()
@@ -652,7 +652,7 @@ public class ModifierProvider extends AbstractModifierProvider implements ICondi
       // boost velocity from charge
       .addModule(ConditionalStatModule.stat(ToolStats.VELOCITY)
         .formula()
-        .customVariable("charge", new ModDataVariable(ModifierIds.warCharge, ModDataSource.PERSISTENT))
+        .customVariable("charge", new ModDataVariable(ModifierIds.warCharge.getLocation(), ModDataSource.PERSISTENT))
         // gain 0.01 velocity per block mined, up to 25% velocity from 25 blocks
         .constant(0.01f).multiply()
         .variable(MULTIPLIER).multiply()
@@ -774,7 +774,7 @@ public class ModifierProvider extends AbstractModifierProvider implements ICondi
     // leggings
     // pocket is an internal modifier to keep the NBT structure for inventory modifiers the smae
     buildModifier(ModifierIds.pocket).showInTooltips(ShowInTooltips.NEVER)
-      .addModule(InventoryModule.builder().key(ModifierIds.pockets).slotsPerLevel(3))
+      .addModule(InventoryModule.builder().key(ModifierIds.pockets.getLocation()).slotsPerLevel(3))
       .addModule(InventoryMenuModule.ANY);
     // 18 slots per level
     buildModifier(ModifierIds.pockets).addModule(new ModifierTraitModule(ModifierIds.pocket, 6, false));
@@ -1299,7 +1299,7 @@ public class ModifierProvider extends AbstractModifierProvider implements ICondi
       // small tools consume 1 per mining operation
       .addModule(ConditionalMiningSpeedModule.builder().percent().toolItem(ItemPredicate.tag(TinkerTags.Items.BROAD_TOOLS).inverted())
         .formula()
-        .customVariable("overslime", new ModDataVariable(overslime, ModDataSource.PERSISTENT))
+        .customVariable("overslime", new ModDataVariable(overslime.getLocation(), ModDataSource.PERSISTENT))
         .variable(LEVEL).min() // must have 1 overslime per level
         .constant(0.2f).multiply() // +20% per level, effectively grants +6 mining speed when base is 30
         .constant(1).add() // want 120%, not 20% when we apply it
@@ -1311,7 +1311,7 @@ public class ModifierProvider extends AbstractModifierProvider implements ICondi
       // broad tools consume 5 per mining operation, same amount consumed with AOE
       .addModule(ConditionalMiningSpeedModule.builder().percent().toolTag(TinkerTags.Items.BROAD_TOOLS)
         .formula()
-        .customVariable("overslime", new ModDataVariable(overslime, ModDataSource.PERSISTENT))
+        .customVariable("overslime", new ModDataVariable(overslime.getLocation(), ModDataSource.PERSISTENT))
         .constant(5).variable(LEVEL).multiply().min() // must have 5 overslime per level
         .constant(5).divide() // scale between 0 and 5
         .constant(0.2f).multiply()
@@ -1323,7 +1323,7 @@ public class ModifierProvider extends AbstractModifierProvider implements ICondi
       .addModule(AttributeModule.builder(Attributes.ATTACK_SPEED, Operation.MULTIPLY_TOTAL)
         .slots(EquipmentSlot.MAINHAND)
         .formula()
-        .customVariable("overslime", new ModDataVariable(overslime, ModDataSource.PERSISTENT))
+        .customVariable("overslime", new ModDataVariable(overslime.getLocation(), ModDataSource.PERSISTENT))
         .variable(LEVEL).min() // must have 1 overslime per level
         .constant(0.15f).multiply()
         .build()
@@ -1332,7 +1332,7 @@ public class ModifierProvider extends AbstractModifierProvider implements ICondi
       // ranged: +6% velocity and drawspeed
       .addModule(ConditionalStatModule.stat(ToolStats.VELOCITY)
         .formula()
-        .customVariable("overslime", new ModDataVariable(overslime, ModDataSource.PERSISTENT))
+        .customVariable("overslime", new ModDataVariable(overslime.getLocation(), ModDataSource.PERSISTENT))
         .variable(LEVEL).min() // must have 1 overslime per level
         .constant(0.06f).multiply()
         .variable(MULTIPLIER).multiply()
@@ -1340,7 +1340,7 @@ public class ModifierProvider extends AbstractModifierProvider implements ICondi
         .build())
       .addModule(ConditionalStatModule.stat(ToolStats.DRAW_SPEED)
         .formula()
-        .customVariable("overslime", new ModDataVariable(overslime, ModDataSource.PERSISTENT))
+        .customVariable("overslime", new ModDataVariable(overslime.getLocation(), ModDataSource.PERSISTENT))
         .variable(LEVEL).min() // must have 1 overslime per level
         .constant(0.06f).multiply()
         .variable(MULTIPLIER).multiply()

@@ -114,7 +114,7 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
 
   /** Creates a builder for a fluid object */
   protected Builder addFluid(FluidObject<?> fluid, int amount) {
-    return addFluid(fluid.getId().getPath(), fluid.ingredient(amount));
+    return addFluid(fluid.id().getPath(), fluid.ingredient(amount));
   }
 
 
@@ -154,7 +154,7 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
   protected Builder compatMetal(FluidObject<?> fluid, String... extraIngots) {
     Builder builder = addMetal(fluid);
     // automatically add ourself
-    String ourself = fluid.getId().getPath().substring("molten_".length());
+    String ourself = fluid.id().getPath().substring("molten_".length());
     if (extraIngots.length == 0) {
       builder.metalCondition(ourself);
     } else {

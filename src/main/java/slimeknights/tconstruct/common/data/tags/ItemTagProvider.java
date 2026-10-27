@@ -17,10 +17,11 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.mantle.datagen.MantleTags;
 import slimeknights.mantle.registration.object.EnumObject;
 import slimeknights.mantle.registration.object.FluidObject;
-import slimeknights.mantle.registration.object.IdAwareObject;
 import slimeknights.mantle.registration.object.MetalItemObject;
 import slimeknights.mantle.registration.object.WoodBlockObject;
 import slimeknights.tconstruct.TConstruct;
@@ -768,7 +769,7 @@ public class ItemTagProvider extends ItemTagsProvider {
   }
 
   @SafeVarargs
-  private void optionalToolTags(IdAwareObject tool, TagKey<Item>... tags) {
+  private void optionalToolTags(DeferredHolder<?, ?> tool, TagKey<Item>... tags) {
     ResourceLocation id = tool.getId();
     for (TagKey<Item> tag : tags) {
       this.tag(tag).addOptional(id);

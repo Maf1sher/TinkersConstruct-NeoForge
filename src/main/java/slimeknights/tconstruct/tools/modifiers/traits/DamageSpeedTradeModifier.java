@@ -41,7 +41,7 @@ public class DamageSpeedTradeModifier extends Modifier implements AttributesModi
   private final float multiplier;
   private final Lazy<UUID> uuid = Lazy.of(() -> UUID.nameUUIDFromBytes(getId().toString().getBytes()));
   private final Lazy<String> attributeName = Lazy.of(() -> {
-    ResourceLocation id = getId();
+    ResourceLocation id = id();
     return id.getPath() + "." + id.getNamespace() + ".attack_damage";
   });
 

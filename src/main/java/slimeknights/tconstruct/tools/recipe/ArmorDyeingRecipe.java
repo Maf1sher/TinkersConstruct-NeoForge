@@ -79,8 +79,8 @@ public class ArmorDyeingRecipe implements ITinkerStationRecipe, MultiNamedRecipe
     int count = 0;
 
     // copy existing color
-    if (persistentData.contains(key, Tag.TAG_INT)) {
-      int color = persistentData.getInt(key);
+    if (persistentData.contains(key.getLocation(), Tag.TAG_INT)) {
+      int color = persistentData.getInt(key.getLocation());
       int r = color >> 16 & 255;
       int g = color >>  8 & 255;
       int b = color       & 255;
@@ -123,7 +123,7 @@ public class ArmorDyeingRecipe implements ITinkerStationRecipe, MultiNamedRecipe
     nr = (int)(nr * scaledBrightness);
     ng = (int)(ng * scaledBrightness);
     nb = (int)(nb * scaledBrightness);
-    persistentData.putInt(key, (nr << 16) | (ng << 8) | nb);
+    persistentData.putInt(key.getLocation(), (nr << 16) | (ng << 8) | nb);
 
     // add the modifier if missing
     if (tool.getModifierLevel(key) == 0) {
@@ -193,7 +193,7 @@ public class ArmorDyeingRecipe implements ITinkerStationRecipe, MultiNamedRecipe
       this.dyes = RegistryHelper.getTagValueStream(BuiltInRegistries.ITEM, color.getTag()).map(ItemStack::new).toList();
       this.variant = Component.translatable("color.minecraft." + color.getSerializedName());
 
-      ResourceLocation modID = RESULT.getId();
+      ResourceLocation modID = RESULT.getId().getLocation();
       this.tintColor = Util.getColor(color);
       List<ModifierEntry> results = List.of(RESULT);
       toolWithModifier = tools.stream().map(stack -> IDisplayModifierRecipe.withModifiers(stack, DEFAULT_TOOL_STACK_SIZE, results, data -> data.putInt(modID, tintColor))).toList();
@@ -244,8 +244,8 @@ public class ArmorDyeingRecipe implements ITinkerStationRecipe, MultiNamedRecipe
       // store into tool NBT
       ModifierId modifier = TinkerModifiers.dyed.getId();
       ModDataNBT persistentData = tool.getPersistentData();
-      if (persistentData.contains(modifier, Tag.TAG_INT)) {
-        int color = persistentData.getInt(modifier);
+      if (persistentData.contains(modifier.getLocation(), Tag.TAG_INT)) {
+        int color = persistentData.getInt(modifier.getLocation());
         int r = color >> 16 & 255;
         int g = color >>  8 & 255;
         int b = color       & 255;
@@ -258,9 +258,9 @@ public class ArmorDyeingRecipe implements ITinkerStationRecipe, MultiNamedRecipe
         nr = (int)(nr * brightness);
         ng = (int)(ng * brightness);
         nb = (int)(nb * brightness);
-        persistentData.putInt(modifier, (nr << 16) | (ng << 8) | nb);
+        persistentData.putInt(modifier.getLocation(), (nr << 16) | (ng << 8) | nb);
       } else {
-        persistentData.putInt(modifier, tintColor);
+        persistentData.putInt(modifier.getLocation(), tintColor);
       }
       // add the modifier if missing
       if (tool.getModifierLevel(modifier) == 0) {

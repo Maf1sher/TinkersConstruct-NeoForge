@@ -25,7 +25,7 @@ public class ModifierRepairRecipeBuilder extends AbstractRecipeBuilder<ModifierR
 
   @Override
   public void save(RecipeOutput output) {
-    save(output, modifier);
+    save(output, modifier.id());
   }
 
   /** Builds the recipe for the crafting table using a repair kit */
