@@ -46,6 +46,7 @@ import slimeknights.mantle.client.model.util.SimpleBlockModel;
 import slimeknights.mantle.data.loadable.Loadable;
 import slimeknights.mantle.data.loadable.array.ArrayLoadable;
 import slimeknights.mantle.data.loadable.primitive.StringLoadable;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.mantle.util.RetexturedHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.materials.MaterialRenderInfo;
@@ -222,7 +223,7 @@ public class MaterialBlockModel implements IUnbakedGeometry<MaterialBlockModel> 
         // for simplicity, assume the whole part is tinted if so. Build your model to separate distinct material faces if needed
         TintedSprite tint = null;
         for (BlockElementFace face : part.faces.values()) {
-          TintedSprite faceTint = tints.get(face.texture);
+          TintedSprite faceTint = tints.get(face.texture());
           if (faceTint != null) {
             tint = faceTint;
             break;
@@ -279,7 +280,7 @@ public class MaterialBlockModel implements IUnbakedGeometry<MaterialBlockModel> 
       if (resolved != originalModel) {
         return resolved;
       }
-      if (stack.isEmpty() || !stack.hasTag()) {
+      if (stack.isEmpty() || !DataComponentHelper.hasCustomData(stack)) {
         return originalModel;
       }
       return baked.getCachedModel(MaterialIdNBT.from(stack));
@@ -388,7 +389,7 @@ public class MaterialBlockModel implements IUnbakedGeometry<MaterialBlockModel> 
         if (resolved != originalModel) {
           return resolved;
         }
-        if (stack.isEmpty() || !stack.hasTag()) {
+        if (stack.isEmpty() || !DataComponentHelper.hasCustomData(stack)) {
           return originalModel;
         }
         return getCachedModel(IMaterialItem.getMaterialFromStack(stack));
@@ -444,7 +445,7 @@ public class MaterialBlockModel implements IUnbakedGeometry<MaterialBlockModel> 
       @Nullable
       @Override
       public BakedModel resolve(BakedModel originalModel, ItemStack stack, @Nullable ClientLevel world, @Nullable LivingEntity entity, int seed) {
-        if (stack.isEmpty() || !stack.hasTag()) {
+        if (stack.isEmpty() || !DataComponentHelper.hasCustomData(stack)) {
           return originalModel;
         }
         Block block = RetexturedHelper.getTexture(stack);

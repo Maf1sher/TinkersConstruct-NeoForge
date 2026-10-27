@@ -15,6 +15,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import slimeknights.mantle.command.MantleCommand;
 import slimeknights.mantle.fluid.FluidTransferHelper;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.config.Config;
@@ -44,7 +45,7 @@ public class CreativeSlotItem extends Item {
   /** Gets the value of the slot tag from the given stack */
   @Nullable
   public static SlotType getSlot(ItemStack stack) {
-    CompoundTag nbt = stack.getTag();
+    CompoundTag nbt = DataComponentHelper.getCustomData(stack);
     if (nbt != null && nbt.contains(NBT_KEY, Tag.TAG_STRING)) {
       return SlotType.getIfPresent(nbt.getString(NBT_KEY));
     }
@@ -53,7 +54,7 @@ public class CreativeSlotItem extends Item {
 
   /** Makes an item stack with the given slot type */
   public static ItemStack withSlot(ItemStack stack, SlotType type) {
-    stack.getOrCreateTag().putString(NBT_KEY, type.getName());
+    DataComponentHelper.getOrCreateCustomData(stack).putString(NBT_KEY, type.getName());
     return stack;
   }
 

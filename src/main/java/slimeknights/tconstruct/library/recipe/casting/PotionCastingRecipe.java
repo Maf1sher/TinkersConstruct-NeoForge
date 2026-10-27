@@ -26,6 +26,7 @@ import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.MultiNamedRecipe;
 import slimeknights.mantle.recipe.NamedRecipe;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.library.utils.RecipeHelper;
 import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
 import slimeknights.tconstruct.library.recipe.helper.TypeAwareRecipeSerializer;
@@ -142,7 +143,7 @@ public class PotionCastingRecipe implements ICastingRecipe, MultiNamedRecipe<IDi
       for (FluidStack fluid : potionFluids) {
         displayResults.addAll(results);
         for (ItemStack result : results) {
-          displayFluids.add(new FluidStack(fluid.getFluid(), fluid.getAmount(), result.getTag()));
+          displayFluids.add(new FluidStack(fluid.getFluid(), fluid.getAmount(), DataComponentHelper.getCustomData(result)));
         }
       }
       this.displayRecipes = List.of(DisplayCastingRecipe.from(this)

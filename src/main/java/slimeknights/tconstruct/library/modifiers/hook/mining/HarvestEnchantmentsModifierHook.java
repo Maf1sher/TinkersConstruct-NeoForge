@@ -7,6 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
 import slimeknights.tconstruct.library.modifiers.hook.behavior.EnchantmentModifierHook;
@@ -103,7 +104,7 @@ public interface HarvestEnchantmentsModifierHook {
    * @param originalTag  Original list of enchantments. If empty, will remove the tag
    */
   static void restoreEnchantments(ItemStack stack, ListTag originalTag) {
-    CompoundTag nbt = stack.getTag();
+    CompoundTag nbt = DataComponentHelper.getCustomData(stack);
     if (nbt != null) {
       if (originalTag.isEmpty()) {
         nbt.remove(TAG_ENCHANTMENTS);

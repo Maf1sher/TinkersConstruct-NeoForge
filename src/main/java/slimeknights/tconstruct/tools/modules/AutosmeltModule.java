@@ -14,6 +14,7 @@ import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.array.ArrayLoadable;
 import slimeknights.mantle.data.loadable.primitive.FloatLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
@@ -105,7 +106,7 @@ public class AutosmeltModule implements ModifierModule, ProcessLootModifierHook 
   @Nullable
   private AbstractCookingRecipe findCachedRecipe(ItemStack stack, Level world) {
     // don't use the cache if there is a tag, prevent breaking NBT sensitive recipes
-    if (stack.hasTag()) {
+    if (DataComponentHelper.hasCustomData(stack)) {
       return findRecipe(stack, world).orElse(null);
     }
     try {

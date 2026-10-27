@@ -31,7 +31,7 @@ public class AntigravityEffect extends TinkerEffect {
 
   public AntigravityEffect() {
     super(MobEffectCategory.HARMFUL, 0xff970d, true);
-    this.addAttributeModifier(Attributes.GRAVITY, TConstruct.getResource("antigravity"), -2, Operation.MULTIPLY_TOTAL);
+    this.addAttributeModifier(Attributes.GRAVITY, TConstruct.getResource("antigravity"), -2, Operation.ADD_MULTIPLIED_TOTAL);
     NeoForge.EVENT_BUS.addListener(this::onLivingJump);
   }
 

@@ -23,6 +23,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.gadgets.TinkerGadgets;
 import slimeknights.tconstruct.gadgets.entity.FancyArmorStandEntity;
 import slimeknights.tconstruct.gadgets.entity.FancyArmorStandEntity.StandType;
@@ -64,7 +65,7 @@ public class FancyArmorStandItem extends Item {
     if (level instanceof ServerLevel server) {
       Player player = context.getPlayer();
       Consumer<FancyArmorStandEntity> consumer = EntityType.createDefaultStackConfig(server, stack, player);
-      FancyArmorStandEntity stand = TinkerGadgets.armorStandEntity.get().create(server, stack.getTag(), consumer, pos, MobSpawnType.SPAWN_EGG, true, true);
+      FancyArmorStandEntity stand = TinkerGadgets.armorStandEntity.get().create(server, DataComponentHelper.getCustomData(stack), consumer, pos, MobSpawnType.SPAWN_EGG, true, true);
       if (stand == null) {
         return InteractionResult.FAIL;
       }

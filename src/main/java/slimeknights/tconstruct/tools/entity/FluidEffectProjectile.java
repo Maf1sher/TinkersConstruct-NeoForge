@@ -192,9 +192,9 @@ public class FluidEffectProjectile extends Projectile implements ProjectileWithK
         EntityDimensions dimensions = getType().getDimensions();
         float factor = 0.01f;
         if (((BlockHitResult)hitResult).getDirection().getAxis() == Axis.Y) {
-          factor += dimensions.height;
+          factor += dimensions.height();
         } else {
-          factor += dimensions.width / 2;
+          factor += dimensions.width() / 2;
         }
         newLocation = hitResult.getLocation().add(velocity.normalize().scale(factor));
       } else {

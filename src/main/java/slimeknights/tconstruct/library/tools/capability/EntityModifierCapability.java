@@ -39,7 +39,7 @@ public class EntityModifierCapability {
   private static final List<Predicate<Entity>> ENTITY_PREDICATES = new ArrayList<>();
 
   /** Attachment storing projectile modifiers, serialized so entity state round-trips like the old capability */
-  public static final DeferredHolder<?, AttachmentType<Attachment>> DATA = TinkerModule.ATTACHMENTS.register(
+  public static final DeferredHolder<AttachmentType<?>, AttachmentType<Attachment>> DATA = TinkerModule.ATTACHMENTS.register(
     "entity_modifiers", () -> AttachmentType.serializable(Attachment::new).build());
 
   /** Gets the capability for the entity. Always returns a mutable instance, unlike the old capability that could be missing. */

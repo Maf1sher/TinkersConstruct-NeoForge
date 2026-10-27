@@ -26,6 +26,7 @@ import slimeknights.mantle.client.TooltipKey;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.data.loadable.record.SingletonLoader;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.mantle.util.TranslationHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.Modifier;
@@ -169,7 +170,7 @@ public enum SmashingModule implements ModifierModule, FluidModifierHook, Project
       data.putString(KEY_FLUID, Loadables.FLUID.getString(resource.getFluid()));
       // we want to store a fixed size, but its possible part swapping changes our capacity, so keep track of our capacity at the time of storing
       data.putFloat(KEY_VALIDATE, getValidationAmount(tool, modifier));
-      CompoundTag tag = resource.getTag();
+      CompoundTag tag = DataComponentHelper.getCustomData(resource);
       if (tag != null) {
         data.put(KEY_FLUID_TAG, tag.copy());
       }
@@ -215,7 +216,7 @@ public enum SmashingModule implements ModifierModule, FluidModifierHook, Project
         } else if (amount <= resource.getAmount()) {
           // ensure the tag matches
           CompoundTag storedTag = getFluidTag(data);
-          if (Objects.equals(storedTag, resource.getTag())) {
+          if (Objects.equals(storedTag, DataComponentHelper.getCustomData(resource))) {
             FluidStack result = new FluidStack(fluid, amount, storedTag);
             if (action.execute()) {
               clearFluid(data);

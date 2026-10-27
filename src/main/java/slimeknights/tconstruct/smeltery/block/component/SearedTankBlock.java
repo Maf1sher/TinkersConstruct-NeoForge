@@ -24,6 +24,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.mantle.fluid.FluidTransferHelper;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.library.recipe.FluidValues;
 import slimeknights.tconstruct.library.utils.NBTTags;
 import slimeknights.tconstruct.smeltery.block.entity.ITankBlockEntity;
@@ -103,7 +104,7 @@ public class SearedTankBlock extends SearedBlock implements ITankBlock, EntityBl
 
   @Override
   public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
-    CompoundTag nbt = stack.getTag();
+    CompoundTag nbt = DataComponentHelper.getCustomData(stack);
     if (nbt != null && world.getBlockEntity(pos) instanceof TankBlockEntity tank) {
       tank.updateTank(nbt.getCompound(NBTTags.TANK));
     }

@@ -10,6 +10,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.mantle.util.ItemLayerPixels;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.tools.capability.fluid.ToolTankHelper;
@@ -66,7 +67,7 @@ public class TankModifierModel implements ModifierModel {
     ToolTankHelper helper = tankHelper();
     FluidStack fluid = helper.getFluid(tool);
     if (!fluid.isEmpty()) {
-      return new CacheKey(fluid.getFluid(), fluid.getTag(), fluid.getAmount() + tolerance < helper.getCapacity(tool));
+      return new CacheKey(fluid.getFluid(), DataComponentHelper.getCustomData(fluid), fluid.getAmount() + tolerance < helper.getCapacity(tool));
     }
     return null;
   }

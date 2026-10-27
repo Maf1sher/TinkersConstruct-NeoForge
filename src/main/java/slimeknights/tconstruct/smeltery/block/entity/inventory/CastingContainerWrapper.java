@@ -6,6 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.library.recipe.casting.ICastingContainer;
 import slimeknights.tconstruct.smeltery.block.entity.CastingBlockEntity;
 
@@ -38,7 +39,7 @@ public class CastingContainerWrapper implements ICastingContainer {
   @Nullable
   @Override
   public CompoundTag getFluidTag() {
-    return fluid.getTag();
+    return DataComponentHelper.getCustomData(fluid);
   }
 
   /** Uses the input for input (default) */

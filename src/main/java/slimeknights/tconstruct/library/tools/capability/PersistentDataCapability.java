@@ -19,7 +19,7 @@ public class PersistentDataCapability {
   private PersistentDataCapability() {}
 
   /** Persistent entity data used by modifiers, including projectile state. */
-  public static final DeferredHolder<?, AttachmentType<ModDataNBT>> DATA = TinkerModule.ATTACHMENTS.register(
+  public static final DeferredHolder<AttachmentType<?>, AttachmentType<ModDataNBT>> DATA = TinkerModule.ATTACHMENTS.register(
     "persistent_data", () -> AttachmentType.serializable(ModDataNBT::new).copyOnDeath().build());
 
   /** Gets the data or warns if its missing */

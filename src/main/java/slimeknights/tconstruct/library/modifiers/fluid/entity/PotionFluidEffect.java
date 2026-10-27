@@ -10,6 +10,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 import slimeknights.mantle.data.loadable.primitive.FloatLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.fluids.fluids.PotionFluidType;
 import slimeknights.tconstruct.library.modifiers.fluid.EffectLevel;
 import slimeknights.tconstruct.library.modifiers.fluid.FluidEffect;
@@ -34,8 +35,8 @@ public record PotionFluidEffect(float scale, TagPredicate predicate) implements 
   public float apply(FluidStack fluid, EffectLevel level, FluidEffectContext.Entity context, FluidAction action) {
     LivingEntity target = context.getLivingTarget();
     // must match the tag predicate
-    if (target != null && predicate.test(fluid.getTag())) {
-      Optional<Potion> potion = PotionFluidType.getPotion(fluid.getTag()).map(Holder::value);
+    if (target != null && predicate.test(DataComponentHelper.getCustomData(fluid))) {
+      Optional<Potion> potion = PotionFluidType.getPotion(DataComponentHelper.getCustomData(fluid)).map(Holder::value);
       if (potion.isPresent() && !potion.get().getEffects().isEmpty()) {
         List<MobEffectInstance> effects = potion.get().getEffects();
         LivingEntity attacker = context.getEntity();

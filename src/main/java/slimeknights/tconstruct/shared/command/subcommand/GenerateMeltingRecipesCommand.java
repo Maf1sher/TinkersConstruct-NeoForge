@@ -54,6 +54,7 @@ import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer;
 import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer.TransferDirection;
 import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer.TransferResult;
 import slimeknights.mantle.recipe.helper.FluidOutput;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.mantle.util.JsonHelper;
 import slimeknights.mantle.util.LogicHelper;
 import slimeknights.tconstruct.TConstruct;
@@ -171,7 +172,7 @@ public class GenerateMeltingRecipesCommand {
       // don't bother with results that have NBT unless its a damagable item, in which case we ignore NBT and hope for the best
       // also skip anything already meltable
       Item result = resultStack.getItem();
-      if (resultStack.isEmpty() || (resultStack.hasTag() && !result.canBeDepleted()) || !melt.matches(result) || MeltingRecipeLookup.canMelt(result)) {
+      if (resultStack.isEmpty() || (DataComponentHelper.hasCustomData(resultStack) && !result.canBeDepleted()) || !melt.matches(result) || MeltingRecipeLookup.canMelt(result)) {
         continue;
       }
       List<MeltingResult> fluids = new ArrayList<>();
@@ -189,7 +190,7 @@ public class GenerateMeltingRecipesCommand {
           for (ItemStack stack : ingredient.getItems()) {
             // if the ingredient has NBT, nothing we can do here
             // also skip if the item is disallowed as an input
-            if (stack.isEmpty() || stack.hasTag() || !inputs.matches(stack.getItem())) {
+            if (stack.isEmpty() || DataComponentHelper.hasCustomData(stack) || !inputs.matches(stack.getItem())) {
               break ingredientSearch;
             }
             // first, try getting its fluid
@@ -311,7 +312,7 @@ public class GenerateMeltingRecipesCommand {
       if (fluid.isEmpty()) {
         return EMPTY;
       }
-      return new MeltingResult(fluid, output.getTag(), meltingFluid.temperature());
+      return new MeltingResult(fluid, DataComponentHelper.getCustomData(output), meltingFluid.temperature());
     }
 
     /** Creates a transfer from a fluid stack instance */
@@ -332,7 +333,7 @@ public class GenerateMeltingRecipesCommand {
     /** Creates a fluid output for this object */
     public FluidOutput toOutput() {
       if (tag != null) {
-        return FluidOutput.fromTag(tag, fluid.getAmount(), fluid.getTag());
+        return FluidOutput.fromTag(tag, fluid.getAmount(), DataComponentHelper.getCustomData(fluid));
       }
       return FluidOutput.fromStack(fluid);
     }

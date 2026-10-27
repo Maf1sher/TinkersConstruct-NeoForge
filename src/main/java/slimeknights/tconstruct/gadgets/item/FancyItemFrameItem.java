@@ -18,6 +18,7 @@ import net.minecraft.world.level.Level;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import slimeknights.mantle.util.DataComponentHelper;
 
 public class FancyItemFrameItem extends Item {
 
@@ -47,7 +48,7 @@ public class FancyItemFrameItem extends Item {
 
     Level world = context.getLevel();
     HangingEntity frame = this.entityProvider.apply(world, placeLocation, facing);
-    CompoundTag tag = stack.getTag();
+    CompoundTag tag = DataComponentHelper.getCustomData(stack);
     if (tag != null) {
       EntityType.updateCustomEntityTag(world, player, frame, tag);
     }

@@ -39,6 +39,7 @@ import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 import slimeknights.mantle.client.model.util.ColoredBlockModel;
 import slimeknights.mantle.client.model.util.ExtraTextureContext;
 import slimeknights.mantle.client.model.util.SimpleBlockModel;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.config.Config;
 import slimeknights.tconstruct.library.client.model.ModelProperties;
@@ -218,7 +219,7 @@ public class TankModel implements IUnbakedGeometry<TankModel> {
       @Override
       public BakedModel resolve(BakedModel model, ItemStack stack, @Nullable ClientLevel world, @Nullable LivingEntity entity, int seed) {
         // ensure we have a fluid
-        if (stack.isEmpty() || !stack.hasTag()) {
+        if (stack.isEmpty() || !DataComponentHelper.hasCustomData(stack)) {
           return model;
         }
         // determine fluid

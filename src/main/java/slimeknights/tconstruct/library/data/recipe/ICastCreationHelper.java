@@ -72,11 +72,11 @@ public interface ICastCreationHelper extends IRecipeHelper {
        .save(output, location(folder + "red_sand/builder_cast/" + name));
     ItemPartRecipeBuilder.item(pattern, ItemOutput.fromItem(cast.getSand(), 4))
       .setTitleKey(SAND_CAST_KEY)
-      .setPatternItem(Ingredient.of(Tags.Items.SAND_COLORLESS))
+      .setPatternItem(Ingredient.of(Tags.Items.SANDS_COLORLESS))
        .save(output, location(folder + "sand/builder_block/" + name));
     ItemPartRecipeBuilder.item(pattern, ItemOutput.fromItem(cast.getRedSand(), 4))
       .setTitleKey(SAND_CAST_KEY)
-      .setPatternItem(Ingredient.of(Tags.Items.SAND_RED))
+      .setPatternItem(Ingredient.of(Tags.Items.SANDS_RED))
        .save(output, location(folder + "red_sand/builder_block/" + name));
   }
 }

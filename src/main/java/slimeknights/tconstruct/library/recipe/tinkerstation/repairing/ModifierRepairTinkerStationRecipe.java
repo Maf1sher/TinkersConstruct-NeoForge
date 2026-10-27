@@ -20,6 +20,7 @@ import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.MultiNamedRecipe;
 import slimeknights.mantle.recipe.NamedRecipe;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.library.utils.RecipeHelper;
 import slimeknights.mantle.util.RegistryHelper;
 import slimeknights.tconstruct.TConstruct;
@@ -183,7 +184,7 @@ public class ModifierRepairTinkerStationRecipe implements ITinkerStationRecipe, 
         .map(item -> {
           if (item instanceof IModifiableDisplay modifiable) {
             ItemStack stack = modifiable.getRenderTool().copy();
-            CompoundTag tag = stack.getOrCreateTag();
+            CompoundTag tag = DataComponentHelper.getOrCreateCustomData(stack);
             tag.put(ToolStack.TAG_STATS, stats);
             tag.put(ToolStack.TAG_UPGRADES, modifiers);
             tag.put(ToolStack.TAG_MODIFIERS, modifiers);
@@ -196,7 +197,7 @@ public class ModifierRepairTinkerStationRecipe implements ITinkerStationRecipe, 
         .toList();
       toolWithModifier = toolWithoutModifier.stream().map(stack -> {
         stack = stack.copy();
-        stack.getOrCreateTag().putInt(ToolStack.TAG_DAMAGE, 200 - repairAmount);
+        DataComponentHelper.getOrCreateCustomData(stack).putInt(ToolStack.TAG_DAMAGE, 200 - repairAmount);
         return stack;
       }).toList();
     }

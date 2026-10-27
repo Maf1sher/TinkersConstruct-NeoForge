@@ -22,6 +22,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.tables.block.entity.chest.AbstractChestBlockEntity;
 
 import javax.annotation.Nullable;
@@ -58,7 +59,7 @@ public class ChestBlock extends TabbedTableBlock {
     super.setPlacedBy(worldIn, pos, state, placer, stack);
     // check if we also have an inventory
 
-    CompoundTag tag = stack.getTag();
+    CompoundTag tag = DataComponentHelper.getCustomData(stack);
     if (tag != null && tag.contains("TinkerData", Tag.TAG_COMPOUND)) {
       CompoundTag tinkerData = tag.getCompound("TinkerData");
       BlockEntity te = worldIn.getBlockEntity(pos);

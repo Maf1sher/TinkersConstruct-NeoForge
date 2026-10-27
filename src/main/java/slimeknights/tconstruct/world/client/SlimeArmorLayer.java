@@ -38,6 +38,7 @@ import net.minecraft.world.level.block.SkullBlock.Type;
 import net.minecraftforge.client.ForgeHooksClient;
 
 import java.util.Map;
+import slimeknights.mantle.util.DataComponentHelper;
 
 /** Generics do not match to use the vanilla armor layer, so this is a reimplementation of some of {@link HumanoidArmorLayer} */
 public class SlimeArmorLayer<T extends Slime, M extends HierarchicalModel<T>, A extends HumanoidModel<T>> extends RenderLayer<T,M> {
@@ -94,7 +95,7 @@ public class SlimeArmorLayer<T extends Slime, M extends HierarchicalModel<T>, A 
         if (item instanceof BlockItem block && block.getBlock() instanceof AbstractSkullBlock skullBlock) {
           matrices.scale(1.1875F, -1.1875F, -1.1875F);
           GameProfile gameprofile = null;
-          CompoundTag tag = helmet.getTag();
+          CompoundTag tag = DataComponentHelper.getCustomData(helmet);
           if (tag != null && tag.contains("SkullOwner", Tag.TAG_COMPOUND)) {
             gameprofile = NbtUtils.readGameProfile(tag.getCompound("SkullOwner"));
           }

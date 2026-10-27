@@ -24,7 +24,7 @@ public class TinkerDataCapability {
   private TinkerDataCapability() {}
 
   /** Non-persistent data attachment used by armor and transient modifier hooks. */
-  public static final DeferredHolder<?, AttachmentType<Holder>> DATA = TinkerModule.ATTACHMENTS.register(
+  public static final DeferredHolder<AttachmentType<?>, AttachmentType<Holder>> DATA = TinkerModule.ATTACHMENTS.register(
     "modifier_data", () -> AttachmentType.builder(Holder::new).build());
 
   /** Gets the transient modifier data for an entity. */

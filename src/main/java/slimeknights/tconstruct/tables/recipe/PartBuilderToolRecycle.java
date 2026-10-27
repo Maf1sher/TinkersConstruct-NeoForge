@@ -23,6 +23,7 @@ import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.MultiNamedRecipe;
 import slimeknights.mantle.recipe.NamedRecipe;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.library.utils.RecipeHelper;
 import net.neoforged.neoforge.common.crafting.SizedIngredient;
 import slimeknights.tconstruct.TConstruct;
@@ -273,7 +274,7 @@ public class PartBuilderToolRecycle implements IPartBuilderRecipe, MultiNamedRec
             List.of(IModifiableDisplay.getDisplayStack(stack)),
             parts.object2IntEntrySet().stream().map(pi -> {
               ItemStack part = pi.getKey().withMaterialForDisplay(ToolBuildHandler.getRenderMaterial(pi.getIntValue()));
-              part.getOrCreateTag().putBoolean(TooltipUtil.KEY_DISPLAY, true);
+              DataComponentHelper.getOrCreateCustomData(part).putBoolean(TooltipUtil.KEY_DISPLAY, true);
               return part;
             }).toList(),
             partItems.stream().flatMap(part -> MaterialItemCache.getAllMaterials(part).stream()).toList()

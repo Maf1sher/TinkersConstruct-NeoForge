@@ -17,6 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.locale.Language;
@@ -161,7 +162,7 @@ public class ContentTool extends PageContent {
       RegistryAccess access = level.registryAccess();
 
       // get the stacks for the first crafting table recipe, prefer this option over parts as it may not be craftable with said parts
-      Recipe<CraftingContainer> craftingRecipe = level.getRecipeManager().byType(RecipeType.CRAFTING).values().stream()
+      Recipe<CraftingContainer> craftingRecipe = level.getRecipeManager().getAllRecipesFor(RecipeType.CRAFTING).stream().map(RecipeHolder::value)
         .filter(r -> r.getResultItem(access).getItem() == tool.asItem())
         .findFirst().orElse(null);
       if (craftingRecipe != null) {
@@ -176,7 +177,7 @@ public class ContentTool extends PageContent {
         }
       } else {
         // fetch the tool building recipe for extra ingredients
-        ToolBuildingRecipe toolBuilding = level.getRecipeManager().byType(TinkerRecipeTypes.TINKER_STATION.get()).values().stream()
+        ToolBuildingRecipe toolBuilding = level.getRecipeManager().getAllRecipesFor(TinkerRecipeTypes.TINKER_STATION.get()).stream().map(RecipeHolder::value)
           // only fetch recipes with the correct tool and that have the same number of parts - fixes issues with tools having multiple recipes
           .filter(r -> r instanceof ToolBuildingRecipe toolRecipe && toolRecipe.getOutput() == tool)
           .map(r -> ((ToolBuildingRecipe) r))

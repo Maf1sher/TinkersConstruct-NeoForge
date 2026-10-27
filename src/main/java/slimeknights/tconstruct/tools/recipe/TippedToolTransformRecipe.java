@@ -12,6 +12,7 @@ import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.recipe.RecipeResult;
@@ -66,7 +67,7 @@ public class TippedToolTransformRecipe extends ToolBuildingRecipe {
         }
         // if we found one, set its NBT into the result tool
         if (!stack.isEmpty()) {
-          CompoundTag tag = stack.getTag();
+          CompoundTag tag = DataComponentHelper.getCustomData(stack);
           if (tag != null && tag.contains(PotionUtils.TAG_POTION, Tag.TAG_STRING)) {
             tool.getPersistentData().putString(modifier, tag.getString(PotionUtils.TAG_POTION));
           }
@@ -82,7 +83,7 @@ public class TippedToolTransformRecipe extends ToolBuildingRecipe {
       ItemStack result = super.getDisplayOutput().get(0);
       displayOutput = Arrays.stream(ingredients.get(0).getItems())
         .map(stack -> {
-          CompoundTag tag = stack.getTag();
+          CompoundTag tag = DataComponentHelper.getCustomData(stack);
           if (tag != null) {
             ItemStack copy = result.copy();
             ToolStack.from(copy).getPersistentData().putString(modifier, tag.getString(PotionUtils.TAG_POTION));

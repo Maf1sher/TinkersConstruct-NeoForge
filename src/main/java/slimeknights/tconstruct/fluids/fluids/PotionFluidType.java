@@ -55,7 +55,7 @@ public class PotionFluidType extends FluidType {
         if (contents.potion().isPresent() || contents.customColor().isPresent() || !contents.customEffects().isEmpty()) {
           return contents.getColor() | 0xFF000000;
         }
-        CompoundTag tag = stack.getTag();
+        CompoundTag tag = DataComponentHelper.getCustomData(stack);
         if (tag != null && tag.contains("CustomPotionColor", Tag.TAG_ANY_NUMERIC)) {
           return tag.getInt("CustomPotionColor") | 0xFF000000;
         }
@@ -79,7 +79,7 @@ public class PotionFluidType extends FluidType {
   /** Reads modern potion components first and accepts the old NBT field for saved fluid stacks. */
   private static Optional<Holder<Potion>> getPotion(FluidStack stack) {
     Optional<Holder<Potion>> component = stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).potion();
-    return component.isPresent() ? component : getPotion(stack.getTag());
+    return component.isPresent() ? component : getPotion(DataComponentHelper.getCustomData(stack));
   }
 
   /** Creates a fluid stack for the given potion */

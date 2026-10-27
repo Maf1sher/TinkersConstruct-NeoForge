@@ -101,7 +101,7 @@ public final class TinkerFluids extends TinkerModule {
   }
 
   /** Creative tab for general items, or those that lack another tab */
-  public static final DeferredHolder<?, CreativeModeTab> tabFluids = CREATIVE_TABS.register(
+  public static final DeferredHolder<CreativeModeTab, CreativeModeTab> tabFluids = CREATIVE_TABS.register(
     "fluids", () -> CreativeModeTab.builder().title(TConstruct.makeTranslation("itemGroup", "fluids"))
                                    .icon(() -> TankItem.fillTank(TinkerSmeltery.searedTank, TankType.FUEL_GAUGE, TinkerFluids.moltenCobalt.get()))
                                    .displayItems(TinkerFluids::addFilledContainers)
@@ -219,7 +219,7 @@ public final class TinkerFluids extends TinkerModule {
 
   // fluid data serializer
   public static final FluidDataSerializer FLUID_DATA_SERIALIZER = new FluidDataSerializer();
-  public static final DeferredHolder<?, EntityDataSerializer<?>> FLUID_DATA_SERIALIZER_REGISTRY = DATA_SERIALIZERS.register("fluid", () -> FLUID_DATA_SERIALIZER);
+  public static final DeferredHolder<EntityDataSerializer<?>, EntityDataSerializer<?>> FLUID_DATA_SERIALIZER_REGISTRY = DATA_SERIALIZERS.register("fluid", () -> FLUID_DATA_SERIALIZER);
 
   /** Creates a builder for a cool fluid with sounds */
   private static FluidType.Properties cool() {

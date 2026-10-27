@@ -15,6 +15,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.mantle.data.loadable.Loadables;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.recipe.FluidValues;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
@@ -70,7 +71,7 @@ public class CopperCanItem extends Item {
 
   /** Removes the fluid from the given stack */
   public static void removeFluid(ItemStack stack) {
-    CompoundTag nbt = stack.getTag();
+    CompoundTag nbt = DataComponentHelper.getCustomData(stack);
     if (nbt != null) {
       nbt.remove(TAG_FLUID);
       nbt.remove(TAG_FLUID_TAG);
@@ -82,7 +83,7 @@ public class CopperCanItem extends Item {
 
   /** Sets the fluid on the given stack whether or not its valiid */
   private static void setFluidInternal(ItemStack stack, ResourceLocation fluid, @Nullable CompoundTag fluidTag) {
-    CompoundTag nbt = stack.getOrCreateTag();
+    CompoundTag nbt = DataComponentHelper.getOrCreateCustomData(stack);
     nbt.putString(TAG_FLUID, fluid.toString());
     if (fluidTag != null) {
       nbt.put(TAG_FLUID_TAG, fluidTag.copy());
@@ -117,12 +118,12 @@ public class CopperCanItem extends Item {
 
   /** Sets the fluid on the given stack */
   public static ItemStack setFluid(ItemStack stack, FluidStack fluid) {
-    return setFluid(stack, fluid.getFluid(), fluid.getTag());
+    return setFluid(stack, fluid.getFluid(), DataComponentHelper.getCustomData(fluid));
   }
 
   /** Gets the fluid from the given stack */
   public static Fluid getFluid(ItemStack stack) {
-    CompoundTag nbt = stack.getTag();
+    CompoundTag nbt = DataComponentHelper.getCustomData(stack);
     if (nbt != null && nbt.contains(TAG_FLUID, Tag.TAG_STRING)) {
       ResourceLocation location = ResourceLocation.tryParse(nbt.getString(TAG_FLUID));
       if (location != null && BuiltInRegistries.FLUID.containsKey(location)) {
@@ -149,7 +150,7 @@ public class CopperCanItem extends Item {
   /** Gets the fluid NBT from the given stack */
   @Nullable
   public static CompoundTag getFluidTag(ItemStack stack) {
-    CompoundTag nbt = stack.getTag();
+    CompoundTag nbt = DataComponentHelper.getCustomData(stack);
     if (nbt != null && nbt.contains(TAG_FLUID_TAG, Tag.TAG_COMPOUND)) {
       return nbt.getCompound(TAG_FLUID_TAG);
     }
@@ -162,7 +163,7 @@ public class CopperCanItem extends Item {
    * @return  String variant name
    */
   public static String getSubtype(ItemStack stack) {
-    CompoundTag nbt = stack.getTag();
+    CompoundTag nbt = DataComponentHelper.getCustomData(stack);
     if (nbt != null) {
       return nbt.getString(TAG_FLUID);
     }

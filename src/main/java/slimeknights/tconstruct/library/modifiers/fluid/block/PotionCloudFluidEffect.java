@@ -8,6 +8,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 import slimeknights.mantle.data.loadable.primitive.FloatLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.fluids.fluids.PotionFluidType;
 import slimeknights.tconstruct.library.modifiers.fluid.EffectLevel;
 import slimeknights.tconstruct.library.modifiers.fluid.FluidEffect;
@@ -30,7 +31,7 @@ public record PotionCloudFluidEffect(float scale, TagPredicate predicate) implem
 
   @Override
   public float apply(FluidStack fluid, EffectLevel level, FluidEffectContext.Block context, FluidAction action) {
-    CompoundTag tag = fluid.getTag();
+    CompoundTag tag = DataComponentHelper.getCustomData(fluid);
     if (predicate.test(tag) && context.isOffsetReplaceable()) {
       Optional<Potion> potion = PotionFluidType.getPotion(tag).map(Holder::value);
       if (potion.isPresent()) {

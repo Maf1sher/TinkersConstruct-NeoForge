@@ -200,7 +200,7 @@ public class BlockLootTableProvider extends BlockLootSubProvider {
     // mangrove leaves do not drop saplings, they just drop sticks. We do slimeballs instead
     this.add(TinkerWorld.slimeLeaves.get(FoliageType.ENDER), leaves -> droppingSilkOrShears(leaves,
       applyExplosionDecay(leaves, LootItem.lootTableItem(TinkerCommons.slimeball.get(SlimeType.ENDER)).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))))
-        .when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.BLOCK_FORTUNE, NORMAL_LEAVES_STICK_CHANCES))));
+        .when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.FORTUNE, NORMAL_LEAVES_STICK_CHANCES))));
     this.add(TinkerWorld.slimeFern.get(FoliageType.ENDER), BlockLootTableProvider::onlyShears);
 
 
@@ -342,7 +342,7 @@ public class BlockLootTableProvider extends BlockLootSubProvider {
   /** Reimplementation of {@link #createLeavesDrops(Block, Block, float...)} dropping the sticks from the loot table */
   private LootTable.Builder dropSapling(Block leaves, Block sapling, float... fortune) {
     return droppingSilkOrShears(leaves, applyExplosionCondition(leaves, LootItem.lootTableItem(sapling))
-      .when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.BLOCK_FORTUNE, fortune)));
+      .when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.FORTUNE, fortune)));
   }
 
   private LootTable.Builder randomDropSlimeBallOrSapling(FoliageType foliageType, Block leaves, Block sapling, float... fortune) {
@@ -353,7 +353,7 @@ public class BlockLootTableProvider extends BlockLootSubProvider {
         LootPool.lootPool().setRolls(ConstantValue.exactly(1))
                 .when(HAS_NO_SHEARS_OR_SILK_TOUCH)
                 .add(applyExplosionCondition(leaves, LootItem.lootTableItem(TinkerCommons.slimeball.get(slime)))
-                       .when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.BLOCK_FORTUNE, 1 / 50f, 1 / 45f, 1 / 40f, 1 / 30f, 1 / 20f))));
+                       .when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.FORTUNE, 1 / 50f, 1 / 45f, 1 / 40f, 1 / 30f, 1 / 20f))));
     }
     return builder;
   }
@@ -436,7 +436,7 @@ public class BlockLootTableProvider extends BlockLootSubProvider {
     this.add(cluster, block -> createSilkTouchDispatchTable(
       block, LootItem.lootTableItem(drop)
         .apply(SetItemCountFunction.setCount(ConstantValue.exactly(4.0F)))
-        .apply(ApplyBonusCount.addOreBonusCount(Enchantments.BLOCK_FORTUNE))
+        .apply(ApplyBonusCount.addOreBonusCount(Enchantments.FORTUNE))
         .when(MatchTool.toolMatches(ItemPredicate.Builder.item().of(ItemTags.CLUSTER_MAX_HARVESTABLES)))
         .otherwise(applyExplosionDecay(block, LootItem.lootTableItem(drop).apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0F)))))));
   }

@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.phys.HitResult;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.library.utils.NBTTags;
 import slimeknights.tconstruct.smeltery.block.component.SearedTankBlock;
 import slimeknights.tconstruct.smeltery.block.entity.ITankBlockEntity;
@@ -60,7 +61,7 @@ public class SearedLanternBlock extends LanternBlock implements ITankBlock, Enti
 
   @Override
   public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
-    CompoundTag nbt = stack.getTag();
+    CompoundTag nbt = DataComponentHelper.getCustomData(stack);
     if (nbt != null && world.getBlockEntity(pos) instanceof TankBlockEntity tank) {
       tank.updateTank(nbt.getCompound(NBTTags.TANK));
     }

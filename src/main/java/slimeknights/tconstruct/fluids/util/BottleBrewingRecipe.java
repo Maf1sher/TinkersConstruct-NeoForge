@@ -2,7 +2,7 @@ package slimeknights.tconstruct.fluids.util;
 
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.alchemy.PotionBrewing;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.neoforge.common.brewing.BrewingRecipe;
 
@@ -16,23 +16,27 @@ public class BottleBrewingRecipe extends BrewingRecipe {
     this.to = to;
   }
 
+  /**
+   * Gets the vanilla container ingredient converting one potion container into another.
+   * Vanilla keeps its container mixes in an instance list since 1.21, so the two vanilla transformations are mirrored here.
+   */
+  private static Ingredient getVanillaIngredient(Item from, Item to) {
+    if (from == Items.POTION && to == Items.SPLASH_POTION) {
+      return Ingredient.of(Items.GUNPOWDER);
+    }
+    if (from == Items.SPLASH_POTION && to == Items.LINGERING_POTION) {
+      return Ingredient.of(Items.DRAGON_BREATH);
+    }
+    return Ingredient.EMPTY;
+  }
+
   @Override
   public boolean isIngredient(ItemStack stack) {
-    for (PotionBrewing.Mix<Item> recipe : PotionBrewing.CONTAINER_MIXES) {
-      if (recipe.from.get() == from && recipe.to.get() == to) {
-        return recipe.ingredient.test(stack);
-      }
-    }
-    return false;
+    return getVanillaIngredient(from, to).test(stack);
   }
 
   @Override
   public Ingredient getIngredient() {
-    for (PotionBrewing.Mix<Item> recipe : PotionBrewing.CONTAINER_MIXES) {
-      if (recipe.from.get() == from && recipe.to.get() == to) {
-        return recipe.ingredient;
-      }
-    }
-    return Ingredient.EMPTY;
+    return getVanillaIngredient(from, to);
   }
 }

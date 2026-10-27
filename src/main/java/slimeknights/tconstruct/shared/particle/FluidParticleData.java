@@ -17,6 +17,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
+import slimeknights.mantle.util.DataComponentHelper;
 
 /** Particle data for a fluid particle */
 @RequiredArgsConstructor
@@ -63,7 +64,7 @@ public class FluidParticleData implements ParticleOptions {
     builder.append(BuiltInRegistries.PARTICLE_TYPE.getKey(getType()));
     builder.append(" ");
     builder.append(BuiltInRegistries.FLUID.getKey(fluid.getFluid()));
-    CompoundTag nbt = fluid.getTag();
+    CompoundTag nbt = DataComponentHelper.getCustomData(fluid);
     if (nbt != null) {
       builder.append(nbt);
     }

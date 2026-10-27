@@ -212,6 +212,10 @@ public class TinkerTags {
 
     // misc compat
     public static final TagKey<Block> BUDDING = common("budding");
+    /** Common stained glass tag, no longer provided by NeoForge */
+    public static final TagKey<Block> STAINED_GLASS = common("stained_glass");
+    /** Common stained glass pane tag, no longer provided by NeoForge */
+    public static final TagKey<Block> STAINED_GLASS_PANES = common("stained_glass_panes");
     // ceramics compat
     @SuppressWarnings("removal")
     public static final TagKey<Block> CISTERN_CONNECTIONS = TagKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath("ceramics", "cistern_connections"));
@@ -233,6 +237,12 @@ public class TinkerTags {
     private static void init() {}
     public static final TagKey<Item> WORKBENCHES = common("workbenches");
     public static final TagKey<Item> TABLES = local("tables");
+    /** Common stained glass tag, no longer provided by NeoForge */
+    public static final TagKey<Item> STAINED_GLASS = common("stained_glass");
+    /** Common stained glass pane tag, no longer provided by NeoForge */
+    public static final TagKey<Item> STAINED_GLASS_PANES = common("stained_glass_panes");
+    /** Common chestplate tag, NeoForge only provides the full armor tag */
+    public static final TagKey<Item> ARMORS_CHESTPLATES = common("armors/chestplates");
     public static final TagKey<Item> GLASS_PANES_SILICA = common("glass_panes/silica");
 
     /** Compat: allows other mods to add normal stone variants which can be used to create stone tools.
@@ -588,7 +598,7 @@ public class TinkerTags {
       return TagKey.create(Registries.ITEM, getResource(name));
     }
 
-    /** Makes a tag in the forge domain */
+    /** Makes a tag in the common (c) domain */
     private static TagKey<Item> common(String name) {
       return TagKey.create(Registries.ITEM, commonResource(name));
     }

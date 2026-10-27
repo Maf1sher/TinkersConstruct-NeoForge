@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType.BlockEntitySupplier;
 import net.minecraft.world.level.block.state.BlockState;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 import slimeknights.tconstruct.library.tools.part.IMaterialItem;
@@ -33,7 +34,7 @@ public class MaterialBlock extends Block implements EntityBlock {
 
   @Override
   public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
-    if (stack.hasTag()) {
+    if (DataComponentHelper.hasCustomData(stack)) {
       MaterialVariantId material = IMaterialItem.getMaterialFromStack(stack);
       if (material != MaterialId.UNKNOWN && level.getBlockEntity(pos) instanceof MaterialBlockEntity be) {
         be.setMaterial(material);

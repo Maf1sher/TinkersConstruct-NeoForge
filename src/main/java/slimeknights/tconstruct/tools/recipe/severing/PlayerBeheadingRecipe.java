@@ -14,6 +14,7 @@ import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.helper.ItemOutput;
 import slimeknights.mantle.recipe.ingredient.EntityIngredient;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.library.recipe.modifiers.severing.SeveringRecipe;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 
@@ -34,7 +35,7 @@ public class PlayerBeheadingRecipe extends SeveringRecipe {
     ItemStack stack = new ItemStack(Items.PLAYER_HEAD);
     if (entity instanceof Player) {
       GameProfile gameprofile = ((Player)entity).getGameProfile();
-      stack.getOrCreateTag().put("SkullOwner", NbtUtils.writeGameProfile(new CompoundTag(), gameprofile));
+      DataComponentHelper.getOrCreateCustomData(stack).put("SkullOwner", NbtUtils.writeGameProfile(new CompoundTag(), gameprofile));
     }
     return stack;
   }

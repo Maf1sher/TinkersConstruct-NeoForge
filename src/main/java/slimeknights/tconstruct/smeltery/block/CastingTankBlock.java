@@ -25,6 +25,7 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import slimeknights.mantle.block.InventoryBlock;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.library.utils.NBTTags;
 import slimeknights.tconstruct.smeltery.block.component.SearedTankBlock;
 import slimeknights.tconstruct.smeltery.block.entity.CastingTankBlockEntity;
@@ -94,7 +95,7 @@ public class CastingTankBlock extends InventoryBlock implements ITankBlock, Enti
 
   @Override
   public void setPlacedBy(Level worldIn, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
-    CompoundTag nbt = stack.getTag();
+    CompoundTag nbt = DataComponentHelper.getCustomData(stack);
     if (nbt != null && worldIn.getBlockEntity(pos) instanceof CastingTankBlockEntity tank) {
       tank.updateTank(nbt.getCompound(NBTTags.TANK));
     }

@@ -17,6 +17,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import org.joml.Vector3f;
 import slimeknights.mantle.client.model.util.ColoredBlockModel;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.mantle.util.ItemLayerPixels;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.model.FluidContainerModel;
@@ -59,7 +60,7 @@ public record FluidModifierModel(@Nullable Material small, @Nullable Material la
   public Object getCacheKey(IToolStackView tool, ModifierEntry modifier) {
     FluidStack fluid = tankHelper().getFluid(tool);
     if (!fluid.isEmpty()) {
-      return new CacheKey(fluid.getFluid(), fluid.getTag());
+      return new CacheKey(fluid.getFluid(), DataComponentHelper.getCustomData(fluid));
     }
     return null;
   }

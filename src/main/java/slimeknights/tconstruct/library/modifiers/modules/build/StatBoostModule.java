@@ -65,7 +65,7 @@ public record StatBoostModule(INumericToolStat<?> stat, StatOperation operation,
 
   /** Creates a builder for adding stats */
   public static Builder multiplyBase(INumericToolStat<?> stat) {
-    return new Builder(stat, StatOperation.MULTIPLY_BASE);
+    return new Builder(stat, StatOperation.ADD_MULTIPLIED_BASE);
   }
 
   /** Creates a builder for adding stats */

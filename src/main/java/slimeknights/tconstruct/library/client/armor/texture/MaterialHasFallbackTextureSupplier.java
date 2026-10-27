@@ -10,6 +10,7 @@ import slimeknights.mantle.data.loadable.array.ArrayLoadable;
 import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 import slimeknights.mantle.data.loadable.primitive.StringLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.library.client.materials.MaterialRenderInfoLoader;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
@@ -59,7 +60,7 @@ public class MaterialHasFallbackTextureSupplier implements ArmorTextureSupplier,
 
   @Override
   public ArmorTexture getArmorTexture(ItemStack stack, TextureType type, RegistryAccess access) {
-    CompoundTag tag = stack.getTag();
+    CompoundTag tag = DataComponentHelper.getCustomData(stack);
     if (tag != null && tag.contains(ToolStack.TAG_MATERIALS, Tag.TAG_LIST)) {
       String material = tag.getList(ToolStack.TAG_MATERIALS, Tag.TAG_STRING).getString(index);
       if (!material.isEmpty() && cache.computeIfAbsent(material, this)) {

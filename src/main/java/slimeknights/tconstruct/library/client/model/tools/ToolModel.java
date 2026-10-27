@@ -54,6 +54,7 @@ import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.mapping.CompactLoadable;
 import slimeknights.mantle.data.loadable.primitive.BooleanLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.mantle.util.ItemLayerPixels;
 import slimeknights.mantle.util.JsonHelper;
 import slimeknights.mantle.util.ReversedListBuilder;
@@ -824,7 +825,7 @@ public class ToolModel implements IUnbakedGeometry<ToolModel> {
       if (ammoKey != null && persistentData.contains(ammoKey, Tag.TAG_COMPOUND)) {
         ammo = ItemStack.of(persistentData.getCompound(ammoKey));
         builder.add(ammo.getItem());
-        CompoundTag tag = ammo.getTag();
+        CompoundTag tag = DataComponentHelper.getCustomData(ammo);
         if (tag != null) {
           builder.add(tag);
         }

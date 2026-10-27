@@ -14,6 +14,7 @@ import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.mantle.util.RegistryHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
@@ -153,7 +154,7 @@ public class TinkerStationDamagingRecipe implements ITinkerStationRecipe, IDispl
         .map(item -> {
           if (item instanceof IModifiableDisplay modifiable) {
             ItemStack stack = modifiable.getRenderTool().copy();
-            stack.getOrCreateTag().put(ToolStack.TAG_STATS, stats);
+            DataComponentHelper.getOrCreateCustomData(stack).put(ToolStack.TAG_STATS, stats);
             return stack;
           }
           return ItemStack.EMPTY;
@@ -170,7 +171,7 @@ public class TinkerStationDamagingRecipe implements ITinkerStationRecipe, IDispl
       toolWithModifier = getToolWithoutModifier().stream()
         .map(stack -> {
           stack = stack.copy();
-          stack.getOrCreateTag().putInt(ToolStack.TAG_DAMAGE, damageAmount);
+          DataComponentHelper.getOrCreateCustomData(stack).putInt(ToolStack.TAG_DAMAGE, damageAmount);
           return stack;
         }).toList();
     }

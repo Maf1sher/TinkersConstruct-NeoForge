@@ -19,7 +19,7 @@ public class RecipeHelper {
 
   /** Gets all recipes of the given type, filtering to the passed type for safety */
   public static <I extends net.minecraft.world.item.crafting.RecipeInput, T extends Recipe<I>> List<T> getRecipes(RecipeManager manager, RecipeType<T> type, Class<T> recipeClass) {
-    return manager.byType(type).stream().map(RecipeHolder::value).filter(recipeClass::isInstance).map(recipeClass::cast).toList();
+    return manager.getAllRecipesFor(type).stream().map(RecipeHolder::value).filter(recipeClass::isInstance).map(recipeClass::cast).toList();
   }
 
   /**

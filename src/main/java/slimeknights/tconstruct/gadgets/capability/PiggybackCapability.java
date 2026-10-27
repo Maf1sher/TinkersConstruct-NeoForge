@@ -17,7 +17,7 @@ public class PiggybackCapability {
     EntityCapability.createVoid(TConstruct.getResource("piggyback"), PiggybackHandler.class);
 
   /** Attachment storing each player's handler, lazily created so the sync cache persists between queries */
-  public static final DeferredHolder<?, AttachmentType<PiggybackHandler>> DATA = TinkerModule.ATTACHMENTS.register(
+  public static final DeferredHolder<AttachmentType<?>, AttachmentType<PiggybackHandler>> DATA = TinkerModule.ATTACHMENTS.register(
     "piggyback", () -> AttachmentType.builder(holder -> new PiggybackHandler((Player) holder)).build());
 
   private PiggybackCapability() {}

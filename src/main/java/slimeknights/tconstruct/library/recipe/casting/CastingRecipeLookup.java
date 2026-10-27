@@ -3,6 +3,7 @@ package slimeknights.tconstruct.library.recipe.casting;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.library.recipe.data.ItemNameOutput;
 import slimeknights.mantle.recipe.helper.ItemOutput;
 import slimeknights.mantle.util.RegistryHelper;
@@ -54,7 +55,7 @@ public class CastingRecipeLookup {
 
   /** Marks the given item output as castable */
   public static void registerCastable(ItemOutput output) {
-    TagKey<Item> tag = output.getTag();
+    TagKey<Item> tag = DataComponentHelper.getCustomData(output);
     if (tag != null) {
       registerCastable(tag);
     // item name output fails here, but that only happens at datagen so just ignore that

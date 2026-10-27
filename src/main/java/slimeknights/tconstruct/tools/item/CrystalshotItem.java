@@ -15,6 +15,7 @@ import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.common.Sounds;
 import slimeknights.tconstruct.tools.TinkerTools;
 
@@ -44,7 +45,7 @@ public class CrystalshotItem extends ArrowItem {
   public AbstractArrow createArrow(Level pLevel, ItemStack pStack, LivingEntity pShooter) {
     CrystalshotEntity arrow = new CrystalshotEntity(pLevel, pShooter);
     String variant = "random";
-    CompoundTag tag = pStack.getTag();
+    CompoundTag tag = DataComponentHelper.getCustomData(pStack);
     if (tag != null && tag.contains(TAG_VARIANT, Tag.TAG_STRING)) {
       variant = tag.getString(TAG_VARIANT);
     }
@@ -57,13 +58,13 @@ public class CrystalshotItem extends ArrowItem {
 
   @Override
   public boolean isInfinite(ItemStack stack, ItemStack bow, Player player) {
-    return bow.getEnchantmentLevel(Enchantments.INFINITY_ARROWS) > 0;
+    return bow.getEnchantmentLevel(Enchantments.INFINITY) > 0;
   }
 
   /** Creates a crystal shot with the given variant */
   public static ItemStack withVariant(String variant, int size) {
     ItemStack stack = new ItemStack(TinkerTools.crystalshotItem, size);
-    stack.getOrCreateTag().putString(TAG_VARIANT, variant);
+    DataComponentHelper.getOrCreateCustomData(stack).putString(TAG_VARIANT, variant);
     return stack;
   }
 

@@ -346,14 +346,14 @@ public class ModifierRecipeProvider extends BaseRecipeProvider {
     hasteRecipes(consumer, ModifierIds.haste, ingredientFromTags(TinkerTags.Items.HARVEST, TinkerTags.Items.CHESTPLATES), 5, upgradeFolder, upgradeSalvage);
     IncrementalModifierRecipeBuilder.modifier(ModifierIds.blasting)
                                     .setTools(TinkerTags.Items.STONE_HARVEST)
-                                    .setInput(Tags.Items.GUNPOWDER, 1, 20)
+                                    .setInput(Tags.Items.GUNPOWDERS, 1, 20)
                                     .setMaxLevel(5) // +50 mining speed at max, conditionally
                                     .setSlots(SlotType.UPGRADE, 1)
                                     .saveSalvage(consumer, prefix(ModifierIds.blasting, upgradeSalvage))
                                     .save(consumer, prefix(ModifierIds.blasting, upgradeFolder));
     IncrementalModifierRecipeBuilder.modifier(ModifierIds.hydraulic)
                                     .setTools(TinkerTags.Items.HARVEST)
-                                    .setInput(Tags.Items.DUSTS_PRISMARINE, 1, 36) // stupid forge name
+                                    .setInput(Tags.Items.GEMS_PRISMARINE, 1, 36) // stupid forge name
                                     .setMaxLevel(5)
                                     .setSlots(SlotType.UPGRADE, 1)
                                     .saveSalvage(consumer, prefix(ModifierIds.hydraulic, upgradeSalvage))
@@ -674,9 +674,9 @@ public class ModifierRecipeProvider extends BaseRecipeProvider {
                          .saveSalvage(consumer, prefix(ModifierIds.crystalshot, abilitySalvage));
     ModifierRecipeBuilder.modifier(ModifierIds.barebow)
       .setTools(TinkerTags.Items.BOWS)
-      .addInput(Tags.Items.STRING)
+      .addInput(Tags.Items.STRINGS)
       .addInput(Tags.Items.RODS_WOODEN)
-      .addInput(Tags.Items.STRING)
+      .addInput(Tags.Items.STRINGS)
       .setMaxLevel(1)
       .save(consumer, prefix(ModifierIds.barebow, slotlessFolder));
     ModifierRecipeBuilder.modifier(ModifierIds.multishot)
@@ -902,7 +902,7 @@ public class ModifierRecipeProvider extends BaseRecipeProvider {
     ModifierRecipeBuilder.modifier(ModifierIds.respiration)
                          .setTools(TinkerTags.Items.HELMETS)
                          .addInput(ItemTags.FISHES)
-                         .addInput(Tags.Items.GLASS_COLORLESS)
+                         .addInput(Tags.Items.GLASS_BLOCKS_COLORLESS)
                          .addInput(ItemTags.FISHES)
                          .addInput(Items.KELP)
                          .addInput(Items.KELP)
@@ -1022,9 +1022,9 @@ public class ModifierRecipeProvider extends BaseRecipeProvider {
     // helmet
     ModifierRecipeBuilder.modifier(ModifierIds.zoom)
                          .setTools(ingredientFromTags(TinkerTags.Items.HELMETS, TinkerTags.Items.INTERACTABLE_CHARGE))
-                         .addInput(Tags.Items.STRING)
+                         .addInput(Tags.Items.STRINGS)
                          .addInput(Items.SPYGLASS)
-                         .addInput(Tags.Items.STRING)
+                         .addInput(Tags.Items.STRINGS)
                          .setSlots(SlotType.UPGRADE, 1)
                          .setMaxLevel(1).checkTraitLevel()
                          .saveSalvage(consumer, prefix(ModifierIds.zoom, upgradeSalvage))
@@ -1057,8 +1057,8 @@ public class ModifierRecipeProvider extends BaseRecipeProvider {
                          .addInput(Items.LEATHER)
                          .addInput(Tags.Items.GEMS_DIAMOND)
                          .addInput(Items.LEATHER)
-                         .addInput(Tags.Items.STRING)
-                         .addInput(Tags.Items.STRING)
+                         .addInput(Tags.Items.STRINGS)
+                         .addInput(Tags.Items.STRINGS)
                          .setMaxLevel(1).checkTraitLevel()
                          .setSlots(SlotType.ABILITY, 1)
                          .saveSalvage(consumer, prefix(TinkerModifiers.ambidextrous, abilitySalvage))
@@ -1633,7 +1633,7 @@ public class ModifierRecipeProvider extends BaseRecipeProvider {
                          .setMaxLevel(1)
                          .save(consumer, prefix(ModifierIds.harmonious, slotlessFolder));
     Ingredient bonusNoSkull = DifferenceIngredient.of(Ingredient.of(TinkerTags.Items.BONUS_SLOTS), Ingredient.of(TinkerTags.Items.SKULLS));
-    SizedIngredient standardSkulls = new SizedIngredient(DifferenceIngredient.of(Ingredient.of(Tags.Items.HEADS), Ingredient.of(Items.DRAGON_HEAD)));
+    SizedIngredient standardSkulls = new SizedIngredient(DifferenceIngredient.of(Ingredient.of(Tags.Items.SKULLS), Ingredient.of(Items.DRAGON_HEAD)));
     ModifierRecipeBuilder.modifier(ModifierIds.recapitated)
       .setTools(bonusNoSkull)
       .addInput(standardSkulls)

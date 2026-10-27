@@ -31,6 +31,7 @@ import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
 import slimeknights.mantle.data.predicate.fluid.FluidPredicate;
 import slimeknights.mantle.fluid.FluidTransferHelper;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
@@ -164,7 +165,7 @@ public record BucketModule(IJsonPredicate<Fluid> fluids) implements ModifierModu
     // need at least a bucket worth of empty space in a fluid we can pickup, and cannot have NBT on the stored fluid
     FluidStack fluidStack = TANK_HELPER.getFluid(tool);
     Fluid currentFluid = fluidStack.getFluid();
-    if (fluidStack.hasTag() || TANK_HELPER.getCapacity(tool) - fluidStack.getAmount() < FluidType.BUCKET_VOLUME || !fluidStack.isEmpty() && !fluids.matches(currentFluid)) {
+    if (DataComponentHelper.hasCustomData(fluidStack) || TANK_HELPER.getCapacity(tool) - fluidStack.getAmount() < FluidType.BUCKET_VOLUME || !fluidStack.isEmpty() && !fluids.matches(currentFluid)) {
       return InteractionResult.PASS;
     }
     // have to trace to find the fluid, ensure we can edit the position
