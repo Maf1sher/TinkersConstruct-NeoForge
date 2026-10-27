@@ -196,7 +196,7 @@ public class ToolDamageUtil {
   public static boolean damageAnimated(IToolStackView tool, int amount, LivingEntity entity, InteractionHand hand, ModifierId cause) {
     if (damage(tool, amount, entity, entity.getItemInHand(hand), cause)) {
       entity.broadcastBreakEvent(hand);
-      // TODO: why don't we fire ForgeEventFactory.onPlayerDestroyItem here?
+      // TODO: why don't we fire EventHooks.onPlayerDestroyItem here?
       return true;
     }
     return false;

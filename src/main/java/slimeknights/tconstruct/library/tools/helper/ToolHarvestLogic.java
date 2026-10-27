@@ -137,7 +137,7 @@ public class ToolHarvestLogic {
       }
     }
     // checked after the Forge hook, so we have to recheck
-    // TODO: is this needed? Seems its called inside ForgeHooks.onBlockBreakEvent
+    // TODO: is this needed? Seems its called inside CommonHooks.fireBlockBreak
     if (player.blockActionRestricted(world, pos, type)) {
       return false;
     }

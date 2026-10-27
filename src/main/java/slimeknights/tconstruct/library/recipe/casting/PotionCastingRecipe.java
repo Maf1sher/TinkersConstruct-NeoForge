@@ -125,7 +125,7 @@ public class PotionCastingRecipe implements ICastingRecipe, MultiNamedRecipe<IDi
 /** Lazily loaded list of display recipes for JEI */
   private List<IDisplayableCastingRecipe> displayRecipes(HolderLookup.Provider access) {
     if (displayRecipes == null) {
-      Collection<Potion> potions = NeoNeoForgeRegistries.POTIONS.getValues();
+      Collection<Potion> potions = BuiltInRegistries.POTION.stream().toList();
       List<ItemStack> results = new ArrayList<>(potions.size());
       // first, make all the potion items
       for (Potion potion : potions) {

@@ -262,7 +262,7 @@ public class ToolInventoryCapability extends InventoryModifierHookIterator<Modif
       int canInsert = Math.min(stack.getCount(), Math.min(stack.getMaxStackSize(), slotLimit));
       leftover = stack.getCount() - canInsert;
       if (!simulate) {
-        setAndCache(inventory, localSlot, slot, ItemHandlerHelper.copyStackWithSize(stack, canInsert));
+        setAndCache(inventory, localSlot, slot, stack.copyWithCount(canInsert));
       }
     } else {
       // space leftover? does it match?
@@ -284,7 +284,7 @@ public class ToolInventoryCapability extends InventoryModifierHookIterator<Modif
     if (leftover == 0) {
       return ItemStack.EMPTY;
     }
-    return ItemHandlerHelper.copyStackWithSize(stack, leftover);
+    return stack.copyWithCount(leftover);
   }
 
   @Nonnull
@@ -312,7 +312,7 @@ public class ToolInventoryCapability extends InventoryModifierHookIterator<Modif
       amount = current.getCount();
     }
     // get the result before modifying current
-    ItemStack result = ItemHandlerHelper.copyStackWithSize(current, amount);
+    ItemStack result = current.copyWithCount(amount);
     if (!simulate) {
       if (amount == current.getCount()) {
         setAndCache(inventory, localSlot, slot, ItemStack.EMPTY);
