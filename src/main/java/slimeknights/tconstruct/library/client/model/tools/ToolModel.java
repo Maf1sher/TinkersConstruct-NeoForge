@@ -36,6 +36,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 import net.neoforged.neoforge.client.model.BakedModelWrapper;
 import net.neoforged.neoforge.client.model.IModelBuilder;
@@ -823,7 +824,8 @@ public class ToolModel implements IUnbakedGeometry<ToolModel> {
       ItemStack ammo;
       ModDataNBT persistentData = tool.getPersistentData();
       if (ammoKey != null && persistentData.contains(ammoKey, Tag.TAG_COMPOUND)) {
-        ammo = ItemStack.of(persistentData.getCompound(ammoKey));
+        Level ammoLevel = Minecraft.getInstance().level;
+        ammo = ammoLevel == null ? ItemStack.EMPTY : ItemStack.parseOptional(ammoLevel.registryAccess(), persistentData.getCompound(ammoKey));
         builder.add(ammo.getItem());
         CompoundTag tag = DataComponentHelper.getCustomData(ammo);
         if (tag != null) {

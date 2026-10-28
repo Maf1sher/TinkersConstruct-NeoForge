@@ -44,7 +44,7 @@ public class PotionCastingRecipe implements ICastingRecipe, MultiNamedRecipe<IDi
   protected static final LoadableField<SizedFluidIngredient, PotionCastingRecipe> FLUID_FIELD = Loadables.SIZED_FLUID_INGREDIENT.requiredField("fluid", r -> r.fluid);
   protected static final LoadableField<Integer, PotionCastingRecipe> COOLING_TIME_FIELD = IntLoadable.FROM_ONE.defaultField("cooling_time", 5, r -> r.coolingTime);
   public static final RecordLoadable<PotionCastingRecipe> LOADER = RecordLoadable.create(
-    TypeAwareRecipeSerializer.TYPED_SERIALIZER.requiredField(), ContextKey.ID.requiredField(), LoadableRecipeSerializer.RECIPE_GROUP,
+    TypeAwareRecipeSerializer.TYPED_SERIALIZER, ContextKey.ID.requiredField(), LoadableRecipeSerializer.RECIPE_GROUP,
     Loadables.ITEM_INGREDIENT_NONEMPTY.requiredField("bottle", r -> r.bottle),
     FLUID_FIELD,
     Loadables.ITEM.requiredField("result", r -> r.result),
@@ -108,7 +108,7 @@ public class PotionCastingRecipe implements ICastingRecipe, MultiNamedRecipe<IDi
   }
 
   @Override
-  public ItemStack assemble(ICastingContainer inv, RegistryAccess access) {
+  public ItemStack assemble(ICastingContainer inv, HolderLookup.Provider access) {
     ItemStack result = new ItemStack(this.result);
     result.setTag(inv.getFluidTag());
     return result;
@@ -168,7 +168,7 @@ public class PotionCastingRecipe implements ICastingRecipe, MultiNamedRecipe<IDi
   /** @deprecated use {@link #assemble(Container, RegistryAccess)} */
   @Deprecated
   @Override
-  public ItemStack getResultItem(RegistryAccess access) {
+  public ItemStack getResultItem(HolderLookup.Provider access) {
     return new ItemStack(this.result);
   }
 

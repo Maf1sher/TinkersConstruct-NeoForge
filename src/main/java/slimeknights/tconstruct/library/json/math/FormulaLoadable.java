@@ -3,7 +3,7 @@ package slimeknights.tconstruct.library.json.math;
 import com.google.gson.JsonObject;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.util.typed.TypedMap;
 import slimeknights.tconstruct.library.json.math.ModifierFormula.FallbackFormula;
@@ -20,17 +20,17 @@ public record FormulaLoadable(FallbackFormula fallback, String... variables) imp
   }
 
   @Override
-  public void serialize(ModifierFormula object, JsonObject json) {
+  public void serializeInto(ModifierFormula object, JsonObject json, TypedMap context) {
     object.serialize(json, variables);
   }
 
   @Override
-  public ModifierFormula decode(FriendlyByteBuf buffer, TypedMap context) throws DecoderException {
+  public ModifierFormula decode(RegistryFriendlyByteBuf buffer, TypedMap context) throws DecoderException {
     return ModifierFormula.fromNetwork(buffer, variables.length, fallback);
   }
 
   @Override
-  public void encode(FriendlyByteBuf buffer, ModifierFormula object) throws EncoderException {
+  public void encode(RegistryFriendlyByteBuf buffer, ModifierFormula object, TypedMap context) throws EncoderException {
     object.toNetwork(buffer);
   }
 

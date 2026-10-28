@@ -43,7 +43,7 @@ public record AttributeUniqueField<P>(String key, Function<P,String> getter) imp
   }
 
   @Override
-  public void encode(RegistryFriendlyByteBuf buffer, P parent) {
+  public void encode(RegistryFriendlyByteBuf buffer, P parent, TypedMap context) {
     buffer.writeUtf(getter.apply(parent));
   }
 }

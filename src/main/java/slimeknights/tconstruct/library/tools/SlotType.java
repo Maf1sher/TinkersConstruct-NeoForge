@@ -195,7 +195,7 @@ public final class SlotType {
       }
 
       @Override
-      public void encode(RegistryFriendlyByteBuf buffer, SlotCount slots) {
+      public void encode(RegistryFriendlyByteBuf buffer, SlotCount slots, TypedMap context) {
         slots.type().write(buffer);
         buffer.writeVarInt(slots.count());
       }
@@ -233,7 +233,7 @@ public final class SlotType {
       }
 
       @Override
-      public void encode(RegistryFriendlyByteBuf buffer, P parent) {
+      public void encode(RegistryFriendlyByteBuf buffer, P parent, TypedMap context) {
         SlotCount slotCount = getter.apply(parent);
         if (slotCount == null) {
           buffer.writeVarInt(0);

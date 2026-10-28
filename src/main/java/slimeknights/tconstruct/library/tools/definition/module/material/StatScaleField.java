@@ -58,7 +58,7 @@ record StatScaleField(String nestKey, String listKey) implements RecordField<flo
   }
 
   @Override
-  public void encode(RegistryFriendlyByteBuf buffer, MaterialStatsModule parent) {
+  public void encode(RegistryFriendlyByteBuf buffer, MaterialStatsModule parent, TypedMap context) {
     buffer.writeVarInt(parent.scales.length);
     for (float scale : parent.scales) {
       buffer.writeFloat(scale);

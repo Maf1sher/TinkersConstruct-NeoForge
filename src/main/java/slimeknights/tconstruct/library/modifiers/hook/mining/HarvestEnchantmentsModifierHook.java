@@ -1,13 +1,10 @@
 package slimeknights.tconstruct.library.modifiers.hook.mining;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import slimeknights.mantle.util.DataComponentHelper;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
 import slimeknights.tconstruct.library.modifiers.hook.behavior.EnchantmentModifierHook;
@@ -18,7 +15,6 @@ import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Map;
 
 /**
  * Modifier hook implementing bonus enchantments from a tool, applied directly before block break.
@@ -37,17 +33,14 @@ public interface HarvestEnchantmentsModifierHook {
    * @param context    Harvest context
    * @param equipment  Context for other equipment on the player
    * @param slot       Slot being checked for harvest enchantments
-   * @param map        A mutable map to add enchantments from this modifier. May contain negatives.
-   * @see EnchantmentModifierHook#addEnchantment(Map, Enchantment, int)
+   * @param enchantments  Mutable enchantments to add enchantments from this modifier. May contain negatives.
+   * @see EnchantmentModifierHook#addEnchantment(ItemEnchantments.Mutable, net.minecraft.core.Holder, int)
    * @see EnchantmentModifierHook.SingleHarvestEnchantment
    */
-  void updateHarvestEnchantments(IToolStackView tool, ModifierEntry modifier, ToolHarvestContext context, EquipmentContext equipment, EquipmentSlot slot, Map<Enchantment,Integer> map);
+  void updateHarvestEnchantments(IToolStackView tool, ModifierEntry modifier, ToolHarvestContext context, EquipmentContext equipment, EquipmentSlot slot, ItemEnchantments.Mutable enchantments);
 
 
   /* Helpers */
-
-  /** Vanilla enchantments tag */
-  String TAG_ENCHANTMENTS = "Enchantments";
 
   /**
    * Adds all enchantments from tools. Separate method as tools don't have enchants all the time.
@@ -55,17 +48,17 @@ public interface HarvestEnchantmentsModifierHook {
    * @param tool     Tool in the main hand
    * @param stack    Base stack instance
    * @param context  Tool harvest context
-   * @return  Old tag if enchants were applied
+   * @return  Old enchantments if any were applied
    */
   @Nullable
-  static ListTag updateHarvestEnchantments(IToolStackView tool, ItemStack stack, ToolHarvestContext context) {
+  static ItemEnchantments updateHarvestEnchantments(IToolStackView tool, ItemStack stack, ToolHarvestContext context) {
     Player player = context.getPlayer();
     if (player == null || !player.isCreative()) {
       // assuming we have a modifiable tool, we iterate all tools other than the main hand (since the main hand is in charge of harvesting the blocks)
       EquipmentContext equipmentContext = EquipmentContext.withTool(context.getLiving(), tool, EquipmentSlot.MAINHAND);
       // lazily parse the enchantment map, wait until someone has a hook
-      ListTag originalEnchants = null;
-      Map<Enchantment,Integer> enchantments = null;
+      ItemEnchantments originalEnchants = null;
+      ItemEnchantments.Mutable enchantments = null;
       // run on all slots except main hand, to prevent double applying luck
       // TODO 1.21: take advantage of the enchantment slot filter to avoid that instead; not like armor can be in the main hand when this runs
       for (EquipmentSlot slot : APPLICABLE_SLOTS) {
@@ -79,8 +72,8 @@ public interface HarvestEnchantmentsModifierHook {
             if (hook != null) {
               // if we have not yet parsed the enchantments, time to do so
               if (enchantments == null) {
-                originalEnchants = stack.getEnchantmentTags();
-                enchantments = EnchantmentHelper.deserializeEnchantments(originalEnchants);
+                originalEnchants = stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
+                enchantments = new ItemEnchantments.Mutable(originalEnchants);
               }
               hook.updateHarvestEnchantments(armor, entry, context, equipmentContext, slot, enchantments);
             }
@@ -90,8 +83,13 @@ public interface HarvestEnchantmentsModifierHook {
       // if the enchantments is null, no hooks ran so the enchantments are unchanged
       if (enchantments != null) {
         // we allow 0 values for enchantments in the hook
-        enchantments.values().removeIf(EnchantmentModifierHook.VALUE_REMOVER);
-        EnchantmentHelper.setEnchantments(enchantments, stack);
+        enchantments.removeIf(enchantment -> EnchantmentModifierHook.VALUE_REMOVER.test(enchantments.getLevel(enchantment)));
+        ItemEnchantments applied = enchantments.toImmutable();
+        if (applied.isEmpty()) {
+          stack.remove(DataComponents.ENCHANTMENTS);
+        } else {
+          stack.set(DataComponents.ENCHANTMENTS, applied);
+        }
         return originalEnchants;
       }
     }
@@ -100,17 +98,14 @@ public interface HarvestEnchantmentsModifierHook {
 
   /**
    * Restores the original enchants to the given stack
-   * @param stack        Stack to clear enchants
-   * @param originalTag  Original list of enchantments. If empty, will remove the tag
+   * @param stack     Stack to clear enchants
+   * @param original  Original enchantments. If empty, will remove the component
    */
-  static void restoreEnchantments(ItemStack stack, ListTag originalTag) {
-    CompoundTag nbt = DataComponentHelper.getCustomData(stack);
-    if (nbt != null) {
-      if (originalTag.isEmpty()) {
-        nbt.remove(TAG_ENCHANTMENTS);
-      } else {
-        nbt.put(TAG_ENCHANTMENTS, originalTag);
-      }
+  static void restoreEnchantments(ItemStack stack, ItemEnchantments original) {
+    if (original.isEmpty()) {
+      stack.remove(DataComponents.ENCHANTMENTS);
+    } else {
+      stack.set(DataComponents.ENCHANTMENTS, original);
     }
   }
 
@@ -118,9 +113,9 @@ public interface HarvestEnchantmentsModifierHook {
   /** Merger that runs all submodules */
   record AllMerger(Collection<HarvestEnchantmentsModifierHook> modules) implements HarvestEnchantmentsModifierHook {
     @Override
-    public void updateHarvestEnchantments(IToolStackView tool, ModifierEntry modifier, ToolHarvestContext context, EquipmentContext equipment, EquipmentSlot slot, Map<Enchantment,Integer> map) {
+    public void updateHarvestEnchantments(IToolStackView tool, ModifierEntry modifier, ToolHarvestContext context, EquipmentContext equipment, EquipmentSlot slot, ItemEnchantments.Mutable enchantments) {
       for (HarvestEnchantmentsModifierHook module : modules) {
-        module.updateHarvestEnchantments(tool, modifier, context, equipment, slot, map);
+        module.updateHarvestEnchantments(tool, modifier, context, equipment, slot, enchantments);
       }
     }
   }

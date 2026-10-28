@@ -132,7 +132,7 @@ public class PartRecipe implements IPartBuilderRecipe, MultiNamedRecipe<IDisplay
   /** @deprecated use {@link #getRecipeOutput(MaterialVariantId)} */
   @Deprecated
   @Override
-  public ItemStack getResultItem(RegistryAccess access) {
+  public ItemStack getResultItem(HolderLookup.Provider access) {
     return new ItemStack(output);
   }
 
@@ -155,7 +155,7 @@ public class PartRecipe implements IPartBuilderRecipe, MultiNamedRecipe<IDisplay
   }
 
   @Override
-  public ItemStack assemble(IPartBuilderContainer inv, RegistryAccess access) {
+  public ItemStack assemble(IPartBuilderContainer inv, HolderLookup.Provider access) {
     MaterialVariant material = MaterialVariant.UNKNOWN;
     int count = outputCount;
     IMaterialValue materialRecipe = inv.getMaterial();

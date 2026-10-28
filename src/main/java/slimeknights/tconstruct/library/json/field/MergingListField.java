@@ -70,11 +70,11 @@ public record MergingListField<T,P>(LoadableField<T,T> field, String key, Functi
   }
 
   @Override
-  public void encode(RegistryFriendlyByteBuf buffer, P parent) {
+  public void encode(RegistryFriendlyByteBuf buffer, P parent, TypedMap context) {
     List<T> list = getter.apply(parent);
     buffer.writeVarInt(list.size());
     for (T value : list) {
-      field.encode(buffer, value);
+      field.encode(buffer, value, context);
     }
   }
 }

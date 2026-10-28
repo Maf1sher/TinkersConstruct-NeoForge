@@ -17,7 +17,7 @@ public interface TinkerPayload extends ISimplePacket {
 
   static <T extends TinkerPayload> StreamCodec<RegistryFriendlyByteBuf,T> codec(
     Function<RegistryFriendlyByteBuf,T> decoder, BiConsumer<RegistryFriendlyByteBuf,T> encoder) {
-    return StreamCodec.of(encoder, decoder);
+    return StreamCodec.of(encoder::accept, decoder::apply);
   }
 
   /** Schedules packet work on the game thread, matching the former thread-safe packet contract. */

@@ -182,7 +182,7 @@ public final class TinkerCommons extends TinkerModule {
 
   /* Slime Balls are edible, believe it or not */
   public static final EnumObject<SlimeType, Item> slimeball = new EnumObject.Builder<SlimeType, Item>(SlimeType.class)
-    .put(SlimeType.EARTH, () -> Items.SLIME_BALL)
+    .putSupplier(SlimeType.EARTH, () -> Items.SLIME_BALL)
     .putAll(ITEMS.registerEnum(SlimeType.TINKER, "slime_ball", type -> new Item(ITEM_PROPS)))
     .build();
 

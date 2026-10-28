@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.netty.handler.codec.DecoderException;
 import lombok.RequiredArgsConstructor;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -39,10 +40,10 @@ public class UpdateModifiersPacket implements TinkerPayload {
   /** Map of modifier redirect ID pairs */
   private Map<ModifierId,ModifierId> redirects;
   /** Map of enchantment to modifier pair */
-  private final Map<Enchantment,Modifier> enchantmentMap;
+  private final Map<Holder<Enchantment>,Modifier> enchantmentMap;
   /** Collection of all enchantment tag mappings */
   private final Map<TagKey<Enchantment>, Modifier> enchantmentTagMappings;
-  private static final StreamCodec<RegistryFriendlyByteBuf,Enchantment> ENCHANTMENT_CODEC = ByteBufCodecs.registry(Registries.ENCHANTMENT);
+  private static final StreamCodec<RegistryFriendlyByteBuf,Holder<Enchantment>> ENCHANTMENT_CODEC = ByteBufCodecs.holderRegistry(Registries.ENCHANTMENT);
 
   /** Ensures both the modifiers and redirects lists are calculated, allows one packet to be used multiple times without redundant work */
   private void ensureCalculated() {
@@ -106,7 +107,7 @@ public class UpdateModifiersPacket implements TinkerPayload {
     this.tags = GenericTagUtil.decodeTags(buffer, ModifierManager.REGISTRY_KEY, id -> getModifier(modifiers, new ModifierId(id)));
 
     // read in enchantment to modifier mapping
-    ImmutableMap.Builder<Enchantment,Modifier> enchantmentBuilder = ImmutableMap.builder();
+    ImmutableMap.Builder<Holder<Enchantment>,Modifier> enchantmentBuilder = ImmutableMap.builder();
     size = buffer.readVarInt();
     for (int i = 0; i < size; i++) {
       enchantmentBuilder.put(
@@ -124,7 +125,6 @@ public class UpdateModifiersPacket implements TinkerPayload {
     enchantmentTagMappings = enchantmentTagBuilder.build();
   }
 
-  @Override
   public void encode(RegistryFriendlyByteBuf buffer) {
     ensureCalculated();
     // write modifiers
@@ -150,7 +150,7 @@ public class UpdateModifiersPacket implements TinkerPayload {
 
     // enchantment mapping
     buffer.writeVarInt(enchantmentMap.size());
-    for (Entry<Enchantment,Modifier> entry : enchantmentMap.entrySet()) {
+    for (Entry<Holder<Enchantment>,Modifier> entry : enchantmentMap.entrySet()) {
       ENCHANTMENT_CODEC.encode(buffer, entry.getKey());
       buffer.writeResourceLocation(entry.getValue().getId().getLocation());
     }

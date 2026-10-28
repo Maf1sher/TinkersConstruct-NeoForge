@@ -2,6 +2,7 @@ package slimeknights.tconstruct.library.recipe.molding;
 
 import lombok.Getter;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -21,7 +22,7 @@ import slimeknights.tconstruct.library.recipe.helper.TypeAwareRecipeSerializer;
 /** Recipe to combine two items on the top of a casting table, changing the first */
 public class MoldingRecipe implements ICommonRecipe<IMoldingContainer> {
   public static final RecordLoadable<MoldingRecipe> LOADER = RecordLoadable.create(
-    TypeAwareRecipeSerializer.TYPED_SERIALIZER.requiredField(),
+    TypeAwareRecipeSerializer.TYPED_SERIALIZER,
     ContextKey.ID.requiredField(),
     Loadables.ITEM_INGREDIENT_NONEMPTY.requiredField("material", MoldingRecipe::getMaterial),
     Loadables.ITEM_INGREDIENT.defaultField("pattern", Ingredient.EMPTY, MoldingRecipe::getPattern),
@@ -64,7 +65,7 @@ public class MoldingRecipe implements ICommonRecipe<IMoldingContainer> {
   }
 
   @Override
-  public ItemStack getResultItem(RegistryAccess access) {
+  public ItemStack getResultItem(HolderLookup.Provider access) {
     return recipeOutput.get();
   }
 }

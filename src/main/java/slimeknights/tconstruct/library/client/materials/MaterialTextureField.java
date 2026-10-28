@@ -65,7 +65,7 @@ enum MaterialTextureField implements RecordField<ResourceLocation, MaterialRende
   }
 
   @Override
-  public void encode(RegistryFriendlyByteBuf buffer, MaterialRenderInfo parent) {
+  public void encode(RegistryFriendlyByteBuf buffer, MaterialRenderInfo parent, TypedMap context) {
     ResourceLocation texture = parent.texture();
     // save some network traffic if the texture is the ID, since we already need an extra byte to specify null
     if (texture == null) {

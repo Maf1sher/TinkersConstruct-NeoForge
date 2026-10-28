@@ -53,7 +53,7 @@ public record MergingField<T,P>(LoadableField<T,P> field, String key, MissingMod
   }
 
   @Override
-  public void encode(RegistryFriendlyByteBuf buffer, P parent) {
-    field.encode(buffer, parent);
+  public void encode(RegistryFriendlyByteBuf buffer, P parent, TypedMap context) {
+    field.encode(buffer, parent, context);
   }
 }

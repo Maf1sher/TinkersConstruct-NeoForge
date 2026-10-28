@@ -3,7 +3,6 @@ package slimeknights.tconstruct.library.recipe.helper;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
 import slimeknights.mantle.data.loadable.ErrorFactory;
-import slimeknights.mantle.data.loadable.field.LoadableField;
 import slimeknights.mantle.data.loadable.field.RecordField;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
@@ -25,7 +24,7 @@ public class TypeAwareRecipeSerializer<T extends Recipe<?>> extends LoadableReci
   }
 
   /** Creates a type aware serializer from a loadable and a recipe type supplier */
-  public static <T extends Recipe<?>> TypeAwareRecipeSerializer<T> of(RecordLoadable<T> loadable, Supplier<? extends RecipeType<?>> type) {
+  public static <T extends Recipe<?>> TypeAwareRecipeSerializer<T> create(RecordLoadable<T> loadable, Supplier<? extends RecipeType<?>> type) {
     return new TypeAwareRecipeSerializer<>(loadable, type);
   }
 
@@ -43,7 +42,7 @@ public class TypeAwareRecipeSerializer<T extends Recipe<?>> extends LoadableReci
 
   /** Context field to fetch a type aware serializer from the recipe context */
   @SuppressWarnings("unchecked")
-  public static final LoadableField<TypeAwareRecipeSerializer<?>,Recipe<?>> TYPED_SERIALIZER =
+  public static final RecordField<TypeAwareRecipeSerializer<?>,Recipe<?>> TYPED_SERIALIZER =
     (RecordField<TypeAwareRecipeSerializer<?>,Object>) LoadableRecipeSerializer.SERIALIZER.mappedField((value, error) -> {
       if (value instanceof TypeAwareRecipeSerializer<?> aware) {
         return aware;

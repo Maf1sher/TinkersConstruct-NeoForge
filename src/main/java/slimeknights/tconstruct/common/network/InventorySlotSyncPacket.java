@@ -27,14 +27,14 @@ public class InventorySlotSyncPacket implements TinkerPayload {
   }
 
   public InventorySlotSyncPacket(RegistryFriendlyByteBuf buffer) {
-    this.itemStack = buffer.readItem();
+    this.itemStack = ItemStack.OPTIONAL_STREAM_CODEC.decode(buffer);
     this.slot = buffer.readShort();
     this.pos = buffer.readBlockPos();
   }
 
   @Override
   public void encode(RegistryFriendlyByteBuf packetBuffer) {
-    packetBuffer.writeItem(this.itemStack);
+    ItemStack.OPTIONAL_STREAM_CODEC.encode(packetBuffer, this.itemStack);
     packetBuffer.writeShort(this.slot);
     packetBuffer.writeBlockPos(this.pos);
   }

@@ -1,8 +1,13 @@
 package slimeknights.tconstruct.tools.data;
 
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.PackOutput;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
@@ -11,6 +16,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Tiers;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -77,11 +83,30 @@ import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import slimeknights.tconstruct.tools.modifiers.traits.skull.StrongBonesModifier;
 import slimeknights.tconstruct.world.block.DirtType;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public class FluidEffectProvider extends AbstractFluidEffectProvider {
-  public FluidEffectProvider(PackOutput packOutput) {
+  private final CompletableFuture<HolderLookup.Provider> registries;
+  /** Enchantment lookup, available once {@link #run(CachedOutput)} starts */
+  private HolderLookup.RegistryLookup<Enchantment> enchantments;
+
+  public FluidEffectProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> registries) {
     super(packOutput, TConstruct.MOD_ID);
+    this.registries = registries;
+  }
+
+  @Override
+  public CompletableFuture<?> run(CachedOutput cache) {
+    return registries.thenCompose(lookup -> {
+      this.enchantments = lookup.lookupOrThrow(Registries.ENCHANTMENT);
+      return super.run(cache);
+    });
+  }
+
+  /** Resolves an enchantment holder for datagen */
+  private Holder<Enchantment> enchantment(ResourceKey<Enchantment> enchantment) {
+    return enchantments.getOrThrow(enchantment);
   }
 
   @SuppressWarnings("removal")
@@ -200,8 +225,8 @@ public class FluidEffectProvider extends AbstractFluidEffectProvider {
     // gems - direct damage and mining //
     addGem(TinkerFluids.moltenAmethyst).addBlockEffect(new HarvestTierPredicate(Tiers.STONE),     new BreakBlockFluidEffect(3));
     addGem(TinkerFluids.moltenQuartz  ).addBlockEffect(new HarvestTierPredicate(Tiers.IRON),      new BreakBlockFluidEffect(5));
-    addGem(TinkerFluids.moltenEmerald ).addBlockEffect(new HarvestTierPredicate(Tiers.IRON),      new BreakBlockFluidEffect(10, Enchantments.SILK_TOUCH, 1));
-    addGem(TinkerFluids.moltenDiamond ).addBlockEffect(new HarvestTierPredicate(Tiers.DIAMOND),   new BreakBlockFluidEffect(10, Enchantments.FORTUNE, 3));
+    addGem(TinkerFluids.moltenEmerald ).addBlockEffect(new HarvestTierPredicate(Tiers.IRON),      new BreakBlockFluidEffect(10, enchantment(Enchantments.SILK_TOUCH), 1));
+    addGem(TinkerFluids.moltenDiamond ).addBlockEffect(new HarvestTierPredicate(Tiers.DIAMOND),   new BreakBlockFluidEffect(10, enchantment(Enchantments.FORTUNE), 3));
     addMetal(TinkerFluids.moltenDebris).addBlockEffect(new HarvestTierPredicate(Tiers.NETHERITE), new BreakBlockFluidEffect(50));
 
     // foods - setup to give equivalent saturation on a full bowl/bottle to their food counterparts, though hunger may be slightly different

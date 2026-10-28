@@ -22,7 +22,7 @@ import java.util.List;
 /** Recipe which duplicates the input cast using a fluid */
 public class CastDuplicationRecipe extends ItemCastingRecipe implements MultiNamedRecipe<IDisplayableCastingRecipe> {
   public static final RecordLoadable<CastDuplicationRecipe> LOADER = RecordLoadable.create(
-    TypeAwareRecipeSerializer.TYPED_SERIALIZER.requiredField(), ContextKey.ID.requiredField(),
+    TypeAwareRecipeSerializer.TYPED_SERIALIZER, ContextKey.ID.requiredField(),
     LoadableRecipeSerializer.RECIPE_GROUP,
     Loadables.ITEM_INGREDIENT_NONEMPTY.requiredField("cast", CastDuplicationRecipe::getCast),
     FLUID_FIELD, COOLING_TIME_FIELD,
@@ -33,12 +33,12 @@ public class CastDuplicationRecipe extends ItemCastingRecipe implements MultiNam
   }
 
   @Override
-  public ItemStack assemble(ICastingContainer inv, RegistryAccess access) {
+  public ItemStack assemble(ICastingContainer inv, HolderLookup.Provider access) {
     return inv.getStack().copy();
   }
 
   @Override
-  public ItemStack getResultItem(RegistryAccess access) {
+  public ItemStack getResultItem(HolderLookup.Provider access) {
     ItemStack[] items = getCast().getItems();
     return items.length == 0 ? ItemStack.EMPTY : items[0];
   }

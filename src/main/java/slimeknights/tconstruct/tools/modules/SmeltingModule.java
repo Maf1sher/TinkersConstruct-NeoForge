@@ -370,7 +370,7 @@ public record SmeltingModule(RecipeType<? extends AbstractCookingRecipe> recipeT
     }
 
     @Override
-    public void encode(RegistryFriendlyByteBuf buffer, SmeltingModule module) {
+    public void encode(RegistryFriendlyByteBuf buffer, SmeltingModule module, TypedMap context) {
       buffer.writeResourceLocation(Objects.requireNonNull(module.output.key()));
     }
   }

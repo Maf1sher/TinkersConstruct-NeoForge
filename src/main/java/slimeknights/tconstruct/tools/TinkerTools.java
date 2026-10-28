@@ -268,19 +268,19 @@ public final class TinkerTools extends TinkerModule {
   public static final DeferredHolder<ParticleType<?>, SimpleParticleType> bonkAttackParticle = PARTICLE_TYPES.register("bonk", () -> new SimpleParticleType(true));
 
   /* Entities */
-  public static final DeferredHolder<EntityType<?>, EntityType<IndestructibleItemEntity>> indestructibleItem = ENTITIES.register("indestructible_item", () ->
+  public static final DeferredHolder<EntityType<?>, EntityType<IndestructibleItemEntity>> indestructibleItem = ENTITIES.registerNoEgg("indestructible_item", () ->
     EntityType.Builder.<IndestructibleItemEntity>of(IndestructibleItemEntity::new, MobCategory.MISC)
                       .sized(0.25F, 0.25F)
                       .fireImmune());
-  public static final DeferredHolder<EntityType<?>, EntityType<CrystalshotEntity>> crystalshotEntity = ENTITIES.register("crystalshot", () ->
+  public static final DeferredHolder<EntityType<?>, EntityType<CrystalshotEntity>> crystalshotEntity = ENTITIES.registerNoEgg("crystalshot", () ->
     EntityType.Builder.<CrystalshotEntity>of(CrystalshotEntity::new, MobCategory.MISC)
                       .sized(0.5F, 0.5F)
                       .clientTrackingRange(4)
                       .updateInterval(20));
-  public static final DeferredHolder<EntityType<?>, EntityType<CombatFishingHook>> fishingHook = ENTITIES.register("fishing_bobber", () -> EntityType.Builder.<CombatFishingHook>of(CombatFishingHook::new, MobCategory.MISC).noSave().noSummon().sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(5));
-  public static final DeferredHolder<EntityType<?>, EntityType<ModifiableArrow>> materialArrow = ENTITIES.register("arrow", () -> EntityType.Builder.<ModifiableArrow>of(ModifiableArrow::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(20));
-  public static final DeferredHolder<EntityType<?>, EntityType<ThrownShuriken>> thrownShuriken = ENTITIES.register("thrown_shuriken", () -> EntityType.Builder.<ThrownShuriken>of(ThrownShuriken::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10));
-  public static final DeferredHolder<EntityType<?>, EntityType<ThrownTool>> thrownTool = ENTITIES.register("thrown_tool", () -> EntityType.Builder.<ThrownTool>of(ThrownTool::new, MobCategory.MISC).sized(0.5f, 0.5f).clientTrackingRange(4).updateInterval(20));
+  public static final DeferredHolder<EntityType<?>, EntityType<CombatFishingHook>> fishingHook = ENTITIES.registerNoEgg("fishing_bobber", () -> EntityType.Builder.<CombatFishingHook>of(CombatFishingHook::new, MobCategory.MISC).noSave().noSummon().sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(5));
+  public static final DeferredHolder<EntityType<?>, EntityType<ModifiableArrow>> materialArrow = ENTITIES.registerNoEgg("arrow", () -> EntityType.Builder.<ModifiableArrow>of(ModifiableArrow::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(20));
+  public static final DeferredHolder<EntityType<?>, EntityType<ThrownShuriken>> thrownShuriken = ENTITIES.registerNoEgg("thrown_shuriken", () -> EntityType.Builder.<ThrownShuriken>of(ThrownShuriken::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10));
+  public static final DeferredHolder<EntityType<?>, EntityType<ThrownTool>> thrownTool = ENTITIES.registerNoEgg("thrown_tool", () -> EntityType.Builder.<ThrownTool>of(ThrownTool::new, MobCategory.MISC).sized(0.5f, 0.5f).clientTrackingRange(4).updateInterval(20));
   static {
     // used for the fishing bobber
     DATA_SERIALIZERS.register("material_variant", () -> MaterialVariantId.DATA_ACCESSOR);
@@ -295,7 +295,7 @@ public final class TinkerTools extends TinkerModule {
    * Events
    */
 
-  void commonSetup(FMLCommonSetupEvent event) {
+  static void commonSetup(FMLCommonSetupEvent event) {
     EquipmentChangeWatcher.register();
     for (ConfigurableAction action : Config.COMMON.toolTweaks) {
       event.enqueueWork(action);
@@ -314,7 +314,7 @@ public final class TinkerTools extends TinkerModule {
     ToolHooks.init();
   }
 
-  void registerRecipeSerializers(RegisterEvent event) {
+  static void registerRecipeSerializers(RegisterEvent event) {
     if (event.getRegistryKey() == NeoForgeRegistries.Keys.INGREDIENT_TYPES) {
       // custom ingredient type; JSON "type" key stays identical to the legacy Forge serializer ID
       Registry<IngredientType<?>> registry = event.getRegistry(NeoForgeRegistries.Keys.INGREDIENT_TYPES);
@@ -395,7 +395,7 @@ public final class TinkerTools extends TinkerModule {
     }
   }
 
-  void gatherData(final GatherDataEvent event) {
+  static void gatherData(final GatherDataEvent event) {
     DataGenerator generator = event.getGenerator();
     PackOutput packOutput = generator.getPackOutput();
     ExistingFileHelper existingFileHelper = event.getExistingFileHelper();

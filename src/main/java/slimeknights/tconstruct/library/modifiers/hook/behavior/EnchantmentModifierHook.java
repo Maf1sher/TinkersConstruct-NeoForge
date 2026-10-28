@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.library.modifiers.hook.behavior;
 
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -16,9 +17,9 @@ import java.util.Collection;
 import java.util.function.Predicate;
 
 /**
- * This interface exposes two methods, {@link #updateEnchantmentLevel(IToolStackView, ModifierEntry, Holder, int)} and {@link #updateEnchantments(IToolStackView, ModifierEntry, ItemEnchantments.Mutable)}
+ * This interface exposes two methods, {@link #updateEnchantmentLevel(IToolStackView, ModifierEntry, Holder, int)} and {@link #updateEnchantments(IToolStackView, ModifierEntry, HolderLookup.RegistryLookup, ItemEnchantments.Mutable)}
  * to allow tools to claim to have enchantments to vanilla APIs without modifying NBT. For performance reasons we don't simply have one hook call the other, but their behavior must be consistent.
- * That is, whatever change you make to the level in {@link #updateEnchantmentLevel(IToolStackView, ModifierEntry, Holder, int)} must also be reflected in the enchantments in {@link #updateEnchantments(IToolStackView, ModifierEntry, ItemEnchantments.Mutable)}.
+ * That is, whatever change you make to the level in {@link #updateEnchantmentLevel(IToolStackView, ModifierEntry, Holder, int)} must also be reflected in the enchantments in {@link #updateEnchantments(IToolStackView, ModifierEntry, HolderLookup.RegistryLookup, ItemEnchantments.Mutable)}.
  */
 public interface EnchantmentModifierHook {
   /** Predicate to remove unneeded values from the enchantments */
@@ -39,10 +40,11 @@ public interface EnchantmentModifierHook {
    * You may reduce the value to a negative, all values 0 or less will be removed after the hook runs.
    * @param tool          Tool instance
    * @param modifier      Modifier instance
-   * @param enchantments  Mutable enchantments to add enchantments from this modifier. May contain negatives.
+   * @param enchantmentLookup  Lookup for enchantments, used by modules that reference an enchantment by key
+   * @param enchantments       Mutable enchantments to add enchantments from this modifier. May contain negatives.
    * @see #addEnchantment(ItemEnchantments.Mutable, Holder, int)
    */
-  void updateEnchantments(IToolStackView tool, ModifierEntry modifier, ItemEnchantments.Mutable enchantments);
+  void updateEnchantments(IToolStackView tool, ModifierEntry modifier, HolderLookup.RegistryLookup<Enchantment> enchantmentLookup, ItemEnchantments.Mutable enchantments);
 
   /** Adds the given enchantment to the mutable enchantments */
   static void addEnchantment(ItemEnchantments.Mutable enchantments, Holder<Enchantment> enchantment, int amount) {
@@ -70,13 +72,14 @@ public interface EnchantmentModifierHook {
   /**
    * Gets all enchantments on the given stack
    * @param stack  Stack instance
+   * @param enchantmentLookup  Lookup for enchantments
    * @return  All contained enchantments
    */
-  static ItemEnchantments getAllEnchantments(ItemStack stack) {
+  static ItemEnchantments getAllEnchantments(ItemStack stack, HolderLookup.RegistryLookup<Enchantment> enchantmentLookup) {
     ItemEnchantments.Mutable enchantments = new ItemEnchantments.Mutable(stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY));
     IToolStackView tool = ToolStack.from(stack);
     for (ModifierEntry entry : tool.getModifierList()) {
-      entry.getHook(ModifierHooks.ENCHANTMENTS).updateEnchantments(tool, entry, enchantments);
+      entry.getHook(ModifierHooks.ENCHANTMENTS).updateEnchantments(tool, entry, enchantmentLookup, enchantments);
     }
     // we allow hooks to return negative, such as to cancel out an enchantment
     enchantments.removeIf(enchantment -> VALUE_REMOVER.test(enchantments.getLevel(enchantment)));
@@ -94,9 +97,9 @@ public interface EnchantmentModifierHook {
     }
 
     @Override
-    public void updateEnchantments(IToolStackView tool, ModifierEntry modifier, ItemEnchantments.Mutable enchantments) {
+    public void updateEnchantments(IToolStackView tool, ModifierEntry modifier, HolderLookup.RegistryLookup<Enchantment> enchantmentLookup, ItemEnchantments.Mutable enchantments) {
       for (EnchantmentModifierHook module : modules) {
-        module.updateEnchantments(tool, modifier, enchantments);
+        module.updateEnchantments(tool, modifier, enchantmentLookup, enchantments);
       }
     }
   }
@@ -133,7 +136,7 @@ public interface EnchantmentModifierHook {
     }
 
     @Override
-    default void updateEnchantments(IToolStackView tool, ModifierEntry modifier, ItemEnchantments.Mutable enchantments) {
+    default void updateEnchantments(IToolStackView tool, ModifierEntry modifier, HolderLookup.RegistryLookup<Enchantment> enchantmentLookup, ItemEnchantments.Mutable enchantments) {
       addEnchantment(enchantments, getEnchantment(tool, modifier), getEnchantmentLevel(tool, modifier));
     }
   }
@@ -149,9 +152,9 @@ public interface EnchantmentModifierHook {
     }
 
     @Override
-    default void updateEnchantments(IToolStackView tool, ModifierEntry modifier, ItemEnchantments.Mutable enchantments) {
+    default void updateEnchantments(IToolStackView tool, ModifierEntry modifier, HolderLookup.RegistryLookup<Enchantment> enchantmentLookup, ItemEnchantments.Mutable enchantments) {
       if (BlockHarvestModifierHook.MarkHarvesting.isHarvesting(tool)) {
-        SingleEnchantment.super.updateEnchantments(tool, modifier, enchantments);
+        SingleEnchantment.super.updateEnchantments(tool, modifier, enchantmentLookup, enchantments);
       }
     }
   }
