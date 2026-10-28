@@ -29,7 +29,7 @@ import java.util.List;
 public class MeltingFuel implements ICustomOutputRecipe<IFluidContainer> {
   public static final RecordLoadable<MeltingFuel> LOADER = RecordLoadable.create(
     ContextKey.ID.requiredField(),
-    Loadables.SIZED_FLUID_INGREDIENT.defaultField("fluid", null, r -> r.input),
+    Loadables.SIZED_FLUID_INGREDIENT.nullableField("fluid", r -> r.input),
     IntLoadable.FROM_ONE.defaultField("duration", 0, MeltingFuel::getDuration),
     IntLoadable.FROM_ONE.requiredField("temperature", MeltingFuel::getTemperature),
     IntLoadable.FROM_ONE.requiredField("rate", MeltingFuel::getRate),
