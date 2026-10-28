@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import io.netty.buffer.Unpooled;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.BuiltInRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.Direction;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -13,11 +13,12 @@ import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import org.junit.jupiter.api.Test;
+import slimeknights.tconstruct.test.BaseMcTest;
 import slimeknights.tconstruct.tools.network.PushBlockRowPacket;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class TinkerFluidIngredientsTest {
+class TinkerFluidIngredientsTest extends BaseMcTest {
   private static final RegistryAccess REGISTRIES = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
 
   @Test

@@ -3,7 +3,8 @@ package slimeknights.tconstruct.library.tools.helper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import slimeknights.mantle.data.predicate.block.BlockPredicate;
@@ -32,7 +33,7 @@ class ToolHarvestLogicTest extends ToolItemTest {
     MaterialItemFixture.init();
     if (pickaxeTool == null) {
       pickaxeTool = new ModifiableItem(new Item.Properties().stacksTo(1), ToolDefinitionFixture.getStandardToolDefinition());
-      ForgeRegistries.ITEMS.register(TestHelper.id("pickaxe"), pickaxeTool);
+      Registry.register(BuiltInRegistries.ITEM, TestHelper.id("pickaxe"), pickaxeTool);
     }
   }
 
@@ -90,7 +91,7 @@ class ToolHarvestLogicTest extends ToolItemTest {
                          .build());
 
     ModifiableItem toolWithMiningModifier = new ModifiableItem(new Item.Properties(), definition);
-    ForgeRegistries.ITEMS.register(TestHelper.id("tool_with_mining_modifier"), toolWithMiningModifier);
+    Registry.register(BuiltInRegistries.ITEM, TestHelper.id("tool_with_mining_modifier"), toolWithMiningModifier);
     ItemStack tool = buildTestTool(toolWithMiningModifier);
 
     // boosted by correct block

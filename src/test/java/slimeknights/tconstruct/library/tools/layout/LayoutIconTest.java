@@ -2,18 +2,19 @@ package slimeknights.tconstruct.library.tools.layout;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
-import io.netty.buffer.Unpooled;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
 import org.junit.jupiter.api.Test;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.tconstruct.library.recipe.partbuilder.Pattern;
 import slimeknights.tconstruct.library.tools.layout.LayoutIcon.ItemStackIcon;
 import slimeknights.tconstruct.library.tools.layout.LayoutIcon.PatternIcon;
 import slimeknights.tconstruct.test.BaseMcTest;
+import slimeknights.tconstruct.test.TestHelper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -29,7 +30,7 @@ class LayoutIconTest extends BaseMcTest {
 
   @Test
   void empty_bufferReadWrite() {
-    FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
+    RegistryFriendlyByteBuf buffer = TestHelper.registryBuffer();
     LayoutIcon.EMPTY.write(buffer);
 
     LayoutIcon decoded = LayoutIcon.read(buffer);
@@ -66,7 +67,7 @@ class LayoutIconTest extends BaseMcTest {
   void item_bufferReadWrite() {
     ItemStack original = new ItemStack(Items.DIAMOND_PICKAXE);
     LayoutIcon itemIcon = LayoutIcon.ofItem(original);
-    FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
+    RegistryFriendlyByteBuf buffer = TestHelper.registryBuffer();
     itemIcon.write(buffer);
 
     LayoutIcon decoded = LayoutIcon.read(buffer);
@@ -81,25 +82,28 @@ class LayoutIconTest extends BaseMcTest {
     ItemStack original = new ItemStack(Items.DIAMOND_PICKAXE);
     LayoutIcon itemIcon = LayoutIcon.ofItem(original);
     JsonObject json = itemIcon.toJson();
-    assertThat(json.entrySet()).hasSize(2);
-    assertThat(GsonHelper.getAsString(json, "item")).isEqualTo(Loadables.ITEM.getKey(Items.DIAMOND_PICKAXE).toString());
-    assert original.getTag() != null;
-    assertThat(GsonHelper.getAsString(json, "nbt")).isEqualTo(original.getTag().toString());
+    // 1.21.1 item format writes a single "id" key for a stack with default components
+    assertThat(json.entrySet()).hasSize(1);
+    assertThat(GsonHelper.getAsString(json, "id")).isEqualTo(Loadables.ITEM.getKey(Items.DIAMOND_PICKAXE).toString());
   }
 
   @Test
   void item_jsonDeserialize() {
     JsonObject json = new JsonObject();
-    json.addProperty("item", Loadables.ITEM.getKey(Items.DIAMOND).toString());
-    json.addProperty("nbt", "{test:1}");
+    json.addProperty("id", Loadables.ITEM.getKey(Items.DIAMOND).toString());
+    JsonObject components = new JsonObject();
+    JsonObject customData = new JsonObject();
+    customData.addProperty("test", 1);
+    components.add("minecraft:custom_data", customData);
+    json.add("components", components);
     LayoutIcon icon = LayoutIcon.SERIALIZER.deserialize(json, LayoutIcon.class, mock(JsonDeserializationContext.class));
     assertThat(icon).isInstanceOf(ItemStackIcon.class);
     ItemStack stack = icon.getValue(ItemStack.class);
     assertThat(stack).isNotNull();
     assertThat(stack.getItem()).isEqualTo(Items.DIAMOND);
-    CompoundTag nbt = stack.getTag();
-    assertThat(nbt).isNotNull();
-    assertThat(nbt.getInt("test")).isEqualTo(1);
+    CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+    assertThat(data).isNotNull();
+    assertThat(data.copyTag().getInt("test")).isEqualTo(1);
   }
 
 
@@ -119,7 +123,7 @@ class LayoutIconTest extends BaseMcTest {
   void pattern_bufferReadWrite() {
     Pattern pattern = new Pattern("test:the_pattern");
     LayoutIcon icon = LayoutIcon.ofPattern(pattern);
-    FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
+    RegistryFriendlyByteBuf buffer = TestHelper.registryBuffer();
     icon.write(buffer);
 
     LayoutIcon decoded = LayoutIcon.read(buffer);

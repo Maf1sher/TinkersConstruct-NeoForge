@@ -5,6 +5,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import org.junit.jupiter.api.Test;
+import slimeknights.tconstruct.test.BaseMcTest;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class TinkerNetworkSyncTest {
+class TinkerNetworkSyncTest extends BaseMcTest {
   @Test
   void syncsTargetedPlayerAndBatchesPayloads() {
     OnDatapackSyncEvent event = mock(OnDatapackSyncEvent.class);

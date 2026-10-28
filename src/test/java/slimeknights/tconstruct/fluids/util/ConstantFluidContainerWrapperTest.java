@@ -6,10 +6,11 @@ import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 import org.junit.jupiter.api.Test;
+import slimeknights.tconstruct.test.BaseMcTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ConstantFluidContainerWrapperTest {
+class ConstantFluidContainerWrapperTest extends BaseMcTest {
   @Test
   void onlyDrainsTheWholeContainerAndSimulationDoesNotConsumeIt() {
     ItemStack filledContainer = new ItemStack(Items.POTION);

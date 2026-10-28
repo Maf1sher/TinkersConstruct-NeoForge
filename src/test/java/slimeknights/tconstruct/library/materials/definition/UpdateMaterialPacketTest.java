@@ -22,8 +22,8 @@ class UpdateMaterialPacketTest extends BaseMcTest {
 
   @Test
   void testGenericEncodeDecode() {
-    IMaterial material1 = new Material(MATERIAL_ID_1, 1, 2, Rarity.UNCOMMON, true, false);
-    IMaterial material2 = new Material(MATERIAL_ID_2, 3, 4, Rarity.RARE, false, true);
+    IMaterial material1 = new Material(MATERIAL_ID_1.getLocation(), 1, 2, Rarity.UNCOMMON, true, false);
+    IMaterial material2 = new Material(MATERIAL_ID_2.getLocation(), 3, 4, Rarity.RARE, false, true);
     Map<MaterialId,IMaterial> materials = ImmutableMap.of(MATERIAL_ID_1, material1, MATERIAL_ID_2, material2);
     Map<MaterialId,MaterialId> redirects = ImmutableMap.of(REDIRECT_ID, MATERIAL_ID_1);
 

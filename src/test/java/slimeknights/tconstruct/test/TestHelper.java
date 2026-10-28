@@ -1,7 +1,7 @@
 package slimeknights.tconstruct.test;
 
 import io.netty.buffer.Unpooled;
-import net.minecraft.core.BuiltInRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -31,7 +31,7 @@ public class TestHelper {
   /** Creates a resource location under {@link #MOD_ID} */
   @SuppressWarnings("removal")
   public static ResourceLocation id(String name) {
-    return new ResourceLocation(MOD_ID, name);
+    return ResourceLocation.fromNamespaceAndPath(MOD_ID, name);
   }
 
   /** Creates a registry-aware buffer for NeoForge payload and Mantle stream-codec tests. */

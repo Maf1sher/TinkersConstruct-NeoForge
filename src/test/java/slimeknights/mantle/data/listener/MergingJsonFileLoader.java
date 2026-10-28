@@ -3,9 +3,11 @@ package slimeknights.mantle.data.listener;
 import com.google.gson.JsonElement;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import slimeknights.tconstruct.library.utils.ResourceId;
 import slimeknights.tconstruct.test.JsonFileLoader;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,17 +29,19 @@ public class MergingJsonFileLoader<B> extends JsonFileLoader {
   /**
    * Loads and parses the relevant files into the data loader
    * @param mergeFolder  If nonnull, subfolder to load as a "second datapack", for testing merging behavior. If null, skips the merging
-   * @param files  List of files
+   * @param files  List of files, accepts any typed resource ID such as a material ID
    */
-  public void loadAndParseFiles(@Nullable String mergeFolder, ResourceLocation... files) {
+  public void loadAndParseFiles(@Nullable String mergeFolder, ResourceId... files) {
+    // 1.21.1 material IDs are a wrapper around the resource location, so unwrap them for the loader
+    ResourceLocation[] locations = Arrays.stream(files).map(ResourceId::getLocation).toArray(ResourceLocation[]::new);
     Map<ResourceLocation,B> parsedMap = new HashMap<>();
-    for (Entry<ResourceLocation, JsonElement> entry : loadFilesAsSplashlist(files).entrySet()) {
+    for (Entry<ResourceLocation, JsonElement> entry : loadFilesAsSplashlist(locations).entrySet()) {
       ResourceLocation id = entry.getKey();
       dataLoader.parse(parsedMap.computeIfAbsent(id, dataLoader.builderConstructor), id, entry.getValue());
     }
     if (mergeFolder != null) {
       JsonFileLoader fakeSecondDataPack = new JsonFileLoader(dataLoader.gson, dataLoader.folder + "/" + mergeFolder);
-      for (Entry<ResourceLocation, JsonElement> entry : fakeSecondDataPack.loadFilesAsSplashlist(files).entrySet()) {
+      for (Entry<ResourceLocation, JsonElement> entry : fakeSecondDataPack.loadFilesAsSplashlist(locations).entrySet()) {
         ResourceLocation id = entry.getKey();
         dataLoader.parse(parsedMap.computeIfAbsent(id, dataLoader.builderConstructor), id, entry.getValue());
       }
