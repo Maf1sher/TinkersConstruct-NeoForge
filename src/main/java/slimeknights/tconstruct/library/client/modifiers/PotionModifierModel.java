@@ -13,7 +13,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionContents;
-import net.minecraft.world.item.alchemy.Potions;
 import slimeknights.mantle.client.model.util.MantleItemLayerModel;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.util.ItemLayerPixels;
@@ -77,9 +76,9 @@ public class PotionModifierModel implements SimpleModifierModel {
       if (toolData.contains(key, Tag.TAG_STRING)) {
         ResourceLocation id = ResourceLocation.tryParse(toolData.getString(key));
         if (id != null) {
-          Potion potion = BuiltInRegistries.POTION.get(id);
-          if (potion != Potions.EMPTY) {
-            quadConsumer.accept(MantleItemLayerModel.getQuadsForSprite(0xFF000000 | PotionUtils.getColor(potion), -1, spriteGetter.apply(texture), transforms, 0, pixels));
+          Holder<Potion> potion = BuiltInRegistries.POTION.getHolder(id).orElse(null);
+          if (potion != null) {
+            quadConsumer.accept(MantleItemLayerModel.getQuadsForSprite(0xFF000000 | PotionContents.getColor(potion), -1, spriteGetter.apply(texture), transforms, 0, pixels));
           }
         }
       }

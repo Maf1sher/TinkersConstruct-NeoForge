@@ -137,7 +137,7 @@ public record FluidMobEffect(Holder<MobEffect> effect, int time, int level, @Nul
   /** Gets the display name for this effect */
   public Component getDisplayName(TimeAction action) {
     // level display based on PotionUtils#addPotionTooltip
-    Component component = effect.getDisplayName();
+    Component component = effect.value().getDisplayName();
     // add level if above 1
     if (level > 1) {
       component = Component.translatable("potion.withAmplifier", component, Component.translatable("potion.potency." + (level - 1)));

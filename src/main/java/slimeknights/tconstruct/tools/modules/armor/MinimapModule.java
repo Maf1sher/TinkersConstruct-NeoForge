@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.tools.modules.armor;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceLocation;
@@ -12,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import slimeknights.mantle.client.TooltipKey;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
@@ -73,7 +75,7 @@ public enum MinimapModule implements ModifierModule, EquipmentChangeModifierHook
       TinkerDataCapability.Holder data = context.getTinkerData().orElse(null);
       if (data != null) {
         // set the map to the selected one
-        ItemStack map = modifier.getHook(ToolInventoryCapability.HOOK).getStack(tool, modifier, tool.getPersistentData().getInt(SELECTED_SLOT));
+        ItemStack map = modifier.getHook(ToolInventoryCapability.HOOK).getStack(tool, modifier, tool.getPersistentData().getInt(SELECTED_SLOT), context.getLevel().registryAccess());
         if (!map.isEmpty()) {
           data.put(MAP, map);
         } else {
@@ -108,7 +110,7 @@ public enum MinimapModule implements ModifierModule, EquipmentChangeModifierHook
           holder.setItemInHand(InteractionHand.OFF_HAND, held);
           if (holder instanceof ServerPlayer player) {
             MapItemSavedData mapData = MapItem.getSavedData(map, world);
-            Integer id = MapItem.getMapId(map);
+            MapId id = map.get(DataComponents.MAP_ID);
             if (mapData != null && id != null) {
               Packet<?> packet = mapData.getUpdatePacket(id, player);
               if (packet != null) {
@@ -128,7 +130,8 @@ public enum MinimapModule implements ModifierModule, EquipmentChangeModifierHook
 
   @Override
   public void onInventorySelect(IToolStackView tool, ModifierEntry modifier, Player player, int newIndex, ItemStack stack) {
-    player.displayClientMessage(Component.translatable(SELECTED, stack.getHoverName(), MapItem.getMapId(stack), newIndex + 1), true);
+    MapId mapId = stack.get(DataComponents.MAP_ID);
+    player.displayClientMessage(Component.translatable(SELECTED, stack.getHoverName(), mapId == null ? 0 : mapId.id(), newIndex + 1), true);
   }
 
   @Override
