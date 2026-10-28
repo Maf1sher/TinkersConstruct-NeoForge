@@ -8,6 +8,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import slimeknights.tconstruct.common.TinkerTags;
@@ -279,11 +280,11 @@ public class ToolDamageUtil {
   }
 
   /** Implements {@link net.minecraft.world.item.Item#damageItem(ItemStack, int, LivingEntity, Consumer)} for a modifiable item */
-  public static <T extends LivingEntity> void handleDamageItem(ItemStack stack, int amount, T damager, Consumer<T> onBroken) {
+  public static <T extends LivingEntity> void handleDamageItem(ItemStack stack, int amount, T damager, Consumer<Item> onBroken) {
     // We basically emulate Itemstack.damageItem here. We always return 0 to skip the handling in ItemStack.
     // If we don't tools ignore our damage logic
     if (isDamageable(stack) && ToolDamageUtil.damage(ToolStack.from(stack), amount, damager, stack)) {
-      onBroken.accept(damager);
+      onBroken.accept(stack.getItem());
     }
   }
 

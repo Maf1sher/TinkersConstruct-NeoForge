@@ -30,7 +30,7 @@ public record AttributeUniqueField<P>(String key, Function<P,String> getter) imp
   }
 
   @Override
-  public void serialize(P parent, JsonObject json) {
+  public void serializeInto(P parent, JsonObject json, TypedMap context) {
     String unique = getter.apply(parent);
     if (!unique.isEmpty()) {
       json.addProperty(key, unique);

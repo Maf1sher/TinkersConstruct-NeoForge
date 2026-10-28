@@ -2,7 +2,9 @@ package slimeknights.tconstruct.tools.logic;
 
 import com.google.common.collect.Multiset;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
@@ -14,6 +16,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -130,7 +133,7 @@ public class ToolEvents {
     }
 
     // next, add in armor haste
-    double armorMultiplier = player.getAttributeValue(TinkerAttributes.MINING_SPEED_MULTIPLIER.get()) + ArmorStatModule.getStat(player, TinkerDataKeys.MINING_SPEED);
+    double armorMultiplier = player.getAttributeValue(TinkerAttributes.MINING_SPEED_MULTIPLIER) + ArmorStatModule.getStat(player, TinkerDataKeys.MINING_SPEED);
     if (armorMultiplier >= 0) {
       event.setNewSpeed((float) (event.getNewSpeed() * armorMultiplier));
     }
@@ -254,7 +257,7 @@ public class ToolEvents {
     // math here; since this event fires before vanilla armor steps, the result feeds into vanilla's reduction after.
     // low priority to minimize conflict as we apply reduction as if we are the final change to damage before vanilla
     float originalDamage = amount;
-    int vanillaModifier = 0;
+    float vanillaModifier = 0;
     float modifierValue = 0;
 
     if (attacker instanceof LivingEntity living) {
@@ -291,7 +294,7 @@ public class ToolEvents {
 
       // run shulking global damage "boost", its a bit hardcoded Java wise to make it softcoded in JSON
       if (attacker.isCrouching()) {
-        double crouchMultiplier = living.getAttributeValue(TinkerAttributes.CROUCH_DAMAGE_MULTIPLIER.get());
+        double crouchMultiplier = living.getAttributeValue(TinkerAttributes.CROUCH_DAMAGE_MULTIPLIER);
         crouchMultiplier += ArmorStatModule.getStat(attacker, TinkerDataKeys.CROUCH_DAMAGE);
         if (crouchMultiplier != 0) {
           originalDamage *= crouchMultiplier;
@@ -330,7 +333,7 @@ public class ToolEvents {
       // remaining logic is reducing damage like vanilla protection
       // fetch vanilla enchant level, assuming its not bypassed in vanilla
       if (DamageSourcePredicate.CAN_PROTECT.matches(source)) {
-        modifierValue = vanillaModifier = EnchantmentHelper.getDamageProtection(entity.getArmorSlots(), source);
+        modifierValue = vanillaModifier = getVanillaProtection(entity, source);
       }
 
       // next, determine how much tinkers armor wants to change it
@@ -345,7 +348,7 @@ public class ToolEvents {
         modifierValue *= 4;
       }
     } else if (DamageSourcePredicate.CAN_PROTECT.matches(source) && entity.getType().is(TinkerTags.EntityTypes.SMALL_ARMOR)) {
-      vanillaModifier = EnchantmentHelper.getDamageProtection(entity.getArmorSlots(), source);
+      vanillaModifier = getVanillaProtection(entity, source);
       modifierValue = vanillaModifier * 4;
     }
 
@@ -377,14 +380,16 @@ public class ToolEvents {
           for (EquipmentSlot slotType : ModifiableArmorMaterial.ARMOR_SLOTS) {
             // for our own armor, saves effort to damage directly with our utility
             IToolStackView tool = context.getToolInSlot(slotType);
-            if (tool != null && (!source.is(DamageTypeTags.IS_FIRE) || !tool.getItem().isFireResistant())) {
+            if (tool != null && (!source.is(DamageTypeTags.IS_FIRE) || tool.getItem().components().get(DataComponents.FIRE_RESISTANT) == null)) {
               // mark this as protection (any valid modifier really would do) so tanned can reduce it to not count it as separate damage
               ToolDamageUtil.damageAnimated(tool, damageMissed, entity, slotType, ARMOR_DAMAGE);
             } else {
               // if not our armor, damage using vanilla like logic
               ItemStack armorStack = entity.getItemBySlot(slotType);
-              if (!armorStack.isEmpty() && (!source.is(DamageTypeTags.IS_FIRE) || !armorStack.getItem().isFireResistant()) && armorStack.getItem() instanceof ArmorItem) {
-                armorStack.hurtAndBreak(damageMissed, entity, e -> e.onEquippedItemBroken(armorStack.getItem(), slotType));
+              if (!armorStack.isEmpty() && (!source.is(DamageTypeTags.IS_FIRE) || !armorStack.has(DataComponents.FIRE_RESISTANT)) && armorStack.getItem() instanceof ArmorItem) {
+                if (entity.level() instanceof ServerLevel serverLevel) {
+                  armorStack.hurtAndBreak(damageMissed, serverLevel, entity, item -> entity.onEquippedItemBroken(item, slotType));
+                }
               }
             }
           }
@@ -404,6 +409,11 @@ public class ToolEvents {
       return 1;
     }
     return (int)damage;
+  }
+
+  /** Vanilla enchantment protection; in 1.21.1 it requires a server level, so client-side damage events just get no vanilla protection */
+  private static float getVanillaProtection(LivingEntity entity, DamageSource source) {
+    return entity.level() instanceof ServerLevel serverLevel ? EnchantmentHelper.getDamageProtection(serverLevel, entity, source) : 0;
   }
 
   /** Modifier ID used for the extra correction damage on armor. Needs to be a "real modifier" for the tag so we use protection as a reasonable enough source. */
@@ -467,7 +477,7 @@ public class ToolEvents {
     if (amount >= 2 && Config.COMMON.dropDragonScales.get() && entity.getType() == EntityType.ENDER_DRAGON
         && source.is(DamageTypeTags.IS_EXPLOSION) && source.getEntity() != null && source.getEntity().getType() == EntityType.PLAYER) {
       // drops up to 1 scale per heart lost, capping at 5 scales
-      ModifierUtil.dropItem(entity, new ItemStack(TinkerModifiers.dragonScale, 1 + entity.level().random.nextInt(Math.min(5, (int)(amount / 2)))));
+      ModifierUtil.dropItem(entity, new ItemStack(TinkerModifiers.dragonScale.get(), 1 + entity.level().random.nextInt(Math.min(5, (int)(amount / 2)))));
     }
   }
 
@@ -518,8 +528,8 @@ public class ToolEvents {
   @SubscribeEvent
   static void projectileSync(PlayerEvent.StartTracking event) {
     Entity entity = event.getTarget();
-    if (entity instanceof Projectile) {
-      TinkerNetwork.getInstance().sendTo(new SyncProjectileModifiersPacket(entity), event.getEntity());
+    if (entity instanceof Projectile && event.getEntity() instanceof ServerPlayer player) {
+      TinkerNetwork.getInstance().sendTo(new SyncProjectileModifiersPacket(entity), player);
     }
   }
 

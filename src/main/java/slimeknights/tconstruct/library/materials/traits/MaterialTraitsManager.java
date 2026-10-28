@@ -9,6 +9,7 @@ import com.google.gson.JsonSyntaxException;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import slimeknights.mantle.data.gson.LoadableSerializer;
 import slimeknights.mantle.data.listener.MergingJsonDataLoader;
 import slimeknights.tconstruct.library.exception.TinkerAPIMaterialException;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
@@ -46,7 +47,7 @@ public class MaterialTraitsManager extends MergingJsonDataLoader<MaterialTraits.
   public static final String FOLDER = "tinkering/materials/traits";
   public static final Gson GSON = (new GsonBuilder())
     .registerTypeAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
-    .registerTypeAdapter(ModifierEntry.class, ModifierEntry.OPTIONAL_LOADABLE)
+    .registerTypeAdapter(ModifierEntry.class, new LoadableSerializer<>(ModifierEntry.OPTIONAL_LOADABLE, builder -> {}))
     .setPrettyPrinting()
     .disableHtmlEscaping()
     .create();

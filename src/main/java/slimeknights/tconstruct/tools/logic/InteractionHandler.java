@@ -27,6 +27,7 @@ import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.event.entity.living.LivingShieldBlockEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock.Action;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.EntityInteract;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock;
 import slimeknights.mantle.client.TooltipKey;
@@ -197,7 +198,7 @@ public class InteractionHandler {
         Level level = player.level();
         if (useBlock == TriState.TRUE || (useBlock != TriState.FALSE
                                          && (!player.isSecondaryUseActive() || player.getItemInHand(Util.getOpposite(hand)).doesSneakBypassUse(level, pos, player)))) {
-          InteractionResult result = level.getBlockState(pos).useWithoutItem(level, player, hand, trace);
+          InteractionResult result = level.getBlockState(pos).useWithoutItem(level, player, trace);
           if (result.consumesAction()) {
             if (player instanceof ServerPlayer serverPlayer) {
               CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, pos, ItemStack.EMPTY);

@@ -22,6 +22,7 @@ import net.minecraft.world.entity.projectile.AbstractArrow.Pickup;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ArrowItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
@@ -98,6 +99,36 @@ public class ModifiableCrossbowItem extends ModifiableLauncherItem {
   @Override
   public int getDefaultProjectileRange() {
     return 8;
+  }
+
+  @Override
+  protected void shootProjectile(LivingEntity shooter, Projectile projectile, int index, float velocity, float inaccuracy, float angle, @Nullable LivingEntity target) {
+    Vector3f targetVector;
+    if (target != null) {
+      double dx = target.getX() - shooter.getX();
+      double dz = target.getZ() - shooter.getZ();
+      double horizontal = Math.sqrt(dx * dx + dz * dz);
+      double dy = target.getY(0.3333333333333333) - projectile.getY() + horizontal * 0.2F;
+      targetVector = getProjectileShotVector(shooter, new Vec3(dx, dy, dz), angle);
+    } else {
+      Vec3 upVector = shooter.getUpVector(1.0F);
+      Quaternionf quaternion = new Quaternionf().setAngleAxis(angle * (float) (Math.PI / 180.0), upVector.x, upVector.y, upVector.z);
+      targetVector = shooter.getViewVector(1.0F).toVector3f().rotate(quaternion);
+    }
+    projectile.shoot(targetVector.x(), targetVector.y(), targetVector.z(), velocity, inaccuracy);
+    shooter.level().playSound(null, shooter.getX(), shooter.getY(), shooter.getZ(), SoundEvents.CROSSBOW_SHOOT, shooter.getSoundSource(), 1.0F, getRandomShotPitch(angle, shooter.getRandom()));
+  }
+
+  /** Gets the direction to shoot a projectile at, rotating the given direction by the given angle */
+  private static Vector3f getProjectileShotVector(LivingEntity shooter, Vec3 distance, float angle) {
+    Vector3f direction = distance.toVector3f().normalize();
+    Vector3f axis = new Vector3f(direction).cross(new Vector3f(0.0F, 1.0F, 0.0F));
+    if (axis.lengthSquared() <= 1.0E-7) {
+      Vec3 upVector = shooter.getUpVector(1.0F);
+      axis = new Vector3f(direction).cross(upVector.toVector3f());
+    }
+    Vector3f side = new Vector3f(direction).rotateAxis((float) (Math.PI / 2), axis.x, axis.y, axis.z);
+    return new Vector3f(direction).rotateAxis(angle * (float) (Math.PI / 180.0), side.x, side.y, side.z);
   }
 
   @Override
@@ -241,11 +272,10 @@ public class ModifiableCrossbowItem extends ModifiableLauncherItem {
           damage += 3;
         } else {
           ArrowItem arrowItem = ammo.getItem() instanceof ArrowItem a ? a : (ArrowItem)Items.ARROW;
-          arrow = arrowItem.createArrow(level, ammo, living);
+          arrow = arrowItem.createArrow(level, ammo, living, living.getItemInHand(hand));
           projectile = arrow;
           arrow.setCritArrow(true);
           arrow.setSoundEvent(SoundEvents.CROSSBOW_HIT);
-          arrow.setShotFromCrossbow(true);
           speed = 3f;
           damage += 1;
 
@@ -301,7 +331,7 @@ public class ModifiableCrossbowItem extends ModifiableLauncherItem {
     ToolStack tool = ToolStack.from(bow);
 
     // call the stop using modifier hook
-    int duration = getUseDuration(bow);
+    int duration = getUseDuration(bow, living);
     for (ModifierEntry entry : tool.getModifiers()) {
       entry.getHook(ModifierHooks.TOOL_USING).beforeReleaseUsing(tool, entry, living, duration, chargeRemaining, ModifierEntry.EMPTY);
     }
@@ -309,7 +339,7 @@ public class ModifiableCrossbowItem extends ModifiableLauncherItem {
     // any reason we shouldn't load?
     // specifically: broken, not fully charged, already have ammo
     ModDataNBT persistentData = tool.getPersistentData();
-    if (tool.isBroken() || getUseDuration(bow) - chargeRemaining < persistentData.getInt(KEY_DRAWTIME) || persistentData.contains(KEY_CROSSBOW_AMMO, Tag.TAG_COMPOUND)) {
+    if (tool.isBroken() || getUseDuration(bow, living) - chargeRemaining < persistentData.getInt(KEY_DRAWTIME) || persistentData.contains(KEY_CROSSBOW_AMMO, Tag.TAG_COMPOUND)) {
       return;
     }
 
@@ -319,7 +349,8 @@ public class ModifiableCrossbowItem extends ModifiableLauncherItem {
     if (!ammo.isEmpty()) {
       level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.CROSSBOW_LOADING_END, SoundSource.PLAYERS, 1.0F, 1.0F / (level.getRandom().nextFloat() * 0.5F + 1.0F) + 0.2F);
       if (!level.isClientSide) {
-        CompoundTag ammoNBT = ammo.save(level.registryAccess(), new CompoundTag());
+        CompoundTag ammoNBT = new CompoundTag();
+        ammo.save(level.registryAccess(), ammoNBT);
         persistentData.put(KEY_CROSSBOW_AMMO, ammoNBT);
         // if the crossbow broke during loading, fire immediately
         if (tool.isBroken()) {
@@ -351,7 +382,7 @@ public class ModifiableCrossbowItem extends ModifiableLauncherItem {
         // copy the stack's tooltip if advanced
         if (tooltipFlag.isAdvanced() && player != null) {
           List<Component> nestedTooltip = new ArrayList<>();
-          heldStack.getItem().appendHoverText(heldStack, player.level(), nestedTooltip, tooltipFlag);
+          heldStack.getItem().appendHoverText(heldStack, Item.TooltipContext.of(player.level()), nestedTooltip, tooltipFlag);
           for (Component nested : nestedTooltip) {
             tooltips.add(Component.literal("  ").append(nested).withStyle(ChatFormatting.GRAY));
           }

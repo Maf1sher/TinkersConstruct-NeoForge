@@ -38,6 +38,7 @@ import slimeknights.tconstruct.library.recipe.FluidValues;
 import slimeknights.tconstruct.library.recipe.casting.material.MaterialFluidRecipeBuilder;
 import slimeknights.tconstruct.library.recipe.ingredient.InstrumentIngredient;
 import slimeknights.tconstruct.library.recipe.melting.MaterialMeltingRecipeBuilder;
+import slimeknights.tconstruct.library.utils.ResourceId;
 import slimeknights.tconstruct.shared.TinkerCommons;
 import slimeknights.tconstruct.shared.TinkerMaterials;
 import slimeknights.tconstruct.shared.block.SlimeType;
@@ -413,6 +414,6 @@ public class MaterialRecipeProvider extends BaseRecipeProvider implements IMater
   /** Adds a recipe for crafting a goat horn material */
   private void hornMaterial(RecipeOutput consumer, ResourceKey<Instrument> instrument, String folder) {
     ResourceLocation key = instrument.location();
-    materialRecipe(consumer, MaterialVariantId.create(MaterialIds.horn, key.toLanguageKey()), InstrumentIngredient.of(Items.GOAT_HORN, instrument).toVanilla(), 4, 1, folder + "horn/" + key.getPath());
+    materialRecipe(consumer, MaterialVariantId.create(MaterialIds.horn, ResourceId.toLanguageKey(key)), InstrumentIngredient.of(Items.GOAT_HORN, instrument).toVanilla(), 4, 1, folder + "horn/" + key.getPath());
   }
 }

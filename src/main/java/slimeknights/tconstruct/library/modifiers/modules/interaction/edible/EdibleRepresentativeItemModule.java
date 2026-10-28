@@ -30,7 +30,7 @@ import java.util.List;
 public record EdibleRepresentativeItemModule(ItemStack representativeItem, ModifierCondition<IToolStackView> condition) implements ModifierModule, UsingToolModifierHook, EdibleEffectHook, ConditionalModule<IToolStackView> {
   private static final List<ModuleHook<?>> DEFAULT_HOOKS = HookProvider.<EdibleRepresentativeItemModule>defaultHooks(ModifierHooks.TOOL_USING, ModifierHooks.EDIBLE_EFFECT);
   public static final RecordLoadable<EdibleRepresentativeItemModule> LOADER = RecordLoadable.create(
-    ItemStackLoadable.REQUIRED_ITEM_NBT.requiredField("representative_item", EdibleRepresentativeItemModule::representativeItem),
+    ItemStackLoadable.REQUIRED_ITEM_DATA.requiredField("representative_item", EdibleRepresentativeItemModule::representativeItem),
     ModifierCondition.TOOL_FIELD, EdibleRepresentativeItemModule::new);
 
   public EdibleRepresentativeItemModule(ItemLike representativeItem) {

@@ -12,6 +12,7 @@ import net.minecraft.util.RandomSource;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import slimeknights.mantle.data.loadable.LegacyLoadable;
 import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.data.loadable.mapping.ConditionalLoadable;
 import slimeknights.mantle.data.loadable.mapping.ConditionalLoadable.ConditionalObject;
 import slimeknights.mantle.data.loadable.primitive.BooleanLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;

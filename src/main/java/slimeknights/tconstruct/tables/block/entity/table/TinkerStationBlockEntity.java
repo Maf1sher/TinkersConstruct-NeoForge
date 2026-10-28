@@ -6,12 +6,14 @@ import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -58,6 +60,9 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
   /** Last crafted crafting recipe */
   @Nullable @Getter
   private ITinkerStationRecipe lastRecipe;
+  /** ID of the last crafted recipe, used for syncing it to clients */
+  @Nullable
+  private ResourceLocation lastRecipeId;
   /** Result inventory, lazy loads results */
   @Getter
   private final LazyResultContainer craftingResult;
@@ -160,7 +165,9 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
       ITinkerStationRecipe recipe = lastRecipe;
       // if it does not match, find a new recipe
       if (recipe == null || !recipe.matches(this.inventoryWrapper, this.level)) {
-        recipe = manager.getRecipeFor(TinkerRecipeTypes.TINKER_STATION.get(), this.inventoryWrapper, this.level).orElse(null);
+        RecipeHolder<ITinkerStationRecipe> holder = manager.getRecipeFor(TinkerRecipeTypes.TINKER_STATION.get(), this.inventoryWrapper, this.level).orElse(null);
+        recipe = holder == null ? null : holder.value();
+        this.lastRecipeId = holder == null ? null : holder.id();
       }
 
       // if we have a recipe, fetch its result
@@ -218,7 +225,7 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
 
     // fire crafting events
     resultItem.onCraftedBy(this.level, player, amount);
-    EventHooks.firePlayerCraftingEvent(player, resultItem, this.inventoryWrapper);
+    EventHooks.firePlayerCraftingEvent(player, resultItem, this);
     this.playCraftSound(player);
 
     // fetch this before updating inputs so they can do input sensitive shrinking
@@ -293,8 +300,8 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
    */
   public void syncRecipe(Player player) {
     // must have a last recipe and a server level
-    if (this.lastRecipe != null && this.level != null && !this.level.isClientSide && player instanceof ServerPlayer server) {
-      TinkerNetwork.getInstance().sendTo(new UpdateTinkerStationRecipePacket(this.worldPosition, this.lastRecipe), server);
+    if (this.lastRecipe != null && this.lastRecipeId != null && this.level != null && !this.level.isClientSide && player instanceof ServerPlayer server) {
+      TinkerNetwork.getInstance().sendTo(new UpdateTinkerStationRecipePacket(this.worldPosition, this.lastRecipeId), server);
     }
   }
 
@@ -304,6 +311,7 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
    */
   public void updateRecipe(ITinkerStationRecipe recipe) {
     this.lastRecipe = recipe;
+    this.lastRecipeId = null;
     this.craftingResult.clearContent();
   }
 

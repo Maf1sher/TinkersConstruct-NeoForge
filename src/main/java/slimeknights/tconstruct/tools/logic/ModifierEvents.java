@@ -29,6 +29,7 @@ import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -115,7 +116,7 @@ public class ModifierEvents {
   static void onKnockback(LivingKnockBackEvent event) {
     LivingEntity entity = event.getEntity();
     Optional<TinkerDataCapability.Holder> dataCap = Optional.of(TinkerDataCapability.getData(entity));
-    double knockback = entity.getAttributeValue(TinkerAttributes.KNOCKBACK_MULTIPLIER.get())
+    double knockback = entity.getAttributeValue(TinkerAttributes.KNOCKBACK_MULTIPLIER)
                      + dataCap.map(data -> data.get(TinkerDataKeys.KNOCKBACK)).orElse(0f);
     if (knockback != 1) {
       event.setStrength((float) (event.getStrength() * knockback));
@@ -135,7 +136,7 @@ public class ModifierEvents {
   @SubscribeEvent
   static void onLivingFall(LivingFallEvent event) {
     LivingEntity entity = event.getEntity();
-    double boost = entity.getAttributeValue(TinkerAttributes.SAFE_FALL_DISTANCE.get()) + ArmorStatModule.getStat(entity, TinkerDataKeys.JUMP_BOOST);
+    double boost = entity.getAttributeValue(TinkerAttributes.SAFE_FALL_DISTANCE) + ArmorStatModule.getStat(entity, TinkerDataKeys.JUMP_BOOST);
     if (boost != 0) {
       event.setDistance((float) Math.max(event.getDistance() - boost, 0));
     }
@@ -146,7 +147,7 @@ public class ModifierEvents {
   @SubscribeEvent
   public static void onLivingJump(LivingJumpEvent event) {
     LivingEntity entity = event.getEntity();
-    double boost = entity.getAttributeValue(TinkerAttributes.JUMP_BOOST.get()) + ArmorStatModule.getStat(entity, TinkerDataKeys.JUMP_BOOST);
+    double boost = entity.getAttributeValue(TinkerAttributes.JUMP_BOOST) + ArmorStatModule.getStat(entity, TinkerDataKeys.JUMP_BOOST);
     if (boost > 0) {
       entity.setDeltaMovement(entity.getDeltaMovement().add(0, boost * 0.1, 0));
     }
@@ -173,7 +174,7 @@ public class ModifierEvents {
   static void onLivingDrops(LivingDropsEvent event) {
     DamageSource source = event.getSource();
     if (source != null) {
-      float gold = (float) event.getEntity().getAttributeValue(TinkerAttributes.CHRYSOPHILITE.get());
+      float gold = (float) event.getEntity().getAttributeValue(TinkerAttributes.CHRYSOPHILITE);
       if (gold > 0) {
         float extraChance = 0.04f * gold;
         LivingEntity target = event.getEntity();
@@ -245,7 +246,7 @@ public class ModifierEvents {
     if (event.getBreaker() instanceof Player player) {
       // directly use modifier for held to ensure the correct hand applies
       // TODO: can we make that datapack configurable?
-      double bonus = player.getAttributeValue(TinkerAttributes.EXPERIENCE_MULTIPLIER.get())
+      double bonus = player.getAttributeValue(TinkerAttributes.EXPERIENCE_MULTIPLIER)
                    + ModifierUtil.getModifierLevel(player.getMainHandItem(), ModifierIds.experienced) * 0.5f
                    + ArmorStatModule.getStat(player, TinkerDataKeys.EXPERIENCE);
       event.setDroppedExperience((int)(event.getDroppedExperience() * bonus));
@@ -263,7 +264,7 @@ public class ModifierEvents {
     // always add armor boost, unfortunately no good way to stop shield stuff here
     Player player = event.getAttackingPlayer();
     if (player != null) {
-      multiplier += player.getAttributeValue(TinkerAttributes.EXPERIENCE_MULTIPLIER.get()) + ArmorStatModule.getStat(player, TinkerDataKeys.EXPERIENCE);
+      multiplier += player.getAttributeValue(TinkerAttributes.EXPERIENCE_MULTIPLIER) + ArmorStatModule.getStat(player, TinkerDataKeys.EXPERIENCE);
     }
     // if the target was killed by an experienced arrow, use that level
     TinkerDataCapability.Holder data = TinkerDataCapability.getData(entity);
@@ -288,8 +289,8 @@ public class ModifierEvents {
 
     // critical boost is defined where the base value is 150%, setting smaller amounts can reduce the critical damage
     // this event however is defined in terms of adding or subtracting critical, so just treat it as additive
-    Attribute attribute = TinkerAttributes.CRITICAL_DAMAGE.get();
-    double criticalBoost = living.getAttributeValue(attribute) - attribute.getDefaultValue() + ArmorStatModule.getStat(living, TinkerDataKeys.CRITICAL_DAMAGE);
+    Holder<Attribute> attribute = TinkerAttributes.CRITICAL_DAMAGE;
+    double criticalBoost = living.getAttributeValue(attribute) - attribute.value().getDefaultValue() + ArmorStatModule.getStat(living, TinkerDataKeys.CRITICAL_DAMAGE);
     if (criticalBoost > 0) {
       // make it critical if we meet our simpler conditions, note this does not boost attack damage
       boolean isCritical = event.isCriticalHit();
@@ -312,9 +313,9 @@ public class ModifierEvents {
     MobEffectInstance newEffect = event.getEffectInstance();
     if (!newEffect.isInfiniteDuration() && !newEffect.getCures().isEmpty()) {
       // use two different stats based on whether the effect is beneficial
-      boolean beneficial = newEffect.getEffect().isBeneficial();
+      boolean beneficial = newEffect.getEffect().value().isBeneficial();
       LivingEntity entity = event.getEntity();
-      double multiplier = entity.getAttributeValue(beneficial ? TinkerAttributes.GOOD_EFFECT_DURATION.get() : TinkerAttributes.BAD_EFFECT_DURATION.get())
+      double multiplier = entity.getAttributeValue(beneficial ? TinkerAttributes.GOOD_EFFECT_DURATION : TinkerAttributes.BAD_EFFECT_DURATION)
                         + ArmorStatModule.getStat(entity, beneficial ? TinkerDataKeys.GOOD_EFFECT_DURATION : TinkerDataKeys.BAD_EFFECT_DURATION);
       if (multiplier != 1) {
         // adjust duration as requested
@@ -332,7 +333,7 @@ public class ModifierEvents {
       return;
     }
     // can the entity bounce?
-    if (living.getAttributeValue(TinkerAttributes.BOUNCY.get()) < 1) {
+    if (living.getAttributeValue(TinkerAttributes.BOUNCY) < 1) {
       return;
     }
 

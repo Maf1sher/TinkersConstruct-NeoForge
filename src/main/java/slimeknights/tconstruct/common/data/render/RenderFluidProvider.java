@@ -16,7 +16,7 @@ import java.util.List;
 /** Provides fluid cuboids for block entity renderers */
 public class RenderFluidProvider extends BlockStateDataMapProvider<List<FluidCuboid>> {
   public RenderFluidProvider(PackOutput output) {
-    super(output, Target.RESOURCE_PACK, FluidCuboid.REGISTRY, TConstruct.MOD_ID);
+    super(output, Target.RESOURCE_PACK, FluidCuboid.REGISTRY.getFolder(), FluidCuboid.REGISTRY.getDataLoader(), TConstruct.MOD_ID);
   }
 
   @Override

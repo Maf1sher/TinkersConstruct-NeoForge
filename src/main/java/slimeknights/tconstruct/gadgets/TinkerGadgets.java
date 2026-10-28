@@ -3,6 +3,7 @@ package slimeknights.tconstruct.gadgets;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.CreativeModeTab.ItemDisplayParameters;
 import net.minecraft.world.item.CreativeModeTab.Output;
@@ -117,7 +118,6 @@ public final class TinkerGadgets extends TinkerModule {
       .sized(0.5F, 0.5F)
       .setTrackingRange(10)
       .setUpdateInterval(Integer.MAX_VALUE)
-      .setCustomClientFactory((spawnEntity, world) -> new FancyItemFrameEntity(TinkerGadgets.itemFrameEntity.get(), world))
       .setShouldReceiveVelocityUpdates(false)
   );
   public static final DeferredHolder<EntityType<?>, EntityType<FancyArmorStandEntity>> armorStandEntity = ENTITIES.registerNoEgg("armor_stand", () ->
@@ -129,7 +129,6 @@ public final class TinkerGadgets extends TinkerModule {
       .sized(0.25F, 0.25F)
       .setTrackingRange(4)
       .setUpdateInterval(10)
-      .setCustomClientFactory((spawnEntity, world) -> new GlowballEntity(TinkerGadgets.glowBallEntity.get(), world))
       .setShouldReceiveVelocityUpdates(true)
   );
   @Deprecated
@@ -138,7 +137,6 @@ public final class TinkerGadgets extends TinkerModule {
       .sized(0.25F, 0.25F)
       .setTrackingRange(4)
       .setUpdateInterval(10)
-      .setCustomClientFactory((spawnEntity, world) -> new EFLNEntity(TinkerGadgets.eflnEntity.get(), world))
       .setShouldReceiveVelocityUpdates(true));
   @Deprecated
   public static final DeferredHolder<EntityType<?>, EntityType<QuartzShurikenEntity>> quartzShurikenEntity = ENTITIES.registerNoEgg("quartz_shuriken", () ->
@@ -146,7 +144,6 @@ public final class TinkerGadgets extends TinkerModule {
       .sized(0.25F, 0.25F)
       .setTrackingRange(4)
       .setUpdateInterval(10)
-      .setCustomClientFactory((spawnEntity, world) -> new QuartzShurikenEntity(TinkerGadgets.quartzShurikenEntity.get(), world))
       .setShouldReceiveVelocityUpdates(true)
   );
   @Deprecated
@@ -155,7 +152,6 @@ public final class TinkerGadgets extends TinkerModule {
       .sized(0.25F, 0.25F)
       .setTrackingRange(4)
       .setUpdateInterval(10)
-      .setCustomClientFactory((spawnEntity, world) -> new FlintShurikenEntity(TinkerGadgets.flintShurikenEntity.get(), world))
       .setShouldReceiveVelocityUpdates(true)
   );
 

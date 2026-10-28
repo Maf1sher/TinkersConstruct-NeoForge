@@ -13,6 +13,6 @@ public abstract class TabbedTableBlock extends TableBlock implements ITabbedBloc
 
   @Override
   public boolean openGui(Player player, Level world, BlockPos pos) {
-    return super.openGui(player, world, pos);
+    return super.openGui(world.getBlockState(pos), world, pos, player).consumesAction();
   }
 }

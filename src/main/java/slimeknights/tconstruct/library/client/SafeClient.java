@@ -60,7 +60,9 @@ public class SafeClient {
     /** @see SafeClient#registryAccess() */
     @Nullable
     public static HolderLookup.Provider registryAccess() {
-      Level level = Minecraft.getInstance().level;
+      // datagen and other headless client-dist runs have no Minecraft instance
+      Minecraft minecraft = Minecraft.getInstance();
+      Level level = minecraft == null ? null : minecraft.level;
       return level == null ? null : level.registryAccess();
     }
 

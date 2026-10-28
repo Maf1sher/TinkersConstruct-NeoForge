@@ -6,11 +6,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -59,7 +61,7 @@ public class SearedDuctBlock extends InventoryBlock {
   }
 
   @Override
-  public void appendHoverText(ItemStack stack, @Nullable BlockGetter pLevel, List<Component> tooltip, TooltipFlag flag) {
+  public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
     RetexturedHelper.addTooltip(stack, tooltip, flag);
   }
 
@@ -70,8 +72,8 @@ public class SearedDuctBlock extends InventoryBlock {
   }
   
   @Override
-  public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
-    return RetexturedBlock.getPickBlock(world, pos, state);
+  public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
+    return RetexturedBlock.getPickBlock(level, pos, state);
   }
 
 

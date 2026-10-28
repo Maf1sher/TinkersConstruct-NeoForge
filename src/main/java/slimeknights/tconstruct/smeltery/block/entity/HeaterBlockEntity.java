@@ -64,6 +64,6 @@ public class HeaterBlockEntity extends NameableBlockEntity {
   @Override
   public void saveAdditional(CompoundTag tags, Provider registries) {
     super.saveAdditional(tags, registries);
-    tags.put(TAG_ITEM, itemHandler.writeToNBT(registries, new CompoundTag()));
+    tags.put(TAG_ITEM, itemHandler.writeToNBT(registries));
   }
 }

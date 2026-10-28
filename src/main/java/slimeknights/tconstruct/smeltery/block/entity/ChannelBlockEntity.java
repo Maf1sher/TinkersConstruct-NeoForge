@@ -11,7 +11,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -68,11 +67,6 @@ public class ChannelBlockEntity extends MantleBlockEntity implements IFluidPacke
 	 */
 	public FluidStack getFluid() {
 		return this.tank.getFluid();
-	}
-
-	@Override
-	public AABB getRenderBoundingBox() {
-		return new AABB(worldPosition.getX(), worldPosition.getY() - 1, worldPosition.getZ(), worldPosition.getX() + 1, worldPosition.getY() + 1, worldPosition.getZ() + 1);
 	}
 
 	/* Fluid handlers */
@@ -328,7 +322,7 @@ public class ChannelBlockEntity extends MantleBlockEntity implements IFluidPacke
   protected void saveSynced(CompoundTag nbt, Provider registries) {
     super.saveSynced(nbt, registries);
     nbt.putByteArray(TAG_IS_FLOWING, isFlowing);
-    nbt.put(TAG_TANK, tank.writeToNBT(new CompoundTag()));
+    nbt.put(TAG_TANK, tank.writeToNBT(registries, new CompoundTag()));
   }
 
 	@Override
@@ -353,6 +347,6 @@ public class ChannelBlockEntity extends MantleBlockEntity implements IFluidPacke
 
 		// tank
 		CompoundTag tankTag = nbt.getCompound(TAG_TANK);
-		tank.readFromNBT(tankTag);
+		tank.readFromNBT(registries, tankTag);
 	}
 }

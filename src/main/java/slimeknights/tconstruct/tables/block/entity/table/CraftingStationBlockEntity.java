@@ -62,11 +62,6 @@ public class CraftingStationBlockEntity extends RetexturedTableBlockEntity imple
     return CraftingInput.of(3, 3, items);
   }
 
-  @Override
-  public AABB getRenderBoundingBox() {
-    return new AABB(worldPosition, worldPosition.offset(1, 2, 1));
-  }
-
   /* Crafting */
 
   @Override

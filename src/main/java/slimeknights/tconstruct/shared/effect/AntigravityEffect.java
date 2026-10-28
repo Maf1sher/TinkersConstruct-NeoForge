@@ -4,8 +4,10 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import lombok.ToString;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
@@ -36,7 +38,7 @@ public class AntigravityEffect extends TinkerEffect {
   }
 
   @Override
-  public boolean isDurationEffectTick(int duration, int amplifier) {
+  public boolean shouldApplyEffectTickThisTick(int duration, int amplifier) {
     return true;
   }
 
@@ -55,7 +57,7 @@ public class AntigravityEffect extends TinkerEffect {
 
   /** Handles movement while under anti-gravity */
   @Override
-  public void applyEffectTick(LivingEntity living, int amplifier) {
+  public boolean applyEffectTick(LivingEntity living, int amplifier) {
     // ensure we are actually under the effects of antigrav, might have a double negative
     if (living.getAttributeValue(Attributes.GRAVITY) < 0) {
       Level level = living.level();
@@ -74,7 +76,7 @@ public class AntigravityEffect extends TinkerEffect {
           living.setDeltaMovement(velocity.x, lastVelocity.twoTicks, velocity.z);
           BlockPos above = BlockPos.containing(living.getX(), living.getBoundingBox().maxY + 0.1, living.getZ());
           BlockState hit = level.getBlockState(above);
-          float height = (float)(lastVelocity.twoTicks * 10 - 3 - living.getAttributeValue(TinkerAttributes.SAFE_FALL_DISTANCE.get()) - TinkerEffect.getLevel(living, MobEffects.JUMP));
+          float height = (float)(lastVelocity.twoTicks * 10 - 3 - living.getAttributeValue(TinkerAttributes.SAFE_FALL_DISTANCE) - TinkerEffect.getLevel(living, MobEffects.JUMP));
           if (height > 0.0F) {
             hit.getBlock().fallOn(level, hit, above, living, height);
           }
@@ -110,11 +112,11 @@ public class AntigravityEffect extends TinkerEffect {
       // update speed based on ladders and friction
       living.setDeltaMovement(velocity.x * friction, y, velocity.z * friction);
     }
+    return true;
   }
 
   @Override
-  public void removeAttributeModifiers(LivingEntity living, AttributeMap attributeMap, int amplifier) {
-    super.removeAttributeModifiers(living, attributeMap, amplifier);
+  public void onMobRemoved(LivingEntity living, int amplifier, Entity.RemovalReason reason) {
     LAST_VELOCITY.remove(living.getId());
   }
 

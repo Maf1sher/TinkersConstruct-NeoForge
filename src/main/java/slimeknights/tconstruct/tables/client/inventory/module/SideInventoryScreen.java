@@ -104,11 +104,6 @@ public class SideInventoryScreen<P extends MultiModuleScreen<?>, C extends Abstr
     return this.firstSlotId <= slot.getSlotIndex() && this.lastSlotId > slot.getSlotIndex();
   }
 
-  @Override
-  public boolean isHovering(Slot slotIn, double mouseX, double mouseY) {
-    return super.isHovering(slotIn, mouseX, mouseY) && this.shouldDrawSlot(slotIn);
-  }
-
   public void updateSlotCount(int newSlotCount) {
     // don't do extra stuff if it's not needed
     if (this.slotCount == newSlotCount) {
@@ -323,11 +318,11 @@ public class SideInventoryScreen<P extends MultiModuleScreen<?>, C extends Abstr
   }
 
   @Override
-  public boolean handleMouseScrolled(double mouseX, double mouseY, double scrollData) {
+  public boolean handleMouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
     if (!this.slider.isEnabled()) {
-      return super.handleMouseScrolled(mouseX, mouseY, scrollData);
+      return super.handleMouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
-    return this.slider.mouseScrolled(scrollData, !this.isMouseOverFullSlot(mouseX, mouseY) && this.isMouseInModule((int) mouseX, (int) mouseY));
+    return this.slider.mouseScrolled(scrollY, !this.isMouseOverFullSlot(mouseX, mouseY) && this.isMouseInModule((int) mouseX, (int) mouseY));
   }
 }

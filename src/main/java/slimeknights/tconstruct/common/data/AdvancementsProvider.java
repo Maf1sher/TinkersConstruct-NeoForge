@@ -402,7 +402,7 @@ public class AdvancementsProvider extends GenericDataProvider {
     });
     AdvancementHolder foundry = builder(TinkerSmeltery.foundryController, resource("foundry/structure"), alloyer, AdvancementType.TASK, builder ->
       builder.addCriterion("open_foundry", new Criterion<>(TinkerCommons.CONTAINER_OPENED_TRIGGER, BlockContainerOpenedTrigger.Instance.container(TinkerSmeltery.foundry.get()))));
-    AdvancementHolder blazingBlood = builder(TankItem.setTank(new ItemStack(TinkerSmeltery.scorchedTank.get(TankType.FUEL_GAUGE)), getTankWith(TinkerFluids.blazingBlood.get(), TankType.FUEL_GAUGE.getCapacity())),
+    AdvancementHolder blazingBlood = builder(TankItem.setTank(new ItemStack(TinkerSmeltery.scorchedTank.get(TankType.FUEL_GAUGE)), getTankWith(TinkerFluids.blazingBlood.get(), TankType.FUEL_GAUGE.getCapacity()), registriesProvider),
             resource("foundry/blaze"), foundry, AdvancementType.GOAL, builder -> {
       Consumer<SearedTankBlock> with = block -> {
         CompoundTag nbt = new CompoundTag();

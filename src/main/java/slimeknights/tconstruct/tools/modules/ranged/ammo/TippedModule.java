@@ -101,9 +101,9 @@ public enum TippedModule implements ModifierModule, ProjectileLaunchModifierHook
         // not a problem if the ID is invalid, will just do nothing
         Optional<? extends Holder<Potion>> potion = BuiltInRegistries.POTION.getHolder(id);
         for (MobEffectInstance instance : potion.map(holder -> holder.value().getEffects()).orElse(List.of())) {
-          MobEffect effect = instance.getEffect();
-          if (effect.isInstantenous()) {
-            effect.applyInstantenousEffect(projectile, projectile.getOwner(), target, instance.getAmplifier(), 1f / (divisor * 0.75f));
+          Holder<MobEffect> effect = instance.getEffect();
+          if (effect.value().isInstantenous()) {
+            effect.value().applyInstantenousEffect(projectile, projectile.getOwner(), target, instance.getAmplifier(), 1f / (divisor * 0.75f));
           } else {
             target.addEffect(new MobEffectInstance(instance.getEffect(), Math.max(instance.mapDuration(i -> i / divisor), 1), instance.getAmplifier(), instance.isAmbient(), instance.isVisible()), source);
           }

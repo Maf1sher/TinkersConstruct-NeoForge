@@ -24,6 +24,7 @@ import slimeknights.mantle.registration.object.EnumObject;
 import slimeknights.mantle.registration.object.FluidObject;
 import slimeknights.mantle.registration.object.MetalItemObject;
 import slimeknights.mantle.registration.object.WoodBlockObject;
+import slimeknights.tconstruct.library.tools.definition.ModifiableArmorMaterial;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.registration.CastItemObject;
@@ -354,7 +355,7 @@ public class ItemTagProvider extends ItemTagsProvider {
     addToolTags(TinkerTools.crossbow,   MULTIPART_TOOL, DURABILITY, MELEE_WEAPON, CROSSBOWS,    INTERACTABLE_LEFT,  SMALL_RANGED, BONUS_SLOTS, Tags.Items.TOOLS_CROSSBOW);
     addToolTags(TinkerTools.longbow,    MULTIPART_TOOL, DURABILITY, MELEE_WEAPON, LONGBOWS,     INTERACTABLE_LEFT,  BROAD_RANGED, BONUS_SLOTS, Tags.Items.TOOLS_BOW, BALLISTAS);
     addToolTags(TinkerTools.fishingRod, MULTIPART_TOOL, DURABILITY, MELEE_WEAPON, FISHING_RODS, INTERACTABLE_DUAL,  SMALL_RANGED, BONUS_SLOTS, Tags.Items.TOOLS_FISHING_ROD);
-    addToolTags(TinkerTools.javelin,    MULTIPART_TOOL, DURABILITY, MELEE_PRIMARY, RANGED,      INTERACTABLE_RIGHT, BROAD_RANGED, BONUS_SLOTS, Tags.Items.TOOLS_TRIDENTS);
+    addToolTags(TinkerTools.javelin,    MULTIPART_TOOL, DURABILITY, MELEE_PRIMARY, RANGED,      INTERACTABLE_RIGHT, BROAD_RANGED, BONUS_SLOTS, Tags.Items.TOOLS_SPEAR);
     addToolTags(TinkerTools.arrow,       MULTIPART_TOOL, AMMO,        UNSALVAGABLE, UNSWAPPABLE, SINGLE_USE, DYEABLE, ItemTags.ARROWS);
     addToolTags(TinkerTools.shuriken,    MULTIPART_TOOL, THROWN_AMMO, UNSALVAGABLE, UNSWAPPABLE, SINGLE_USE);
     addToolTags(TinkerTools.throwingAxe, MULTIPART_TOOL, THROWN_AMMO, UNSALVAGABLE, UNSWAPPABLE, SINGLE_USE);
@@ -376,7 +377,7 @@ public class ItemTagProvider extends ItemTagsProvider {
     addArmorTags(TinkerTools.plateArmor,    MULTIPART_TOOL, DURABILITY, BONUS_SLOTS, DYEABLE, TRIM);
     addArmorTags(TinkerTools.slimesuit,     DURABILITY, BONUS_SLOTS, DYEABLE, TRIM, UNRECYCLABLE);
     IntrinsicTagAppender<Item> multipart = tag(MULTIPART_TOOL);
-    for (ArmorItem.Type type : ArmorItem.Type.values()) {
+    for (ArmorItem.Type type : ModifiableArmorMaterial.ARMOR_TYPES) {
       if (type != ArmorItem.Type.HELMET) {
         multipart.add(TinkerTools.slimesuit.get(type));
       }
@@ -391,18 +392,18 @@ public class ItemTagProvider extends ItemTagsProvider {
     // care about order for armor in the book
     tag(BASIC_ARMOR);
     IntrinsicTagAppender<Item> bookArmor = tag(PUNY_ARMOR);
-    for (ArmorItem.Type slotType : ArmorItem.Type.values()) {
+    for (ArmorItem.Type slotType : ModifiableArmorMaterial.ARMOR_TYPES) {
       bookArmor.add(TinkerTools.travelersGear.get(slotType));
     }
     bookArmor.add(TinkerTools.travelersShield.get());
-    for (ArmorItem.Type slotType : ArmorItem.Type.values()) {
+    for (ArmorItem.Type slotType : ModifiableArmorMaterial.ARMOR_TYPES) {
       bookArmor.add(TinkerTools.plateArmor.get(slotType));
     }
     bookArmor.add(TinkerTools.plateShield.get());
     tag(MIGHTY_ARMOR);
     tag(FANTASTIC_ARMOR);
     bookArmor = tag(GADGETRY_ARMOR);
-    for (ArmorItem.Type slotType : ArmorItem.Type.values()) {
+    for (ArmorItem.Type slotType : ModifiableArmorMaterial.ARMOR_TYPES) {
       bookArmor.add(TinkerTools.slimesuit.get(slotType));
     }
     bookArmor.add(TinkerTools.slimeWings.asItem());
@@ -457,7 +458,7 @@ public class ItemTagProvider extends ItemTagsProvider {
     this.tag(TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("parry", "excluded_shields"))).addTag(HELD);
 
     // kamas are a shear type, when broken we don't pass it to loot tables
-    this.tag(Tags.Items.SHEARS).add(TinkerTools.kama.get());
+    this.tag(Tags.Items.TOOLS_SHEAR).add(TinkerTools.kama.get());
     // mark kama and scythe for mods like thermal to use
     this.tag(TinkerTags.Items.SCYTHES).add(TinkerTools.kama.get(), TinkerTools.scythe.get());
     // nothing to blacklist, just want the empty tag so it appears in datapacks
@@ -502,9 +503,9 @@ public class ItemTagProvider extends ItemTagsProvider {
     this.tag(TinkerTags.Items.STONESHIELDS)
         .addTag(Tags.Items.STONES)
         .addTag(Tags.Items.COBBLESTONES)
-        .addTag(Tags.Items.SANDSTONE)
+        .addTag(Tags.Items.SANDSTONE_BLOCKS)
         .addTag(Tags.Items.END_STONES)
-        .addTag(Tags.Items.GRAVEL) // for shovels and axes to use
+        .addTag(Tags.Items.GRAVELS) // for shovels and axes to use
         .add(Items.NETHERRACK, Items.BASALT, Items.POLISHED_BASALT, Items.BLACKSTONE, Items.POLISHED_BLACKSTONE);
     this.tag(TinkerTags.Items.FIREBALLS).add(Items.FIRE_CHARGE);
     this.tag(TinkerTags.Items.TOOL_INVENTORY_BLACKLIST)
@@ -757,7 +758,7 @@ public class ItemTagProvider extends ItemTagsProvider {
     this.tag(Tags.Items.INGOTS).addTag(metal.getIngotTag());
     this.tag(metal.getNuggetTag()).add(metal.getNugget());
     this.tag(Tags.Items.NUGGETS).addTag(metal.getNuggetTag());
-    this.copy(metal.getBlockTag(), metal.getBlockItemTag());
+    this.copy(metal.getBlockTag().block(), metal.getBlockTag().item());
   }
 
   @SafeVarargs
@@ -782,15 +783,20 @@ public class ItemTagProvider extends ItemTagsProvider {
       case LEGGINGS -> LEGGINGS;
       case CHESTPLATE -> CHESTPLATES;
       case HELMET -> HELMETS;
+      // body armor is only used by wolf armor, which Tinkers does not add
+      case BODY -> throw new IllegalArgumentException("Body armor has no Tinkers tag");
     };
   }
 
-  private TagKey<Item> getForgeArmorTag(ArmorItem.Type slotType) {
+  /** Vanilla armor slot tags, replacing the removed forge armor tags */
+  private TagKey<Item> getPlatformArmorTag(ArmorItem.Type slotType) {
     return switch (slotType) {
-      case BOOTS -> Tags.Items.ARMORS_BOOTS;
-      case LEGGINGS -> Tags.Items.ARMORS_LEGGINGS;
-      case CHESTPLATE -> TinkerTags.Items.ARMORS_CHESTPLATES;
-      case HELMET -> Tags.Items.ARMORS_HELMETS;
+      case BOOTS -> ItemTags.FOOT_ARMOR;
+      case LEGGINGS -> ItemTags.LEG_ARMOR;
+      case CHESTPLATE -> ItemTags.CHEST_ARMOR;
+      case HELMET -> ItemTags.HEAD_ARMOR;
+      // no vanilla body armor item tag exists; wolf armor is not a Tinkers material item
+      case BODY -> throw new IllegalArgumentException("Body armor has no vanilla item tag");
     };
   }
 
@@ -801,7 +807,7 @@ public class ItemTagProvider extends ItemTagsProvider {
         this.tag(tag).add(item);
       }
       this.tag(getArmorTag(type)).add(item);
-      this.tag(getForgeArmorTag(type)).add(item);
+      this.tag(getPlatformArmorTag(type)).add(item);
     });
   }
 

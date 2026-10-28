@@ -32,11 +32,11 @@ public interface BlockItemProviderCapability {
   /** Registers this capability */
   @ApiStatus.Internal
   static void register(IEventBus modEventBus) {
-    modEventBus.addListener(BlockItemProviderCapability::register);
+    modEventBus.addListener(BlockItemProviderCapability::registerCapabilities);
   }
 
   /** Registers the capability with the event bus */
-  private static void register(RegisterCapabilitiesEvent event) {
+  private static void registerCapabilities(RegisterCapabilitiesEvent event) {
     ItemLike[] blockItems = BuiltInRegistries.ITEM.stream().filter(BlockItem.class::isInstance).toArray(ItemLike[]::new);
     event.registerItem(CAPABILITY, (stack, context) -> SimpleBlockItem.INSTANCE, blockItems);
   }

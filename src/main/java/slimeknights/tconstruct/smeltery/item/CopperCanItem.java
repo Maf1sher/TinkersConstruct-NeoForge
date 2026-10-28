@@ -50,7 +50,7 @@ public class CopperCanItem extends Item {
   }
 
   @Override
-  public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flag) {
+  public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
     Fluid fluid = getFluid(stack);
     if (fluid != Fluids.EMPTY) {
       CompoundTag fluidTag = getFluidTag(stack);
@@ -76,9 +76,7 @@ public class CopperCanItem extends Item {
     if (nbt != null) {
       nbt.remove(TAG_FLUID);
       nbt.remove(TAG_FLUID_TAG);
-      if (nbt.isEmpty()) {
-        stack.setTag(null);
-      }
+      DataComponentHelper.setCustomData(stack, nbt);
     }
   }
 
@@ -141,10 +139,10 @@ public class CopperCanItem extends Item {
   @SuppressWarnings("deprecation")
   public static void addFilledVariants(Consumer<ItemStack> output) {
     BuiltInRegistries.FLUID.holders().filter(holder -> {
-      Fluid fluid = holder.get();
+      Fluid fluid = holder.value();
       return fluid.isSource(fluid.defaultFluidState()) && !holder.is(TinkerTags.Fluids.HIDE_IN_CREATIVE_TANKS);
     }).forEachOrdered(holder -> {
-      output.accept(CopperCanItem.setFluid(new ItemStack(TinkerSmeltery.copperCan), holder.key().location(), null));
+      output.accept(CopperCanItem.setFluid(new ItemStack(TinkerSmeltery.copperCan.get()), holder.key().location(), null));
     });
   }
 

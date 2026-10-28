@@ -10,7 +10,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.DispenserBlock;
-import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.gadgets.TinkerGadgets;
 import slimeknights.tconstruct.gadgets.entity.FancyArmorStandEntity.StandType;
 
@@ -23,11 +22,11 @@ public class DispenseFancyArmorStand extends DefaultDispenseItemBehavior {
 
   @Override
   protected ItemStack execute(BlockSource source, ItemStack stack) {
-    Direction direction = source.getBlockState().getValue(DispenserBlock.FACING);
-    BlockPos blockpos = source.getPos().relative(direction);
-    ServerLevel server = source.getLevel();
+    Direction direction = source.state().getValue(DispenserBlock.FACING);
+    BlockPos blockpos = source.pos().relative(direction);
+    ServerLevel server = source.level();
     Consumer<FancyArmorStandEntity> consumer = EntityType.appendDefaultStackConfig(stand -> stand.setYRot(direction.toYRot()), server, stack, null);
-    FancyArmorStandEntity stand = TinkerGadgets.armorStandEntity.get().spawn(server, DataComponentHelper.getCustomData(stack), consumer, blockpos, MobSpawnType.DISPENSER, false, false);
+    FancyArmorStandEntity stand = TinkerGadgets.armorStandEntity.get().spawn(server, consumer, blockpos, MobSpawnType.DISPENSER, false, false);
     if (stand != null) {
       stack.shrink(1);
       type.onPlace(stand);

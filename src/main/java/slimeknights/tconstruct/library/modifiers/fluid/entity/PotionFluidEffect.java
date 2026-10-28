@@ -10,6 +10,8 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 import slimeknights.mantle.data.loadable.primitive.FloatLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
+
+import java.util.Optional;
 import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.fluids.fluids.PotionFluidType;
 import slimeknights.tconstruct.library.modifiers.fluid.EffectLevel;
@@ -47,13 +49,13 @@ public record PotionFluidEffect(float scale, TagPredicate predicate) implements 
         // report whichever effect used the most
         float used = 0;
         for (MobEffectInstance instance : effects) {
-          MobEffect effect = instance.getEffect();
-          if (effect.isInstantenous()) {
+          Holder<MobEffect> effect = instance.getEffect();
+          if (effect.value().isInstantenous()) {
             // instant effects just apply full value always
             used = level.value();
             if (action.execute()) {
               target.invulnerableTime = 0;
-              effect.applyInstantenousEffect(directSource, attacker, target, instance.getAmplifier(), used * scale);
+              effect.value().applyInstantenousEffect(directSource, attacker, target, instance.getAmplifier(), used * scale);
             }
           } else {
             // if the potion already exists, we scale up the existing time

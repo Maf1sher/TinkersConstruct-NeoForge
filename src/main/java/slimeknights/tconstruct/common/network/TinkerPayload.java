@@ -20,6 +20,12 @@ public interface TinkerPayload extends ISimplePacket {
     return StreamCodec.of(encoder::accept, decoder::apply);
   }
 
+  /**
+   * Writes this payload to the network
+   * @param buffer  Buffer instance
+   */
+  void encode(RegistryFriendlyByteBuf buffer);
+
   /** Schedules packet work on the game thread, matching the former thread-safe packet contract. */
   default void enqueue(IPayloadContext context, Runnable work) {
     context.enqueueWork(work);

@@ -3,6 +3,7 @@ package slimeknights.tconstruct.smeltery.block.entity.tank;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -171,10 +172,10 @@ public class CastingFluidHandler implements IFluidHandler {
   private static final String TAG_CAPACITY = "capacity";
 
   /** Reads the tank from Tag */
-  public void readFromTag(CompoundTag nbt) {
+  public void readFromTag(HolderLookup.Provider provider, CompoundTag nbt) {
     capacity = nbt.getInt(TAG_CAPACITY);
     if (nbt.contains(TAG_FLUID, Tag.TAG_COMPOUND)) {
-      setFluid(FluidStack.loadFluidStackFromNBT(nbt.getCompound(TAG_FLUID)));
+      setFluid(FluidStack.parseOptional(provider, nbt.getCompound(TAG_FLUID)));
     }
     if (nbt.contains(TAG_FILTER, Tag.TAG_STRING)) {
       filter = BuiltInRegistries.FLUID.get(ResourceLocation.tryParse(nbt.getString(TAG_FILTER)));
@@ -183,10 +184,10 @@ public class CastingFluidHandler implements IFluidHandler {
 
   /** Write the tank from NBT */
   @SuppressWarnings("deprecation")
-  public CompoundTag writeToTag(CompoundTag nbt) {
+  public CompoundTag writeToTag(HolderLookup.Provider provider, CompoundTag nbt) {
     nbt.putInt(TAG_CAPACITY, capacity);
     if (!fluid.isEmpty()) {
-      nbt.put(TAG_FLUID, fluid.writeToNBT(registries, new CompoundTag()));
+      nbt.put(TAG_FLUID, fluid.save(provider));
     }
     if (filter != Fluids.EMPTY) {
       nbt.putString(TAG_FILTER, BuiltInRegistries.FLUID.getKey(filter).toString());

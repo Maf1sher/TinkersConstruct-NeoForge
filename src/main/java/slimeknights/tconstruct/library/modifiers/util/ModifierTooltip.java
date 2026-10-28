@@ -121,7 +121,7 @@ public enum ModifierTooltip {
     }
 
     @Override
-    public JsonElement serialize(ShowInTooltips tooltips) {
+    public JsonElement serialize(ShowInTooltips tooltips, TypedMap context) {
       if (tooltips.isNever()) return new JsonPrimitive("never");
       if (tooltips.isAlways()) return new JsonPrimitive("always");
       // other presets
@@ -137,8 +137,8 @@ public enum ModifierTooltip {
     }
 
     @Override
-    public void encode(RegistryFriendlyByteBuf buffer, ShowInTooltips value) {
-      ShowInTooltips.LOADABLE.encode(buffer, value);
+    public void encode(RegistryFriendlyByteBuf buffer, ShowInTooltips value, TypedMap context) {
+      ShowInTooltips.LOADABLE.encode(buffer, value, context);
     }
   }
 }

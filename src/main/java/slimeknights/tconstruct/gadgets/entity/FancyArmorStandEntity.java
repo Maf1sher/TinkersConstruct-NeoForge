@@ -1,19 +1,24 @@
 package slimeknights.tconstruct.gadgets.entity;
 
 import lombok.Getter;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.HitResult;
@@ -34,10 +39,10 @@ public class FancyArmorStandEntity extends ArmorStand {
   /* Data */
 
   @Override
-  protected void defineSynchedData() {
-    super.defineSynchedData();
-    this.entityData.define(VARIANT, 0);
-    this.entityData.define(LEFT_HANDED, false);
+  protected void defineSynchedData(SynchedEntityData.Builder builder) {
+    super.defineSynchedData(builder);
+    builder.define(VARIANT, 0);
+    builder.define(LEFT_HANDED, false);
   }
 
   @Override
@@ -140,14 +145,25 @@ public class FancyArmorStandEntity extends ArmorStand {
   }
 
   @Override
-  protected void brokenByPlayer(DamageSource source) {
-    ItemStack stack = new ItemStack(getStandItem());
-    if (this.hasCustomName()) {
-      stack.setHoverName(this.getCustomName());
+  protected void dropAllDeathLoot(ServerLevel level, DamageSource source) {
+    super.dropAllDeathLoot(level, source);
+    // ArmorStand#brokenByPlayer is private in 1.21 and always drops a vanilla armor stand, so swap that fresh drop
+    // for this stand's fancy item. Explosions and other death causes never dropped the stand item, so skip those.
+    if (source.is(DamageTypeTags.CAN_BREAK_ARMOR_STAND) && !source.is(DamageTypeTags.IS_EXPLOSION) && !source.isCreativePlayer()) {
+      ItemStack stack = new ItemStack(getStandItem());
+      if (this.hasCustomName()) {
+        stack.set(DataComponents.CUSTOM_NAME, this.getCustomName());
+      }
+      boolean replaced = false;
+      for (ItemEntity entity : level.getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate(2.0), entity -> entity.tickCount == 0 && entity.getItem().is(Items.ARMOR_STAND))) {
+        entity.setItem(stack);
+        replaced = true;
+        break;
+      }
+      if (!replaced) {
+        Block.popResource(level, this.blockPosition(), stack);
+      }
     }
-    Block.popResource(this.level(), this.blockPosition(), stack);
-
-    this.brokenByAnything(source);
   }
 
 

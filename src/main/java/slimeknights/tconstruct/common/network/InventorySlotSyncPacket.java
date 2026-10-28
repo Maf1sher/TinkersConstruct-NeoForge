@@ -6,6 +6,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -51,13 +52,12 @@ public class InventorySlotSyncPacket implements TinkerPayload {
     private static void handle(InventorySlotSyncPacket packet) {
       Level world = Minecraft.getInstance().level;
       if (world != null) {
-        world.getCapability(Capabilities.ItemHandler.BLOCK, packet.pos, null)
-          .filter(cap -> cap instanceof IItemHandlerModifiable)
-          .ifPresent(cap -> {
-              ((IItemHandlerModifiable)cap).setStackInSlot(packet.slot, packet.itemStack);
-              //noinspection ConstantConditions
-              Minecraft.getInstance().levelRenderer.blockChanged(null, packet.pos, null, null, 0);
-          });
+        IItemHandler cap = world.getCapability(Capabilities.ItemHandler.BLOCK, packet.pos, null);
+        if (cap instanceof IItemHandlerModifiable modifiable) {
+          modifiable.setStackInSlot(packet.slot, packet.itemStack);
+          //noinspection ConstantConditions
+          Minecraft.getInstance().levelRenderer.blockChanged(null, packet.pos, null, null, 0);
+        }
       }
     }
   }

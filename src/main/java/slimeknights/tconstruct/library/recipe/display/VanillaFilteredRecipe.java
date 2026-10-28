@@ -33,7 +33,7 @@ public interface VanillaFilteredRecipe<T extends FilteredRecipe> {
   }
 
   /** Gets a modifiable list of filtered recipes matching the given recipe type, wrapped in holders with derived IDs. */
-  static <T extends FilteredRecipe, I extends RecipeInput, R extends Recipe<I>> List<RecipeHolder<T>> getRecipeHolders(RegistryAccess access, RecipeManager manager, RecipeType<R> type, Class<T> recipeClass) {
+  static <T extends Recipe<?> & FilteredRecipe, I extends RecipeInput, R extends Recipe<I>> List<RecipeHolder<T>> getRecipeHolders(RegistryAccess access, RecipeManager manager, RecipeType<R> type, Class<T> recipeClass) {
     List<RecipeHolder<T>> recipes = new ArrayList<>();
     for (RecipeHolder<R> holder : manager.getAllRecipesFor(type)) {
       if (holder.value() instanceof VanillaFilteredRecipe<?> filtered) {

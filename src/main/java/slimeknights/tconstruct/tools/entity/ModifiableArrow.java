@@ -5,8 +5,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -14,6 +16,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
+import slimeknights.tconstruct.library.modifiers.entity.ProjectileWithKnockback;
 import slimeknights.tconstruct.library.modifiers.entity.ReusableProjectile;
 import slimeknights.tconstruct.library.modifiers.hook.build.ConditionalStatModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.ranged.ScheduledProjectileTaskModifierHook;
@@ -31,7 +34,7 @@ import slimeknights.tconstruct.tools.TinkerTools;
 import javax.annotation.Nullable;
 
 /** Arrow with material variants */
-public class ModifiableArrow extends AbstractArrow implements ToolProjectile, ReusableProjectile {
+public class ModifiableArrow extends AbstractArrow implements ToolProjectile, ReusableProjectile, ProjectileWithKnockback {
   /** Key to sync the stack to the client */
   protected static final EntityDataAccessor<ItemStack> STACK = SynchedEntityData.defineId(ModifiableArrow.class, EntityDataSerializers.ITEM_STACK);
   /** Movement speed in water */
@@ -41,6 +44,8 @@ public class ModifiableArrow extends AbstractArrow implements ToolProjectile, Re
   private IToolStackView tool = null;
   private boolean reclaim = false;
   private boolean dealtDamage = false;
+  /** Extra knockback from modifiers, applied when the arrow hits an entity */
+  private float knockback = 0;
   /** Tasks queued by modifiers */
   private Schedule tasks = Schedule.EMPTY;
 
@@ -49,11 +54,16 @@ public class ModifiableArrow extends AbstractArrow implements ToolProjectile, Re
   }
 
   public ModifiableArrow(Level level, double pX, double pY, double pZ) {
-    super(TinkerTools.materialArrow.get(), pX, pY, pZ, level);
+    super(TinkerTools.materialArrow.get(), pX, pY, pZ, level, new ItemStack(TinkerTools.arrow.get()), null);
   }
 
   public ModifiableArrow(Level level, LivingEntity shooter) {
-    super(TinkerTools.materialArrow.get(), shooter, level);
+    super(TinkerTools.materialArrow.get(), shooter, level, new ItemStack(TinkerTools.arrow.get()), null);
+  }
+
+  @Override
+  protected ItemStack getDefaultPickupItem() {
+    return new ItemStack(TinkerTools.arrow.get());
   }
 
 
@@ -139,8 +149,21 @@ public class ModifiableArrow extends AbstractArrow implements ToolProjectile, Re
   // need to replace some setters with adders so vanilla bows work with our logic
 
   @Override
-  public void setKnockback(int knockback) {
-    super.setKnockback(getKnockback() + knockback);
+  public void addKnockback(float amount) {
+    this.knockback += amount;
+  }
+
+  @Override
+  protected void doKnockback(LivingEntity target, DamageSource damageSource) {
+    super.doKnockback(target, damageSource);
+    // 1.21 removed the arrow knockback field, so apply the modifier knockback on top of the vanilla enchantment knockback
+    if (this.knockback > 0) {
+      double resistance = Math.max(0.0, 1.0 - target.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
+      Vec3 direction = this.getDeltaMovement().multiply(1.0, 0.0, 1.0).normalize().scale(this.knockback * 0.6 * resistance);
+      if (direction.lengthSqr() > 0.0) {
+        target.push(direction.x, 0.1, direction.z);
+      }
+    }
   }
 
   @Override
@@ -205,10 +228,10 @@ public class ModifiableArrow extends AbstractArrow implements ToolProjectile, Re
   /* Client */
 
   @Override
-  protected void defineSynchedData() {
-    super.defineSynchedData();
-    this.entityData.define(STACK, ItemStack.EMPTY);
-    this.entityData.define(WATER_INERTIA, 0.6f);
+  protected void defineSynchedData(SynchedEntityData.Builder builder) {
+    super.defineSynchedData(builder);
+    builder.define(STACK, ItemStack.EMPTY);
+    builder.define(WATER_INERTIA, 0.6f);
   }
 
   @Override

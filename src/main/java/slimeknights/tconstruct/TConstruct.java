@@ -1,11 +1,15 @@
 package slimeknights.tconstruct;
 
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.core.RegistrySetBuilder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
@@ -15,7 +19,6 @@ import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.apache.logging.log4j.LogManager;
@@ -72,10 +75,12 @@ import slimeknights.tconstruct.world.TinkerWorld;
 import slimeknights.tconstruct.world.data.WorldgenProvider;
 
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
  * TConstruct, the tool mod. Craft your tools with style, then modify until the original is gone!
@@ -108,7 +113,8 @@ public class TConstruct {
     // base
     bus.register(new TinkerCommons(bus));
     bus.register(new TinkerMaterials());
-    bus.register(new TinkerEffects(bus));
+    // registers its own event listeners in the constructor, so it must not be registered on the bus
+    new TinkerEffects(bus);
     bus.register(new TinkerGadgets(bus));
     bus.register(new TinkerAttributes(bus));
     // world
@@ -117,8 +123,10 @@ public class TConstruct {
     // tools
     bus.register(new TinkerTables());
     bus.register(new TinkerModifiers(bus));
-    bus.register(new TinkerToolParts());
-    bus.register(new TinkerTools(bus));
+    // no @SubscribeEvent methods, the static registrations are all this module needs
+    new TinkerToolParts();
+    // registers its own listeners in the constructor
+    new TinkerTools(bus);
     // smeltery
     bus.register(new TinkerSmeltery());
     bus.register(new TinkerFluids());
@@ -154,6 +162,23 @@ public class TConstruct {
     StationSlotLayoutLoader.init();
   }
 
+  /** Combines a static registry lookup with a datapack lookup, preferring static registries so their holders stay valid */
+  private static HolderLookup.Provider combineLookups(HolderLookup.Provider statics, HolderLookup.Provider datapack) {
+    return new HolderLookup.Provider() {
+      @Override
+      public Stream<ResourceKey<? extends Registry<?>>> listRegistries() {
+        return Stream.concat(statics.listRegistries(), datapack.listRegistries()).distinct();
+      }
+
+      @Override
+      public <T> Optional<HolderLookup.RegistryLookup<T>> lookup(ResourceKey<? extends Registry<? extends T>> key) {
+        // datapack registries also exist as empty static stubs; only prefer a static registry that has entries
+        Optional<HolderLookup.RegistryLookup<T>> staticLookup = statics.lookup(key).filter(lookup -> lookup.listElements().findAny().isPresent());
+        return staticLookup.isPresent() ? staticLookup : datapack.lookup(key);
+      }
+    };
+  }
+
   static void gatherData(final GatherDataEvent event) {
     DataGenerator generator = event.getGenerator();
     PackOutput packOutput = generator.getPackOutput();
@@ -166,8 +191,10 @@ public class TConstruct {
     DamageTypeProvider.register(registrySetBuilder);
     WorldgenProvider.register(registrySetBuilder);
     TrimMaterialProvider.register(registrySetBuilder);
-    DatapackBuiltinEntriesProvider datapackRegistryProvider = new DatapackBuiltinEntriesProvider(packOutput, lookupProvider, registrySetBuilder, Set.of(MOD_ID));
-    generator.addProvider(server, datapackRegistryProvider);
+    event.createDatapackRegistryObjects(registrySetBuilder, Set.of(MOD_ID));
+    // combine the static registries (item holders must come from these) with the datapack entries (structures, damage types, trim materials)
+    lookupProvider = event.getLookupProvider().thenApply(datapack ->
+      combineLookups(RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY), datapack));
 
     // tags
     BlockTagProvider blockTags = new BlockTagProvider(packOutput, lookupProvider, existingFileHelper);
@@ -182,10 +209,10 @@ public class TConstruct {
     generator.addProvider(server, new PotionTagProvider(packOutput, lookupProvider, existingFileHelper));
     generator.addProvider(server, new CreativeTabTagProvider(packOutput, lookupProvider, existingFileHelper));
     generator.addProvider(server, new InstrumentTagProvider(packOutput, lookupProvider, existingFileHelper));
-    generator.addProvider(server, new DamageTypeTagProvider(packOutput, datapackRegistryProvider.getRegistryProvider(), existingFileHelper));
+    generator.addProvider(server, new DamageTypeTagProvider(packOutput, lookupProvider, existingFileHelper));
 
     // other datagen
-    generator.addProvider(server, new TConstructLootTableProvider(packOutput));
+    generator.addProvider(server, new TConstructLootTableProvider(packOutput, lookupProvider));
     generator.addProvider(server, new AdvancementsProvider(packOutput, lookupProvider));
     generator.addProvider(server, new GlobalLootModifiersProvider(packOutput, lookupProvider));
     generator.addProvider(server, new LootTableInjectionProvider(packOutput, lookupProvider));

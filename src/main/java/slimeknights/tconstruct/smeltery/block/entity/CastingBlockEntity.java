@@ -17,6 +17,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -84,10 +85,13 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
   private int coolingTime = -1;
   /** Current in progress recipe */
   private ICastingRecipe currentRecipe;
+  /** ID of the current in progress recipe, as recipes no longer store their own ID */
+  @Nullable
+  private ResourceLocation currentRecipeId;
   /** Name of the current recipe, fetched from Tag. Used since Tag is read before recipe manager access */
   private ResourceLocation recipeName;
   /** Cache recipe to reduce time during recipe lookups. Not saved to Tag */
-  private ICastingRecipe lastCastingRecipe;
+  private RecipeHolder<ICastingRecipe> lastCastingRecipe;
   /** Last recipe output for client side display */
   private ItemStack lastOutput = null;
   /** If true, this block is allowed to cast without a cast */
@@ -285,7 +289,9 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
         if (!currentRecipe.matches(castingInventory, level)) {
           // if lost our recipe or the recipe needs more fluid then we have, we are done
           // will come around later for the proper fluid amount
-          currentRecipe = findCastingRecipe();
+          RecipeHolder<ICastingRecipe> newRecipe = findCastingRecipe();
+          currentRecipe = newRecipe == null ? null : newRecipe.value();
+          currentRecipeId = newRecipe == null ? null : newRecipe.id();
           recipeName = null;
           if (currentRecipe == null || currentRecipe.getFluidAmount(castingInventory) > currentFluid.getAmount()) {
             timer = 0;
@@ -337,16 +343,14 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
   }
 
   @Nullable
-  private ICastingRecipe findCastingRecipe() {
+  private RecipeHolder<ICastingRecipe> findCastingRecipe() {
     if (level == null) return null;
-    if (this.lastCastingRecipe != null && this.lastCastingRecipe.matches(castingInventory, level)) {
+    if (this.lastCastingRecipe != null && this.lastCastingRecipe.value().matches(castingInventory, level)) {
       return this.lastCastingRecipe;
     }
-    ICastingRecipe castingRecipe = level.getRecipeManager().getRecipeFor(this.castingType, castingInventory, level).orElse(null);
-    if (castingRecipe != null) {
-      this.lastCastingRecipe = castingRecipe;
-    }
-    return castingRecipe;
+    Optional<RecipeHolder<ICastingRecipe>> newRecipe = level.getRecipeManager().getRecipeFor(this.castingType, castingInventory, level);
+    newRecipe.ifPresent(holder -> this.lastCastingRecipe = holder);
+    return newRecipe.orElse(null);
   }
 
 
@@ -360,7 +364,7 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
     if (lastMoldingRecipe != null && lastMoldingRecipe.matches(moldingInventory, level)) {
       return lastMoldingRecipe;
     }
-    Optional<MoldingRecipe> newRecipe = level.getRecipeManager().getRecipeFor(moldingType, moldingInventory, level);
+    Optional<MoldingRecipe> newRecipe = level.getRecipeManager().getRecipeFor(moldingType, moldingInventory, level).map(RecipeHolder::value);
     if (newRecipe.isPresent()) {
       lastMoldingRecipe = newRecipe.get();
       return lastMoldingRecipe;
@@ -396,10 +400,12 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
         return 0;
       }
       castingInventory.useInput();
-      ICastingRecipe castingRecipe = findCastingRecipe();
-      if (castingRecipe != null) {
+      RecipeHolder<ICastingRecipe> holder = findCastingRecipe();
+      if (holder != null) {
+        ICastingRecipe castingRecipe = holder.value();
         if (action == FluidAction.EXECUTE) {
           this.currentRecipe = castingRecipe;
+          this.currentRecipeId = holder.id();
           this.recipeName = null;
           this.lastOutput = null;
         }
@@ -408,10 +414,12 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
     } else {
       // if we have an output and no input, try using that as the input
       castingInventory.useOutput();
-      ICastingRecipe castingRecipe = findCastingRecipe();
-      if (castingRecipe != null) {
+      RecipeHolder<ICastingRecipe> holder = findCastingRecipe();
+      if (holder != null) {
+        ICastingRecipe castingRecipe = holder.value();
         if (action == FluidAction.EXECUTE) {
           this.currentRecipe = castingRecipe;
+          this.currentRecipeId = holder.id();
           this.recipeName = null;
           this.lastOutput = null;
           // move output to input slot, prevents removing and ensures item is reduced properly
@@ -431,6 +439,7 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
   public void reset() {
     timer = 0;
     currentRecipe = null;
+    currentRecipeId = null;
     recipeName = null;
     lastOutput = null;
     castingInventory.setFluid(FluidStack.EMPTY);
@@ -546,8 +555,10 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
     FluidStack fluid = tank.getFluid();
     if(!fluid.isEmpty()) {
       // fetch recipe by name
-      RecipeHelper.getRecipe(level.getRecipeManager(), name, ICastingRecipe.class).ifPresent(recipe -> {
+      RecipeHelper.getRecipeHolder(level.getRecipeManager(), name, ICastingRecipe.class).ifPresent(holder -> {
+        ICastingRecipe recipe = holder.value();
         this.currentRecipe = recipe;
+        this.currentRecipeId = holder.id();
         castingInventory.setFluid(fluid);
         tank.setCapacity(recipe.getFluidAmount(castingInventory));
         if (fluid.getAmount() >= tank.getCapacity()) {
@@ -576,12 +587,12 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
   @Override
   public void saveSynced(CompoundTag tags, Provider registries) {
     super.saveSynced(tags, registries);
-    tags.put(TAG_TANK, tank.writeToTag(new CompoundTag()));
+    tags.put(TAG_TANK, tank.writeToTag(registries, new CompoundTag()));
     if (currentRecipe != null || recipeName != null) {
       tags.putInt(TAG_TIMER, timer);
     }
-    if (currentRecipe != null) {
-      tags.putString(TAG_RECIPE, currentRecipe.getId().toString());
+    if (currentRecipe != null && currentRecipeId != null) {
+      tags.putString(TAG_RECIPE, currentRecipeId.toString());
     } else if (recipeName != null) {
       tags.putString(TAG_RECIPE, recipeName.toString());
     }
@@ -591,7 +602,7 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
   @Override
   public void loadAdditional(CompoundTag tags, Provider registries) {
     super.loadAdditional(tags, registries);
-    tank.readFromTag(tags.getCompound(TAG_TANK));
+    tank.readFromTag(registries, tags.getCompound(TAG_TANK));
     timer = tags.getInt(TAG_TIMER);
     if (tags.contains(TAG_RECIPE, CompoundTag.TAG_STRING)) {
       ResourceLocation name = ResourceLocation.parse(tags.getString(TAG_RECIPE));

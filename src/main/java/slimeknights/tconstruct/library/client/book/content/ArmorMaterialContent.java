@@ -17,6 +17,7 @@ import slimeknights.mantle.client.screen.book.element.TextElement;
 import slimeknights.mantle.util.html.HtmlElement;
 import slimeknights.mantle.util.html.HtmlGroup;
 import slimeknights.mantle.util.html.HtmlSerializable;
+import slimeknights.tconstruct.library.tools.definition.ModifiableArmorMaterial;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.book.elements.TinkerItemElement;
 import slimeknights.tconstruct.library.client.materials.MaterialTooltipCache;
@@ -115,7 +116,7 @@ public class ArmorMaterialContent extends AbstractMaterialContent {
 
   /** Gets the tool to display for the given stat type, just hardcoding to plate armor for simplicity */
   private static void addPlatingItem(MaterialStatsId statType, List<ItemStack> stacks, MaterialVariantId variant) {
-    for (ArmorItem.Type slotType : ArmorItem.Type.values()) {
+    for (ArmorItem.Type slotType : ModifiableArmorMaterial.ARMOR_TYPES) {
       if (statType.equals(PlatingMaterialStats.TYPES.get(slotType.ordinal()).getId())) {
         stacks.add(TinkerToolParts.plating.get(slotType).withMaterialForDisplay(variant));
         return;

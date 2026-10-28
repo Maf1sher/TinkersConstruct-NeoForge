@@ -22,6 +22,7 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -758,11 +759,11 @@ public final class TinkerModifiers extends TinkerModule {
   /** @deprecated use {@link MaterialRepairModule} */
   @SuppressWarnings("removal")
   @Deprecated(forRemoval = true)
-  public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<ModifierMaterialRepairRecipe>> modifierMaterialRepair = RECIPE_SERIALIZERS.register("modifier_material_repair", () -> LoadableRecipeSerializer.deprecated(ModifierMaterialRepairRecipe.LOADER, "use the tconstruct:material_repair modifier module instead"));
+  public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<ModifierMaterialRepairRecipe>> modifierMaterialRepair = RECIPE_SERIALIZERS.register("modifier_material_repair", () -> LoadableRecipeSerializer.of(ModifierMaterialRepairRecipe.LOADER));
   /** @deprecated use {@link MaterialRepairModule} */
   @SuppressWarnings("removal")
   @Deprecated(forRemoval = true)
-  public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<ModifierMaterialRepairKitRecipe>> craftingModifierMaterialRepair = RECIPE_SERIALIZERS.register("crafting_modifier_material_repair", () -> LoadableRecipeSerializer.deprecated(ModifierMaterialRepairKitRecipe.LOADER, "use the tconstruct:material_repair modifier module instead"));
+  public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<ModifierMaterialRepairKitRecipe>> craftingModifierMaterialRepair = RECIPE_SERIALIZERS.register("crafting_modifier_material_repair", () -> LoadableRecipeSerializer.of(ModifierMaterialRepairKitRecipe.LOADER));
   // worktable
   public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<ModifierRemovalRecipe>> removeModifierSerializer = RECIPE_SERIALIZERS.register("remove_modifier", () -> LoadableRecipeSerializer.of(ModifierRemovalRecipe.LOADER));
   public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<ExtractModifierRecipe>> extractModifierSerializer = RECIPE_SERIALIZERS.register("extract_modifier", () -> LoadableRecipeSerializer.of(ExtractModifierRecipe.LOADER));
@@ -1106,7 +1107,6 @@ public final class TinkerModifiers extends TinkerModule {
   @SubscribeEvent
   void commonSetup(final FMLCommonSetupEvent event) {
     PersistentDataCapability.register();
-    EntityModifierCapability.register();
     // by default, we support modifying projectiles (arrows or fireworks mainly, but maybe other stuff). other entities may come in the future
     EntityModifierCapability.registerEntityPredicate(entity -> entity instanceof Projectile);
   }

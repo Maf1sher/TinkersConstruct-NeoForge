@@ -107,7 +107,6 @@ public class Modifier implements IdAwareObject {
     this.id = name;
   }
 
-  @Override
   public ModifierId getId() {
     return Objects.requireNonNull(id, "Modifier has null registry name");
   }
@@ -150,7 +149,7 @@ public class Modifier implements IdAwareObject {
    * @return  Translation key
    */
   protected String makeTranslationKey() {
-    return Util.makeTranslationKey("modifier", Objects.requireNonNull(id));
+    return Util.makeTranslationKey("modifier", Objects.requireNonNull(id).getLocation());
   }
 
   /**

@@ -34,7 +34,7 @@ public class RecipeHelper {
    * @param recipeClass  Class for final recipes
    * @return  List of display recipes
    */
-  public static <T, R extends Recipe<?>> List<T> getJEIRecipes(Provider provider, RecipeManager manager, RecipeType<R> type, Class<T> recipeClass) {
+  public static <T, I extends net.minecraft.world.item.crafting.RecipeInput, R extends Recipe<I>> List<T> getJEIRecipes(Provider provider, RecipeManager manager, RecipeType<R> type, Class<T> recipeClass) {
     return MultiNamedRecipe.streamRecipes(provider, manager, type, recipeClass).toList();
   }
 
@@ -47,7 +47,7 @@ public class RecipeHelper {
    * @param recipeClass  Class for final recipes
    * @return  List of display recipe holders
    */
-  public static <T, R extends Recipe<?>> List<DisplayRecipe<T>> getJEIDisplayRecipes(Provider provider, RecipeManager manager, RecipeType<R> type, Class<T> recipeClass) {
+  public static <T, I extends net.minecraft.world.item.crafting.RecipeInput, R extends Recipe<I>> List<DisplayRecipe<T>> getJEIDisplayRecipes(Provider provider, RecipeManager manager, RecipeType<R> type, Class<T> recipeClass) {
     return MultiNamedRecipe.streamNamedRecipes(provider, manager, type, recipeClass)
       .map(named -> new DisplayRecipe<>(named.id(), named.recipe()))
       .toList();

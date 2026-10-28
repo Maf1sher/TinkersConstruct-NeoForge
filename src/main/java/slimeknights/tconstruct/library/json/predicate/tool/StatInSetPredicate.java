@@ -49,7 +49,7 @@ public record StatInSetPredicate<T>(IToolStat<T> stat, Set<T> values) implements
     }
 
     @Override
-    public void serialize(StatInSetPredicate<?> object, JsonObject json) {
+    public void serializeInto(StatInSetPredicate<?> object, JsonObject json, TypedMap context) {
       json.add("stat", ToolStats.LOADER.serialize(object.stat));
       serializeSet(object, json);
     }
@@ -79,7 +79,7 @@ public record StatInSetPredicate<T>(IToolStat<T> stat, Set<T> values) implements
     }
 
     @Override
-    public void encode(RegistryFriendlyByteBuf buffer, StatInSetPredicate<?> object) {
+    public void encode(RegistryFriendlyByteBuf buffer, StatInSetPredicate<?> object, TypedMap context) {
       ToolStats.LOADER.encode(buffer, object.stat);
       setToNetwork(object, buffer);
     }

@@ -74,10 +74,10 @@ public class Config {
       ImmutableList.Builder<ConfigurableAction> actions = ImmutableList.builder();
       actions.add(new ConfigurableAction(builder, "extendFireProtectionSlots", true,
                                          "If true, extends the applicable slots for the fire protection enchantment to work better with shields. Will not impact gameplay with the vanilla enchantment.\nIf false, fire protection on a shield will not reduce fire tick time.",
-                                         () -> Enchantments.FIRE_PROTECTION.slots = EquipmentSlot.values()));
+                                         () -> {}));
       actions.add(new ConfigurableAction(builder, "extendBlastProtectionSlots", true,
                                          "If true, extends the applicable slots for the blast protection enchantment to work better with shields. Will not impact gameplay with the vanilla enchantment.\nIf false, blast protection on a shield will not reduce explosion knockback.",
-                                         () -> Enchantments.BLAST_PROTECTION.slots = EquipmentSlot.values()));
+                                         () -> {}));
       toolTweaks = actions.build();
 
       this.syncKnockbackResistance = builder

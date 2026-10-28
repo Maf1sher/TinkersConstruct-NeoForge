@@ -19,7 +19,7 @@ import slimeknights.tconstruct.tools.TinkerModifiers;
 @RequiredArgsConstructor
 public class HasModifierLootCondition implements LootItemCondition {
   public static final MapCodec<HasModifierLootCondition> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-    ResourceLocation.CODEC.xmap(ModifierId::new, id -> id).fieldOf("modifier").forGetter(condition -> condition.modifier)
+    ResourceLocation.CODEC.xmap(ModifierId::new, ModifierId::getLocation).fieldOf("modifier").forGetter(condition -> condition.modifier)
   ).apply(instance, HasModifierLootCondition::new));
   private final ModifierId modifier;
 

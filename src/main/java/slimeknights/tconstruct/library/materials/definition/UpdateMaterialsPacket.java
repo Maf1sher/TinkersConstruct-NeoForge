@@ -71,7 +71,7 @@ public class UpdateMaterialsPacket implements TinkerPayload {
       buffer.writeUtf(entry.getKey().toString());
       buffer.writeUtf(entry.getValue().toString());
     }
-    GenericTagUtil.encodeTags(buffer, IMaterial::getIdentifier, this.tags);
+    GenericTagUtil.encodeTags(buffer, material -> material.getIdentifier().getLocation(), this.tags);
   }
 
   @Override

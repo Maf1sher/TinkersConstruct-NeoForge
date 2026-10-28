@@ -9,10 +9,8 @@ import net.minecraft.data.tags.IntrinsicHolderTagsProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
-import slimeknights.mantle.datagen.MantleTags;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
-import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import javax.annotation.Nullable;
 import java.util.concurrent.CompletableFuture;
@@ -51,9 +49,6 @@ public class BlockEntityTypeTagProvider extends IntrinsicHolderTagsProvider<Bloc
     ironchest(sideInventories, "crystal");
     ironchest(sideInventories, "obsidian");
     ironchest(sideInventories, "dirt");
-
-    // these block entities don't fully sync the fluid to client, so show simplified information
-    tag(MantleTags.BlockEntities.HIDES_GAUGE_AMOUNT).add(TinkerSmeltery.faucet.get(), TinkerSmeltery.channel.get());
   }
 
   @Override

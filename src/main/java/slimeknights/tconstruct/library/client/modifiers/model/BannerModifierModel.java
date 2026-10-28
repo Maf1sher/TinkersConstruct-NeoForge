@@ -8,9 +8,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.entity.BannerPattern;
 import slimeknights.mantle.client.model.util.MantleItemLayerModel;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
@@ -45,8 +43,8 @@ public record BannerModifierModel(@Nullable ResourceLocation smallPrefix, @Nulla
   public void validate(Function<Material, TextureAtlasSprite> spriteGetter) {
     // since these are dynamically loaded, condition based on the config option
     if (Config.CLIENT.logMissingModifierTextures.get()) {
-      for (ResourceKey<BannerPattern> key : Sheets.SHIELD_MATERIALS.keySet()) {
-        String suffix = MaterialRenderInfo.getSuffix(key.location());
+      for (ResourceLocation key : Sheets.SHIELD_MATERIALS.keySet()) {
+        String suffix = MaterialRenderInfo.getSuffix(key);
         if (smallPrefix != null) {
           spriteGetter.apply(ModifierModel.blockAtlas(smallPrefix.withSuffix(suffix)));
         }

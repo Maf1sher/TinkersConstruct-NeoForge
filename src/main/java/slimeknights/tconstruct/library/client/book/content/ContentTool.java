@@ -11,12 +11,11 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.locale.Language;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.ShapedRecipe;
@@ -162,7 +161,7 @@ public class ContentTool extends PageContent {
       RegistryAccess access = level.registryAccess();
 
       // get the stacks for the first crafting table recipe, prefer this option over parts as it may not be craftable with said parts
-      Recipe<CraftingContainer> craftingRecipe = level.getRecipeManager().getAllRecipesFor(RecipeType.CRAFTING).stream().map(RecipeHolder::value)
+      CraftingRecipe craftingRecipe = level.getRecipeManager().getAllRecipesFor(RecipeType.CRAFTING).stream().map(RecipeHolder::value)
         .filter(r -> r.getResultItem(access).getItem() == tool.asItem())
         .findFirst().orElse(null);
       if (craftingRecipe != null) {
@@ -172,7 +171,7 @@ public class ContentTool extends PageContent {
         // if we have a shaped recipe, display slots in order
         if (craftingRecipe instanceof ShapedRecipe shaped) {
           int width = Mth.clamp(shaped.getWidth() - 1, 0, 2);
-          this.imgSlots = IMG_SLOTS_SHAPED[Mth.clamp(shaped.getRecipeHeight() - 1, 0, 2)][width];
+          this.imgSlots = IMG_SLOTS_SHAPED[Mth.clamp(shaped.getHeight() - 1, 0, 2)][width];
           this.slotPos = SLOTS_WIDTH[width];
         }
       } else {

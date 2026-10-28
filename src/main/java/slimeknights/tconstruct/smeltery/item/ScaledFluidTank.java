@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.smeltery.item;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
@@ -11,6 +12,8 @@ import javax.annotation.Nonnull;
  * Internally works the same as a fluid tank with {@code capacity * scale}, except operations are truncated to the nearest scale (e.g. if scale is 4, we must fill in 4mb increments).
  */
 public class ScaledFluidTank extends FluidTank {
+  /** Tag holding the fluid, matching {@link FluidTank} */
+  private static final String TAG_FLUID = "Fluid";
   private final int scale;
   private ScaledFluidTank(int capacity, int scale) {
     super(capacity * scale);
@@ -84,20 +87,22 @@ public class ScaledFluidTank extends FluidTank {
   /* NBT */
 
   @Override
-  public FluidTank readFromNBT(CompoundTag nbt) {
+  public FluidTank readFromNBT(HolderLookup.Provider provider, CompoundTag nbt) {
     // scale the fluid on reading from NBT; as each instance should store the fluid relative to stack size 1
-    FluidStack fluid = FluidStack.loadFluidStackFromNBT(nbt);
+    FluidStack fluid = FluidStack.parseOptional(provider, nbt.getCompound(TAG_FLUID));
     fluid.setAmount(fluid.getAmount() * scale);
     setFluid(fluid);
     return this;
   }
 
   @Override
-  public CompoundTag writeToNBT(CompoundTag nbt) {
-    // scale the fluid on reading from NBT; as each instance should store the fluid relative to stack size 1
+  public CompoundTag writeToNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+    // scale the fluid on writing to NBT; as each instance should store the fluid relative to stack size 1
     FluidStack fluid = this.fluid.copy();
-    fluid.setAmount(fluid.getAmount() / scale);
-    fluid.writeToNBT(nbt);
+    if (!fluid.isEmpty()) {
+      fluid.setAmount(fluid.getAmount() / scale);
+      nbt.put(TAG_FLUID, fluid.save(provider));
+    }
     return nbt;
   }
 }

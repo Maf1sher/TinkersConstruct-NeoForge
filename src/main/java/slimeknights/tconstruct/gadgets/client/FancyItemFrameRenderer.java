@@ -8,12 +8,14 @@ import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemFrameRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.Event;
@@ -28,13 +30,14 @@ import java.util.EnumMap;
 import java.util.Map;
 
 public class FancyItemFrameRenderer<T extends FancyItemFrameEntity> extends ItemFrameRenderer<T> {
-  public static final Map<FrameType, ResourceLocation> LOCATIONS_MODEL = new EnumMap<>(FrameType.class);
-  public static final Map<FrameType, ResourceLocation> LOCATIONS_MODEL_MAP = new EnumMap<>(FrameType.class);
+  public static final Map<FrameType, ModelResourceLocation> LOCATIONS_MODEL = new EnumMap<>(FrameType.class);
+  public static final Map<FrameType, ModelResourceLocation> LOCATIONS_MODEL_MAP = new EnumMap<>(FrameType.class);
   static {
     for (FrameType type : FrameType.values()) {
       String name = type == FrameType.REVERSED_GOLD ? FrameType.GOLD.getSerializedName() : type.getSerializedName();
-      LOCATIONS_MODEL.put(type, TConstruct.getResource("block/frame/" + name));
-      LOCATIONS_MODEL_MAP.put(type, TConstruct.getResource("block/frame/" + name + "_map"));
+      // 1.21 requires model resource locations, so resolve the frame blockstates with the map variant
+      LOCATIONS_MODEL.put(type, new ModelResourceLocation(TConstruct.getResource(name + "_frame"), "map=false"));
+      LOCATIONS_MODEL_MAP.put(type, new ModelResourceLocation(TConstruct.getResource(name + "_frame"), "map=true"));
     }
   }
 
@@ -108,7 +111,7 @@ public class FancyItemFrameRenderer<T extends FancyItemFrameEntity> extends Item
           matrices.scale(0.0078125F, 0.0078125F, 0.0078125F);
           matrices.translate(-64.0D, -64.0D, -1.0D);
           int light = frameType == FrameType.MANYULLYN ? 0x00F000F0 : packedLight;
-          Integer mapId = MapItem.getMapId(stack);
+          MapId mapId = stack.get(DataComponents.MAP_ID);
           assert mapId != null;
           Minecraft.getInstance().gameRenderer.getMapRenderer().render(matrices, bufferIn, mapId, mapdata, true, light);
         } else {

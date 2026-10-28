@@ -12,6 +12,7 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.mojang.serialization.JsonOps;
 import lombok.Getter;
+import slimeknights.mantle.data.gson.LoadableSerializer;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.resources.RegistryOps;
@@ -51,7 +52,7 @@ public class StationSlotLayoutLoader extends SimpleJsonResourceReloadListener {
   public static final Gson GSON = (new GsonBuilder())
     .registerTypeHierarchyAdapter(Ingredient.class, new IngredientSerializer())
     .registerTypeHierarchyAdapter(LayoutIcon.class, LayoutIcon.SERIALIZER)
-    .registerTypeAdapter(Pattern.class, Pattern.PARSER)
+    .registerTypeAdapter(Pattern.class, new LoadableSerializer<>(Pattern.PARSER, builder -> {}))
     .setPrettyPrinting()
     .disableHtmlEscaping()
     .create();

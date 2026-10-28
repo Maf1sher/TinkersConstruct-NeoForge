@@ -1,8 +1,11 @@
 package slimeknights.tconstruct.world.block;
 
 import com.google.common.collect.Lists;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import lombok.Getter;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -20,6 +23,11 @@ import java.util.List;
 
 public class SlimeTallGrassBlock extends BushBlock implements net.neoforged.neoforge.common.IShearable {
 
+  public static final MapCodec<SlimeTallGrassBlock> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+    propertiesCodec(),
+    StringRepresentable.fromEnum(FoliageType::values).fieldOf("foliage_type").forGetter(SlimeTallGrassBlock::getFoliageType)
+  ).apply(instance, SlimeTallGrassBlock::new));
+
   private static final VoxelShape SHAPE = Block.box(2.0D, 0.0D, 2.0D, 14.0D, 13.0D, 14.0D);
 
   @Getter
@@ -27,6 +35,11 @@ public class SlimeTallGrassBlock extends BushBlock implements net.neoforged.neof
   public SlimeTallGrassBlock(Properties properties, FoliageType foliageType) {
     super(properties);
     this.foliageType = foliageType;
+  }
+
+  @Override
+  public MapCodec<SlimeTallGrassBlock> codec() {
+    return CODEC;
   }
 
   @Deprecated

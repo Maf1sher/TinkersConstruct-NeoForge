@@ -24,7 +24,7 @@ public record RestoreHungerFluidEffect(int hunger, float saturation, boolean can
     IntLoadable.FROM_ONE.requiredField("hunger", e -> e.hunger),
     FloatLoadable.FROM_ZERO.requiredField("saturation", e -> e.saturation),
     BooleanLoadable.INSTANCE.defaultField("can_always_eat", false, e -> e.canAlwaysEat),
-    ItemOutput.Loadable.OPTIONAL_ITEM.emptyField("representative_item", e -> e.representative),
+    ItemOutput.Loadable.OPTIONAL_ITEM.defaultField("representative_item", ItemOutput.EMPTY, false, e -> e.representative),
     RestoreHungerFluidEffect::new);
 
   @Override

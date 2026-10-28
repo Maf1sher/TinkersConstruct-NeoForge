@@ -149,14 +149,14 @@ public class TankBlockEntity extends SmelteryComponentBlockEntity implements ITa
   }
 
   @Override
-  public void loadAdditional(CompoundTag tag, Provider registries) {
+  public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
     tank.setCapacity(getCapacity(getBlockState().getBlock()));
     updateTank(registries, tag.getCompound(NBTTags.TANK));
     super.loadAdditional(tag, registries);
   }
 
   @Override
-  public void saveSynced(CompoundTag tag, Provider registries) {
+  public void saveSynced(CompoundTag tag, HolderLookup.Provider registries) {
     super.saveSynced(tag, registries);
     // want tank on the client on world load
     if (!tank.isEmpty()) {

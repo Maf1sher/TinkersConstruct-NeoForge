@@ -26,9 +26,9 @@ public class UpdateTinkerStationRecipePacket implements TinkerPayload {
 
   private final BlockPos pos;
   private final ResourceLocation recipe;
-  public UpdateTinkerStationRecipePacket(BlockPos pos, ITinkerStationRecipe recipe) {
+  public UpdateTinkerStationRecipePacket(BlockPos pos, ResourceLocation recipe) {
     this.pos = pos;
-    this.recipe = recipe.getId();
+    this.recipe = recipe;
   }
 
   public UpdateTinkerStationRecipePacket(RegistryFriendlyByteBuf buffer) {
@@ -56,7 +56,7 @@ public class UpdateTinkerStationRecipePacket implements TinkerPayload {
       Level world = mc.level;
       if (world != null) {
         // start by fetching the recipe, no further work if it's missing
-        ITinkerStationRecipe recipe = RecipeHelper.getRecipe(world.getRecipeManager(), packet.recipe, ITinkerStationRecipe.class).orElse(null);
+        ITinkerStationRecipe recipe = world.getRecipeManager().byKey(packet.recipe).filter(holder -> holder.value() instanceof ITinkerStationRecipe).map(holder -> (ITinkerStationRecipe) holder.value()).orElse(null);
         if (recipe == null) {
           TConstruct.LOG.error("Failed to update Tinker Station Recipe at {}: unknown recipe {}", packet.pos, packet.recipe);
           return;

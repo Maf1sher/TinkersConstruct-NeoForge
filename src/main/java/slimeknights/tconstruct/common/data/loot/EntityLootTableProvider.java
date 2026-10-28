@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.common.data.loot;
 
 import net.minecraft.core.HolderLookup;
+import net.minecraft.advancements.critereon.EntityFlagsPredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.NbtPredicate;
@@ -65,7 +66,7 @@ public class EntityLootTableProvider extends EntityLootSubProvider {
                                                                    .add(LootItem.lootTableItem(Items.CLAY_BALL)
                                                                                           .apply(SetItemCountFunction.setCount(UniformGenerator.between(-2.0F, 1.0F)))
                                                                                           .apply(EnchantedCountIncreaseFunction.lootingMultiplier(this.registries, UniformGenerator.between(0.0F, 1.0F)))
-                                                                                          .apply(SmeltItemFunction.smelted().when(LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, ENTITY_ON_FIRE))))));
+                                                                                          .apply(SmeltItemFunction.smelted().when(LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().flags(EntityFlagsPredicate.Builder.flags().setOnFire(true))))))));
 
     LootItemCondition.Builder killedByFrog = killedByFrog();
     this.add(TinkerWorld.terracubeEntity.get(),
@@ -80,13 +81,13 @@ public class EntityLootTableProvider extends EntityLootSubProvider {
                                         .add(LootItem.lootTableItem(TinkerSmeltery.searedLamp)
                                                      .apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
                                                      .when(killedByFrog))
-                                        .apply(SmeltItemFunction.smelted().when(LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, ENTITY_ON_FIRE)))));
+                                        .apply(SmeltItemFunction.smelted().when(LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().flags(EntityFlagsPredicate.Builder.flags().setOnFire(true)))))));
     // not really sure why armor stands have a loot table, but vanilla does it
     this.add(TinkerGadgets.armorStandEntity.get(), LootTable.lootTable());
   }
 
   /** Drops an item using the same chances as slimeballs */
-  private static LootPoolEntryContainer.Builder<?> slimeball(Item item) {
+  private LootPoolEntryContainer.Builder<?> slimeball(Item item) {
     return LootItem.lootTableItem(item)
       .apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 2.0F)))
       .apply(EnchantedCountIncreaseFunction.lootingMultiplier(this.registries, UniformGenerator.between(0.0F, 1.0F)));

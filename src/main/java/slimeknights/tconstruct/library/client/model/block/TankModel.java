@@ -79,12 +79,12 @@ public class TankModel implements IUnbakedGeometry<TankModel> {
   }
 
   @Override
-  public BakedModel bake(IGeometryBakingContext owner, ModelBaker baker, Function<Material,TextureAtlasSprite> spriteGetter, ModelState transform, ItemOverrides overrides, ResourceLocation location) {
-    BakedModel baked = model.bake(owner, baker, spriteGetter, transform, overrides, location);
+  public BakedModel bake(IGeometryBakingContext owner, ModelBaker baker, Function<Material,TextureAtlasSprite> spriteGetter, ModelState transform, ItemOverrides overrides) {
+    BakedModel baked = model.bake(owner, baker, spriteGetter, transform, overrides);
     // bake the GUI model if present
     BakedModel bakedGui = baked;
     if (gui != null) {
-      bakedGui = gui.bake(owner, baker, spriteGetter, transform, overrides, location);
+      bakedGui = gui.bake(owner, baker, spriteGetter, transform, overrides);
     }
     return new Baked(owner, transform, baked, bakedGui, this);
   }
@@ -136,11 +136,11 @@ public class TankModel implements IUnbakedGeometry<TankModel> {
       IQuadTransformer quadTransformer = SimpleBlockModel.applyTransform(originalTransforms, owner.getRootTransform());
       // first, add all regular elements
       for (BlockElement element : baseModel.getElements()) {
-        SimpleBlockModel.bakePart(builder, owner, element, spriteGetter, originalTransforms, quadTransformer, BAKE_LOCATION);
+        SimpleBlockModel.bakePart(builder, owner, element, spriteGetter, originalTransforms, quadTransformer);
       }
       // next, add in the fluid
       IQuadTransformer fluidTransformer = color == -1 ? quadTransformer : quadTransformer.andThen(ColoredBlockModel.applyColorQuadTransformer(color));
-      ColoredBlockModel.bakePart(builder, owner, fluid, luminosity, spriteGetter, originalTransforms.getRotation(), fluidTransformer, originalTransforms.isUvLocked(), BAKE_LOCATION);
+      ColoredBlockModel.bakePart(builder, owner, fluid, luminosity, spriteGetter, originalTransforms.getRotation(), fluidTransformer, originalTransforms.isUvLocked());
       return builder.build(SimpleBlockModel.getRenderTypeGroup(owner));
     }
 

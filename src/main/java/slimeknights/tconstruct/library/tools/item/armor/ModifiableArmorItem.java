@@ -28,6 +28,7 @@ import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
@@ -36,6 +37,7 @@ import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.ItemAbility;
 import slimeknights.mantle.client.SafeClientAccess;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.mantle.client.TooltipKey;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
@@ -155,8 +157,11 @@ public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay
   /* Loading */
 
   @Override
-  public void verifyTagAfterLoad(CompoundTag nbt) {
-    ToolStack.verifyTag(this, nbt, getToolDefinition());
+  public void verifyComponentsAfterLoad(ItemStack stack) {
+    CompoundTag tag = DataComponentHelper.getCustomData(stack);
+    if (tag != null) {
+      ToolStack.verifyTag(this, tag, getToolDefinition());
+    }
   }
 
   @Override
@@ -184,11 +189,6 @@ public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay
     // we use enchantments to handle some modifiers, so don't glow from them
     // however, if a modifier wants to glow let them
     return ModifierUtil.checkVolatileFlag(stack, SHINY);
-  }
-
-  @Override
-  public Rarity getRarity(ItemStack stack) {
-    return RarityModule.getRarity(stack);
   }
 
 
@@ -236,11 +236,11 @@ public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay
   }
 
   @Override
-  public <T extends LivingEntity> int damageItem(ItemStack stack, int amount, T damager, Consumer<T> onBroken) {
+  public <T extends LivingEntity> int damageItem(ItemStack stack, int amount, T damager, Consumer<Item> onBroken) {
     // We basically emulate Itemstack.damageItem here. We always return 0 to skip the handling in ItemStack.
     // If we don't tools ignore our damage logic
     if (ToolDamageUtil.damage(ToolStack.from(stack), amount, damager, stack)) {
-      onBroken.accept(damager);
+      onBroken.accept(stack.getItem());
     }
 
     return 0;
@@ -389,7 +389,8 @@ public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay
   }
 
   @Override
-  public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+  public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    Level level = context.level();
     TooltipUtil.addInformation(this, stack, level, tooltip, SafeClientAccess.getTooltipKey(), flag);
   }
 

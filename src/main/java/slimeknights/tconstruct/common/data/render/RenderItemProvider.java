@@ -17,7 +17,7 @@ import static net.minecraft.world.level.block.state.properties.BlockStatePropert
 /** Provides fluid cuboids for block entity renderers */
 public class RenderItemProvider extends BlockStateDataMapProvider<List<RenderItem>> {
   public RenderItemProvider(PackOutput output) {
-    super(output, Target.RESOURCE_PACK, RenderItem.STATE_REGISTRY, TConstruct.MOD_ID);
+    super(output, Target.RESOURCE_PACK, RenderItem.REGISTRY.getFolder(), RenderItem.REGISTRY.getDataLoader(), TConstruct.MOD_ID);
   }
 
   @Override

@@ -10,6 +10,9 @@ import javax.annotation.Nullable;
 
 /** Armor material that doubles as a container for tool definitions for each armor slot */
 public class ModifiableArmorMaterial extends DummyArmorMaterial {
+  /** Armor types Tinkers adds; body armor (wolf armor) is not part of the mod */
+  public static final ArmorItem.Type[] ARMOR_TYPES = {ArmorItem.Type.HELMET, ArmorItem.Type.CHESTPLATE, ArmorItem.Type.LEGGINGS, ArmorItem.Type.BOOTS};
+
   /** Array of all four armor slot types */
   public static final EquipmentSlot[] ARMOR_SLOTS = {EquipmentSlot.FEET, EquipmentSlot.LEGS, EquipmentSlot.CHEST, EquipmentSlot.HEAD};
 
@@ -24,18 +27,29 @@ public class ModifiableArmorMaterial extends DummyArmorMaterial {
     this.armorDefinitions = armorDefinitions;
   }
 
+  /** Gets the storage index for an armor type; body armor (wolf armor) is not supported */
+  private static int index(ArmorItem.Type type) {
+    return switch (type) {
+      case HELMET -> 0;
+      case CHESTPLATE -> 1;
+      case LEGGINGS -> 2;
+      case BOOTS -> 3;
+      case BODY -> throw new IllegalArgumentException("Body armor has no Tinkers definition");
+    };
+  }
+
   /** Creates a modifiable armor material, creates tool definition for the selected slots */
   public static ModifiableArmorMaterial create(ResourceLocation id, SoundEvent equipSound, ArmorItem.Type... slots) {
     ToolDefinition[] definitions = new ToolDefinition[4];
     for (ArmorItem.Type slot : slots) {
-      definitions[slot.ordinal()] = ToolDefinition.create(id.withSuffix("_" + slot.getName()));
+      definitions[index(slot)] = ToolDefinition.create(id.withSuffix("_" + slot.getName()));
     }
     return new ModifiableArmorMaterial(id, equipSound, definitions);
   }
 
   /** Creates a modifiable armor material, creates tool definition for all four armor slots */
   public static ModifiableArmorMaterial create(ResourceLocation id, SoundEvent equipSound) {
-    return create(id, equipSound, ArmorItem.Type.values());
+    return create(id, equipSound, ArmorItem.Type.HELMET, ArmorItem.Type.CHESTPLATE, ArmorItem.Type.LEGGINGS, ArmorItem.Type.BOOTS);
   }
 
   /**
@@ -45,6 +59,6 @@ public class ModifiableArmorMaterial extends DummyArmorMaterial {
    */
   @Nullable
   public ToolDefinition getArmorDefinition(ArmorItem.Type slotType) {
-    return armorDefinitions[slotType.ordinal()];
+    return armorDefinitions[index(slotType)];
   }
 }

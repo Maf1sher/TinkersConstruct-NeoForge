@@ -13,6 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -40,6 +41,7 @@ import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
 import slimeknights.tconstruct.tools.entity.ThrownTool;
 
+import javax.annotation.Nullable;
 import java.util.function.Predicate;
 
 public class ModifiableBowItem extends ModifiableLauncherItem {
@@ -85,6 +87,11 @@ public class ModifiableBowItem extends ModifiableLauncherItem {
   @Override
   public int getDefaultProjectileRange() {
     return 15;
+  }
+
+  @Override
+  protected void shootProjectile(LivingEntity shooter, Projectile projectile, int index, float velocity, float inaccuracy, float angle, @Nullable LivingEntity target) {
+    projectile.shootFromRotation(shooter, shooter.getXRot(), shooter.getYRot() + angle, 0.0F, velocity, inaccuracy);
   }
 
   @Override
@@ -158,7 +165,7 @@ public class ModifiableBowItem extends ModifiableLauncherItem {
   public void releaseUsing(ItemStack bow, Level level, LivingEntity living, int timeLeft) {
     // call the stop using hook
     ToolStack tool = ToolStack.from(bow);
-    int duration = getUseDuration(bow);
+    int duration = getUseDuration(bow, living);
     for (ModifierEntry entry : tool.getModifiers()) {
       entry.getHook(ModifierHooks.TOOL_USING).beforeReleaseUsing(tool, entry, living, duration, timeLeft, ModifierEntry.EMPTY);
     }
@@ -239,7 +246,7 @@ public class ModifiableBowItem extends ModifiableLauncherItem {
       float waterInertia = 0.6f;
       SoundEvent sound = SoundEvents.ARROW_SHOOT;
       if (thrownTool) {
-        sound = SoundEvents.TRIDENT_THROW;
+        sound = SoundEvents.TRIDENT_THROW.value();
         IToolStackView thrown = ToolStack.from(ammo);
         float thrownVelocity = ConditionalStatModifierHook.getModifiedStat(thrown, living, ToolStats.VELOCITY);
         power *= thrownVelocity * ConditionalStatModifierHook.getModifiedStat(thrown, living, ToolStats.DRAW_SPEED) / 1.5f;
@@ -259,7 +266,7 @@ public class ModifiableBowItem extends ModifiableLauncherItem {
           thrown.setOriginalSlot(originalSlot);
           arrow = thrown;
         } else {
-          arrow = arrowItem.createArrow(level, ammo, living);
+          arrow = arrowItem.createArrow(level, ammo, living, bow);
         }
         float angle = startAngle + (10 * arrowIndex);
         arrow.shootFromRotation(living, living.getXRot() + angle, living.getYRot(), 0, power * 3.0F, inaccuracy);

@@ -26,6 +26,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.Rarity;
@@ -38,6 +39,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.common.ItemAbility;
 import slimeknights.mantle.client.SafeClientAccess;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.item.ModifiableItemClientExtension;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
@@ -142,8 +144,11 @@ public abstract class ModifiableLauncherItem extends ProjectileWeaponItem implem
   /* Loading */
 
   @Override
-  public void verifyTagAfterLoad(CompoundTag nbt) {
-    ToolStack.verifyTag(this, nbt, getToolDefinition());
+  public void verifyComponentsAfterLoad(ItemStack stack) {
+    CompoundTag tag = DataComponentHelper.getCustomData(stack);
+    if (tag != null) {
+      ToolStack.verifyTag(this, tag, getToolDefinition());
+    }
   }
 
   @Override
@@ -159,11 +164,6 @@ public abstract class ModifiableLauncherItem extends ProjectileWeaponItem implem
     // we use enchantments to handle some modifiers, so don't glow from them
     // however, if a modifier wants to glow let them
     return ModifierUtil.checkVolatileFlag(stack, SHINY);
-  }
-
-  @Override
-  public Rarity getRarity(ItemStack stack) {
-    return RarityModule.getRarity(stack);
   }
 
 
@@ -211,8 +211,8 @@ public abstract class ModifiableLauncherItem extends ProjectileWeaponItem implem
   }
 
   @Override
-  public <T extends LivingEntity> int damageItem(ItemStack stack, int amount, T damager, Consumer<T> onBroken) {
-    ToolDamageUtil.handleDamageItem(stack, amount, damager, onBroken);
+  public <T extends LivingEntity> int damageItem(ItemStack stack, int amount, T damager, Consumer<Item> onBroken) {
+    ToolDamageUtil.handleDamageItem(stack, amount, damager, brokenBy -> onBroken.accept(stack.getItem()));
     return 0;
   }
 
@@ -294,7 +294,7 @@ public abstract class ModifiableLauncherItem extends ProjectileWeaponItem implem
   /* Arrow logic */
 
   @Override
-  public int getUseDuration(ItemStack pStack) {
+  public int getUseDuration(ItemStack pStack, LivingEntity entity) {
     return 72000;
   }
 
@@ -304,7 +304,7 @@ public abstract class ModifiableLauncherItem extends ProjectileWeaponItem implem
   @Override
   public ItemStack finishUsingItem(ItemStack stack, Level pLevel, LivingEntity living) {
     ToolStack tool = ToolStack.from(stack);
-    int duration = getUseDuration(stack);
+    int duration = getUseDuration(stack, living);
     for (ModifierEntry entry : tool.getModifiers()) {
       entry.getHook(ModifierHooks.TOOL_USING).beforeReleaseUsing(tool, entry, living, duration, 0, ModifierEntry.EMPTY);
     }
@@ -327,7 +327,7 @@ public abstract class ModifiableLauncherItem extends ProjectileWeaponItem implem
   @Override
   public void onUseTick(Level level, LivingEntity living, ItemStack bow, int chargeRemaining) {
     // play the sound at the end of loading as an indicator its loaded, texture is another indicator
-    int duration = getUseDuration(bow);
+    int duration = getUseDuration(bow, living);
     if (!level.isClientSide) {
       if (duration - chargeRemaining == ModifierUtil.getPersistentInt(bow, KEY_DRAWTIME, -1)) {
         level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.CROSSBOW_LOADING_MIDDLE, SoundSource.PLAYERS, 0.75F, 1.0F);
@@ -348,7 +348,8 @@ public abstract class ModifiableLauncherItem extends ProjectileWeaponItem implem
   }
 
   @Override
-  public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+  public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    Level level = context.level();
     TooltipUtil.addInformation(this, stack, level, tooltip, SafeClientAccess.getTooltipKey(), flag);
   }
 
@@ -398,11 +399,6 @@ public abstract class ModifiableLauncherItem extends ProjectileWeaponItem implem
   @Override
   public float getDestroySpeed(ItemStack stack, BlockState state) {
     return MiningSpeedToolHook.getDestroySpeed(stack, state);
-  }
-
-  @Override
-  public boolean onBlockStartBreak(ItemStack stack, BlockPos pos, Player player) {
-    return ToolHarvestLogic.handleBlockBreak(stack, pos, player);
   }
 
 

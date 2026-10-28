@@ -12,6 +12,7 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.client.materials.MaterialTooltipCache;
@@ -117,11 +118,6 @@ public class MaterialItem extends Item implements IMaterialItem {
   }
 
   @Override
-  public Rarity getRarity(ItemStack stack) {
-    return MaterialRegistry.getMaterial(getMaterial(stack).getId()).getRarity();
-  }
-
-  @Override
   public boolean isFoil(ItemStack stack) {
     return MaterialRegistry.getInstance().isInTag(getMaterial(stack).getId(), TinkerTags.Materials.SHINY);
   }
@@ -137,7 +133,7 @@ public class MaterialItem extends Item implements IMaterialItem {
   }
 
   @Override
-  public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flag) {
+  public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
     appendHoverText(this, stack, tooltip, flag);
   }
 
@@ -188,7 +184,12 @@ public class MaterialItem extends Item implements IMaterialItem {
   }
 
   @Override
-  public void verifyTagAfterLoad(CompoundTag nbt) {
-    verifyTag(nbt);
+  public void verifyComponentsAfterLoad(ItemStack stack) {
+    CompoundTag tag = DataComponentHelper.getCustomData(stack);
+    if (tag != null) {
+      verifyTag(tag);
+      // rarity is a data component in 1.21.1, so it cannot be derived by overriding a getter
+      stack.set(DataComponents.RARITY, MaterialRegistry.getMaterial(getMaterial(stack).getId()).getRarity());
+    }
   }
 }

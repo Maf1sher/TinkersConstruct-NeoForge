@@ -12,6 +12,7 @@ import slimeknights.mantle.data.loadable.mapping.DispatchLoadable;
 import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.util.typed.TypedMap;
+import slimeknights.tconstruct.library.tools.definition.ModifiableArmorMaterial;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.materials.MaterialRegistry;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
@@ -162,7 +163,7 @@ public class MaterialRepairModule implements MaterialRepairToolHook, ToolModule 
 
     /** Sets the durability for the piece based on the given factor */
     public ArmorBuilder durabilityFactor(float maxDamageFactor) {
-      for (ArmorItem.Type slotType : ArmorItem.Type.values()) {
+      for (ArmorItem.Type slotType : ModifiableArmorMaterial.ARMOR_TYPES) {
         int index = slotType.ordinal();
         durability[index] = (int)(ArmorModuleBuilder.MAX_DAMAGE_ARRAY[index] * maxDamageFactor);
       }

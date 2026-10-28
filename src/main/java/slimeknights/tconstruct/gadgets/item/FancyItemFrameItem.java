@@ -12,6 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 
@@ -30,7 +31,7 @@ public class FancyItemFrameItem extends Item {
   }
 
   @Override
-  public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> tooltip, TooltipFlag pIsAdvanced) {
+  public void appendHoverText(ItemStack pStack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag pIsAdvanced) {
     tooltip.add(Component.translatable(getDescriptionId() + ".tooltip").withStyle(ChatFormatting.GRAY));
   }
 
@@ -50,7 +51,7 @@ public class FancyItemFrameItem extends Item {
     HangingEntity frame = this.entityProvider.apply(world, placeLocation, facing);
     CompoundTag tag = DataComponentHelper.getCustomData(stack);
     if (tag != null) {
-      EntityType.updateCustomEntityTag(world, player, frame, tag);
+      EntityType.updateCustomEntityTag(world, player, frame, CustomData.of(tag));
     }
 
     if (frame.survives()) {

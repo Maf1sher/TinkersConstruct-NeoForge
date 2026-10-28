@@ -153,7 +153,7 @@ public abstract class AbstractMaterialRenderInfoProvider extends GenericDataProv
       if (parent != null) {
         json.addProperty("parent", parent.toString());
       }
-      MaterialRenderInfo.LOADABLE.serialize(new MaterialRenderInfo(id, texture, fallbacks, color, luminosity), json);
+      MaterialRenderInfo.LOADABLE.serializeInto(new MaterialRenderInfo(id, texture, fallbacks, color, luminosity), json);
       if (generator != null) {
         json.add("generator", MaterialGeneratorInfo.LOADABLE.serialize(generator));
       }

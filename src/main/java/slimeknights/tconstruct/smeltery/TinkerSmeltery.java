@@ -404,7 +404,7 @@ public final class TinkerSmeltery extends TinkerModule {
   public static final CastItemObject bootsPlatingCast = ITEMS.registerCast("boots_plating", () -> new PartCastItem(ITEM_PROPS, () -> TinkerToolParts.plating.get(ArmorItem.Type.BOOTS)));
   public static final CastItemObject mailleCast = ITEMS.registerCast(TinkerToolParts.maille, ITEM_PROPS);
   // dummy cast creation items
-  public static final EnumObject<ArmorItem.Type,DummyMaterialItem> dummyPlating = ITEMS.registerEnum(ArmorItem.Type.values(), "plating_dummy", type -> new DummyMaterialItem(ITEM_PROPS));
+  public static final EnumObject<ArmorItem.Type,DummyMaterialItem> dummyPlating = ITEMS.registerEnum(slimeknights.tconstruct.library.tools.definition.ModifiableArmorMaterial.ARMOR_TYPES, "plating_dummy", type -> new DummyMaterialItem(ITEM_PROPS));
 
 
   /*
@@ -527,7 +527,7 @@ public final class TinkerSmeltery extends TinkerModule {
     PackOutput packOutput = generator.getPackOutput();
     generator.addProvider(server, new SmelteryRecipeProvider(packOutput, event.getLookupProvider()));
     generator.addProvider(server, new CeramicsOptionalRecipeProvider(packOutput));
-    generator.addProvider(server, new FluidContainerTransferProvider(packOutput));
+    generator.addProvider(server, new FluidContainerTransferProvider(packOutput, event.getLookupProvider()));
   }
 
   /** Adds all relevant items to the creative tab */
@@ -707,7 +707,7 @@ public final class TinkerSmeltery extends TinkerModule {
 
   /** Properties for transparent smeltery or foundry blocks, such as glass. */
   private static Properties structureNonSolid(MapColor color, SoundType sound) {
-    return structureProps(color, sound).isValidSpawn(Blocks::never).isRedstoneConductor(NEVER).isSuffocating(NEVER).isViewBlocking(NEVER).noOcclusion().forceSolidOn();
+    return structureProps(color, sound).isValidSpawn((s, g, p, e) -> false).isRedstoneConductor(NEVER).isSuffocating(NEVER).isViewBlocking(NEVER).noOcclusion().forceSolidOn();
   }
 
   /** Properties for an opaque seared block, such as bricks. */

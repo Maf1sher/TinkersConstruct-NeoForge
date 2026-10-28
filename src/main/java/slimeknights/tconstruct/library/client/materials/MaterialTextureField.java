@@ -35,7 +35,7 @@ enum MaterialTextureField implements RecordField<ResourceLocation, MaterialRende
   }
 
   @Override
-  public void serialize(MaterialRenderInfo parent, JsonObject json) {
+  public void serializeInto(MaterialRenderInfo parent, JsonObject json, TypedMap context) {
     ResourceLocation texture = parent.texture();
     if (texture == null) {
       json.add("texture", JsonNull.INSTANCE);

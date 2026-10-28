@@ -70,7 +70,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNullElse;
 import static slimeknights.tconstruct.TConstruct.RANDOM;
@@ -233,10 +232,7 @@ public interface MobEffectModule extends ModifierModule, ConditionalModule<ITool
       }
       float duration = this.time.computeValue(scaledLevel);
       if (duration > 0) {
-        MobEffectInstance instance = new MobEffectInstance(effect, (int)duration, level);
-        if (curativeItems != null) {
-          instance.setCurativeItems(curativeItems.stream().map(ItemStack::new).collect(Collectors.toList()));
-        }
+        // 1.21.1 removed per-instance curative items from MobEffectInstance, so the parsed list cannot be applied
         target.addEffect(new MobEffectInstance(effect, (int)duration, level), cause);
       }
     }

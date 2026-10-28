@@ -86,9 +86,14 @@ public class TerracubeEntity extends ArmoredSlimeEntity {
         Item item = armorQuality == 5 ? Items.TURTLE_HELMET : getEquipmentForSlot(EquipmentSlot.HEAD, armorQuality);
         if (item != null) {
           this.setItemSlot(EquipmentSlot.HEAD, new ItemStack(item));
-          this.enchantSpawnedArmor(random, multiplier, EquipmentSlot.HEAD);
         }
       }
     }
+  }
+
+  @Override
+  protected void populateDefaultEquipmentEnchantments(ServerLevelAccessor level, RandomSource random, DifficultyInstance difficulty) {
+    // only the helmet slot can hold equipment, so limit enchanting to that slot
+    this.enchantSpawnedArmor(level, random, EquipmentSlot.HEAD, difficulty);
   }
 }

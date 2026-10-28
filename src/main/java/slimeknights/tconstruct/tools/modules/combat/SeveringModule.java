@@ -1,8 +1,13 @@
 package slimeknights.tconstruct.tools.modules.combat;
 
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.tags.ItemTags;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -13,12 +18,17 @@ import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
 import slimeknights.tconstruct.library.modifiers.hook.behavior.ProcessLootModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.combat.ArmorLootingModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.combat.LootingModifierHook;
 import slimeknights.tconstruct.library.modifiers.modules.ModifierModule;
 import slimeknights.tconstruct.library.module.HookProvider;
 import slimeknights.tconstruct.library.module.ModuleHook;
 import slimeknights.tconstruct.library.recipe.modifiers.severing.SeveringRecipe;
 import slimeknights.tconstruct.library.recipe.modifiers.severing.SeveringRecipeCache;
+import slimeknights.tconstruct.library.tools.context.LootingContext;
+import slimeknights.tconstruct.library.tools.helper.ModifierLootingHandler;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
+import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 
 import java.util.List;
 
@@ -36,6 +46,21 @@ public enum SeveringModule implements ModifierModule, ProcessLootModifierHook {
   @Override
   public List<ModuleHook<?>> getDefaultHooks() {
     return DEFAULT_HOOKS;
+  }
+
+  /** Computes the looting level for the killer, as 1.21 removed the loot context looting helper */
+  private static int getLooting(LootContext context, Level world, Entity target) {
+    if (!(context.getParamOrNull(LootContextParams.ATTACKING_ENTITY) instanceof LivingEntity killer)) {
+      return 0;
+    }
+    EquipmentSlot slotType = ModifierLootingHandler.getLootingSlot(killer);
+    ItemStack held = killer.getItemBySlot(slotType);
+    LootingContext lootingContext = new LootingContext(killer, target, context.getParamOrNull(LootContextParams.DAMAGE_SOURCE), slotType);
+    int vanillaLooting = world.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).get(Enchantments.LOOTING)
+      .map(enchantment -> EnchantmentHelper.getItemEnchantmentLevel(enchantment, held)).orElse(0);
+    IToolStackView tool = held.is(TinkerTags.Items.MODIFIABLE) ? ToolStack.from(held) : null;
+    int level = tool != null ? LootingModifierHook.getLooting(tool, lootingContext, vanillaLooting) : vanillaLooting;
+    return ArmorLootingModifierHook.getLooting(tool, lootingContext, level);
   }
 
   @SuppressWarnings("removal")
@@ -57,7 +82,7 @@ public enum SeveringModule implements ModifierModule, ProcessLootModifierHook {
         List<SeveringRecipe> recipes = SeveringRecipeCache.findRecipe(world.getRecipeManager(), entity.getType());
         if (!recipes.isEmpty()) {
           float level = modifier.getEffectiveLevel();
-          float looting = context.getLootingModifier();
+          float looting = getLooting(context, world, entity);
           // deprecated method of doubling chances
           float chanceMultiplier = entity.getType().is(TinkerTags.EntityTypes.RARE_MOBS) ? 2 : 1;
           for (SeveringRecipe recipe : recipes) {

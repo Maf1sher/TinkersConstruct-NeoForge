@@ -408,11 +408,11 @@ public class InfoPanelScreen<P extends MultiModuleScreen<?>, C extends AbstractC
   }
 
   @Override
-  public boolean handleMouseScrolled(double mouseX, double mouseY, double scrollData) {
+  public boolean handleMouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
     if (!this.slider.isEnabled() || !this.isMouseInModule((int) mouseX, (int) mouseY) || this.isMouseOverFullSlot(mouseX, mouseY)) {
       return false;
     }
 
-    return this.slider.mouseScrolled(scrollData, true);
+    return this.slider.mouseScrolled(scrollY, true);
   }
 }

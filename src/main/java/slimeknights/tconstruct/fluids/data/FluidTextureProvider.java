@@ -128,7 +128,7 @@ public class FluidTextureProvider extends AbstractFluidTextureProvider {
 
   /** Creates a texture in the root folder */
   private FluidTexture.Builder root(FluidObject<?> fluid) {
-    return texture(fluid).wrapId("fluid/", "/", false, false);
+    return texture(fluid).wrapId("fluid/", "/").still().flowing();
   }
 
   /** Creates a texture using the given fixed name in the fluid folder */

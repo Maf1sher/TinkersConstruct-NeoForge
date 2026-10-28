@@ -47,7 +47,7 @@ public record ModifierTooltipsField<P>(String key, String legacy, Function<P, Sh
   }
 
   @Override
-  public void serialize(P parent, JsonObject json) {
+  public void serializeInto(P parent, JsonObject json, TypedMap context) {
     ShowInTooltips show = getter.apply(parent);
     // skip serializing always
     if (!show.isAlways()) {

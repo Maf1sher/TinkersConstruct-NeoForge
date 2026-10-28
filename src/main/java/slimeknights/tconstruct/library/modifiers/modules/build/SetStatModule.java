@@ -69,8 +69,8 @@ public record SetStatModule<T>(IToolStat<T> stat, T value, ModifierCondition<ITo
     }
 
     @Override
-    public void serialize(SetStatModule<?> object, JsonObject json) {
-      ModifierCondition.CONTEXT_FIELD.serialize(object, json);
+    public void serializeInto(SetStatModule<?> object, JsonObject json, TypedMap context) {
+      ModifierCondition.CONTEXT_FIELD.serializeInto(object, json, context);
       json.add("stat", ToolStats.LOADER.serialize(object.stat));
       serializeValue(object, json);
     }
@@ -94,10 +94,10 @@ public record SetStatModule<T>(IToolStat<T> stat, T value, ModifierCondition<ITo
     }
 
     @Override
-    public void encode(RegistryFriendlyByteBuf buffer, SetStatModule<?> object) {
+    public void encode(RegistryFriendlyByteBuf buffer, SetStatModule<?> object, TypedMap context) {
       ToolStats.LOADER.encode(buffer, object.stat);
       writeValue(object, buffer);
-      ModifierCondition.CONTEXT_FIELD.encode(buffer, object);
+      ModifierCondition.CONTEXT_FIELD.encode(buffer, object, context);
     }
 
     /** Handles generics for writing the value to network */

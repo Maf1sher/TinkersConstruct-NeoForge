@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.smeltery.data;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
@@ -18,14 +19,17 @@ import slimeknights.tconstruct.fluids.TinkerFluids;
 import slimeknights.tconstruct.library.recipe.FluidValues;
 import slimeknights.tconstruct.shared.block.SlimeType;
 
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
 public class FluidContainerTransferProvider extends AbstractFluidContainerTransferProvider {
-  public FluidContainerTransferProvider(PackOutput packOutput) {
-    super(packOutput, TConstruct.MOD_ID);
+  public FluidContainerTransferProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> registries) {
+    super(packOutput, TConstruct.MOD_ID, registries);
   }
 
   @Override
-  protected void addTransfers() {
-    addFillEmpty("meat_soup_", TinkerFluids.meatSoupBowl, Items.BOWL, TinkerFluids.meatSoup, FluidValues.BOWL, false);
+  protected void addTransfers(HolderLookup.Provider lookup) {
+    addFillEmpty("meat_soup_", TinkerFluids.meatSoupBowl, Items.BOWL, TinkerFluids.meatSoup, FluidValues.BOWL, List.of());
     // these bottles are fluid handlers, but glass bottles are not
     addBottleFill("venom_bottle_fill", TinkerFluids.venomBottle, TinkerFluids.venom);
     addBottleFill("earth_slime_bottle_fill", TinkerFluids.slimeBottle.get(SlimeType.EARTH), TinkerFluids.earthSlime);

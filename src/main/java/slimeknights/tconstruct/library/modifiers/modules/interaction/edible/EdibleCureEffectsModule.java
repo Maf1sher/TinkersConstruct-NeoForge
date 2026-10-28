@@ -26,7 +26,7 @@ import java.util.List;
 public record EdibleCureEffectsModule(ItemStack curativeItem, IJsonPredicate<LivingEntity> holder, ModifierCondition<IToolStackView> condition) implements ModifierModule, EdibleEffectHook, ConditionalModule<IToolStackView> {
   private static final List<ModuleHook<?>> DEFAULT_HOOKS = HookProvider.<EdibleCureEffectsModule>defaultHooks(ModifierHooks.EDIBLE_EFFECT);
   public static final RecordLoadable<EdibleCureEffectsModule> LOADER = RecordLoadable.create(
-    ItemStackLoadable.REQUIRED_ITEM_NBT.requiredField("curative_item", EdibleCureEffectsModule::curativeItem),
+    ItemStackLoadable.REQUIRED_ITEM_DATA.requiredField("curative_item", EdibleCureEffectsModule::curativeItem),
     LivingEntityPredicate.LOADER.defaultField("holder", EdibleCureEffectsModule::holder),
     ModifierCondition.TOOL_FIELD, EdibleCureEffectsModule::new);
 

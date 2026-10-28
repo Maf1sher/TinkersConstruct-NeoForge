@@ -113,15 +113,6 @@ public class TinkerEffect extends MobEffect {
   }
 
   /**
-   * Gets the level of the effect on the entity starting from 1, or 0 if not active
-   * @param entity  Entity to check
-   * @return  Level, or 0 if inactive
-   */
-  public static int getLevel(LivingEntity entity, Supplier<? extends MobEffect> effect) {
-    return getAmplifier(entity, effect.get()) + 1;
-  }
-
-  /**
    * Gets the amplifier of the effect on the entity starting from 0, or -1 if not active
    * @param entity  Entity to check
    * @return  Amplifier, or -1 if inactive

@@ -42,6 +42,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.common.ItemAbility;
 import slimeknights.mantle.client.SafeClientAccess;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.client.item.ModifiableItemClientExtension;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
@@ -155,8 +156,11 @@ public class ModifiableItem extends TieredItem implements IModifiableDisplay {
   /* Loading */
 
   @Override
-  public void verifyTagAfterLoad(CompoundTag nbt) {
-    ToolStack.verifyTag(this, nbt, getToolDefinition());
+  public void verifyComponentsAfterLoad(ItemStack stack) {
+    CompoundTag tag = DataComponentHelper.getCustomData(stack);
+    if (tag != null) {
+      ToolStack.verifyTag(this, tag, getToolDefinition());
+    }
   }
 
   @Override
@@ -172,11 +176,6 @@ public class ModifiableItem extends TieredItem implements IModifiableDisplay {
     // we use enchantments to handle some modifiers, so don't glow from them
     // however, if a modifier wants to glow let them
     return ModifierUtil.checkVolatileFlag(stack, SHINY);
-  }
-
-  @Override
-  public Rarity getRarity(ItemStack stack) {
-    return RarityModule.getRarity(stack);
   }
 
 
@@ -229,7 +228,7 @@ public class ModifiableItem extends TieredItem implements IModifiableDisplay {
   }
 
   @Override
-  public <T extends LivingEntity> int damageItem(ItemStack stack, int amount, T damager, Consumer<T> onBroken) {
+  public <T extends LivingEntity> int damageItem(ItemStack stack, int amount, T damager, Consumer<Item> onBroken) {
     ToolDamageUtil.handleDamageItem(stack, amount, damager, onBroken);
     return 0;
   }
@@ -302,12 +301,6 @@ public class ModifiableItem extends TieredItem implements IModifiableDisplay {
   public float getDestroySpeed(ItemStack stack, BlockState state) {
     return stack.getCount() == 1 ? MiningSpeedToolHook.getDestroySpeed(stack, state) : 0;
   }
-
-  @Override
-  public boolean onBlockStartBreak(ItemStack stack, BlockPos pos, Player player) {
-    return stack.getCount() > 1 || ToolHarvestLogic.handleBlockBreak(stack, pos, player);
-  }
-
 
   /* Modifier interactions */
 
@@ -468,7 +461,7 @@ public class ModifiableItem extends TieredItem implements IModifiableDisplay {
   }
 
   @Override
-  public int getUseDuration(ItemStack stack) {
+  public int getUseDuration(ItemStack stack, LivingEntity entity) {
     ToolStack tool = ToolStack.from(stack);
     ModifierEntry activeModifier = GeneralInteractionModifierHook.getActiveModifier(tool);
     if (activeModifier != ModifierEntry.EMPTY) {
@@ -501,7 +494,8 @@ public class ModifiableItem extends TieredItem implements IModifiableDisplay {
   }
 
   @Override
-  public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+  public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    Level level = context.level();
     TooltipUtil.addInformation(this, stack, level, tooltip, SafeClientAccess.getTooltipKey(), flag);
   }
 

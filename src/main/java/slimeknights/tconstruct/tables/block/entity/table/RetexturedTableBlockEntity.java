@@ -26,11 +26,6 @@ public abstract class RetexturedTableBlockEntity extends TableBlockEntity implem
   public RetexturedTableBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, Component name, int size) {
     super(type, pos, state, name, size);
   }
-  @Override
-  public AABB getRenderBoundingBox() {
-    return new AABB(worldPosition, worldPosition.offset(1, 2, 1));
-  }
-
 
   /* Textures */
 

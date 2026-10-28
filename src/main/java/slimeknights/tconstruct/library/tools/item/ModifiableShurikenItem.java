@@ -18,6 +18,7 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import slimeknights.mantle.client.SafeClientAccess;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.mantle.client.TooltipKey;
 import slimeknights.tconstruct.common.Sounds;
 import slimeknights.tconstruct.library.modifiers.hook.build.ConditionalStatModifierHook;
@@ -79,8 +80,11 @@ public class ModifiableShurikenItem extends Item implements IModifiableDisplay {
   /* Loading */
 
   @Override
-  public void verifyTagAfterLoad(CompoundTag nbt) {
-    ToolStack.verifyTag(this, nbt, getToolDefinition());
+  public void verifyComponentsAfterLoad(ItemStack stack) {
+    CompoundTag tag = DataComponentHelper.getCustomData(stack);
+    if (tag != null) {
+      ToolStack.verifyTag(this, tag, getToolDefinition());
+    }
   }
 
   @Override
@@ -96,11 +100,6 @@ public class ModifiableShurikenItem extends Item implements IModifiableDisplay {
     // we use enchantments to handle some modifiers, so don't glow from them
     // however, if a modifier wants to glow let them
     return ModifierUtil.checkVolatileFlag(stack, SHINY);
-  }
-
-  @Override
-  public Rarity getRarity(ItemStack stack) {
-    return RarityModule.getRarity(stack);
   }
 
 
@@ -144,7 +143,8 @@ public class ModifiableShurikenItem extends Item implements IModifiableDisplay {
   }
 
   @Override
-  public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+  public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    Level level = context.level();
     TooltipUtil.addInformation(this, stack, level, tooltip, SafeClientAccess.getTooltipKey(), flag);
   }
 

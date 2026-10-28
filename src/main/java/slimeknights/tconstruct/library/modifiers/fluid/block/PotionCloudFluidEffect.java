@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.library.modifiers.fluid.block;
 
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.AreaEffectCloud;
@@ -8,6 +9,8 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 import slimeknights.mantle.data.loadable.primitive.FloatLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
+
+import java.util.Optional;
 import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.fluids.fluids.PotionFluidType;
 import slimeknights.tconstruct.library.modifiers.fluid.EffectLevel;
@@ -45,7 +48,7 @@ public record PotionCloudFluidEffect(float scale, TagPredicate predicate) implem
             // keep track of how many effects are actually added
             boolean used = false;
             for (MobEffectInstance instance : effects) {
-              if (instance.getEffect().isInstantenous()) {
+              if (instance.getEffect().value().isInstantenous()) {
                 // only thing we have to scale on instant effects is the amplifier, though clouds automatically half instant effects for us
                 int amplifier = (int)((instance.getAmplifier() + 1) * effectScale * 2) - 1;
                 if (amplifier >= 0) {

@@ -26,12 +26,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.common.conditions.WithConditions;
@@ -101,7 +102,7 @@ public class GenerateMeltingRecipesCommand {
 
   /** Runs the command */
   @SuppressWarnings({"unchecked", "removal"})  // not like we are using the generics at all
-  private static <C extends Container, T extends Recipe<C>> int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+  private static int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
     long startTime = System.nanoTime();
     Holder<RecipeType<?>> recipeType = ResourceArgument.getResource(context, "recipe_type", Registries.RECIPE_TYPE);
 
@@ -163,9 +164,10 @@ public class GenerateMeltingRecipesCommand {
 
     // iterate all recipes and try adding a melting recipe
     MeltingCache cache = new MeltingCache();
-    for (Recipe<?> recipe : level.getRecipeManager().getAllRecipesFor((RecipeType<T>) recipeType.get())) {
+    for (RecipeHolder<?> holder : allRecipes(level.getRecipeManager(), recipeType.value())) {
+      Recipe<?> recipe = holder.value();
       // skip any recipes that are specifically blacklisted
-      if (skipRecipes.contains(recipe.getId())) {
+      if (skipRecipes.contains(holder.id())) {
         continue;
       }
       ItemStack resultStack = recipe.getResultItem(access);
@@ -300,6 +302,12 @@ public class GenerateMeltingRecipesCommand {
     return successes.intValue();
   }
 
+  /** Gets all recipes of the given type, casting away the generics as the command does not care about the recipe input type */
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  private static List<RecipeHolder<?>> allRecipes(RecipeManager manager, RecipeType<?> type) {
+    return (List) manager.getAllRecipesFor((RecipeType) type);
+  }
+
   /** Helper to make it easier to keep tags consistent in fluid outputs */
   private record MeltingResult(FluidStack fluid, @Nullable TagKey<Fluid> tag, int temperature) {
     /** Empty instance for cache saving */
@@ -312,7 +320,7 @@ public class GenerateMeltingRecipesCommand {
       if (fluid.isEmpty()) {
         return EMPTY;
       }
-      return new MeltingResult(fluid, DataComponentHelper.getCustomData(output), meltingFluid.temperature());
+      return new MeltingResult(fluid, output.getValueOrTag().right().orElse(null), meltingFluid.temperature());
     }
 
     /** Creates a transfer from a fluid stack instance */
@@ -333,7 +341,7 @@ public class GenerateMeltingRecipesCommand {
     /** Creates a fluid output for this object */
     public FluidOutput toOutput() {
       if (tag != null) {
-        return FluidOutput.fromTag(tag, fluid.getAmount(), DataComponentHelper.getCustomData(fluid));
+        return FluidOutput.fromTag(tag, fluid.getAmount(), fluid.getComponentsPatch());
       }
       return FluidOutput.fromStack(fluid);
     }
@@ -446,7 +454,7 @@ public class GenerateMeltingRecipesCommand {
       }
       // handle buckets directly as its faster
       if (item instanceof BucketItem bucket) {
-        Fluid fluid = bucket.getFluid();
+        Fluid fluid = bucket.content;
         if (fluid != Fluids.EMPTY) {
           return MeltingResult.from(new FluidStack(fluid, FluidType.BUCKET_VOLUME));
         }

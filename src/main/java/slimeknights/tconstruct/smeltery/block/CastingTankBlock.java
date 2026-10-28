@@ -7,12 +7,14 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.Mirror;
@@ -67,8 +69,8 @@ public class CastingTankBlock extends InventoryBlock implements ITankBlock, Enti
   }
 
   @Override
-  protected boolean openGui(Player player, Level world, BlockPos pos) {
-    return false;
+  protected InteractionResult openGui(BlockState state, Level world, BlockPos pos, Player player) {
+    return InteractionResult.PASS;
   }
 
   @Deprecated
@@ -85,12 +87,12 @@ public class CastingTankBlock extends InventoryBlock implements ITankBlock, Enti
 
   @Deprecated
   @Override
-  public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+  protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
     if (world.getBlockEntity(pos) instanceof CastingTankBlockEntity tank) {
       tank.interact(player, hand, hit.getLocation().y - pos.getY() < 0.6875);
-      return InteractionResult.SUCCESS;
+      return ItemInteractionResult.SUCCESS;
     }
-    return InteractionResult.FAIL;
+    return ItemInteractionResult.FAIL;
   }
 
   @Override
@@ -139,8 +141,8 @@ public class CastingTankBlock extends InventoryBlock implements ITankBlock, Enti
   }
 
   @Override
-  public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
-    return ITankBlockEntity.getCloneItemStack(new ItemStack(this), world, pos);
+  public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
+    return ITankBlockEntity.getCloneItemStack(new ItemStack(this), level, pos);
   }
 
   @Override

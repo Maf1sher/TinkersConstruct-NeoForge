@@ -46,7 +46,7 @@ public enum BlockInteractFluidEffect implements FluidEffect<FluidEffectContext.B
     // our tools we know work so ignore them
     if (!level.isClientSide && context.getPlayer() == null && stack.isDamageableItem() && !stack.is(TinkerTags.Items.MODIFIABLE)) {
       // unable to call Forge damageItem as that needs entity access, but its just vanilla broken anyways, right?
-      stack.hurt(1, level.getRandom(), null);
+      stack.setDamageValue(stack.getDamageValue() + 1);
       // calling methods again instead of using return as return may be incorrect for custom broken stacks
       if (stack.getDamageValue() >= stack.getMaxDamage()) {
         // but that won't happen, right? will need to consider another workaround in that case.

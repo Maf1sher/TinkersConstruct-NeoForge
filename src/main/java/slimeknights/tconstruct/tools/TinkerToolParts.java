@@ -12,6 +12,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredItem;
 import slimeknights.mantle.registration.object.EnumObject;
+import slimeknights.tconstruct.library.tools.definition.ModifiableArmorMaterial;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerModule;
 import slimeknights.tconstruct.common.TinkerTags;
@@ -93,7 +94,7 @@ public final class TinkerToolParts extends TinkerModule {
   public static final DeferredItem<ToolPartItem> toolHandle = ITEMS.register("tool_handle", () -> new ToolPartItem(ITEM_PROPS, HandleMaterialStats.ID));
   public static final DeferredItem<ToolPartItem> toughHandle = ITEMS.register("tough_handle", () -> new ToolPartItem(ITEM_PROPS, HandleMaterialStats.ID));
   // armor
-  public static final EnumObject<ArmorItem.Type,ToolPartItem> plating = ITEMS.registerEnum(ArmorItem.Type.values(), "plating", type -> new ToolPartItem(ITEM_PROPS, PlatingMaterialStats.TYPES.get(type.ordinal()).getId()));
+  public static final EnumObject<ArmorItem.Type,ToolPartItem> plating = ITEMS.registerEnum(ModifiableArmorMaterial.ARMOR_TYPES, "plating", type -> new ToolPartItem(ITEM_PROPS, PlatingMaterialStats.TYPES.get(type.ordinal()).getId()));
   public static final DeferredItem<ToolPartItem> maille = ITEMS.register("maille", () -> new ToolPartItem(ITEM_PROPS, StatlessMaterialStats.MAILLE.getIdentifier()));
   public static final DeferredItem<ToolPartItem> shieldCore = ITEMS.register("shield_core", () -> new ToolPartItem(ITEM_PROPS, StatlessMaterialStats.SHIELD_CORE.getIdentifier()));
   // slimesuit
@@ -137,7 +138,7 @@ public final class TinkerToolParts extends TinkerModule {
     accept(output, arrowShaft);
     accept(output, fletching);
     // plating, pair each one with the dummy plating item
-    for (ArmorItem.Type type : ArmorItem.Type.values()) {
+    for (ArmorItem.Type type : ModifiableArmorMaterial.ARMOR_TYPES) {
       tab.accept(TinkerSmeltery.dummyPlating.get(type));
       plating.get(type).addVariants(output, "");
     }

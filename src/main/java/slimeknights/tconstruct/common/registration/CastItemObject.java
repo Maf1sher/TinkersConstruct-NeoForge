@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.common.registration;
 
+import net.minecraft.core.Holder;
 import lombok.Getter;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -22,8 +23,8 @@ import static slimeknights.mantle.util.RegistryHelper.getHolder;
 public class CastItemObject extends ItemObject<Item, Item> {
   @Getter
   private final ResourceLocation name;
-  private final Supplier<? extends Item> sand;
-  private final Supplier<? extends Item> redSand;
+  private final Holder<Item> sand;
+  private final Holder<Item> redSand;
   @Getter
   private final TagKey<Item> singleUseTag;
   @Getter
@@ -31,15 +32,15 @@ public class CastItemObject extends ItemObject<Item, Item> {
 
   @SuppressWarnings("deprecation")  // you know, pointless deprecations is really going to make people start ignoring deprecations
   public CastItemObject(ResourceLocation name, Item gold, Item sand, Item redSand) {
-    super(getHolder(BuiltInRegistries.ITEM, gold));
+    super(BuiltInRegistries.ITEM.wrapAsHolder(gold));
     this.name = name;
-    this.sand = getHolder(BuiltInRegistries.ITEM, sand);
-    this.redSand = getHolder(BuiltInRegistries.ITEM, redSand);
+    this.sand = BuiltInRegistries.ITEM.wrapAsHolder(sand);
+    this.redSand = BuiltInRegistries.ITEM.wrapAsHolder(redSand);
     this.singleUseTag = makeTag("single_use");
     this.multiUseTag = makeTag("multi_use");
   }
 
-  public CastItemObject(ResourceLocation name, DeferredItem<Item> gold, Supplier<? extends Item> sand, Supplier<? extends Item> redSand) {
+  public CastItemObject(ResourceLocation name, DeferredItem<Item> gold, DeferredItem<Item> sand, DeferredItem<Item> redSand) {
     super(gold);
     this.name = name;
     this.sand = sand;
@@ -61,7 +62,7 @@ public class CastItemObject extends ItemObject<Item, Item> {
    * @return  Yellow sand variant
    */
   public Item getSand() {
-    return Objects.requireNonNull(this.sand.get(), "CastItemObject missing sand");
+    return Objects.requireNonNull(this.sand.value(), "CastItemObject missing sand");
   }
 
   /**
@@ -69,7 +70,7 @@ public class CastItemObject extends ItemObject<Item, Item> {
    * @return  Red sand variant
    */
   public Item getRedSand() {
-    return Objects.requireNonNull(this.redSand.get(), "CastItemObject missing red sand");
+    return Objects.requireNonNull(this.redSand.value(), "CastItemObject missing red sand");
   }
 
   /**

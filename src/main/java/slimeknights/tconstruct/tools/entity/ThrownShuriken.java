@@ -18,7 +18,8 @@ import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity;
+import net.minecraft.world.level.block.EndGatewayBlock;
+import net.minecraft.world.level.block.NetherPortalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -160,12 +161,10 @@ public class ThrownShuriken extends Projectile implements ToolProjectile, Projec
       BlockPos pos = ((BlockHitResult)hit).getBlockPos();
       BlockState state = this.level().getBlockState(pos);
       if (state.is(Blocks.NETHER_PORTAL)) {
-        this.handleInsidePortal(pos);
+        this.setAsInsidePortal((NetherPortalBlock) state.getBlock(), pos);
         teleported = true;
       } else if (state.is(Blocks.END_GATEWAY)) {
-        if (this.level().getBlockEntity(pos) instanceof TheEndGatewayBlockEntity gateway && TheEndGatewayBlockEntity.canEntityTeleport(this)) {
-          TheEndGatewayBlockEntity.teleportEntity(this.level(), pos, state, this, gateway);
-        }
+        this.setAsInsidePortal((EndGatewayBlock) state.getBlock(), pos);
         teleported = true;
       }
     }
@@ -274,9 +273,9 @@ public class ThrownShuriken extends Projectile implements ToolProjectile, Projec
   /* Client */
 
   @Override
-  protected void defineSynchedData() {
-    this.entityData.define(STACK, ItemStack.EMPTY);
-    this.entityData.define(WATER_INERTIA, 0.8f);
+  protected void defineSynchedData(SynchedEntityData.Builder builder) {
+    builder.define(STACK, ItemStack.EMPTY);
+    builder.define(WATER_INERTIA, 0.8f);
   }
 
   @Override

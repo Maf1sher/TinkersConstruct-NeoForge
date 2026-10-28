@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -64,7 +65,7 @@ public class ChestBlock extends TabbedTableBlock {
       CompoundTag tinkerData = tag.getCompound("TinkerData");
       BlockEntity te = worldIn.getBlockEntity(pos);
       if (te instanceof AbstractChestBlockEntity chest) {
-        chest.readInventory(tinkerData);
+        chest.readInventory(worldIn.registryAccess(), tinkerData);
       }
     }
   }
@@ -79,21 +80,21 @@ public class ChestBlock extends TabbedTableBlock {
   @SuppressWarnings("deprecation")
   @Override
   @Deprecated
-  public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+  protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
     BlockEntity te = worldIn.getBlockEntity(pos);
     Inventory playerInventory = player.getInventory();
     ItemStack heldItem = playerInventory.getSelected();
 
     if (!heldItem.isEmpty() && te instanceof AbstractChestBlockEntity chest && chest.canInsert(player, heldItem)) {
-      IItemHandlerModifiable itemHandler = chest.getItemHandler();
+      IItemHandler itemHandler = chest.getItemHandler();
       ItemStack rest = ItemHandlerHelper.insertItem(itemHandler, heldItem, false);
       if (rest.isEmpty() || rest.getCount() < heldItem.getCount()) {
         playerInventory.items.set(playerInventory.selected, rest);
-        return InteractionResult.SUCCESS;
+        return ItemInteractionResult.SUCCESS;
       }
     }
 
-    return super.use(state, worldIn, pos, player, handIn, hit);
+    return super.useItemOn(stack, state, worldIn, pos, player, handIn, hit);
   }
 
   @Override

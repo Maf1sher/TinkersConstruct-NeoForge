@@ -69,7 +69,7 @@ public class FluidEffectContent extends PageContent {
       title = Language.getInstance().getOrDefault(key);
     }
     if (text.isBlank()) {
-      text = ForgeI18n.getPattern(key + ".fluid_effect");
+      text = I18n.get(key + ".fluid_effect");
     }
     // if we didn't set either effects list, fetch those
     if (effects.hasEffects()) {

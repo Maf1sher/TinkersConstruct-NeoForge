@@ -1,10 +1,18 @@
 package slimeknights.tconstruct.tools.menu;
 
 import lombok.Getter;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.CraftingMenu;
@@ -38,6 +46,7 @@ import slimeknights.tconstruct.tools.network.ToolContainerFluidUpdatePacket;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 /** Container for a tool inventory */
 public class ToolContainerMenu extends AbstractContainerMenu {
@@ -89,7 +98,7 @@ public class ToolContainerMenu extends AbstractContainerMenu {
   }
 
   /** Creates a new instance of this container on the client side */
-  public static ToolContainerMenu forClient(int id, Inventory inventory, FriendlyByteBuf buffer) {
+  public static ToolContainerMenu forClient(int id, Inventory inventory, RegistryFriendlyByteBuf buffer) {
     int slotIndex = buffer.readVarInt();
     ToolSyncType syncType = buffer.readEnum(ToolSyncType.class);
     // when syncing the full stack, overwrite the spot in the inventory
@@ -277,7 +286,31 @@ public class ToolContainerMenu extends AbstractContainerMenu {
   public void slotsChanged(Container pContainer) {
     super.slotsChanged(pContainer);
     if (craftingContainer != null && resultContainer != null) {
-      CraftingMenu.slotChangedCraftingGrid(this, player.level(), player, craftingContainer, resultContainer);
+      slotChangedCraftingGrid(this, player.level(), player, craftingContainer, resultContainer);
+    }
+  }
+
+  /**
+   * Replacement for {@link CraftingMenu#slotChangedCraftingGrid}, which became protected in 1.21.
+   * Updates the crafting result slot and syncs it to the client.
+   */
+  private static void slotChangedCraftingGrid(AbstractContainerMenu menu, Level level, Player player, CraftingContainer craftSlots, ResultContainer resultSlots) {
+    if (level instanceof ServerLevel serverLevel && player instanceof ServerPlayer serverPlayer) {
+      CraftingInput input = craftSlots.asCraftInput();
+      ItemStack result = ItemStack.EMPTY;
+      Optional<RecipeHolder<CraftingRecipe>> optional = serverLevel.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, serverLevel);
+      if (optional.isPresent()) {
+        RecipeHolder<CraftingRecipe> holder = optional.get();
+        if (resultSlots.setRecipeUsed(serverLevel, serverPlayer, holder)) {
+          ItemStack assembled = holder.value().assemble(input, serverLevel.registryAccess());
+          if (assembled.isItemEnabled(serverLevel.enabledFeatures())) {
+            result = assembled;
+          }
+        }
+      }
+      resultSlots.setItem(0, result);
+      menu.setRemoteSlot(0, result);
+      serverPlayer.connection.send(new ClientboundContainerSetSlotPacket(menu.containerId, menu.incrementStateId(), 0, result));
     }
   }
 
@@ -348,8 +381,8 @@ public class ToolContainerMenu extends AbstractContainerMenu {
     public void updateFluid(FluidStack updated, int change) {
       if (change != 0) {
         setFluid(updated);
-        if (player != null) {
-          TinkerNetwork.getInstance().sendTo(new ToolContainerFluidUpdatePacket(updated), player);
+        if (player instanceof ServerPlayer serverPlayer) {
+          TinkerNetwork.getInstance().sendTo(new ToolContainerFluidUpdatePacket(updated), serverPlayer);
         }
       }
     }

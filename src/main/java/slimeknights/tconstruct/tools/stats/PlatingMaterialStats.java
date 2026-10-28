@@ -7,6 +7,7 @@ import net.minecraft.world.item.ArmorItem;
 import slimeknights.mantle.data.loadable.field.LoadableField;
 import slimeknights.mantle.data.loadable.primitive.FloatLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.tconstruct.library.tools.definition.ModifiableArmorMaterial;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.materials.stats.IRepairableMaterialStats;
 import slimeknights.tconstruct.library.materials.stats.MaterialStatType;
@@ -98,7 +99,7 @@ public record PlatingMaterialStats(MaterialStatType<?> getType, int durability, 
 
     /** Sets the durability for the piece based on the given factor */
     public Builder durabilityFactor(float maxDamageFactor) {
-      for (ArmorItem.Type slotType : ArmorItem.Type.values()) {
+      for (ArmorItem.Type slotType : ModifiableArmorMaterial.ARMOR_TYPES) {
         int index = slotType.ordinal();
         durability[index] = (int)(ArmorModuleBuilder.MAX_DAMAGE_ARRAY[index] * maxDamageFactor);
       }

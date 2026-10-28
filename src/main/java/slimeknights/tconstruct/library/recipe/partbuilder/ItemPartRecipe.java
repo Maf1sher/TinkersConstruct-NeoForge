@@ -20,6 +20,7 @@ import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariant;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 import slimeknights.tconstruct.library.recipe.material.IMaterialValue;
+import slimeknights.tconstruct.library.utils.ResourceId;
 import slimeknights.tconstruct.tables.TinkerTables;
 
 import javax.annotation.Nullable;
@@ -74,7 +75,7 @@ public class ItemPartRecipe implements IDisplayPartBuilderRecipe {
     this.result = result;
     this.titleKey = titleKey;
     if (titleKey != null) {
-      String key = "recipe." + titleKey.toLanguageKey();
+      String key = "recipe." + ResourceId.toLanguageKey(titleKey);
       title = Component.translatable(key);
       information = List.of(Component.translatable(key + ".info"));
     } else {

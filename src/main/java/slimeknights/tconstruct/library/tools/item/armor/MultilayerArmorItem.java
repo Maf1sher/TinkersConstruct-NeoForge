@@ -24,7 +24,7 @@ public class MultilayerArmorItem extends ModifiableArmorItem {
   }
 
   /** Used by data-driven creation where the tool definition is provided manually */
-  public MultilayerArmorItem(ModifiableArmorMaterial material, ArmorItem.Type slot, Properties properties, ToolDefinition toolDefinition, ResourceLocation name) {
+  public MultilayerArmorItem(DummyArmorMaterial material, ArmorItem.Type slot, Properties properties, ToolDefinition toolDefinition, ResourceLocation name) {
     super(material, slot, properties, toolDefinition);
     this.name = name;
   }

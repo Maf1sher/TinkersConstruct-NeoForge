@@ -3,6 +3,7 @@ package slimeknights.tconstruct.smeltery.block.controller;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -83,16 +84,15 @@ public abstract class ControllerBlock extends InventoryBlock {
   }
 
   @Override
-  protected boolean openGui(Player player, Level world, BlockPos pos) {
-    BlockState state = world.getBlockState(pos);
+  protected InteractionResult openGui(BlockState state, Level world, BlockPos pos, Player player) {
     if (state.getBlock() == this) {
       if (canOpenGui(state)) {
-        return super.openGui(player, world, pos);
+        return super.openGui(state, world, pos, player);
       } else {
-        return displayStatus(player, world, pos, state);
+        return displayStatus(player, world, pos, state) ? InteractionResult.SUCCESS : InteractionResult.PASS;
       }
     }
-    return false;
+    return InteractionResult.PASS;
   }
 
 

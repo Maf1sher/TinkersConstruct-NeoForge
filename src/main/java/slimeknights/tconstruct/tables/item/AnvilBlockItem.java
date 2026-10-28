@@ -4,6 +4,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
@@ -49,12 +50,6 @@ public class AnvilBlockItem extends MaterialBlockItem {
   }
 
   @Override
-  public Rarity getRarity(ItemStack stack) {
-    // override rarity, since this is a block, not an item
-    return Rarity.COMMON;
-  }
-
-  @Override
   public boolean isFoil(ItemStack stack) {
     // disable shiny as it won't show in world
     return false;
@@ -70,9 +65,10 @@ public class AnvilBlockItem extends MaterialBlockItem {
   }
 
   @Override
-  public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+  public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    Level level = context.level();
     // ditch the super call advanced tooltip material ID, we will handle it ourselves later
-    this.getBlock().appendHoverText(stack, level, tooltip, flag);
+    this.getBlock().appendHoverText(stack, context, tooltip, flag);
     MaterialVariantId material = getMaterial(stack);
     if (!MaterialId.UNKNOWN.equals(material)) {
       // put tool material in tooltip. Its technically below texture but the two should never coexist.

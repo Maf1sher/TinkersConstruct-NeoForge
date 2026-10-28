@@ -12,7 +12,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Plane;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
@@ -442,12 +441,15 @@ public abstract class MultiblockCuboid<T extends MultiblockStructureData> {
     if (!rootTag.contains(key, Tag.TAG_LIST)) {
       return Collections.emptyList();
     }
-    ListTag list = rootTag.getList(key, Tag.TAG_COMPOUND);
+    ListTag list = rootTag.getList(key, Tag.TAG_INT_ARRAY);
     List<BlockPos> collection = new ArrayList<>(list.size());
     for (int i = 0; i < list.size(); i++) {
-      BlockPos pos = NbtUtils.readBlockPos(list.getCompound(i));
-      if (!pos.equals(BlockPos.ZERO)) {
-        collection.add(pos.offset(offset));
+      int[] pos = list.getIntArray(i);
+      if (pos.length == 3) {
+        BlockPos blockPos = new BlockPos(pos[0], pos[1], pos[2]);
+        if (!blockPos.equals(BlockPos.ZERO)) {
+          collection.add(blockPos.offset(offset));
+        }
       }
     }
     return collection;

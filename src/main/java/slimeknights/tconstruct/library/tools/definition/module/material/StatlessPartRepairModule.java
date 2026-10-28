@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import net.minecraft.world.item.ArmorItem;
 import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.tconstruct.library.tools.definition.ModifiableArmorMaterial;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariant;
 import slimeknights.tconstruct.library.module.HookProvider;
@@ -67,7 +68,7 @@ public record StatlessPartRepairModule(int partIndex, int repairAmount) implemen
 
     /** Sets the durability for the piece based on the given factor */
     public ArmorBuilder durabilityFactor(float maxDamageFactor) {
-      for (ArmorItem.Type slotType : ArmorItem.Type.values()) {
+      for (ArmorItem.Type slotType : ModifiableArmorMaterial.ARMOR_TYPES) {
         int index = slotType.ordinal();
         durability[index] = (int)(ArmorModuleBuilder.MAX_DAMAGE_ARRAY[index] * maxDamageFactor);
       }

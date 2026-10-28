@@ -77,6 +77,9 @@ import java.util.function.Function;
 public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements IUnbakedGeometry<FluidContainerModel> {
   public static final IGeometryLoader<FluidContainerModel> LOADER = FluidContainerModel::deserialize;
 
+  /** Location used for dynamic model baking */
+  private static final ResourceLocation BAKE_LOCATION = TConstruct.getResource("copper_can_dynamic");
+
   /** Clone of same named field from {@link net.neoforged.neoforge.client.model.DynamicFluidContainerModel} */
   public static final Transformation FLUID_TRANSFORM = new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(1, 1, 1.002f), new Quaternionf());
 
@@ -112,7 +115,7 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
     return null;
   }
 
-  private static BakedModel bakeInternal(IGeometryBakingContext context, Function<Material,TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides, ResourceLocation modelLocation, FluidStack fluid, boolean flipGas) {
+  private static BakedModel bakeInternal(IGeometryBakingContext context, Function<Material,TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides, FluidStack fluid, boolean flipGas) {
     // get basic sprites
     IClientFluidTypeExtensions clientFluid = IClientFluidTypeExtensions.of(fluid.getFluid());
     TextureAtlasSprite baseSprite = getSprite(context, spriteGetter, "base");
@@ -139,18 +142,17 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
     // add in the base
     if (baseSprite != null) {
       modelBuilder.addQuads(renderTypes, UnbakedGeometryHelper.bakeElements(
-        UnbakedGeometryHelper.createUnbakedItemElements(0, baseSprite.contents()),
-        $ -> baseSprite, modelState, modelLocation
+        UnbakedGeometryHelper.createUnbakedItemElements(0, baseSprite),
+        $ -> baseSprite, modelState
       ));
     }
 
     // add in fluid
     if (fluidSprite != null) {
       List<BakedQuad> quads = UnbakedGeometryHelper.bakeElements(
-        UnbakedGeometryHelper.createUnbakedItemMaskElements(1, spriteGetter.apply(context.getMaterial("fluid")).contents()),
+        UnbakedGeometryHelper.createUnbakedItemMaskElements(1, spriteGetter.apply(context.getMaterial("fluid"))),
         $ -> fluidSprite,
-        new SimpleModelState(modelState.getRotation().compose(FLUID_TRANSFORM), modelState.isUvLocked()),
-        modelLocation
+        new SimpleModelState(modelState.getRotation().compose(FLUID_TRANSFORM), modelState.isUvLocked())
       );
 
       // apply light
@@ -171,21 +173,19 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
   }
 
   @Override
-  public BakedModel bake(IGeometryBakingContext context, ModelBaker bakery, Function<Material,TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides, ResourceLocation modelLocation) {
+  public BakedModel bake(IGeometryBakingContext context, ModelBaker bakery, Function<Material,TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides) {
     // We need to disable GUI 3D and block lighting for this to render properly
-    context = StandaloneGeometryBakingContext.builder(context).withGui3d(false).withUseBlockLight(false).build(modelLocation);
+    context = StandaloneGeometryBakingContext.builder(context).withGui3d(false).withUseBlockLight(false).build(BAKE_LOCATION);
     // only do contained fluid if we did not set the fluid in the model properties
     if (fluid.isEmpty()) {
       overrides = new ContainedFluidOverrideHandler(context, overrides, modelState, flipGas);
     }
-    return bakeInternal(context, spriteGetter, modelState, overrides, modelLocation, fluid, flipGas);
+    return bakeInternal(context, spriteGetter, modelState, overrides, fluid, flipGas);
   }
 
   /** Handles swapping the model based on the contained fluid */
   @RequiredArgsConstructor
   private static final class ContainedFluidOverrideHandler extends ItemOverrides {
-    private static final ResourceLocation BAKE_LOCATION = TConstruct.getResource("copper_can_dynamic");
-
     private final Map<FluidStack,BakedModel> cache = Maps.newHashMap(); // contains all the baked models since they'll never change
 
     private final IGeometryBakingContext context;
@@ -196,7 +196,7 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
 
     /** Gets the model directly, for creating the cached models */
     private BakedModel getUncahcedModel(FluidStack fluid) {
-      return bakeInternal(context, Material::sprite, modelState, ItemOverrides.EMPTY, BAKE_LOCATION, fluid, flipGas);
+      return bakeInternal(context, Material::sprite, modelState, ItemOverrides.EMPTY, fluid, flipGas);
     }
 
     @Override

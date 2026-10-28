@@ -120,7 +120,7 @@ public final class TinkerFluids extends TinkerModule {
   public static final FlowingFluidObject<SlimeFluid> enderSlime = FLUIDS.registerSlime("ender_slime", slime("ender_slime").temperature(370)).bucket().mobEffectBlock(MapColor.COLOR_PURPLE, 0, () -> new MobEffectInstance(TinkerEffects.enderference, 5 * 20)).flowing(SlimeFluid.Source::new, SlimeFluid.Flowing::new);
   public static final FlowingFluidObject<SlimeFluid> magma      = FLUIDS.registerSlime("magma",       slime("magma").temperature(600).lightLevel(3)).bucket().commonTag().burningBlock(MapColor.NETHER, 3, 8, 3f).flowing(SlimeFluid.Source::new, SlimeFluid.Flowing::new);
   public static final FlowingFluidObject<InvertedFluid> ichor   = FLUIDS.registerSlime("ichor").type(() -> new SlimeFluidType.Inverted(slime("ichor").temperature(1000).density(-1600))).bucket().block(MapColor.COLOR_ORANGE, 0).invertedFlowing();
-  public static final EnumObject<SlimeType, Fluid> slime = new EnumObject.Builder<SlimeType, Fluid>(SlimeType.class).put(SlimeType.EARTH, earthSlime).put(SlimeType.SKY, skySlime).put(SlimeType.ENDER, enderSlime).put(SlimeType.ICHOR, ichor).build();
+  public static final EnumObject<SlimeType, Fluid> slime = new EnumObject.Builder<SlimeType, Fluid>(SlimeType.class).put(SlimeType.EARTH, earthSlime.getHolder()).put(SlimeType.SKY, skySlime.getHolder()).put(SlimeType.ENDER, enderSlime.getHolder()).put(SlimeType.ICHOR, ichor.getHolder()).build();
   // bottles of slime
   public static final EnumObject<SlimeType, Item> slimeBottle = ITEMS.registerEnum(SlimeType.values(), "slime_bottle", type -> new FluidContainerFoodItem(
       new Item.Properties().food(TinkerFood.getBottle(type)).stacksTo(16).craftRemainder(Items.GLASS_BOTTLE), () -> new FluidStack(slime.get(type), FluidValues.BOTTLE)));
@@ -135,7 +135,7 @@ public final class TinkerFluids extends TinkerModule {
   public static final DeferredItem<Item> meatSoupBowl = ITEMS.register("meat_soup", () -> new ContainerFoodItem(new Item.Properties().food(TinkerFood.MEAT_SOUP).stacksTo(1).craftRemainder(Items.BOWL)));
 
   // potion
-  public static final FluidObject<UnplaceableFluid> potion = FLUIDS.register("potion").type(() -> new PotionFluidType(cool().descriptionId("item.minecraft.potion.effect.empty").density(1100).viscosity(1100).temperature(315).sound(SoundActions.BUCKET_FILL, SoundEvents.BOTTLE_FILL).sound(SoundActions.BUCKET_EMPTY, SoundEvents.BOTTLE_EMPTY))).bucket(fluid -> new PotionBucketItem(fluid, RegistrationHelper.BUCKET_PROPS)).commonTag().unplacable();
+  public static final FluidObject<UnplaceableFluid> potion = FLUIDS.register("potion").type(() -> new PotionFluidType(cool().descriptionId("item.minecraft.potion.effect.empty").density(1100).viscosity(1100).temperature(315).sound(SoundActions.BUCKET_FILL, SoundEvents.BOTTLE_FILL).sound(SoundActions.BUCKET_EMPTY, SoundEvents.BOTTLE_EMPTY))).bucket(fluid -> new PotionBucketItem(() -> fluid, RegistrationHelper.BUCKET_PROPS)).commonTag().unplacable();
   public static final DeferredItem<Item> splashBottle = ITEMS.register("splash_bottle", () -> new BottleItem(Items.SPLASH_POTION, ITEM_PROPS));
   public static final DeferredItem<Item> lingeringBottle = ITEMS.register("lingering_bottle", () -> new BottleItem(Items.LINGERING_POTION, ITEM_PROPS));
 
@@ -173,7 +173,7 @@ public final class TinkerFluids extends TinkerModule {
 
   public static final FlowingFluidObject<BaseFlowingFluid> moltenManyullyn   = FLUIDS.registerMetal("molten_manyullyn").type(hot("molten_manyullyn").temperature(1500).lightLevel(11)).burningBlock(MapColor.COLOR_PURPLE, 11, 10, 8f).bucket().commonTag().flowing();
   public static final FlowingFluidObject<BaseFlowingFluid> moltenHepatizon   = FLUIDS.registerMetal("molten_hepatizon").type(hot("molten_hepatizon").temperature(1700).lightLevel(8)).burningBlock(MapColor.TERRACOTTA_BLUE, 8, 10, 7f).bucket().commonTag().flowing();
-  public static final FlowingFluidObject<InvertedFluid>     moltenCinderslime = FLUIDS.registerMetal("molten_cinderslime").invertedType(hot("molten_cinderslime").temperature(1350).lightLevel(10).density(-2000)).burningBlock(MapColor.COLOR_RED, 10, 10, 7f).bucket().invertedFlowing();
+  public static final FlowingFluidObject<InvertedFluid>     moltenCinderslime = FLUIDS.registerMetal("molten_cinderslime").type(() -> new SlimeFluidType.Inverted(hot("molten_cinderslime").temperature(1350).lightLevel(10).density(-2000))).burningBlock(MapColor.COLOR_RED, 10, 10, 7f).bucket().invertedFlowing();
   public static final FlowingFluidObject<BaseFlowingFluid> moltenQueensSlime = FLUIDS.registerMetal("molten_queens_slime").type(hot("molten_queens_slime").temperature(1450).lightLevel(9)).burningBlock(MapColor.COLOR_GREEN, 9, 10, 6f).bucket().flowing();
   public static final FlowingFluidObject<BaseFlowingFluid> moltenSoulsteel   = FLUIDS.registerMetal("molten_soulsteel").type(hot("molten_soulsteel").temperature(1500).lightLevel(6)).burningBlock(MapColor.COLOR_BROWN, 6, 10, 7f).bucket().flowing();
   public static final FlowingFluidObject<BaseFlowingFluid> moltenNetherite   = FLUIDS.registerMetal("molten_netherite").type(hot("molten_netherite").temperature(1550).lightLevel(14)).burningBlock(MapColor.COLOR_BLACK, 14, 10, 10f).bucket().commonTag().flowing();
@@ -295,12 +295,12 @@ public final class TinkerFluids extends TinkerModule {
   @SubscribeEvent
   void commonSetup(final FMLCommonSetupEvent event) {
     event.enqueueWork(() -> {
-      CauldronInteraction.WATER.put(splashBottle.get(), new FillBottle(Items.SPLASH_POTION));
-      CauldronInteraction.WATER.put(lingeringBottle.get(), new FillBottle(Items.LINGERING_POTION));
-      CauldronInteraction.WATER.put(Items.SPLASH_POTION,    new EmptyBottleIntoWater(splashBottle,    CauldronInteraction.WATER.get(Items.SPLASH_POTION)));
-      CauldronInteraction.WATER.put(Items.LINGERING_POTION, new EmptyBottleIntoWater(lingeringBottle, CauldronInteraction.WATER.get(Items.LINGERING_POTION)));
-      CauldronInteraction.EMPTY.put(Items.SPLASH_POTION,    new EmptyBottleIntoEmpty(splashBottle,    CauldronInteraction.EMPTY.get(Items.SPLASH_POTION)));
-      CauldronInteraction.EMPTY.put(Items.LINGERING_POTION, new EmptyBottleIntoEmpty(lingeringBottle, CauldronInteraction.EMPTY.get(Items.LINGERING_POTION)));
+      CauldronInteraction.WATER.map().put(splashBottle.get(), new FillBottle(Items.SPLASH_POTION));
+      CauldronInteraction.WATER.map().put(lingeringBottle.get(), new FillBottle(Items.LINGERING_POTION));
+      CauldronInteraction.WATER.map().put(Items.SPLASH_POTION,    new EmptyBottleIntoWater(splashBottle,    CauldronInteraction.WATER.map().get(Items.SPLASH_POTION)));
+      CauldronInteraction.WATER.map().put(Items.LINGERING_POTION, new EmptyBottleIntoWater(lingeringBottle, CauldronInteraction.WATER.map().get(Items.LINGERING_POTION)));
+      CauldronInteraction.EMPTY.map().put(Items.SPLASH_POTION,    new EmptyBottleIntoEmpty(splashBottle,    CauldronInteraction.EMPTY.map().get(Items.SPLASH_POTION)));
+      CauldronInteraction.EMPTY.map().put(Items.LINGERING_POTION, new EmptyBottleIntoEmpty(lingeringBottle, CauldronInteraction.EMPTY.map().get(Items.LINGERING_POTION)));
     });
 
     // dispense buckets
@@ -310,8 +310,8 @@ public final class TinkerFluids extends TinkerModule {
       @Override
       public ItemStack execute(BlockSource source, ItemStack stack) {
         DispensibleContainerItem container = (DispensibleContainerItem)stack.getItem();
-        BlockPos blockpos = source.getPos().relative(source.getBlockState().getValue(DispenserBlock.FACING));
-        Level level = source.getLevel();
+        BlockPos blockpos = source.pos().relative(source.state().getValue(DispenserBlock.FACING));
+        Level level = source.level();
         if (container.emptyContents(null, level, blockpos, null, stack)) {
           container.checkExtraContent(null, level, stack, blockpos);
           return new ItemStack(Items.BUCKET);
@@ -512,7 +512,7 @@ public final class TinkerFluids extends TinkerModule {
     acceptCompat(output, fieryLiquid, "fiery", MaterialIds.fiery);
     // potion buckets
     BuiltInRegistries.POTION.holders().filter(holder -> {
-      Potion potion = holder.get();
+      Potion potion = holder.value();
       return potion != Potions.WATER.value() && !potion.getEffects().isEmpty();
     }).forEachOrdered(holder ->
       output.accept(PotionFluidType.potionBucket(holder.key())));

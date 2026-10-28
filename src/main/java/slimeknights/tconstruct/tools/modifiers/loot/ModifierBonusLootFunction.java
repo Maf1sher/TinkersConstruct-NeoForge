@@ -27,7 +27,7 @@ import java.util.Set;
 public class ModifierBonusLootFunction extends LootItemConditionalFunction {
   public static final MapCodec<ModifierBonusLootFunction> CODEC = RecordCodecBuilder.mapCodec(instance ->
     commonFields(instance).and(instance.group(
-      ResourceLocation.CODEC.xmap(ModifierId::new, id -> id).fieldOf("modifier").forGetter(function -> function.modifier),
+      ResourceLocation.CODEC.xmap(ModifierId::new, ModifierId::getLocation).fieldOf("modifier").forGetter(function -> function.modifier),
       LootBonusFormulaCodec.CODEC.forGetter(function -> function.formula),
       Codec.BOOL.optionalFieldOf("include_base", true).forGetter(function -> function.includeBase)
     )).apply(instance, ModifierBonusLootFunction::new));

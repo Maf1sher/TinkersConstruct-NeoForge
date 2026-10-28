@@ -6,7 +6,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -21,7 +21,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 
 public record FillBottle(Item filled) implements CauldronInteraction {
   @Override
-  public InteractionResult interact(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, ItemStack stack) {
+  public ItemInteractionResult interact(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, ItemStack stack) {
     if (!level.isClientSide) {
       ItemStack filledBottle = new ItemStack(filled);
       filledBottle.set(DataComponents.POTION_CONTENTS, new PotionContents(Potions.WATER));
@@ -32,6 +32,6 @@ public record FillBottle(Item filled) implements CauldronInteraction {
       level.playSound(null, pos, SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0F, 1.0F);
       level.gameEvent(null, GameEvent.FLUID_PICKUP, pos);
     }
-    return InteractionResult.sidedSuccess(level.isClientSide);
+    return ItemInteractionResult.sidedSuccess(level.isClientSide);
   }
 }

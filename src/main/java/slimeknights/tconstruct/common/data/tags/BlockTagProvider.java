@@ -142,17 +142,17 @@ public class BlockTagProvider extends BlockTagsProvider {
 
     TagsProvider.TagAppender<Block> builder = this.tag(TinkerTags.Blocks.ANVIL_METAL)
         // tier 3
-        .addTag(TinkerMaterials.slimesteel.getBlockTag())
-        .addTag(TinkerMaterials.amethystBronze.getBlockTag())
-        .addTag(TinkerMaterials.roseGold.getBlockTag())
-        .addTag(TinkerMaterials.pigIron.getBlockTag())
+        .addTag(TinkerMaterials.slimesteel.getBlockTag().block())
+        .addTag(TinkerMaterials.amethystBronze.getBlockTag().block())
+        .addTag(TinkerMaterials.roseGold.getBlockTag().block())
+        .addTag(TinkerMaterials.pigIron.getBlockTag().block())
         // tier 4
-        .addTag(TinkerMaterials.cinderslime.getBlockTag())
-        .addTag(TinkerMaterials.queensSlime.getBlockTag())
-        .addTag(TinkerMaterials.manyullyn.getBlockTag())
-        .addTag(TinkerMaterials.hepatizon.getBlockTag())
-        .addTag(TinkerMaterials.knightmetal.getBlockTag())
-        .addTag(TinkerMaterials.knightslime.getBlockTag())
+        .addTag(TinkerMaterials.cinderslime.getBlockTag().block())
+        .addTag(TinkerMaterials.queensSlime.getBlockTag().block())
+        .addTag(TinkerMaterials.manyullyn.getBlockTag().block())
+        .addTag(TinkerMaterials.hepatizon.getBlockTag().block())
+        .addTag(TinkerMaterials.knightmetal.getBlockTag().block())
+        .addTag(TinkerMaterials.knightslime.getBlockTag().block())
         .addTag(Tags.Blocks.STORAGE_BLOCKS_NETHERITE);
     for (SmelteryCompat compat : SmelteryCompat.values()) {
       if (compat.getType() == CompatType.ALLOY) {
@@ -273,7 +273,7 @@ public class BlockTagProvider extends BlockTagsProvider {
     TinkerWorld.slimeDirt.forEach((type, block) -> this.tag(type.getBlockTag()).add(block));
     IntrinsicTagAppender<Block> enderBarkRoots = this.tag(TinkerTags.Blocks.ENDERBARK_ROOTS).add(TinkerWorld.enderbarkRoots.get());
     TinkerWorld.slimyEnderbarkRoots.forEach((type, block) -> {
-      this.tag(type.getDirtType().getBlockTag()).add(block);
+      this.tag(type.asDirt().getBlockTag()).add(block);
       enderBarkRoots.add(block);
     });
     endermanHoldable.addTag(TinkerTags.Blocks.SLIMY_SOIL);
@@ -351,6 +351,10 @@ public class BlockTagProvider extends BlockTagsProvider {
     this.tag(TinkerTags.Blocks.CISTERN_CONNECTIONS)
         // cannot add channels as it requires a block state property to properly detect, look into a way to fix this later
         .add(TinkerSmeltery.searedFaucet.get(), TinkerSmeltery.scorchedFaucet.get());
+    // these blocks do not fully sync the fluid to client, so gauges show just the fluid name
+    this.tag(MantleTags.Blocks.HIDES_GAUGE_AMOUNT).add(
+        TinkerSmeltery.searedFaucet.get(), TinkerSmeltery.scorchedFaucet.get(),
+        TinkerSmeltery.searedChannel.get(), TinkerSmeltery.scorchedChannel.get());
 
     // tanks
     IntrinsicTagAppender<Block> searedTankTagAppender = this.tag(TinkerTags.Blocks.SEARED_TANKS);
@@ -452,12 +456,14 @@ public class BlockTagProvider extends BlockTagsProvider {
       for (FoliageType grass : FoliageType.values()) {
         Tiers dirtTier = dirt.getHarvestTier();
         Tiers grassTier = grass.getHarvestTier();
-        // cannot use tier sorting registry as it's not init during datagen, stuck comparing levels and falling back to ordinal for gold
+        // tier sorting registry is not initialized during datagen, so compare ordinals with gold ranked as level 0 (as in vanilla 1.20.1)
+        int dirtRank = dirtTier == Tiers.GOLD ? 0 : dirtTier.ordinal();
+        int grassRank = grassTier == Tiers.GOLD ? 0 : grassTier.ordinal();
         Tiers tier;
-        if (dirtTier.getLevel() == grassTier.getLevel()) {
+        if (dirtRank == grassRank) {
           tier = dirtTier.ordinal() > grassTier.ordinal() ? dirtTier : grassTier;
         } else {
-          tier = dirtTier.getLevel() > grassTier.getLevel() ? dirtTier : grassTier;
+          tier = dirtRank > grassRank ? dirtTier : grassTier;
         }
         this.tag(Objects.requireNonNull(tier.getTag())).add(TinkerWorld.slimeGrass.get(dirt).get(grass));
       }
@@ -642,11 +648,11 @@ public class BlockTagProvider extends BlockTagsProvider {
    * @param metal  Metal object
    */
   private void addMetalTags(MetalItemObject metal, boolean beacon) {
-    this.tag(metal.getBlockTag()).add(metal.get());
+    this.tag(metal.getBlockTag().block()).add(metal.get());
     if (beacon) {
-      this.tag(BlockTags.BEACON_BASE_BLOCKS).addTag(metal.getBlockTag());
+      this.tag(BlockTags.BEACON_BASE_BLOCKS).addTag(metal.getBlockTag().block());
     }
-    this.tag(Tags.Blocks.STORAGE_BLOCKS).addTag(metal.getBlockTag());
+    this.tag(Tags.Blocks.STORAGE_BLOCKS).addTag(metal.getBlockTag().block());
   }
 
   /** Adds tags for a glass item object */

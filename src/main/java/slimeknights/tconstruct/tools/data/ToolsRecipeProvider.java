@@ -51,6 +51,7 @@ import slimeknights.tconstruct.library.recipe.partbuilder.recycle.PartBuilderRec
 import slimeknights.tconstruct.library.recipe.partbuilder.recycle.PartBuilderToolRecycleBuilder;
 import slimeknights.tconstruct.library.recipe.tinkerstation.building.MaterialSwappingRecipeBuilder;
 import slimeknights.tconstruct.library.recipe.tinkerstation.building.ToolBuildingRecipeBuilder;
+import slimeknights.tconstruct.library.tools.definition.ModifiableArmorMaterial;
 import slimeknights.tconstruct.library.tools.layout.Patterns;
 import slimeknights.tconstruct.library.tools.part.IMaterialItem;
 import slimeknights.tconstruct.shared.TinkerMaterials;
@@ -379,7 +380,7 @@ public class ToolsRecipeProvider extends BaseRecipeProvider implements IMaterial
       .save(consumer, location(folder + "plate_shield"));
 
     // slimesuit recycling
-    for (ArmorItem.Type type : ArmorItem.Type.values()) {
+    for (ArmorItem.Type type : ModifiableArmorMaterial.ARMOR_TYPES) {
       PartBuilderToolRecycleBuilder.tool(TinkerTools.slimesuit.get(type))
         // different parts for index 0
         .part(switch (type) {
@@ -388,6 +389,7 @@ public class ToolsRecipeProvider extends BaseRecipeProvider implements IMaterial
           case CHESTPLATE -> TinkerToolParts.ribcage.get();
           case LEGGINGS -> TinkerToolParts.shell.get();
           case BOOTS -> TinkerToolParts.laces.get();
+          case BODY -> throw new IllegalArgumentException("Body armor has no part");
         })
         // slime lacks a part so do repair kit
         .part(TinkerToolParts.repairKit)

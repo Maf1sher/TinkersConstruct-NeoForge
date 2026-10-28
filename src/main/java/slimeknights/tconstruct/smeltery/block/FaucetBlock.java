@@ -77,7 +77,7 @@ public class FaucetBlock extends Block implements EntityBlock {
 
   @SuppressWarnings("deprecation")
   @Override
-  public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+  public boolean isPathfindable(BlockState state, PathComputationType type) {
     return false;
   }
 
@@ -98,7 +98,7 @@ public class FaucetBlock extends Block implements EntityBlock {
 
   @SuppressWarnings("deprecation")
   @Override
-  public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+  protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
     if (player.isShiftKeyDown()) {
       return InteractionResult.PASS;
     }

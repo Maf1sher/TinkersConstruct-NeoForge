@@ -7,6 +7,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -66,7 +67,7 @@ public class GlowballEntity extends ThrowableItemProjectile implements IEntityWi
 
   @Override
   public void writeSpawnData(RegistryFriendlyByteBuf buffer) {
-    ItemStack.OPTIONAL_STREAM_CODEC.encode(buffer, this.getItemRaw());
+    ItemStack.OPTIONAL_STREAM_CODEC.encode(buffer, this.getItem());
   }
 
   @Override

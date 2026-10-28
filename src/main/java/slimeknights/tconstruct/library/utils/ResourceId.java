@@ -50,6 +50,16 @@ public abstract class ResourceId implements Comparable<ResourceId>, IdAwareObjec
     return location.getPath();
   }
 
+  /** {@return the translation key for this ID, of the form {@code namespace.path}} */
+  public String toLanguageKey() {
+    return toLanguageKey(location);
+  }
+
+  /** {@return the translation key for the given location, of the form {@code namespace.path}} */
+  public static String toLanguageKey(ResourceLocation location) {
+    return location.getNamespace() + "." + location.getPath();
+  }
+
   /** {@return a resource location with the given suffix appended to this ID's path} */
   public ResourceLocation withSuffix(String suffix) {
     return location.withSuffix(suffix);

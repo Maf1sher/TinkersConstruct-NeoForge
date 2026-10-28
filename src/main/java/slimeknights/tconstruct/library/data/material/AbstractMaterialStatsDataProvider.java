@@ -8,6 +8,8 @@ import net.minecraft.data.PackOutput.Target;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ArmorItem;
 import slimeknights.mantle.data.GenericDataProvider;
+import slimeknights.mantle.util.JsonHelper;
+import slimeknights.tconstruct.library.tools.definition.ModifiableArmorMaterial;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.materials.json.MaterialStatJson;
 import slimeknights.tconstruct.library.materials.stats.IMaterialStats;
@@ -52,7 +54,7 @@ public abstract class AbstractMaterialStatsDataProvider extends GenericDataProvi
     }
     // does not ensure we have materials for all stats, we may be adding stats for another mod
     // generate finally
-    return allOf(allMaterialStats.entrySet().stream().map(entry -> saveJson(cache, entry.getKey().getLocation(), entry.getValue().serialize())));
+    return allOf(allMaterialStats.entrySet().stream().map(entry -> saveJson(cache, entry.getKey().getLocation(), JsonHelper.DEFAULT_GSON.toJsonTree(entry.getValue().serialize()))));
   }
 
 
@@ -90,7 +92,7 @@ public abstract class AbstractMaterialStatsDataProvider extends GenericDataProvi
    */
   protected void addArmorStats(MaterialId location, ArmorModuleBuilder<? extends IMaterialStats> statBuilder, IMaterialStats... otherStats) {
     IMaterialStats[] stats = new IMaterialStats[4];
-    for (ArmorItem.Type slotType : ArmorItem.Type.values()) {
+    for (ArmorItem.Type slotType : ModifiableArmorMaterial.ARMOR_TYPES) {
       stats[slotType.ordinal()] = statBuilder.build(slotType);
     }
     addMaterialStats(location, stats);

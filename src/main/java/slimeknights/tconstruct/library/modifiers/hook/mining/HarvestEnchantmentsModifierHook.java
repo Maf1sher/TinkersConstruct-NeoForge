@@ -82,9 +82,10 @@ public interface HarvestEnchantmentsModifierHook {
       }
       // if the enchantments is null, no hooks ran so the enchantments are unchanged
       if (enchantments != null) {
+        ItemEnchantments.Mutable mutable = enchantments;
         // we allow 0 values for enchantments in the hook
-        enchantments.removeIf(enchantment -> EnchantmentModifierHook.VALUE_REMOVER.test(enchantments.getLevel(enchantment)));
-        ItemEnchantments applied = enchantments.toImmutable();
+        mutable.removeIf(enchantment -> EnchantmentModifierHook.VALUE_REMOVER.test(mutable.getLevel(enchantment)));
+        ItemEnchantments applied = mutable.toImmutable();
         if (applied.isEmpty()) {
           stack.remove(DataComponents.ENCHANTMENTS);
         } else {

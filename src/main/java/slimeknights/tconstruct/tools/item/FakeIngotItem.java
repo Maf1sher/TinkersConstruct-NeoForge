@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.tools.item;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
@@ -50,8 +51,9 @@ public class FakeIngotItem extends RepairKitItem {
   }
 
   @Override
-  public Rarity getRarity(ItemStack stack) {
-    // override rarity, since vanilla ingots don't use it
-    return Rarity.COMMON;
+  public void verifyComponentsAfterLoad(ItemStack stack) {
+    super.verifyComponentsAfterLoad(stack);
+    // rarity is a data component in 1.21.1; these items are always common
+    stack.set(DataComponents.RARITY, Rarity.COMMON);
   }
 }

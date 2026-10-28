@@ -127,11 +127,6 @@ public class ThrownTool extends ThrownTrident implements ToolProjectile {
   }
 
   @Override
-  public boolean isChanneling() {
-    return !getPickupItem().isEmpty() && getTool().getModifiers().getLevel(ModifierIds.channeling) > 0;
-  }
-
-  @Override
   public Component getDisplayName() {
     if (getPickupItem().isEmpty()) {
       return super.getDisplayName();
@@ -376,10 +371,10 @@ public class ThrownTool extends ThrownTrident implements ToolProjectile {
   /* Client */
 
   @Override
-  protected void defineSynchedData() {
-    super.defineSynchedData();
-    this.entityData.define(STACK, ItemStack.EMPTY);
-    this.entityData.define(WATER_INERTIA, 0.6f);
+  protected void defineSynchedData(SynchedEntityData.Builder builder) {
+    super.defineSynchedData(builder);
+    builder.define(STACK, ItemStack.EMPTY);
+    builder.define(WATER_INERTIA, 0.6f);
   }
 
   @Override

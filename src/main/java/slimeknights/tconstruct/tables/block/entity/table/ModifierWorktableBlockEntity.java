@@ -7,6 +7,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
@@ -137,7 +138,7 @@ public class ModifierWorktableBlockEntity extends RetexturedTableBlockEntity imp
         return updateRecipe(lastRecipe);
       }
       // look for a new recipe, if it matches cache it
-      Optional<IModifierWorktableRecipe> recipe = level.getRecipeManager().getRecipeFor(TinkerRecipeTypes.MODIFIER_WORKTABLE.get(), inventoryWrapper, level);
+      Optional<IModifierWorktableRecipe> recipe = level.getRecipeManager().getRecipeFor(TinkerRecipeTypes.MODIFIER_WORKTABLE.get(), inventoryWrapper, level).map(RecipeHolder::value);
       if (recipe.isPresent()) {
         return updateRecipe(recipe.get());
       }
@@ -208,7 +209,7 @@ public class ModifierWorktableBlockEntity extends RetexturedTableBlockEntity imp
 
     // we are definitely crafting at this point
     resultItem.onCraftedBy(this.level, player, amount);
-    EventHooks.firePlayerCraftingEvent(player, resultItem, this.inventoryWrapper);
+    EventHooks.firePlayerCraftingEvent(player, resultItem, this);
     this.playCraftSound(player);
 
     // run the recipe, will shrink inputs

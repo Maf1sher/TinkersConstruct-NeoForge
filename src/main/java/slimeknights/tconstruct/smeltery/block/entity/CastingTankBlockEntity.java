@@ -267,13 +267,13 @@ public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlo
     if (nbt.isEmpty()) {
       tank.setFluid(FluidStack.EMPTY);
     } else {
-      tank.readFromNBT(nbt);
+      tank.readFromNBT(registries, nbt);
       TankBlockEntity.updateLight(this, tank);
     }
   }
 
   @Override
-  public void loadAdditional(CompoundTag tag, Provider registries) {
+  public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
     tank.setCapacity(getCapacity(getBlockState().getBlock()));
     updateTank(registries, tag.getCompound(NBTTags.TANK));
     lastRedstone = tag.getBoolean(TAG_REDSTONE);
@@ -281,17 +281,17 @@ public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlo
   }
 
   @Override
-  public void saveAdditional(CompoundTag tags, Provider registries) {
+  public void saveAdditional(CompoundTag tags, HolderLookup.Provider registries) {
     super.saveAdditional(tags, registries);
     tags.putBoolean(TAG_REDSTONE, lastRedstone);
   }
 
   @Override
-  public void saveSynced(CompoundTag tag, Provider registries) {
+  public void saveSynced(CompoundTag tag, HolderLookup.Provider registries) {
     super.saveSynced(tag, registries);
     // want tank on the client on world load
     if (!tank.isEmpty()) {
-      tag.put(NBTTags.TANK, tank.writeToNBT(new CompoundTag()));
+      tag.put(NBTTags.TANK, tank.writeToNBT(registries, new CompoundTag()));
     }
   }
 

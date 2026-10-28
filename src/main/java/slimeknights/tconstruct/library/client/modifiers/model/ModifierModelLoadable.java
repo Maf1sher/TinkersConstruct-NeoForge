@@ -56,7 +56,7 @@ public enum ModifierModelLoadable implements Loadable<ModifierModel> {
   }
 
   @Override
-  public JsonElement serialize(ModifierModel model) {
+  public JsonElement serialize(ModifierModel model, TypedMap context) {
     // if it's a compound, serialize as a list
     if (this == COMPACT) {
       // if its empty, serialize as an empty list
@@ -91,7 +91,7 @@ public enum ModifierModelLoadable implements Loadable<ModifierModel> {
   }
 
   @Override
-  public void encode(RegistryFriendlyByteBuf buffer, ModifierModel value) {
-    ModifierModel.LOADER.encode(buffer, value);
+  public void encode(RegistryFriendlyByteBuf buffer, ModifierModel value, TypedMap context) {
+    ModifierModel.LOADER.encode(buffer, value, context);
   }
 }

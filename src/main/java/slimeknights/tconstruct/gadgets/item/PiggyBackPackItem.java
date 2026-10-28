@@ -154,7 +154,7 @@ public class PiggyBackPackItem extends TooltipItem {
   public void inventoryTick(ItemStack stack, Level worldIn, Entity entityIn, int itemSlot, boolean isSelected) {
     if (entityIn instanceof LivingEntity livingEntity && livingEntity.getItemBySlot(EquipmentSlot.CHEST) == stack && entityIn.isVehicle()) {
       int amplifier = this.getEntitiesCarriedCount(livingEntity) - 1;
-      livingEntity.addEffect(new MobEffectInstance(TinkerGadgets.carryEffect.get(), 2, amplifier, true, false, true));
+      livingEntity.addEffect(new MobEffectInstance(TinkerGadgets.carryEffect, 2, amplifier, true, false, true));
     }
   }
 
@@ -174,12 +174,12 @@ public class PiggyBackPackItem extends TooltipItem {
     }
 
     @Override
-    public boolean isDurationEffectTick(int duration, int amplifier) {
+    public boolean shouldApplyEffectTickThisTick(int duration, int amplifier) {
       return true; // check every tick
     }
 
     @Override
-    public void applyEffectTick(@Nonnull LivingEntity livingEntityIn, int p_76394_2_) {
+    public boolean applyEffectTick(@Nonnull LivingEntity livingEntityIn, int p_76394_2_) {
       ItemStack chestArmor = livingEntityIn.getItemBySlot(EquipmentSlot.CHEST);
       if (chestArmor.isEmpty() || chestArmor.getItem() != TinkerGadgets.piggyBackpack.get()) {
         TinkerGadgets.piggyBackpack.get().matchCarriedEntitiesToCount(livingEntityIn, 0);
@@ -192,7 +192,8 @@ public class PiggyBackPackItem extends TooltipItem {
           }
         }
       }
-    }
+      return true;
+  }
 
     @Override
     public void initializeClient(Consumer<IClientMobEffectExtensions> consumer) {

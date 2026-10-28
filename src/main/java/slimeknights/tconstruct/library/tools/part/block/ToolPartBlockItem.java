@@ -2,6 +2,7 @@ package slimeknights.tconstruct.library.tools.part.block;
 
 import lombok.Getter;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
@@ -23,7 +24,7 @@ public class ToolPartBlockItem extends MaterialBlockItem implements IToolPart {
   }
 
   @Override
-  public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+  public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
     ToolPartItem.appendHoverText(this, stack, tooltip, flag);
   }
 }

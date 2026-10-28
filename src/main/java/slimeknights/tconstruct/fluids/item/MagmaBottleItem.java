@@ -26,12 +26,12 @@ public class MagmaBottleItem extends Item {
   }
 
   @Override
-  public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-    super.appendHoverText(stack, worldIn, tooltip, flagIn);
+  public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flagIn) {
+    super.appendHoverText(stack, context, tooltip, flagIn);
     tooltip.add(Component.translatable(
       "potion.withDuration",
       Blocks.FIRE.getName(),
-      StringUtil.formatTickDuration(fireTime * 20)
+      StringUtil.formatTickDuration(fireTime * 20, 20.0f)
     ).withStyle(MobEffectCategory.HARMFUL.getTooltipFormatting()));
   }
 
@@ -42,7 +42,7 @@ public class MagmaBottleItem extends Item {
   }
 
   @Override
-  public int getUseDuration(ItemStack pStack) {
+  public int getUseDuration(ItemStack pStack, LivingEntity entity) {
     return 32;
   }
 

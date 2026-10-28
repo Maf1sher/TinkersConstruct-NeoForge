@@ -56,7 +56,7 @@ public class ModifierModelMapManager extends MergingJsonDataLoader<Builder> {
   public CompletableFuture<Void> reload(PreparationBarrier stage, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
     // run in the first stage instead of the second stage
     return CompletableFuture.runAsync(() -> {
-      if (ModLoader.isLoadingStateValid()) {
+      if (!ModLoader.hasErrors()) {
         this.onResourceManagerReload(resourceManager);
       }
     }, backgroundExecutor).thenCompose(stage::wait);
@@ -233,7 +233,7 @@ public class ModifierModelMapManager extends MergingJsonDataLoader<Builder> {
 
   /** Gets a map of modifier models for the given tool, considering the legacy model system */
   @SuppressWarnings("deprecation")
-  public ModifierModelMap getModelsForTool(Function<Material, TextureAtlasSprite> spriteGetter, List<ResourceLocation> options, List<ResourceLocation> smallRoots, List<ResourceLocation> largeRoots, ResourceLocation modelLocation) {
+  public ModifierModelMap getModelsForTool(Function<Material, TextureAtlasSprite> spriteGetter, List<ResourceLocation> options, List<ResourceLocation> smallRoots, List<ResourceLocation> largeRoots, String modelName) {
     Set<ModifierId> seenModifiers = new HashSet<>();
     ModifierModelMap models = getModelsForTool(spriteGetter, options, seenModifiers::addAll);
     // if not using the legacy system, we are done
@@ -247,7 +247,7 @@ public class ModifierModelMapManager extends MergingJsonDataLoader<Builder> {
     }
     // if nothing is on the new system, just return the legacy one with a warning
     if (models.isEmpty()) {
-      TConstruct.LOG.warn("Tool model {} is using deprecated system for modifier models instead of modifier model maps for {}", modelLocation, legacy.keySet());
+      TConstruct.LOG.warn("Tool model {} is using deprecated system for modifier models instead of modifier model maps for {}", modelName, legacy.keySet());
       return ModifierModelMap.create(legacy, Map.of());
     }
     // have both so we need to combine
@@ -261,7 +261,7 @@ public class ModifierModelMapManager extends MergingJsonDataLoader<Builder> {
     }
     // only warn of legacy usage if we have legacy models
     if (!legacyIds.isEmpty()) {
-      TConstruct.LOG.warn("Tool model {} is using deprecated system for modifier models instead of modifier model maps for {}", modelLocation, legacyIds);
+      TConstruct.LOG.warn("Tool model {} is using deprecated system for modifier models instead of modifier model maps for {}", modelName, legacyIds);
     }
     return models.withModifiers(builder);
   }

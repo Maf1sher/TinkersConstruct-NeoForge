@@ -221,7 +221,7 @@ public class StatsNBT {
     }
 
     @Override
-    public void serialize(StatsNBT stats, JsonObject json) {
+    public void serializeInto(StatsNBT stats, JsonObject json, TypedMap context) {
       for (Entry<IToolStat<?>,Object> entry : stats.stats.entrySet()) {
         IToolStat<?> stat = entry.getKey();
         json.add(stat.getName().toString(), serialize(stat, entry.getValue()));
@@ -234,7 +234,7 @@ public class StatsNBT {
     }
 
     @Override
-    public void encode(RegistryFriendlyByteBuf buffer, StatsNBT stats) {
+    public void encode(RegistryFriendlyByteBuf buffer, StatsNBT stats, TypedMap context) {
       stats.toNetwork(buffer);
     }
   };

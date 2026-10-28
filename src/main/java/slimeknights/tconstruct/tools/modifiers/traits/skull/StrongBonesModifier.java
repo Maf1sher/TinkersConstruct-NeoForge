@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.tools.modifiers.traits.skull;
 
+import slimeknights.tconstruct.common.TinkerCures;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -59,7 +60,7 @@ public class StrongBonesModifier extends SingleLevelModifier {
     }
     level = ArmorLevelModule.getLevel(living, CALCIFIABLE);
     if (level > 0) {
-      MobEffectInstance effect = new MobEffectInstance(TinkerModifiers.calcifiedEffect.get(), flat + eachLevel * level, 0);
+      MobEffectInstance effect = new MobEffectInstance(TinkerModifiers.calcifiedEffect, flat + eachLevel * level, 0);
       didSomething |= action.execute() ? living.addEffect(effect) : living.canBeAffected(effect);
     }
     return didSomething;

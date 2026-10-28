@@ -214,7 +214,7 @@ public class ToolHarvestLogic {
 
   /**
    * Call on block break to break a block.
-   * Used in {@link net.neoforged.neoforge.common.extensions.IItemExtension#onBlockStartBreak(ItemStack, BlockPos, Player)}.
+   * NeoForge 1.21.1 removed the {@code onBlockStartBreak} item hook, so callers must invoke this manually.
    * See also {@link net.minecraft.client.multiplayer.MultiPlayerGameMode#destroyBlock(BlockPos)} (client)
    * and {@link net.minecraft.server.level.ServerPlayerGameMode#destroyBlock(BlockPos)} (server)
    * @param stack   Stack instance

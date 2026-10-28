@@ -8,6 +8,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PotionItem;
@@ -25,7 +26,6 @@ import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.library.utils.Util;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -79,8 +79,8 @@ public class PotionBucketItem extends PotionItem {
     if (!level.isClientSide) {
       PotionContents contents = stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
       for (MobEffectInstance effect : contents.getAllEffects()) {
-        if (effect.getEffect().isInstantenous()) {
-          effect.getEffect().applyInstantenousEffect(player, player, living, effect.getAmplifier(), 2.5D);
+        if (effect.getEffect().value().isInstantenous()) {
+          effect.getEffect().value().applyInstantenousEffect(player, player, living, effect.getAmplifier(), 2.5D);
         } else {
           MobEffectInstance newEffect = new MobEffectInstance(effect.getEffect(), effect.mapDuration(duration -> duration * 5 / 2), effect.getAmplifier(), effect.isAmbient(), effect.isVisible(), effect.showIcon());
           living.addEffect(newEffect);
@@ -108,12 +108,12 @@ public class PotionBucketItem extends PotionItem {
   }
 
   @Override
-  public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltip, TooltipFlag pFlag) {
+  public void appendHoverText(ItemStack pStack, Item.TooltipContext context, List<Component> pTooltip, TooltipFlag pFlag) {
     pStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).addPotionTooltip(pTooltip::add, 2.5f, 20.0f);
   }
 
   @Override
-  public int getUseDuration(ItemStack pStack) {
+  public int getUseDuration(ItemStack pStack, LivingEntity entity) {
     return 96; // 3x duration of potion bottles
   }
 

@@ -4,8 +4,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 
-import static net.minecraft.world.damagesource.CombatRules.getDamageAfterAbsorb;
-
 /**
  * Utinet.minecraft.world.damagesource.CombatRulesation logic
  */
@@ -13,7 +11,20 @@ public class ArmorUtil {
   private ArmorUtil() {}
 
   /**
-   * Inverse of {@link net.minecraft.world.damagesource.CombatRules#getDamageAfterAbsorb(float, float, float)}  with respect to damage
+   * Vanilla armor absorption formula from 1.20, kept here as 1.21 requires entity and damage source context for enchantment effectiveness.
+   * @param damage     Damage to absorb
+   * @param armor      Total armor value
+   * @param toughness  Total toughness value
+   * @return  Damage after armor absorption
+   */
+  private static float getDamageAfterAbsorb(float damage, float armor, float toughness) {
+    float f = 2.0F + toughness / 4.0F;
+    float f1 = Mth.clamp(armor - damage / f, armor * 0.2F, 20.0F);
+    return damage * (1.0F - f1 / 25.0F);
+  }
+
+  /**
+   * Inverse of {@link #getDamageAfterAbsorb(float, float, float)}  with respect to damage
    * @param damage     Damage returned by the vanilla function, must be 0 or more
    * @param armor      Total armor value, tested between 0 and 30
    * @param toughness  Total toughness value, tested between 0 and 20

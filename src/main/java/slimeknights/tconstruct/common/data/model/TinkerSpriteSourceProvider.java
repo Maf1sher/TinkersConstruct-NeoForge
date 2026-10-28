@@ -3,6 +3,7 @@ package slimeknights.tconstruct.common.data.model;
 import net.minecraft.client.renderer.texture.atlas.sources.DirectoryLister;
 import net.minecraft.client.renderer.texture.atlas.sources.PalettedPermutations;
 import net.minecraft.client.renderer.texture.atlas.sources.SingleFile;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -20,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -36,13 +38,12 @@ public class TinkerSpriteSourceProvider extends SpriteSourceProvider {
   private static final String PALETTE_FOLDER = "trims/color_palettes/";
   private static final String TRIM_FOLDER = "trims/models/armor/";
 
-  public TinkerSpriteSourceProvider(PackOutput output, ExistingFileHelper fileHelper) {
-    super(output, fileHelper, TConstruct.MOD_ID);
+  public TinkerSpriteSourceProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries, ExistingFileHelper fileHelper) {
+    super(output, registries, TConstruct.MOD_ID, fileHelper);
   }
 
-  @SuppressWarnings("removal")
   @Override
-  protected void addSources() {
+  protected void gather() {
     ResourceLocation trimPalette = ResourceLocation.parse(PALETTE_FOLDER + "trim_palette");
     // map of material suffix to material paeltte for trims
     Map<String,ResourceLocation> tinkerMaterials = Arrays.stream(MaterialIds.TRIM_MATERIALS).collect(Collectors.toMap(id -> id.getNamespace() + "_" + id.getPath(), id -> id.withPrefix(PALETTE_FOLDER)));

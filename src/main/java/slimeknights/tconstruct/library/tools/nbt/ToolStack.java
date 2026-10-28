@@ -21,6 +21,7 @@ import slimeknights.tconstruct.library.materials.MaterialRegistry;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariant;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
+import slimeknights.tconstruct.library.modifiers.modules.build.RarityModule;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.modifiers.ModifierManager;
@@ -171,7 +172,7 @@ public class ToolStack implements IToolStackView {
           stack.set(DataComponents.CUSTOM_DATA, CustomData.of(nbt));
           nbt = stack.get(DataComponents.CUSTOM_DATA).getUnsafe();
         } else {
-          switch (Config.COMMON.logInvalidToolStack.get()) {
+          switch (getInvalidToolStackLogging()) {
             case STACKTRACE ->
               TConstruct.LOG.warn("Tool stack constructed using non-modifiable tool, this may cause issues as it has no NBT. Stacktrace can be disabled in config.", new Exception("Stack trace"));
             case WARNING ->
@@ -184,10 +185,20 @@ public class ToolStack implements IToolStackView {
     }
     // Damage is a vanilla data component in 1.21.1. Keep the established Tinkers
     // field in custom data as well, so tool readers and saved data retain their format.
-    if (!nbt.contains(TAG_DAMAGE) && item.isDamageable(stack)) {
-      nbt.putInt(TAG_DAMAGE, stack.getDamageValue());
+    if (!nbt.contains(TAG_DAMAGE) && stack.isDamageableItem()) {
+      // read the component directly: getDamageValue() would call back into ToolStack.from
+      nbt.putInt(TAG_DAMAGE, stack.getOrDefault(DataComponents.DAMAGE, 0));
     }
     return new ToolStack(item, definition, nbt, copyNbt ? null : stack);
+  }
+
+  /** Reads the invalid tool stack logging mode, tolerating calls before configs are loaded (tests and early startup) */
+  private static Config.Common.LogInvalidToolStack getInvalidToolStackLogging() {
+    try {
+      return Config.COMMON.logInvalidToolStack.get();
+    } catch (IllegalStateException e) {
+      return Config.Common.LogInvalidToolStack.WARNING;
+    }
   }
 
   /**
@@ -278,6 +289,7 @@ public class ToolStack implements IToolStackView {
     if (item.isDamageable(stack)) {
       stack.setDamageValue(getDamageRaw());
     }
+    stack.set(DataComponents.RARITY, RarityModule.getRarity(stack));
     return stack;
   }
 
@@ -315,6 +327,7 @@ public class ToolStack implements IToolStackView {
     if (stack.getItem().isDamageable(stack)) {
       stack.setDamageValue(tag.getInt(TAG_DAMAGE));
     }
+    stack.set(DataComponents.RARITY, RarityModule.getRarity(stack));
     return stack;
   }
 
@@ -438,7 +451,8 @@ public class ToolStack implements IToolStackView {
     this.damage = damage;
     nbt.putInt(TAG_DAMAGE, damage);
     if (sourceStack != null && sourceStack.getItem() == item && item.isDamageable(sourceStack)) {
-      sourceStack.setDamageValue(damage);
+      // write the component directly: setDamageValue() would call back into ModifiableItem#setDamage
+      sourceStack.set(DataComponents.DAMAGE, damage);
     }
   }
 
@@ -795,6 +809,11 @@ public class ToolStack implements IToolStackView {
     // finally, update raw data, called last to make the parameters more convenient mostly, plus no other hooks should be responding to this data
     for (ModifierEntry entry : modifierList) {
       entry.getHook(ModifierHooks.RAW_DATA).addRawData(this, entry, getRestrictedNBT());
+    }
+
+    // rarity is a data component in 1.21.1; keep the source stack in sync with the rebuilt volatile data
+    if (sourceStack != null) {
+      sourceStack.set(DataComponents.RARITY, RarityModule.getRarity(sourceStack));
     }
   }
 

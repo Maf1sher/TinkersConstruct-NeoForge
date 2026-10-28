@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.library.tools.capability;
 
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.attachment.AttachmentType;
@@ -36,7 +37,9 @@ public class PersistentDataCapability {
 
   /** Syncs the data to the given player */
   private static void sync(Player player) {
-    TinkerNetwork.getInstance().sendTo(new SyncPersistentDataPacket(player.getData(DATA).getCopy()), player);
+    if (player instanceof ServerPlayer serverPlayer) {
+      TinkerNetwork.getInstance().sendTo(new SyncPersistentDataPacket(player.getData(DATA).getCopy()), serverPlayer);
+    }
   }
 
   /** sync caps when the player respawns/returns from the end */

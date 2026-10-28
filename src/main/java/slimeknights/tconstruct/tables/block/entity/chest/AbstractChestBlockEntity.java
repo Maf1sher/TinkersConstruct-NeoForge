@@ -58,21 +58,21 @@ public abstract class AbstractChestBlockEntity extends NameableBlockEntity {
     super.saveAdditional(tags, registries);
     // move the items from the serialized result
     // we don't care about the size and need it here for compat with old worlds
-    CompoundTag handlerNBT = itemHandler.serializeNBT();
+    CompoundTag handlerNBT = itemHandler.serializeNBT(registries);
     tags.put(KEY_ITEMS, handlerNBT.getList(KEY_ITEMS, Tag.TAG_COMPOUND));
   }
 
   /** Reads the inventory from NBT */
-  public void readInventory(CompoundTag tags) {
+  public void readInventory(Provider registries, CompoundTag tags) {
     // copy in just the items key for deserializing, don't want to change the size
     CompoundTag handlerNBT = new CompoundTag();
     handlerNBT.put(KEY_ITEMS, tags.getList(KEY_ITEMS, Tag.TAG_COMPOUND));
-    itemHandler.deserializeNBT(handlerNBT);
+    itemHandler.deserializeNBT(registries, handlerNBT);
   }
 
   @Override
   public void loadAdditional(CompoundTag tags, Provider registries) {
     super.loadAdditional(tags, registries);
-    readInventory(tags);
+    readInventory(registries, tags);
   }
 }

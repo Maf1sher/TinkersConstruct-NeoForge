@@ -22,7 +22,6 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -117,8 +116,6 @@ public abstract class HeatingStructureBlockEntity extends NameableBlockEntity im
   private boolean structureUpdateQueued = false;
   /** If true, fluids have changed since the last update and should be synced to the client, synced at most once every 4 ticks */
   private boolean fluidUpdateQueued = false;
-  /** Cache of the bounds for the case of no structure */
-  private AABB defaultBounds;
   @Nonnull
   @Getter
   private Block texture = Blocks.AIR;
@@ -481,16 +478,6 @@ public abstract class HeatingStructureBlockEntity extends NameableBlockEntity im
     this.setChangedFast();
   }
 
-  @Override
-  public AABB getRenderBoundingBox() {
-    if (structure != null) {
-      return structure.getBounds();
-    } else if (defaultBounds == null) {
-      defaultBounds = new AABB(worldPosition, worldPosition.offset(1, 1, 1));
-    }
-    return defaultBounds;
-  }
-
   /* Heating helpers */
 
   /**
@@ -592,7 +579,7 @@ public abstract class HeatingStructureBlockEntity extends NameableBlockEntity im
   public void loadAdditional(CompoundTag nbt, Provider registries) {
     super.loadAdditional(nbt, registries);
     if (nbt.contains(TAG_TANK, Tag.TAG_COMPOUND)) {
-      tank.read(nbt.getCompound(TAG_TANK));
+      tank.read(registries, nbt.getCompound(TAG_TANK));
       FluidStack first = tank.getFluidInTank(0);
       if (!first.isEmpty()) {
         updateDisplayFluid(first);
@@ -605,8 +592,8 @@ public abstract class HeatingStructureBlockEntity extends NameableBlockEntity im
       setStructure(multiblock.readFromTag(nbt.getCompound(TAG_STRUCTURE), this.worldPosition));
     }
     // only exists to be sent server to client in update packets
-    if (nbt.contains(TAG_ERROR_POS, Tag.TAG_COMPOUND)) {
-      this.errorPos = NbtUtils.readBlockPos(nbt.getCompound(TAG_ERROR_POS)).offset(this.worldPosition);
+    if (nbt.contains(TAG_ERROR_POS, Tag.TAG_INT_ARRAY)) {
+      NbtUtils.readBlockPos(nbt, TAG_ERROR_POS).ifPresent(pos -> this.errorPos = pos.offset(this.worldPosition));
     }
     fuelModule.readFromTag(nbt);
     if (nbt.contains(TAG_TEXTURE, Tag.TAG_STRING)) {
@@ -629,7 +616,7 @@ public abstract class HeatingStructureBlockEntity extends NameableBlockEntity im
   public void saveSynced(CompoundTag compound, Provider registries) {
     // Tag that writes to disk and syncs to client
     super.saveSynced(compound, registries);
-    compound.put(TAG_TANK, tank.write(new CompoundTag()));
+    compound.put(TAG_TANK, tank.write(registries, new CompoundTag()));
     compound.put(TAG_INVENTORY, meltingInventory.writeToTag(registries));
     if (texture != Blocks.AIR) {
       compound.putString(TAG_TEXTURE, getTextureName());

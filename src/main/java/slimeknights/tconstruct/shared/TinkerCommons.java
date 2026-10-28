@@ -125,7 +125,7 @@ public final class TinkerCommons extends TinkerModule {
   public static final DeferredHolder<Block, GlowBlock> glow = DeferredHolder.create(Registries.BLOCK, glowBlock.getId());
   // glass
   public static final DeferredBlock<TransparentBlock> clearGlass = BLOCKS.register("clear_glass", () -> new TransparentBlock(glassBuilder(MapColor.NONE)), BLOCK_ITEM);
-  public static final DeferredBlock<TintedGlassBlock> clearTintedGlass = BLOCKS.register("clear_tinted_glass", () -> new TintedGlassBlock(glassBuilder(MapColor.COLOR_GRAY).noOcclusion().isValidSpawn(Blocks::never).isRedstoneConductor(Blocks::never).isSuffocating(Blocks::never).isViewBlocking(Blocks::never)), BLOCK_ITEM);
+  public static final DeferredBlock<TintedGlassBlock> clearTintedGlass = BLOCKS.register("clear_tinted_glass", () -> new TintedGlassBlock(glassBuilder(MapColor.COLOR_GRAY).noOcclusion().isValidSpawn((state, level, pos, entityType) -> false).isRedstoneConductor((s, g, p) -> false).isSuffocating((s, g, p) -> false).isViewBlocking((s, g, p) -> false)), BLOCK_ITEM);
   public static final DeferredBlock<ClearGlassPaneBlock> clearGlassPane = BLOCKS.register("clear_glass_pane", () -> new ClearGlassPaneBlock(glassBuilder(MapColor.NONE)), BLOCK_ITEM);
   public static final EnumObject<GlassColor,ClearStainedGlassBlock> clearStainedGlass = BLOCKS.registerEnum(GlassColor.values(), "clear_stained_glass", (color) -> new ClearStainedGlassBlock(glassBuilder(color.getDye().getMapColor()), color), BLOCK_ITEM);
   public static final EnumObject<GlassColor,ClearStainedGlassPaneBlock> clearStainedGlassPane = BLOCKS.registerEnum(GlassColor.values(), "clear_stained_glass_pane", (color) -> new ClearStainedGlassPaneBlock(glassBuilder(color.getDye().getMapColor()), color), BLOCK_ITEM);
@@ -155,8 +155,8 @@ public final class TinkerCommons extends TinkerModule {
   /*
    * Items
    */
-  public static final DeferredItem<EdibleItem> bacon = ITEMS.register("bacon", () -> new EdibleItem(TinkerFood.BACON));
-  public static final DeferredItem<EdibleItem> jeweledApple = ITEMS.register("jeweled_apple", () -> new EdibleItem(TinkerFood.JEWELED_APPLE));
+  public static final DeferredItem<EdibleItem> bacon = ITEMS.register("bacon", () -> new EdibleItem(new Properties().food(TinkerFood.BACON)));
+  public static final DeferredItem<EdibleItem> jeweledApple = ITEMS.register("jeweled_apple", () -> new EdibleItem(new Properties().food(TinkerFood.JEWELED_APPLE)));
   public static final DeferredItem<Item> cheeseIngot = ITEMS.register("cheese_ingot", () -> new CheeseItem(new Properties().food(TinkerFood.CHEESE)));
   public static final DeferredBlock<Block> cheeseBlock = BLOCKS.register("cheese_block", () -> new HalfTransparentBlock(builder(MapColor.COLOR_YELLOW, SoundType.HONEY_BLOCK).strength(1.5F, 3.0F).speedFactor(0.4F).jumpFactor(0.5F).noOcclusion()), block -> new CheeseBlockItem(block, new Properties().food(TinkerFood.CHEESE)));
 
@@ -261,7 +261,7 @@ public final class TinkerCommons extends TinkerModule {
     ExistingFileHelper existingFileHelper = event.getExistingFileHelper();
     boolean client = event.includeClient();
     generator.addProvider(client, new ModelSpriteProvider(output, existingFileHelper));
-    generator.addProvider(client, new TinkerSpriteSourceProvider(output, existingFileHelper));
+    generator.addProvider(client, new TinkerSpriteSourceProvider(output, event.getLookupProvider(), existingFileHelper));
     generator.addProvider(client, new TinkerItemModelProvider(output, existingFileHelper));
     generator.addProvider(client, new TinkerBlockStateProvider(output, existingFileHelper));
     generator.addProvider(client, new RenderFluidProvider(output));
