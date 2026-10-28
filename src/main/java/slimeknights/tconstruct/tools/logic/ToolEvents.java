@@ -44,6 +44,7 @@ import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEvent.LivingVisibilityEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import slimeknights.mantle.registration.MantleData;
 import slimeknights.tconstruct.library.events.TinkerToolEvent.Result;
@@ -78,6 +79,9 @@ import slimeknights.tconstruct.library.tools.helper.ArmorUtil;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
 import slimeknights.tconstruct.library.tools.helper.ToolAttackUtil;
 import slimeknights.tconstruct.library.tools.helper.ToolDamageUtil;
+import slimeknights.tconstruct.library.tools.helper.ToolHarvestLogic;
+import slimeknights.tconstruct.library.tools.item.ModifiableItem;
+import slimeknights.tconstruct.library.tools.item.ranged.ModifiableLauncherItem;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ModifierNBT;
@@ -136,6 +140,33 @@ public class ToolEvents {
     double armorMultiplier = player.getAttributeValue(TinkerAttributes.MINING_SPEED_MULTIPLIER) + ArmorStatModule.getStat(player, TinkerDataKeys.MINING_SPEED);
     if (armorMultiplier >= 0) {
       event.setNewSpeed((float) (event.getNewSpeed() * armorMultiplier));
+    }
+  }
+
+  /**
+   * Handles AOE block breaking. NeoForge 1.21.1 removed {@code Item#onBlockStartBreak}, so this replaces the old
+   * {@link ModifiableItem} and {@link ModifiableLauncherItem} overrides. Runs late so protection mods can cancel
+   * the event before any block is broken.
+   */
+  @SubscribeEvent(priority = EventPriority.LOWEST)
+  static void onBlockBreak(BlockEvent.BreakEvent event) {
+    if (event.isCanceled()) {
+      return;
+    }
+    ItemStack stack = event.getPlayer().getMainHandItem();
+    // stacked tools bypass AOE, matching the removed 1.20.1 override
+    if (stack.getCount() > 1) {
+      return;
+    }
+    if (!(stack.getItem() instanceof ModifiableItem) && !(stack.getItem() instanceof ModifiableLauncherItem)) {
+      return;
+    }
+    // the event listener must not react to the events fired for AOE targets
+    if (ToolHarvestLogic.isBreakingBlocks()) {
+      return;
+    }
+    if (ToolHarvestLogic.handleBlockBreak(stack, event.getPos(), event.getPlayer())) {
+      event.setCanceled(true);
     }
   }
 

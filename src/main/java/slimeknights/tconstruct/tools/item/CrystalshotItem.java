@@ -46,6 +46,15 @@ public class CrystalshotItem extends ArrowItem {
   }
 
   @Override
+  public boolean isInfinite(ItemStack ammo, ItemStack bow, LivingEntity entity) {
+    // 1.21.1 moved the Forge item hook to ArrowItem; keep the old Infinity behavior
+    return entity.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT)
+      .get(Enchantments.INFINITY)
+      .map(infinity -> EnchantmentHelper.getItemEnchantmentLevel(infinity, bow) > 0)
+      .orElse(false);
+  }
+
+  @Override
   public AbstractArrow createArrow(Level pLevel, ItemStack pStack, LivingEntity pShooter, @Nullable ItemStack weapon) {
     CrystalshotEntity arrow = new CrystalshotEntity(pLevel, pShooter, pStack, weapon);
     String variant = "random";
