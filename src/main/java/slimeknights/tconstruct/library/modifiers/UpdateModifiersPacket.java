@@ -13,6 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.network.TinkerPayload;
 import slimeknights.tconstruct.library.modifiers.impl.ComposableModifier;
@@ -89,7 +90,7 @@ public class UpdateModifiersPacket implements TinkerPayload {
     for (int i = 0; i < size; i++) {
       ModifierId id = new ModifierId(buffer.readUtf(Short.MAX_VALUE));
       try {
-        Modifier modifier = ComposableModifier.LOADER.decode(buffer, ModifierManager.contextBuilder(id.getLocation()).build());
+        Modifier modifier = ComposableModifier.LOADER.decode(buffer, ContextKey.addLookupContext(ModifierManager.contextBuilder(id.getLocation()), buffer.registryAccess()).build());
         modifier.setId(id);
         modifiers.put(id, modifier);
       } catch (RuntimeException e) {

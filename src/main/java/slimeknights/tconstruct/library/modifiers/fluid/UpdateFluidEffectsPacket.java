@@ -5,9 +5,9 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.ApiStatus.Internal;
+import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.network.TinkerPayload;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +25,7 @@ public record UpdateFluidEffectsPacket(List<FluidEffects.Entry> fluids) implemen
     for (int i = 0; i < size; i++) {
       ResourceLocation key = buffer.readResourceLocation();
       try {
-        FluidEffects effects = FluidEffects.LOADABLE.decode(buffer, FluidEffectManager.contextBuilder(key).build());
+        FluidEffects effects = FluidEffects.LOADABLE.decode(buffer, ContextKey.addLookupContext(FluidEffectManager.contextBuilder(key), buffer.registryAccess()).build());
         entries.add(new FluidEffects.Entry(key, effects));
       } catch (RuntimeException e) {
         // put exception in the log with a bit more info

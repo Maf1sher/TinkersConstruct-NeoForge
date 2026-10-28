@@ -113,6 +113,9 @@ public class ModifierManager extends SimpleJsonResourceReloadListener {
   private Map<Holder<Enchantment>,Modifier> enchantmentMap = Collections.emptyMap();
   /** Enchantment lookup set when the datapack listeners are added, needed as enchantments are a datapack registry */
   private HolderLookup.RegistryLookup<Enchantment> enchantments = null;
+  /** Registry lookup for datapack registry references in modifier modules, set when the datapack listeners are added */
+  @Nullable
+  private HolderLookup.Provider registries = null;
 
   /** If true, dynamic modifiers have been loaded from datapacks, so its safe to fetch dynamic modifiers */
   @Getter
@@ -145,6 +148,7 @@ public class ModifierManager extends SimpleJsonResourceReloadListener {
     event.addListener(this);
     conditionContext = event.getConditionContext();
     enchantments = event.getRegistryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+    registries = event.getRegistryAccess();
   }
 
   @SuppressWarnings({"removal", "deprecation"})
@@ -308,7 +312,9 @@ public class ModifierManager extends SimpleJsonResourceReloadListener {
       }
 
       // fallback to actual modifier
-      Modifier modifier = ComposableModifier.LOADER.deserialize(json, contextBuilder(key).put(ContextKey.CONDITION_CONTEXT, conditionContext).build());
+      TypedMapBuilder context = contextBuilder(key).put(ContextKey.CONDITION_CONTEXT, conditionContext);
+      ContextKey.addLookupContext(context, registries);
+      Modifier modifier = ComposableModifier.LOADER.deserialize(json, context.build());
       modifier.setId(new ModifierId(key));
       return modifier;
     } catch (JsonSyntaxException e) {
