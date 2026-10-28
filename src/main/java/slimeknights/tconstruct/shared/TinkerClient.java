@@ -22,11 +22,17 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RecipesUpdatedEvent;
 import net.neoforged.neoforge.client.event.RenderBlockScreenEffectEvent;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.fluids.FluidType;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.joml.Matrix4f;
+import slimeknights.mantle.fluid.texture.ClientTextureFluidType;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.recipe.RecipeCacheInvalidator;
+import slimeknights.tconstruct.fluids.fluids.PotionFluidType;
+import slimeknights.tconstruct.fluids.fluids.SlimeFluidType;
 import slimeknights.tconstruct.library.client.armor.texture.ArmorTextureSupplier;
 import slimeknights.tconstruct.library.client.armor.texture.DyedArmorTextureSupplier;
 import slimeknights.tconstruct.library.client.armor.texture.FirstArmorTextureSupplier;
@@ -77,6 +83,9 @@ public class TinkerClient {
     ModifierIconManager.init(modEventBus);
     MaterialRenderInfoLoader.init(modEventBus);
 
+    // fluid textures are data-driven, so every fluid type needs the generic client extension
+    modEventBus.addListener(TinkerClient::registerFluidExtensions);
+
     // add the recipe cache invalidator to the client
     Consumer<RecipesUpdatedEvent> recipesUpdated = event -> RecipeCacheInvalidator.reload(true);
     NeoForge.EVENT_BUS.addListener(recipesUpdated);
@@ -117,6 +126,17 @@ public class TinkerClient {
     ModifierModel.LOADER.register(getResource("material_has_fallback"), MaterialHasFallbackModifierModel.LOADER);
     // specialized
     ModifierModel.LOADER.register(getResource("slimeskull"), SlimeskullModifierModel.LOADER);
+  }
+
+  /** Registers the data-driven fluid textures for all Tinkers fluids that do not provide their own client extension */
+  private static void registerFluidExtensions(RegisterClientExtensionsEvent event) {
+    for (var entry : NeoForgeRegistries.FLUID_TYPES.entrySet()) {
+      FluidType type = entry.getValue();
+      if (entry.getKey().location().getNamespace().equals(TConstruct.MOD_ID)
+          && !(type instanceof SlimeFluidType) && !(type instanceof PotionFluidType)) {
+        event.registerFluidType(new ClientTextureFluidType(type), type);
+      }
+    }
   }
 
   @SubscribeEvent
