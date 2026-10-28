@@ -30,6 +30,7 @@ import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.library.fluid.FluidTagHelper;
 import slimeknights.tconstruct.library.utils.RecipeHelper;
 import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
+import slimeknights.tconstruct.library.recipe.TinkerFluidIngredients;
 import slimeknights.tconstruct.library.recipe.helper.TypeAwareRecipeSerializer;
 
 import java.util.ArrayList;
@@ -136,7 +137,7 @@ public class PotionCastingRecipe implements ICastingRecipe, MultiNamedRecipe<IDi
       // next, it's time to do the fluids
       // we want an order of Mod 1 Potion 1, Mod 1 Potion 2, ..., Mod 2 Potion 1, ...
       // this is potentially displaying multiple fluids from the fluid tag
-      List<FluidStack> potionFluids = List.of(this.fluid.getFluids());
+      List<FluidStack> potionFluids = TinkerFluidIngredients.displayFluids(this.fluid);
       int totalSize = results.size() * potionFluids.size();
       List<ItemStack> displayResults = new ArrayList<>(totalSize);
       List<FluidStack> displayFluids = new ArrayList<>(totalSize);

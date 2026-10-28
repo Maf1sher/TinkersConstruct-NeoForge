@@ -18,6 +18,7 @@ import slimeknights.mantle.recipe.ingredient.EntityIngredient;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.recipe.modifiers.severing.SeveringRecipe;
 import slimeknights.tconstruct.plugin.jei.TConstructJEIConstants;
+import slimeknights.tconstruct.plugin.jei.util.CategoryUtil;
 import slimeknights.tconstruct.tools.TinkerTools;
 
 import java.util.List;
@@ -47,9 +48,9 @@ public class SeveringCategory extends AbstractRecipeCategory<DisplayRecipe<Sever
            .setCustomRenderer(MantleJEIConstants.ENTITY_TYPE, entityRenderer)
            .addIngredients(MantleJEIConstants.ENTITY_TYPE, input.getDisplay());
     // currently JEI doesn't accept empty for a focus linked slot, so use null
-    List<ItemStack> eggStacks = input.getEggs().stream().map(stack -> stack.isEmpty() ? null : stack).toList();
+    List<ItemStack> eggStacks = input.getEggs().stream().map(stack -> stack == null || stack.isEmpty() ? null : stack).toList();
     IIngredientAcceptor<?> eggs = builder.addInvisibleIngredients(RecipeIngredientRole.INPUT).addIngredients(VanillaTypes.ITEM_STACK, eggStacks);
-    builder.createFocusLink(entities, eggs);
+    CategoryUtil.createFocusLink(builder, entities, eggs);
 
     // output
     builder.addOutputSlot(76, 11).addItemStack(recipe.getOutput()).setOutputSlotBackground();

@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.neoforge.NeoForgeTypes;
+import mezz.jei.api.gui.builder.IIngredientAcceptor;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
@@ -13,6 +14,7 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.fluids.FluidStack;
+import slimeknights.tconstruct.TConstruct;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -75,6 +77,23 @@ public final class CategoryUtil {
         .addIngredients(NeoForgeTypes.FLUID_STACK, mapper.apply(ingredient)));
     }
     return maxAmount;
+  }
+
+  /**
+   * Creates a focus link between the given slots, skipping the link when JEI rejects it.
+   * JEI requires all linked slots to have the same number of valid ingredients, but ingredient lists lose entries to
+   * JEI's own filtering (such as non-source fluids), so a link that is valid when building the recipe may not be
+   * valid to JEI. Skipping the link keeps the recipe usable instead of showing a crashed recipe.
+   */
+  public static void createFocusLink(IRecipeLayoutBuilder builder, IIngredientAcceptor<?>... slots) {
+    if (slots.length < 2) {
+      return;
+    }
+    try {
+      builder.createFocusLink(slots);
+    } catch (IllegalArgumentException e) {
+      TConstruct.LOG.debug("Skipping JEI focus link: {}", e.getMessage());
+    }
   }
 
   /** Finds the slot with the given name, or null if the slot is missing */

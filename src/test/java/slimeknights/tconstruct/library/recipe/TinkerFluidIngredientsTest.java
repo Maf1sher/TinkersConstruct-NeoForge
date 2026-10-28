@@ -40,6 +40,14 @@ class TinkerFluidIngredientsTest extends BaseMcTest {
   }
 
   @Test
+  void displayFluidsOnlyIncludeSourceFluids() {
+    // fluid tags such as c:molten_iron include both the still and flowing variants, but recipe viewers only accept source fluids
+    assertThat(TinkerFluidIngredients.isDisplayFluid(new FluidStack(Fluids.WATER, 1000))).isTrue();
+    assertThat(TinkerFluidIngredients.isDisplayFluid(new FluidStack(Fluids.FLOWING_WATER, 1000))).isFalse();
+    assertThat(TinkerFluidIngredients.isDisplayFluid(FluidStack.EMPTY)).isFalse();
+  }
+
+  @Test
   void payloadCodecRoundTripsRegistryAwarePacket() {
     PushBlockRowPacket packet = new PushBlockRowPacket(new BlockPos(2, 3, 4), Direction.NORTH, true, 5);
     RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), REGISTRIES);

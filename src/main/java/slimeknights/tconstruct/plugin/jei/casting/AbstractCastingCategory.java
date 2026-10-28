@@ -153,11 +153,11 @@ public abstract class AbstractCastingCategory extends AbstractRecipeCategory<Dis
       linked.add(tank);
     } else if (inputs.size() > 1) {
       // otherwise, just link two fluid slots together
-      builder.createFocusLink(tank, faucet);
+      CategoryUtil.createFocusLink(builder, tank, faucet);
     }
     // apply links
     if (linked.size() > 1) {
-      builder.createFocusLink(linked.toArray(IRecipeSlotBuilder[]::new));
+      CategoryUtil.createFocusLink(builder, linked.toArray(IRecipeSlotBuilder[]::new));
     }
   }
 

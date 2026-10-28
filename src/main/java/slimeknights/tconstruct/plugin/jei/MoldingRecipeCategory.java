@@ -18,6 +18,7 @@ import slimeknights.mantle.client.SafeClientAccess;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
 import slimeknights.tconstruct.library.recipe.molding.MoldingRecipe;
+import slimeknights.tconstruct.plugin.jei.util.CategoryUtil;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 /** Recipe category for molding casts */
@@ -70,7 +71,7 @@ public class MoldingRecipeCategory extends AbstractRecipeCategory<DisplayRecipe<
         inputSlot.addRichTooltipCallback(PATTERN_CONSUMED_TOOLTIP);
       } else {
         IRecipeSlotBuilder preservedSlot = builder.addSlot(RecipeIngredientRole.RENDER_ONLY, 51, 8).addIngredients(pattern);
-        builder.createFocusLink(inputSlot, preservedSlot);
+        CategoryUtil.createFocusLink(builder, inputSlot, preservedSlot);
       }
     }
   }

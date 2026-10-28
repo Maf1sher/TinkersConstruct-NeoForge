@@ -58,7 +58,7 @@ public class FoundryCategory extends AbstractMeltingCategory {
       }
       // link slots
       if (slots.size() > 1) {
-        builder.createFocusLink(slots.toArray(IRecipeSlotBuilder[]::new));
+        CategoryUtil.createFocusLink(builder, slots.toArray(IRecipeSlotBuilder[]::new));
       }
     }
 

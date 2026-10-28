@@ -16,6 +16,7 @@ import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.helper.ItemOutput;
 import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
+import slimeknights.tconstruct.library.recipe.TinkerFluidIngredients;
 import slimeknights.tconstruct.library.recipe.helper.TypeAwareRecipeSerializer;
 
 import java.util.Arrays;
@@ -98,6 +99,6 @@ public class ItemCastingRecipe extends AbstractCastingRecipe implements IDisplay
    */
   @Override
   public List<FluidStack> getFluids() {
-    return java.util.Arrays.asList(this.fluid.getFluids());
+    return TinkerFluidIngredients.displayFluids(this.fluid);
   }
 }

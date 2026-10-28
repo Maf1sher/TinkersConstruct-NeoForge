@@ -26,6 +26,7 @@ import slimeknights.tconstruct.library.recipe.partbuilder.Pattern;
 import slimeknights.tconstruct.library.tools.layout.Patterns;
 import slimeknights.tconstruct.plugin.jei.TConstructJEIConstants;
 import slimeknights.tconstruct.plugin.jei.material.MaterialTitleIngredientRenderer;
+import slimeknights.tconstruct.plugin.jei.util.CategoryUtil;
 import slimeknights.tconstruct.tables.TinkerTables;
 
 import java.util.ArrayList;
@@ -134,7 +135,7 @@ public class PartBuilderCategory extends AbstractRecipeCategory<DisplayRecipe<ID
       if (resultSize == materialItems.size()) linked.add(materialItemSlot);
       if (resultSize == patterns.size())      linked.add(patternSlot);
       if (linked.size() > 1) {
-        builder.createFocusLink(linked.toArray(IRecipeSlotBuilder[]::new));
+        CategoryUtil.createFocusLink(builder, linked.toArray(IRecipeSlotBuilder[]::new));
       }
     }
   }

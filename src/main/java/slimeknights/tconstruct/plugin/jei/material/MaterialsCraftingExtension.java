@@ -116,7 +116,7 @@ public class MaterialsCraftingExtension<T extends CraftingRecipe & MaterialsCraf
       // apply focus links
       int fWidth = width;
       int fHeight = height;
-      builder.createFocusLink(Streams.concat(
+      CategoryUtil.createFocusLink(builder, Streams.concat(
         Stream.of(output),
         Arrays.stream(materialSlots).mapToObj(i -> inputs.get(MantleJEIConstants.getCraftingIndex(i, fWidth, fHeight)))
       ).toArray(IRecipeSlotBuilder[]::new));

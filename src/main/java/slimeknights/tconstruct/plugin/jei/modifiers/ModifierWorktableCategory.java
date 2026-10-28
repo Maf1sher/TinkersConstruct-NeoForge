@@ -16,6 +16,7 @@ import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.recipe.worktable.IModifierWorktableRecipe;
 import slimeknights.tconstruct.plugin.jei.TConstructJEIConstants;
+import slimeknights.tconstruct.plugin.jei.util.CategoryUtil;
 import slimeknights.tconstruct.tables.TinkerTables;
 
 import java.util.List;
@@ -73,7 +74,7 @@ public class ModifierWorktableCategory extends AbstractRecipeCategory<DisplayRec
       .addIngredients(TConstructJEIConstants.MODIFIER_TYPE, modifiers)
       .setBackground(modifierButton, -1, -1);
     if (recipe.linkToolsModifiers() && tools.size() == modifiers.size()) {
-      builder.createFocusLink(toolSlot, modifierSlot);
+      CategoryUtil.createFocusLink(builder, toolSlot, modifierSlot);
     }
   }
 

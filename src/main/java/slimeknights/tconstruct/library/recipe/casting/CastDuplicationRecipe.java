@@ -15,6 +15,7 @@ import slimeknights.mantle.recipe.NamedRecipe;
 import slimeknights.tconstruct.library.utils.RecipeHelper;
 import slimeknights.mantle.recipe.helper.ItemOutput;
 import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
+import slimeknights.tconstruct.library.recipe.TinkerFluidIngredients;
 import slimeknights.tconstruct.library.recipe.helper.TypeAwareRecipeSerializer;
 
 import java.util.List;
@@ -57,7 +58,7 @@ public class CastDuplicationRecipe extends ItemCastingRecipe implements MultiNam
       List<ItemStack> casts = List.of(getCast().getItems());
       displayRecipes = List.of(DisplayCastingRecipe.from(id, this)
         .casts(casts).results(casts).linkCastToOutput()
-        .fluids(java.util.Arrays.asList(fluid.getFluids()))
+        .fluids(TinkerFluidIngredients.displayFluids(fluid))
         .coolingTime(coolingTime)
         .build());
     }

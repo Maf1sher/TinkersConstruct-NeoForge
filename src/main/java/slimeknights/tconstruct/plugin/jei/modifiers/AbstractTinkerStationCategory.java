@@ -244,11 +244,11 @@ public abstract class AbstractTinkerStationCategory<T extends IDisplayTinkerStat
           Arrays.stream(linkToOutput).filter(i -> i < inputSlots.length && layout.inputs.get(i).size() == size).mapToObj(i -> inputSlots[i])
         ).toArray(IRecipeSlotBuilder[]::new);
         if (linked.length > 0) {
-          builder.createFocusLink(linked);
+          CategoryUtil.createFocusLink(builder, linked);
         }
         // if no links, try linking tool to output
       } else if (toolWithoutModifier.size() == size) {
-        builder.createFocusLink(withoutModifierSlot, withModifierSlot);
+        CategoryUtil.createFocusLink(builder, withoutModifierSlot, withModifierSlot);
       }
     }
   }

@@ -16,6 +16,7 @@ import slimeknights.tconstruct.library.utils.RecipeHelper;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
+import slimeknights.tconstruct.library.recipe.TinkerFluidIngredients;
 import slimeknights.tconstruct.library.recipe.helper.TypeAwareRecipeSerializer;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.recipe.casting.potion.ModifierPotionCastingRecipe;
@@ -61,7 +62,7 @@ public class TipClearingCastingRecipe extends ModifierPotionCastingRecipe {
 /** Lazily loaded list of display recipes for JEI */
   private List<IDisplayableCastingRecipe> displayRecipes(ResourceLocation id, HolderLookup.Provider access) {
     if (displayRecipes == null) {
-      List<FluidStack> fluids = java.util.Arrays.asList(fluid.getFluids());
+      List<FluidStack> fluids = TinkerFluidIngredients.displayFluids(fluid);
       List<String> potions = getPotionIds();
 
       // create a recipe per tool

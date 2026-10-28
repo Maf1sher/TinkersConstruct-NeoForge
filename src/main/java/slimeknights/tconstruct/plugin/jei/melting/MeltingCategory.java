@@ -26,6 +26,7 @@ import slimeknights.tconstruct.library.recipe.fuel.MeltingFuelLookup;
 import slimeknights.tconstruct.library.recipe.melting.IDisplayableMeltingRecipe;
 import slimeknights.tconstruct.library.recipe.melting.IMeltingContainer.OreRateType;
 import slimeknights.tconstruct.plugin.jei.TConstructJEIConstants;
+import slimeknights.tconstruct.plugin.jei.util.CategoryUtil;
 import slimeknights.tconstruct.plugin.jei.util.FluidTooltipCallback;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
@@ -87,7 +88,7 @@ public class MeltingCategory extends AbstractMeltingCategory {
       .setSlotName(FLUID_SLOT);
     // apply focus link if the sizes match
     if (outputs.size() > 1 && outputs.size() == inputs.size()) {
-      builder.createFocusLink(outputSlot, inputSlot);
+      CategoryUtil.createFocusLink(builder, outputSlot, inputSlot);
     }
 
     // show fuels that are valid for this recipe

@@ -21,6 +21,7 @@ import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.field.LoadableField;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
+import slimeknights.tconstruct.library.recipe.TinkerFluidIngredients;
 import slimeknights.tconstruct.library.recipe.helper.TypeAwareRecipeSerializer;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.recipe.casting.potion.ModifierPotionCastingRecipe;
@@ -91,7 +92,7 @@ public class TippingCastingRecipe extends ModifierPotionCastingRecipe {
       }).toList();
 
       // next, make 1 copy of the potion fluid with NBT list per potion fluid
-      List<FluidStack> basePotions = java.util.Arrays.asList(this.fluid.getFluids());
+      List<FluidStack> basePotions = TinkerFluidIngredients.displayFluids(this.fluid);
       List<FluidStack> fluids = basePotions.stream()
         .flatMap(fluid -> potionNBT.stream().map(nbt -> FluidTagHelper.withTag(fluid.getFluid(), fluid.getAmount(), nbt)))
         .toList();

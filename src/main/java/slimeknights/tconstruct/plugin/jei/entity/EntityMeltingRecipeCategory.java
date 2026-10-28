@@ -30,6 +30,7 @@ import slimeknights.tconstruct.library.recipe.FluidValues;
 import slimeknights.tconstruct.library.recipe.entitymelting.EntityMeltingRecipe;
 import slimeknights.tconstruct.plugin.jei.TConstructJEIConstants;
 import slimeknights.tconstruct.plugin.jei.melting.MeltingFuelHandler;
+import slimeknights.tconstruct.plugin.jei.util.CategoryUtil;
 import slimeknights.tconstruct.plugin.jei.util.FluidTooltipCallback;
 
 import java.awt.Color;
@@ -84,9 +85,9 @@ public class EntityMeltingRecipeCategory extends AbstractRecipeCategory<DisplayR
                                              .addIngredients(MantleJEIConstants.ENTITY_TYPE, input.getDisplay());
     // add spawn eggs as hidden inputs
     // currently JEI doesn't accept empty for a focus linked slot, so use null
-    List<ItemStack> eggStacks = input.getEggs().stream().map(stack -> stack.isEmpty() ? null : stack).toList();
+    List<ItemStack> eggStacks = input.getEggs().stream().map(stack -> stack == null || stack.isEmpty() ? null : stack).toList();
     IIngredientAcceptor<?> eggs = builder.addInvisibleIngredients(RecipeIngredientRole.INPUT).addIngredients(VanillaTypes.ITEM_STACK, eggStacks);
-    builder.createFocusLink(entities, eggs);
+    CategoryUtil.createFocusLink(builder, entities, eggs);
 
     // output
     builder.addOutputSlot(115, 11)

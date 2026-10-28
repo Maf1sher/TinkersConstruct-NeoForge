@@ -255,6 +255,10 @@ public class PartSwapCastingRecipe extends AbstractMaterialCastingRecipe impleme
       if (statType != null && (!statType.canUseMaterial(output.getId()) || (composite && !statType.canUseMaterial(input.getId())))) continue;
       // scale the fluids to the recipe size
       List<FluidStack> fluids = resizeFluids(recipe.getFluids());
+      // fluid tags may only contain fluids recipe viewers cannot display, skip those materials instead of building a broken recipe
+      if (fluids.isEmpty()) {
+        continue;
+      }
       for (FluidStack fluid : fluids) {
         int time = ICastingRecipe.calcCoolingTime(recipe.getTemperature(), fluid.getAmount());
         if (time > maxCoolingTime) {
@@ -313,11 +317,12 @@ public class PartSwapCastingRecipe extends AbstractMaterialCastingRecipe impleme
         }
       }
       // add result tool regardless
-      resultMaterials.add(recipe.output.getVariant());
       copy.replaceMaterial(tool.index, recipe.output);
       ItemStack result = copy.createStack();
+      // keep result materials parallel to the fluids and results, as focus filtering maps material indices to fluid indices
       for (int i = 0; i < newFluids.size(); i++) {
         results.add(result);
+        resultMaterials.add(recipe.output.getVariant());
       }
     }
     // make lists immutable

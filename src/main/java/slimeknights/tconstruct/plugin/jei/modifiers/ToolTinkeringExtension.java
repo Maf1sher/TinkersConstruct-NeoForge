@@ -91,11 +91,11 @@ public class ToolTinkeringExtension implements ICraftingCategoryExtension<IDispl
           Arrays.stream(linkToOutput).filter(i -> i < inputCount && inputs.get(i+1).size() == toolSize).mapToObj(i -> inputSlots.get(getCraftingIndex(i, size, size)))
         ).toArray(IRecipeSlotBuilder[]::new);
         if (linked.length > 0) {
-          builder.createFocusLink(linked);
+          CategoryUtil.createFocusLink(builder, linked);
         }
         // if no links, try linking tool to output
       } else if (toolWithoutModifier.size() == toolSize) {
-        builder.createFocusLink(toolSlot, outputSlot);
+        CategoryUtil.createFocusLink(builder, toolSlot, outputSlot);
       }
     }
   }

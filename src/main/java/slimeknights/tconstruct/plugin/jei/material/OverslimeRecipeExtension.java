@@ -24,6 +24,7 @@ import slimeknights.tconstruct.library.recipe.modifiers.adding.OverslimeCrafting
 import slimeknights.tconstruct.library.recipe.modifiers.adding.OverslimeModifierRecipe;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
+import slimeknights.tconstruct.plugin.jei.util.CategoryUtil;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 
 import java.awt.Color;
@@ -94,7 +95,7 @@ public class OverslimeRecipeExtension implements ICraftingCategoryExtension<Over
     if (inputs.size() < 9) {
       TConstruct.LOG.error("Failed to create focus link for {} as the layout {} is not 3x3", holder.id(), builder.getClass().getName());
     } else {
-      builder.createFocusLink(inputs.get(MantleJEIConstants.getCraftingIndex(0, 2, 2)), output);
+      CategoryUtil.createFocusLink(builder, inputs.get(MantleJEIConstants.getCraftingIndex(0, 2, 2)), output);
     }
   }
 

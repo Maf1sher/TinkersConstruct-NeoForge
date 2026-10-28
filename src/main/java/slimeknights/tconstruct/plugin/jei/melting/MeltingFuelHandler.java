@@ -47,13 +47,13 @@ public class MeltingFuelHandler {
    * @param fuels  List of fuel recipes
    */
   public static void setMeltngFuels(List<MeltingFuel> fuels) {
-    // sort the fuels highest first
-    fuels.sort(Comparator.comparingInt(MeltingFuel::getTemperature));
+    // sort the fuels highest first, on a copy as callers pass immutable lists
+    List<MeltingFuel> sortedFuels = fuels.stream().sorted(Comparator.comparingInt(MeltingFuel::getTemperature)).toList();
     // get a list of temperature to fuel
-    fuelLookup = fuels.stream()
+    fuelLookup = sortedFuels.stream()
       .mapToInt(MeltingFuel::getTemperature)
       .distinct()
-      .mapToObj((temperature) -> Pair.of(temperature, fuels.stream()
+      .mapToObj((temperature) -> Pair.of(temperature, sortedFuels.stream()
         .filter(fuel -> fuel.getTemperature() >= temperature && !fuel.getInputs().isEmpty())
         .flatMap(fuel -> fuel.getInputs().stream())
         .toList()))

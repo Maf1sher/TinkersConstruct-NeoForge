@@ -127,7 +127,7 @@ public class ToolBuildingCategory extends AbstractRecipeCategory<DisplayRecipe<T
     IRecipeSlotBuilder resultSlot = builder.addOutputSlot(WIDTH - 26, 23)
       .addItemStacks(result).setSlotName(RESULT_SLOT).setOutputSlotBackground();
     if (partCount == 0 && result.size() > 1 && partsAndExtras.get(0).size() == result.size()) {
-      builder.createFocusLink(resultSlot, firstSlot);
+      CategoryUtil.createFocusLink(builder, resultSlot, firstSlot);
     }
 
     // add hidden materials as a hidden input for recipe lookup
