@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.tools.modules.armor;
 
 import com.google.common.collect.ImmutableSet;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -55,16 +56,17 @@ public record ShieldStrapModule(Set<TooltipKey> keys) implements ModifierModule,
       if (offhand.isEmpty() || !ToolInventoryCapability.isBlacklisted(offhand)) {
         InventoryModifierHook inventory = modifier.getHook(ToolInventoryCapability.HOOK);
         int slots = inventory.getSlots(tool, modifier);
+        HolderLookup.Provider registries = level.registryAccess();
 
         // new offhand is first slot
-        ItemStack newOffhand = inventory.getStack(tool, modifier, 0);
+        ItemStack newOffhand = inventory.getStack(tool, modifier, 0, registries);
         player.setItemInHand(InteractionHand.OFF_HAND, newOffhand);
         // shift all other slots back by 1;
         for (int i = 1; i < slots; i++) {
-          inventory.setStack(tool, modifier, i - 1, inventory.getStack(tool, modifier, i));
+          inventory.setStack(tool, modifier, i - 1, inventory.getStack(tool, modifier, i, registries), registries);
         }
         // put old offhand in last slot
-        inventory.setStack(tool, modifier, slots - 1, offhand);
+        inventory.setStack(tool, modifier, slots - 1, offhand, registries);
 
         // sound effect
         if (!newOffhand.isEmpty() || !offhand.isEmpty()) {

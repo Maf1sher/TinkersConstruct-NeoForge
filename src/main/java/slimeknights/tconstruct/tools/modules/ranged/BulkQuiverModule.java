@@ -49,7 +49,7 @@ public record BulkQuiverModule(boolean checkStandardArrows) implements ModifierM
     if (checkStandardArrows && !standardAmmo.isEmpty()) {
       return ItemStack.EMPTY;
     }
-    StackMatch match = modifier.getHook(ToolInventoryCapability.HOOK).findStack(tool, modifier, ammoPredicate);
+    StackMatch match = modifier.getHook(ToolInventoryCapability.HOOK).findStack(tool, modifier, ammoPredicate, shooter.level().registryAccess());
     if (!match.isEmpty()) {
       tool.getPersistentData().putInt(LAST_SLOT, match.slot());
       return match.stack();
@@ -61,6 +61,6 @@ public record BulkQuiverModule(boolean checkStandardArrows) implements ModifierM
   public void shrinkAmmo(IToolStackView tool, ModifierEntry modifier, LivingEntity shooter, ItemStack ammo, int needed) {
     // we assume no one else touched the quiver inventory, this is a good assumption, do not make it a bad assumption by modifying the quiver in other modifiers
     ammo.shrink(needed);
-    modifier.getHook(ToolInventoryCapability.HOOK).setStack(tool, modifier, tool.getPersistentData().getInt(LAST_SLOT), ammo);
+    modifier.getHook(ToolInventoryCapability.HOOK).setStack(tool, modifier, tool.getPersistentData().getInt(LAST_SLOT), ammo, shooter.level().registryAccess());
   }
 }

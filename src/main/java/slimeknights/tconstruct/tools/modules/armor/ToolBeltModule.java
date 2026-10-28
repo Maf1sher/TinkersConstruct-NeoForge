@@ -61,9 +61,9 @@ public record ToolBeltModule(Set<TooltipKey> keys) implements ModifierModule, Ke
       for (int slot = 0; slot < slots; slot++) {
         ItemStack original = inventory.getItem(slot);
         if (original.isEmpty() || !isBlacklisted(original)) {
-          ItemStack beltItem = belt.getStack(tool, modifier, slot);
+          ItemStack beltItem = belt.getStack(tool, modifier, slot, level.registryAccess());
           inventory.setItem(slot, beltItem);
-          belt.setStack(tool, modifier, slot, original);
+          belt.setStack(tool, modifier, slot, original, level.registryAccess());
           didChange = !original.isEmpty() || !beltItem.isEmpty();
         }
       }

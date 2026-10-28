@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.tools.modules;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -34,7 +35,8 @@ public interface InventorySelectionModule {
     // support going 1 above max to disable the trick arrows
     int newSelected = (current + 1) % (totalSlots + 1);
     // skip over empty slots; helps when you don't use the full space
-    while (newSelected < totalSlots && inventory.getStack(tool, modifier, newSelected).isEmpty()) {
+    HolderLookup.Provider registries = player.level().registryAccess();
+    while (newSelected < totalSlots && inventory.getStack(tool, modifier, newSelected, registries).isEmpty()) {
       newSelected++;
     }
 
@@ -45,7 +47,7 @@ public interface InventorySelectionModule {
         if (newSelected == totalSlots) {
           onDisableSelection(tool, modifier, player);
         } else {
-          onInventorySelect(tool, modifier, player, newSelected, inventory.getStack(tool, modifier, newSelected));
+          onInventorySelect(tool, modifier, player, newSelected, inventory.getStack(tool, modifier, newSelected, registries));
         }
       }
       return true;

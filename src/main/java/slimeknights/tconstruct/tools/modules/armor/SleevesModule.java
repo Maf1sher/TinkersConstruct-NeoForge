@@ -64,7 +64,7 @@ public enum SleevesModule implements ModifierModule, GeneralInteractionModifierH
       if (!player.isCrouching()) {
         InventoryModifierHook inventory = modifier.getHook(ToolInventoryCapability.HOOK);
         int selected = tool.getPersistentData().getInt(SELECTED_SLOT);
-        ItemStack ammo = inventory.getStack(tool, modifier, selected);
+        ItemStack ammo = inventory.getStack(tool, modifier, selected, player.level().registryAccess());
         // if we have nothing, fallback to the slot toggle
         if (!ammo.isEmpty()) {
           if (!player.getCooldowns().isOnCooldown(ammo.getItem())) {
@@ -80,7 +80,7 @@ public enum SleevesModule implements ModifierModule, GeneralInteractionModifierH
               player.stopUsingItem();
             }
             // handle result
-            inventory.setStack(tool, modifier, selected, result.getObject());
+            inventory.setStack(tool, modifier, selected, result.getObject(), player.level().registryAccess());
             return result.getResult();
           } else {
             // toggle if we just were unable to use the item

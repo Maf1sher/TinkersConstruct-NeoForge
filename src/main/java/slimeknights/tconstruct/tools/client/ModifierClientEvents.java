@@ -8,6 +8,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -182,13 +183,14 @@ public class ModifierClientEvents {
       return;
     }
     EquipmentChangeContext context = event.getContext();
+    HolderLookup.Provider registries = event.getEntity().level().registryAccess();
     if (Config.CLIENT.renderShieldSlotItem.get()) {
       if (context.getChangedSlot() == EquipmentSlot.LEGS) {
         IToolStackView tool = context.getToolInSlot(EquipmentSlot.LEGS);
         if (tool != null) {
           ModifierEntry entry = tool.getModifiers().getEntry(TinkerModifiers.shieldStrap.getId());
           if (entry != ModifierEntry.EMPTY) {
-            nextOffhand = entry.getHook(ToolInventoryCapability.HOOK).getStack(tool, entry, 0);
+            nextOffhand = entry.getHook(ToolInventoryCapability.HOOK).getStack(tool, entry, 0, registries);
             return;
           }
         }
@@ -201,7 +203,7 @@ public class ModifierClientEvents {
         if (tool != null) {
           ModifierEntry entry = tool.getModifiers().getEntry(TinkerModifiers.sleeves.getId());
           if (entry != ModifierEntry.EMPTY) {
-            currentSleeve = entry.getHook(ToolInventoryCapability.HOOK).getStack(tool, entry, tool.getPersistentData().getInt(SleevesModule.SELECTED_SLOT));
+            currentSleeve = entry.getHook(ToolInventoryCapability.HOOK).getStack(tool, entry, tool.getPersistentData().getInt(SleevesModule.SELECTED_SLOT), registries);
             return;
           }
         }
@@ -216,7 +218,7 @@ public class ModifierClientEvents {
         if (tool != null) {
           ModifierEntry entry = tool.getModifier(TinkerModifiers.itemFrame.getId());
           if (entry.intEffectiveLevel() > 0) {
-            entry.getHook(ToolInventoryCapability.HOOK).getAllStacks(tool, entry, itemFrames);
+            entry.getHook(ToolInventoryCapability.HOOK).getAllStacks(tool, entry, itemFrames, registries);
           }
         }
       }
