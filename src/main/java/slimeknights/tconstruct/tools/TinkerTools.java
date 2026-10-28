@@ -1,7 +1,8 @@
 package slimeknights.tconstruct.tools;
 
-import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.critereon.ItemSubPredicate;
 import net.minecraft.core.Registry;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
@@ -319,8 +320,11 @@ public final class TinkerTools extends TinkerModule {
       // custom ingredient type; JSON "type" key stays identical to the legacy Forge serializer ID
       Registry<IngredientType<?>> registry = event.getRegistry(NeoForgeRegistries.Keys.INGREDIENT_TYPES);
       Registry.register(registry, ToolHookIngredient.ID, (IngredientType<?>) ToolHookIngredient.TYPE);
+    } else if (event.getRegistryKey() == Registries.ITEM_SUB_PREDICATE_TYPE) {
+      // replaces Forge ItemPredicate.register; JSON key stays "tconstruct:tool_stack"
+      Registry<ItemSubPredicate.Type<?>> registry = event.getRegistry(Registries.ITEM_SUB_PREDICATE_TYPE);
+      Registry.register(registry, ToolStackItemPredicate.ID, ToolStackItemPredicate.TYPE);
     } else if (event.getRegistryKey() == Registries.RECIPE_SERIALIZER) {
-      ItemPredicate.register(ToolStackItemPredicate.ID, ToolStackItemPredicate::deserialize);
 
       // register tool stats that are not defined directly in the class; safer than static init registration
       ToolStats.register(OverslimeModule.OVERSLIME_STAT);

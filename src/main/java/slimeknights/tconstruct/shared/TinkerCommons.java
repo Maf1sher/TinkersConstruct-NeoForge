@@ -1,9 +1,9 @@
 package slimeknights.tconstruct.shared;
 
 import com.mojang.serialization.MapCodec;
-import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
@@ -223,9 +223,10 @@ public final class TinkerCommons extends TinkerModule {
       Registry.register(registry, MaterialValueIngredient.ID, (IngredientType<?>) MaterialValueIngredient.TYPE);
       // replaces the removed Mantle datagen helper of the same name
       Registry.register(registry, ItemNameIngredient.ID, (IngredientType<?>) ItemNameIngredient.TYPE);
+    } else if (event.getRegistryKey() == Registries.TRIGGER_TYPE) {
+      // registered under the Tinkers namespace; CriteriaTriggers.register would force "minecraft:"
+      Registry.register(BuiltInRegistries.TRIGGER_TYPES, BlockContainerOpenedTrigger.ID, CONTAINER_OPENED_TRIGGER);
     } else if (event.getRegistryKey() == Registries.RECIPE_SERIALIZER) {
-      CriteriaTriggers.register(CONTAINER_OPENED_TRIGGER);
-
       // mantle
       DamageSourcePredicate.LOADER.register(getResource("direct"), TinkerPredicate.DIRECT_DAMAGE.getLoader());
       // entity
