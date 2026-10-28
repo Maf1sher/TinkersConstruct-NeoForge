@@ -124,7 +124,7 @@ public abstract class RandomItem {
 
     @Override
     public JsonElement serialize() {
-      JsonElement resultElement = this.result.serialize(true);
+      JsonElement resultElement = ItemOutput.REQUIRED_STACK_LOADABLE.serialize(this.result);
       JsonObject object;
       // if a primitive, that means its just an item name, so build an object around it
       if (resultElement.isJsonPrimitive()) {
@@ -158,7 +158,7 @@ public abstract class RandomItem {
 
     @Override
     public JsonElement serialize() {
-      JsonElement resultElement = this.result.serialize(true);
+      JsonElement resultElement = ItemOutput.REQUIRED_STACK_LOADABLE.serialize(this.result);
       // no chance means raw item object is enough
       if (chance >= 1.0f) {
         return resultElement;

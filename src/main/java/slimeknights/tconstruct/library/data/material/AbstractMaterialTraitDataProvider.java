@@ -6,7 +6,7 @@ import net.minecraft.data.CachedOutput;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
 import net.minecraft.resources.ResourceLocation;
-import slimeknights.mantle.data.GenericDataProvider;
+import slimeknights.mantle.data.GsonDataProvider;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.materials.json.MaterialTraitsJson;
 import slimeknights.tconstruct.library.materials.stats.MaterialStatsId;
@@ -26,14 +26,14 @@ import java.util.concurrent.CompletableFuture;
 
 /** Base data generator for use in addons */
 @SuppressWarnings({"unused", "SameParameterValue"})  // API
-public abstract class AbstractMaterialTraitDataProvider extends GenericDataProvider {
+public abstract class AbstractMaterialTraitDataProvider extends GsonDataProvider {
   /** Map of material ID to builder, there is at most one builder for each ID */
   private final Map<MaterialId,MaterialTraitsBuilder> allMaterialTraits = new HashMap<>();
   /* Materials data provider for validation */
   private final AbstractMaterialDataProvider materials;
 
   public AbstractMaterialTraitDataProvider(PackOutput packOutput, AbstractMaterialDataProvider materials) {
-    super(packOutput, Target.DATA_PACK, MaterialTraitsManager.FOLDER);
+    super(packOutput, Target.DATA_PACK, MaterialTraitsManager.FOLDER, MaterialTraitsManager.GSON);
     this.materials = materials;
   }
 
@@ -54,7 +54,7 @@ public abstract class AbstractMaterialTraitDataProvider extends GenericDataProvi
     }
 
     // generate
-    return allOf(allMaterialTraits.entrySet().stream().map(entry -> saveJson(cache, entry.getKey().getLocation(), entry.getValue().build())));
+    return allOf(allMaterialTraits.entrySet().stream().map(entry -> saveGson(cache, entry.getKey().getLocation(), entry.getValue().build())));
   }
 
 

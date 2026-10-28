@@ -73,7 +73,7 @@ public class TippedToolTransformRecipe extends ToolBuildingRecipe {
         if (!stack.isEmpty()) {
           ResourceLocation potion = getPotionId(stack);
           if (potion != null) {
-            tool.getPersistentData().putString(modifier.getId().getLocation(), potion.toString());
+            tool.getPersistentData().putString(modifier.getLocation(), potion.toString());
           }
         }
       }
@@ -97,7 +97,7 @@ public class TippedToolTransformRecipe extends ToolBuildingRecipe {
           ResourceLocation potion = getPotionId(stack);
           if (potion != null) {
             ItemStack copy = result.copy();
-            ToolStack.from(copy).getPersistentData().putString(modifier.getId().getLocation(), potion.toString());
+            ToolStack.from(copy).getPersistentData().putString(modifier.getLocation(), potion.toString());
             return copy;
           }
           return result;

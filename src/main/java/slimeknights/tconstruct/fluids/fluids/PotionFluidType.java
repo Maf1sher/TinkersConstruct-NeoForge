@@ -92,9 +92,14 @@ public class PotionFluidType extends FluidType {
   /** Creates a fluid stack for the given potion */
   @SuppressWarnings("deprecation")  // forge registries have nullable keys, like why would you want that?
   public static FluidStack potionFluid(Potion potion, int size) {
+    return potionFluid(BuiltInRegistries.POTION.wrapAsHolder(potion), size);
+  }
+
+  /** Creates a fluid stack for the given potion */
+  public static FluidStack potionFluid(Holder<Potion> potion, int size) {
     FluidStack stack = new FluidStack(TinkerFluids.potion.get(), size);
-    if (!potion.getEffects().isEmpty()) {
-      stack.set(DataComponents.POTION_CONTENTS, new PotionContents(BuiltInRegistries.POTION.wrapAsHolder(potion)));
+    if (!potion.value().getEffects().isEmpty()) {
+      stack.set(DataComponents.POTION_CONTENTS, new PotionContents(potion));
     }
     return stack;
   }
@@ -102,9 +107,14 @@ public class PotionFluidType extends FluidType {
   /** Creates a fluid output for the given potion */
   @SuppressWarnings("deprecation")  // forge registries have nullable keys, like why would you want that?
   public static FluidOutput potionResult(Potion potion, int size) {
-    DataComponentPatch components = potion.getEffects().isEmpty()
+    return potionResult(BuiltInRegistries.POTION.wrapAsHolder(potion), size);
+  }
+
+  /** Creates a fluid output for the given potion */
+  public static FluidOutput potionResult(Holder<Potion> potion, int size) {
+    DataComponentPatch components = potion.value().getEffects().isEmpty()
       ? DataComponentPatch.EMPTY
-      : DataComponentPatch.builder().set(DataComponents.POTION_CONTENTS, new PotionContents(BuiltInRegistries.POTION.wrapAsHolder(potion))).build();
+      : DataComponentPatch.builder().set(DataComponents.POTION_CONTENTS, new PotionContents(potion)).build();
     return FluidOutput.fromTag(Objects.requireNonNull(TinkerFluids.potion.getCommonTag()), size, components);
   }
 
@@ -118,9 +128,14 @@ public class PotionFluidType extends FluidType {
   /** Creates a potion bucket for the given potion */
   @SuppressWarnings("deprecation")  // forge registries have nullable keys, like why would you want that?
   public static ItemStack potionBucket(Potion potion) {
+    return potionBucket(BuiltInRegistries.POTION.wrapAsHolder(potion));
+  }
+
+  /** Creates a potion bucket for the given potion */
+  public static ItemStack potionBucket(Holder<Potion> potion) {
     ItemStack stack = new ItemStack(TinkerFluids.potion);
-    if (!potion.getEffects().isEmpty()) {
-      stack.set(DataComponents.POTION_CONTENTS, new PotionContents(BuiltInRegistries.POTION.wrapAsHolder(potion)));
+    if (!potion.value().getEffects().isEmpty()) {
+      stack.set(DataComponents.POTION_CONTENTS, new PotionContents(potion));
     }
     return stack;
   }

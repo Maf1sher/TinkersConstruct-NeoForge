@@ -14,8 +14,12 @@ import java.util.concurrent.CompletableFuture;
  * Shared logic for each module's recipe provider
  */
 public abstract class BaseRecipeProvider extends RecipeProvider implements IConditionBuilder, IRecipeHelper {
+  /** Registry lookup passed to the provider; vanilla keeps its copy private, so we keep our own for component serialization */
+  protected final CompletableFuture<HolderLookup.Provider> registriesFuture;
+
   public BaseRecipeProvider(PackOutput generator, CompletableFuture<HolderLookup.Provider> registries) {
     super(generator, registries);
+    this.registriesFuture = registries;
     TConstruct.sealTinkersClass(this, "BaseRecipeProvider", "BaseRecipeProvider is trivial to recreate and directly extending can lead to addon recipes polluting our namespace.");
   }
 

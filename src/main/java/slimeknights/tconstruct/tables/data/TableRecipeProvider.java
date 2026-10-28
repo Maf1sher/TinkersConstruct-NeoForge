@@ -213,7 +213,7 @@ public class TableRecipeProvider extends BaseRecipeProvider {
     {
       CompoundTag nbt = new CompoundTag();
       CompoundTag display = new CompoundTag();
-      display.putString("Name", Serializer.toJson(Component.translatable("block.tconstruct.tool_forge"), this.registries));
+      display.putString("Name", Serializer.toJson(Component.translatable("block.tconstruct.tool_forge"), this.registriesFuture.join()));
       nbt.put("display", display);
       toolForge = CraftingNBTWrapper.wrap(consumer, nbt);
     }

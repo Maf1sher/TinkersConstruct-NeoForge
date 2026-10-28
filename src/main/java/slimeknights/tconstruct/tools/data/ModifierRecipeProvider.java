@@ -1923,7 +1923,7 @@ public class ModifierRecipeProvider extends BaseRecipeProvider {
     consumer.accept(dyeing, new ArmorDyeingRecipe(), null);
     ResourceLocation trim = location(folder + "trim");
     consumer.accept(trim, new ArmorTrimRecipe(), null);
-    LoadableFinishedRecipe.save(consumer, location(folder + "banner"), BannerModifierRecipe.LOADER, new BannerModifierRecipe(location(folder + "banner"), Ingredient.of(TinkerFluids.slimeBottle.get(SlimeType.SKY))));
+    consumer.accept(location(folder + "banner"), new BannerModifierRecipe(location(folder + "banner"), Ingredient.of(TinkerFluids.slimeBottle.get(SlimeType.SKY))), null);
 
     // slimesuit //
     RecipeOutput slimeEmbellishmentConsumer = consumer.withConditions(new TagFilledCondition<>(TinkerTags.Items.EMBELLISHMENT_SLIME));
