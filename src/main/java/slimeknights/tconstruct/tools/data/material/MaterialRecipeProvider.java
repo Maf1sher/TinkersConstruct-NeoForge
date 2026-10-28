@@ -188,7 +188,7 @@ public class MaterialRecipeProvider extends BaseRecipeProvider implements IMater
     materialRecipe(consumer, MaterialIds.ice, Ingredient.of(Blocks.BLUE_ICE),   9, 1, folder + "ice/blue");
     materialRecipe(consumer, MaterialIds.ichor, Ingredient.of(TinkerWorld.ichorGeode), 1, 1, folder + "ichor");
     materialRecipe(consumer, MaterialIds.quartz, Ingredient.of(Tags.Items.GEMS_QUARTZ),           1, 1, folder + "quartz/gem");
-    materialRecipe(consumer, MaterialIds.quartz, Ingredient.of(Tags.Items.STORAGE_BLOCKS_QUARTZ), 4, 1, folder + "quartz/block");
+    materialRecipe(consumer, MaterialIds.quartz, Ingredient.of(TinkerTags.Items.STORAGE_BLOCKS_QUARTZ), 4, 1, folder + "quartz/block");
     materialRecipe(consumer, MaterialIds.glowstone, Ingredient.of(Tags.Items.DUSTS_GLOWSTONE), 1, 4, folder + "glowstone/dust");
     materialRecipe(consumer, MaterialIds.glowstone, Ingredient.of(Blocks.GLOWSTONE), 1, 1, ItemOutput.fromItem(Items.GLOWSTONE_DUST),folder + "glowstone/block");
     materialRecipe(consumer, MaterialIds.magnetite, Ingredient.of(TinkerTags.Items.STEEL_SHARD), 1, 1, folder + "magnetite");
@@ -256,7 +256,7 @@ public class MaterialRecipeProvider extends BaseRecipeProvider implements IMater
     // goat horns
     // fallback recipe if mods add a new goat horn variant
     materialRecipe(consumer.withConditions(new TagCombinationCondition<>(List.of(InstrumentTags.GOAT_HORNS), TinkerTags.Instruments.VARIANT_HORNS)),
-      MaterialIds.horn, InstrumentIngredient.of(Items.GOAT_HORN, TinkerTags.Instruments.VARIANT_HORNS), 4, 1, folder + "horn/default");
+      MaterialIds.horn, InstrumentIngredient.of(Items.GOAT_HORN, TinkerTags.Instruments.VARIANT_HORNS).toVanilla(), 4, 1, folder + "horn/default");
     hornMaterial(consumer, Instruments.PONDER_GOAT_HORN, folder);
     hornMaterial(consumer, Instruments.SING_GOAT_HORN,   folder);
     hornMaterial(consumer, Instruments.SEEK_GOAT_HORN,   folder);
@@ -413,6 +413,6 @@ public class MaterialRecipeProvider extends BaseRecipeProvider implements IMater
   /** Adds a recipe for crafting a goat horn material */
   private void hornMaterial(RecipeOutput consumer, ResourceKey<Instrument> instrument, String folder) {
     ResourceLocation key = instrument.location();
-    materialRecipe(consumer, MaterialVariantId.create(MaterialIds.horn, key.toLanguageKey()), InstrumentIngredient.of(Items.GOAT_HORN, instrument), 4, 1, folder + "horn/" + key.getPath());
+    materialRecipe(consumer, MaterialVariantId.create(MaterialIds.horn, key.toLanguageKey()), InstrumentIngredient.of(Items.GOAT_HORN, instrument).toVanilla(), 4, 1, folder + "horn/" + key.getPath());
   }
 }

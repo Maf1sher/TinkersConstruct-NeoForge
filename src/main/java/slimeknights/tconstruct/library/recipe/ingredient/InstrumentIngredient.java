@@ -48,10 +48,7 @@ public class InstrumentIngredient implements ICustomIngredient {
       .optionalFieldOf("instrument").forGetter(ingredient -> Optional.ofNullable(ingredient.instrument)),
     TagKey.codec(Registries.INSTRUMENT)
       .optionalFieldOf("ignore").forGetter(ingredient -> Optional.ofNullable(ingredient.ignore))
-  ).apply(instance, (item, instrument, ignore) -> new InstrumentIngredient(item, instrument.orElse(null), ignore.orElse(null)))
-    .validate(ingredient -> ingredient.instrument == null && ingredient.ignore == null
-      ? DataResult.error(() -> "Invalid InstrumentIngredient: must set either 'instrument' or 'ignore'")
-      : DataResult.success(ingredient)));
+  ).apply(instance, (item, instrument, ignore) -> new InstrumentIngredient(item, instrument.orElse(null), ignore.orElse(null))));
 
   /** Network codec: item ID, then either the instrument key or the ignored tag, matching the old byte layout */
   public static final StreamCodec<RegistryFriendlyByteBuf, InstrumentIngredient> STREAM_CODEC = StreamCodec.of(

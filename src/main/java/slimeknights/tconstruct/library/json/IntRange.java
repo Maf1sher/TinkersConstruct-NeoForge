@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import slimeknights.mantle.data.loadable.Loadable;
 import slimeknights.mantle.data.loadable.field.LoadableField;
@@ -105,7 +105,7 @@ public record IntRange(int min, int max) implements IntPredicate, Loadable<IntRa
   }
 
   @Override
-  public JsonElement serialize(IntRange range) {
+  public JsonElement serialize(IntRange range, TypedMap context) {
     // if the range is exact, return an integer
     if (range.min == range.max) {
       validateArgument("value", range.min);
@@ -126,7 +126,7 @@ public record IntRange(int min, int max) implements IntPredicate, Loadable<IntRa
   /** Serializes this range into the given object parent */
   public void serializeInto(JsonObject parent, String key, IntRange range) {
     if (!this.equals(range)) {
-      parent.add(key, serialize(range));
+      parent.add(key, serialize(range, TypedMap.EMPTY));
     }
   }
 
@@ -135,25 +135,25 @@ public record IntRange(int min, int max) implements IntPredicate, Loadable<IntRa
 
   /** Reads a range from the buffer */
   @Override
-  public IntRange decode(FriendlyByteBuf buffer, TypedMap context) {
+  public IntRange decode(RegistryFriendlyByteBuf buffer, TypedMap context) {
     return fromNetwork(buffer);
   }
 
   /** Reads a range from the buffer */
-  public static IntRange fromNetwork(FriendlyByteBuf buffer) {
+  public static IntRange fromNetwork(RegistryFriendlyByteBuf buffer) {
     int min = buffer.readVarInt();
     int max = buffer.readVarInt();
     return new IntRange(min, max);
   }
 
   /** Writes this range to the buffer */
-  public void toNetwork(FriendlyByteBuf buffer) {
+  public void toNetwork(RegistryFriendlyByteBuf buffer) {
     buffer.writeVarInt(min);
     buffer.writeVarInt(max);
   }
 
   @Override
-  public void encode(FriendlyByteBuf buffer, IntRange object) {
+  public void encode(RegistryFriendlyByteBuf buffer, IntRange object, TypedMap context) {
     object.toNetwork(buffer);
   }
 

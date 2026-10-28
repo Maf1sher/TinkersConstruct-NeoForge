@@ -30,7 +30,7 @@ import slimeknights.mantle.data.predicate.block.BlockPredicate;
 import slimeknights.mantle.data.predicate.entity.BlockAtEntityPredicate;
 import slimeknights.mantle.data.predicate.entity.HasMobEffectPredicate;
 import slimeknights.mantle.data.predicate.entity.LivingEntityPredicate;
-import slimeknights.mantle.recipe.data.FluidNameIngredient;
+import slimeknights.tconstruct.library.recipe.ingredient.FluidNameIngredient;
 import slimeknights.mantle.recipe.helper.ItemOutput;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.Sounds;
@@ -322,7 +322,7 @@ public class FluidEffectProvider extends AbstractFluidEffectProvider {
       .addEntityEffects(FluidMobEffect.builder().effect(MobEffects.CONFUSION, 5 * 20, 1).buildEntity(TimeAction.ADD));
     {
       String ie = "immersiveengineering";
-      MobEffect flammable = FakeRegistryEntry.effect(ResourceLocation.fromNamespaceAndPath(ie, "flammable"));
+      Holder<MobEffect> flammable = FakeRegistryEntry.effect(ResourceLocation.fromNamespaceAndPath(ie, "flammable"));
       compatFluid(ie, "creosote",  50)
         .addEffect(FluidMobEffect.builder().effect(flammable, 8 * 20, 1), TimeAction.ADD)
         .addEntityEffect(new FireFluidEffect(TimeAction.ADD, 8));
@@ -338,7 +338,7 @@ public class FluidEffectProvider extends AbstractFluidEffectProvider {
       Block concreteSprayed = FakeRegistryEntry.block(ResourceLocation.fromNamespaceAndPath(ie, "concrete_sprayed"));
       AreaMobEffectFluidEffect concreteFeet = new AreaMobEffectFluidEffect(new FluidMobEffect(FakeRegistryEntry.effect(ResourceLocation.fromNamespaceAndPath(ie, "concrete_feet")), MobEffectInstance.INFINITE_DURATION, 1), TimeAction.SET, GroupCost.MAX);
       compatFluid(ie, "concrete", 100)
-        .addEntityEffect(new BlockAtEntityPredicate(BlockPredicate.CAN_BE_REPLACED, 0), new SetBlockFluidEffect(concreteSprayed))
+        .addEntityEffect(LivingEntityPredicate.fallback(new BlockAtEntityPredicate(BlockPredicate.CAN_BE_REPLACED, 0)), new SetBlockFluidEffect(concreteSprayed))
         .offsetBlockEffect(BlockPredicate.CAN_BE_REPLACED, new SetBlockFluidEffect(concreteSprayed))
         .addEntityEffect(concreteFeet).offsetBlockEffect(concreteFeet);
     }

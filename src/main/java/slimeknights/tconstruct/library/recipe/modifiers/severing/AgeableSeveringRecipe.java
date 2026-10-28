@@ -16,7 +16,7 @@ public class AgeableSeveringRecipe extends SeveringRecipe {
   public static final RecordLoadable<AgeableSeveringRecipe> LOADER = RecordLoadable.create(
     ContextKey.ID.requiredField(), ENTITY_FIELD,
     ItemOutput.Loadable.REQUIRED_STACK.requiredField("adult_result", r -> r.output),
-    ItemOutput.Loadable.OPTIONAL_STACK.emptyField("child_result", r -> r.childOutput),
+    ItemOutput.Loadable.OPTIONAL_STACK.defaultField("child_result", ItemOutput.EMPTY, false, r -> r.childOutput),
     BASE_CHANCE_FIELD, LOOTING_BONUS_FIELD,
     AgeableSeveringRecipe::new);
 

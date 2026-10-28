@@ -77,16 +77,16 @@ public class TippingCastingRecipe extends ModifierPotionCastingRecipe {
 
   @Override
   public List<NamedRecipe<IDisplayableCastingRecipe>> getRecipes(ResourceLocation id, HolderLookup.Provider provider) {
-    return RecipeHelper.named(id, displayRecipes(provider));
+    return RecipeHelper.named(id, displayRecipes(id, provider));
   }
 /** Lazily loaded list of display recipes for JEI */
-  private List<IDisplayableCastingRecipe> displayRecipes(HolderLookup.Provider access) {
+  private List<IDisplayableCastingRecipe> displayRecipes(ResourceLocation id, HolderLookup.Provider access) {
     if (displayRecipes == null) {
       // first, get a list of potion IDs
       List<String> potions = getPotionIds();
-      List<CompoundTag> potionNBT = potions.stream().map(id -> {
+      List<CompoundTag> potionNBT = potions.stream().map(potionId -> {
         CompoundTag fluidNBT = new CompoundTag();
-        fluidNBT.putString(POTION_TAG, id);
+        fluidNBT.putString(POTION_TAG, potionId);
         return fluidNBT;
       }).toList();
 
@@ -112,7 +112,7 @@ public class TippingCastingRecipe extends ModifierPotionCastingRecipe {
           withPotion = List.copyOf(list);
         }
         // and finally create the recipe
-        return DisplayCastingRecipe.from(this)
+        return DisplayCastingRecipe.from(id, this)
           .cast(withModifier).consumed()
           .results(withPotion).fluids(fluids).linkFluidsToOutput()
           .coolingTime(coolingTime).build();

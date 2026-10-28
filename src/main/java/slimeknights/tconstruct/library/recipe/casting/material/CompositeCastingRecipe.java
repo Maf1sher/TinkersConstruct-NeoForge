@@ -86,10 +86,10 @@ public class CompositeCastingRecipe extends MaterialCastingRecipe implements Mul
 
   @Override
   public List<NamedRecipe<IDisplayableCastingRecipe>> getRecipes(ResourceLocation id, HolderLookup.Provider provider) {
-    return RecipeHelper.named(id, displayRecipes(provider));
+    return RecipeHelper.named(id, displayRecipes(id, provider));
   }
 /** Lazily loaded list of display recipes for JEI */
-  private List<IDisplayableCastingRecipe> displayRecipes(HolderLookup.Provider access) {
+  private List<IDisplayableCastingRecipe> displayRecipes(ResourceLocation id, HolderLookup.Provider access) {
     if (multiRecipes == null) {
       List<MaterialFluidRecipe> recipes = MaterialCastingLookup.getSortedCompositeFluids();
       List<FluidStack> displayFluids = new ArrayList<>(recipes.size());
@@ -163,7 +163,7 @@ public class CompositeCastingRecipe extends MaterialCastingRecipe implements Mul
       if (displayFluids.isEmpty()) {
         multiRecipes = List.of();
       } else {
-        multiRecipes = List.of(DisplayCastingRecipe.from(this)
+        multiRecipes = List.of(DisplayCastingRecipe.from(id, this)
           .casts(List.copyOf(displayInputs)).consumed()
           .fluids(List.copyOf(displayFluids))
           .results(List.copyOf(displayResults))

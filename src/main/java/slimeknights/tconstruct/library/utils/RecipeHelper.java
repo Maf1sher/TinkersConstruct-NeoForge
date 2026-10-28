@@ -34,6 +34,13 @@ public class RecipeHelper {
     return MultiNamedRecipe.streamRecipes(provider, manager, type, recipeClass).toList();
   }
 
+  /** Gets the recipe holder with the given ID, filtering to the passed type for safety */
+  public static <T extends Recipe<?>> java.util.Optional<RecipeHolder<T>> getRecipeHolder(RecipeManager manager, ResourceLocation id, Class<T> recipeClass) {
+    return manager.byKey(id)
+      .filter(holder -> recipeClass.isInstance(holder.value()))
+      .map(holder -> new RecipeHolder<>(holder.id(), recipeClass.cast(holder.value())));
+  }
+
   /** Wraps a list of display recipes with unique derived names for the given base recipe */
   public static <T> List<NamedRecipe<T>> named(ResourceLocation id, List<T> recipes) {
     return IntStream.range(0, recipes.size()).mapToObj(i -> NamedRecipe.of(id.withSuffix("/" + i), recipes.get(i))).toList();

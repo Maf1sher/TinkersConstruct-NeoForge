@@ -213,7 +213,7 @@ public class TableRecipeProvider extends BaseRecipeProvider {
     {
       CompoundTag nbt = new CompoundTag();
       CompoundTag display = new CompoundTag();
-      display.putString("Name", Serializer.toJson(Component.translatable("block.tconstruct.tool_forge")));
+      display.putString("Name", Serializer.toJson(Component.translatable("block.tconstruct.tool_forge"), this.registries));
       nbt.put("display", display);
       toolForge = CraftingNBTWrapper.wrap(consumer, nbt);
     }
@@ -243,7 +243,7 @@ public class TableRecipeProvider extends BaseRecipeProvider {
       .save(toolForge, location(folder + "scorched_forge"));
 
     // material recipes - for the material fallbacks
-    Ingredient fakeStorageBlock = MaterialIngredient.of(TinkerToolParts.fakeStorageBlock, MaterialPredicate.tag(TinkerTags.Materials.COMPATABILITY_ALLOYS));
+    Ingredient fakeStorageBlock = MaterialIngredient.of(TinkerToolParts.fakeStorageBlock, MaterialPredicate.tag(TinkerTags.Materials.COMPATABILITY_ALLOYS)).toVanilla();
     MaterialsConsumerBuilder.shaped("m").shapedRecipe(RecipeCategory.MISC, TinkerTables.tinkersAnvil)
       .define('m', fakeStorageBlock)
       .define('s', TinkerTags.Items.SEARED_BLOCKS)
@@ -293,9 +293,9 @@ public class TableRecipeProvider extends BaseRecipeProvider {
 
     // tool repair recipe
     ResourceLocation tinkerStationRepair = location(folder + "tinker_station_repair");
-    consumer.accept(tinkerStationRepair, new TinkerStationRepairRecipe(tinkerStationRepair), null);
+    consumer.accept(tinkerStationRepair, new TinkerStationRepairRecipe(), null);
     ResourceLocation craftingTableRepair = location(folder + "crafting_table_repair");
-    consumer.accept(craftingTableRepair, new CraftingTableRepairKitRecipe(craftingTableRepair), null);
+    consumer.accept(craftingTableRepair, new CraftingTableRepairKitRecipe(), null);
   }
 
   private void damageRecipes(RecipeOutput consumer) {

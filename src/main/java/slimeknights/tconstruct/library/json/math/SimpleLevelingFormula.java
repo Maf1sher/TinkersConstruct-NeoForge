@@ -19,7 +19,7 @@ record SimpleLevelingFormula(LevelingValue leveling, FallbackFormula formula) im
 
   @Override
   public JsonObject serialize(JsonObject json, String[] variableNames) {
-    LevelingValue.LOADABLE.serialize(leveling, json);
+    LevelingValue.LOADABLE.serializeInto(leveling, json, slimeknights.mantle.util.typed.TypedMap.EMPTY);
     return json;
   }
 

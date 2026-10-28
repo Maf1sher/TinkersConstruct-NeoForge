@@ -119,10 +119,10 @@ public class ContainerFillingRecipe implements ICastingRecipe, MultiNamedRecipe<
 
   @Override
   public List<NamedRecipe<IDisplayableCastingRecipe>> getRecipes(ResourceLocation id, HolderLookup.Provider provider) {
-    return RecipeHelper.named(id, displayRecipes(provider));
+    return RecipeHelper.named(id, displayRecipes(id, provider));
   }
 /** Lazily loaded list of display recipes for JEI */
-  private List<IDisplayableCastingRecipe> displayRecipes(HolderLookup.Provider access) {
+  private List<IDisplayableCastingRecipe> displayRecipes(ResourceLocation id, HolderLookup.Provider access) {
     if (displayRecipes == null) {
       // filter fluid registry to just fluids we care about
       List<FluidStack> fluids = BuiltInRegistries.FLUID.stream()
@@ -149,7 +149,7 @@ public class ContainerFillingRecipe implements ICastingRecipe, MultiNamedRecipe<
           return handler.getContainer();
         }).orElse(stack);
       }).toList();
-      displayRecipes = List.of(DisplayCastingRecipe.from(this)
+      displayRecipes = List.of(DisplayCastingRecipe.from(id, this)
         // cast is just an empty container, which is "consumed"
         .cast(new ItemStack(container)).consumed()
         .fluids(fluids).results(results).linkFluidsToOutput()

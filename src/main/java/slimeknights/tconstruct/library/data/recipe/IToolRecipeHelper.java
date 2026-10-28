@@ -3,6 +3,7 @@ package slimeknights.tconstruct.library.data.recipe;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.neoforged.neoforge.common.crafting.CompoundIngredient;
 import net.minecraft.world.level.ItemLike;
 
 import slimeknights.mantle.recipe.helper.ItemOutput;
@@ -97,7 +98,7 @@ public interface IToolRecipeHelper extends ICastCreationHelper {
     // Material Casting
     partCasting(output, part, cast, cost, partFolder);
     // Cast Casting
-    castCreation(output, MaterialIngredient.of(part), cast, castFolder, id(part).getPath());
+    castCreation(output, MaterialIngredient.of(part).toVanilla(), cast, castFolder, id(part).getPath());
   }
 
   /**
@@ -134,11 +135,11 @@ public interface IToolRecipeHelper extends ICastCreationHelper {
     // Material Casting
     partCasting(output, part, cast, cost, partFolder);
     // Cast Casting
-    castCreation(output, Ingredient.of(dummyPart, MaterialIngredient.of(part)), cast, castFolder, id(part).getPath());
+    castCreation(output, CompoundIngredient.of(Ingredient.of(dummyPart), MaterialIngredient.of(part).toVanilla()), cast, castFolder, id(part).getPath());
     // dummy part builder recipe
     ItemPartRecipeBuilder.item(cast.getName(), ItemOutput.fromItem(dummyPart))
                          .material(MaterialIds.rock, cost)
-                         .setPatternItem(Ingredient.of(Ingredient.of(TinkerTags.Items.DEFAULT_PATTERNS), cast.get()))
+                         .setPatternItem(CompoundIngredient.of(Ingredient.of(TinkerTags.Items.DEFAULT_PATTERNS), Ingredient.of(cast.get())))
                           .save(output, location(partFolder + "builder/" + cast.getName().getPath()));
   }
 
@@ -155,7 +156,7 @@ public interface IToolRecipeHelper extends ICastCreationHelper {
     // Part Builder
     PartRecipeBuilder.partRecipe(part)
                      .setPattern(id)
-                     .setPatternItem(Ingredient.of(Ingredient.of(TinkerTags.Items.DEFAULT_PATTERNS), cast.get()))
+                     .setPatternItem(CompoundIngredient.of(Ingredient.of(TinkerTags.Items.DEFAULT_PATTERNS), Ingredient.of(cast.get())))
                      .setCost(cost)
                       .save(output, location(partFolder + "builder/" + id.getPath()));
     // casting

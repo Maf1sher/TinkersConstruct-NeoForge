@@ -14,7 +14,7 @@ public class ModifierSortingRecipeBuilder extends AbstractSizedIngredientRecipeB
 
   @Override
   public void save(RecipeOutput output) {
-    save(output, BuiltInRegistries.ITEM.getKey((inputs.get(0).getItems().get(0).getItem())));
+    save(output, BuiltInRegistries.ITEM.getKey((inputs.get(0).getItems()[0].getItem())));
   }
 
   @Override

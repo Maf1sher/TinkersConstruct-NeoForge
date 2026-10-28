@@ -88,7 +88,7 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
   @Override
   public CompletableFuture<?> run(CachedOutput cache) {
     ensureAddMaterialsRun();
-    return allOf(allMaterials.entrySet().stream().map(entry -> saveJson(cache, entry.getKey(), entry.getValue().convert())));
+    return allOf(allMaterials.entrySet().stream().map(entry -> saveJson(cache, entry.getKey().getLocation(), entry.getValue().convert())));
   }
 
   /**

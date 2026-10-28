@@ -82,6 +82,11 @@ public class MeltingRecipeBuilder extends AbstractRecipeBuilder<MeltingRecipeBui
    * @param timeFactor   Factor this recipe takes compared to the standard of ingots
    * @return  Builder instance
    */
+  /** Creates a new builder instance from a custom ingredient */
+  public static MeltingRecipeBuilder melting(net.neoforged.neoforge.common.crafting.ICustomIngredient input, FluidObject<?> fluid, int amount, float timeFactor) {
+    return melting(input.toVanilla(), fluid, amount, timeFactor);
+  }
+
   public static MeltingRecipeBuilder melting(Ingredient input, FluidObject<?> fluid, int amount, float timeFactor) {
     int temperature = getTemperature(fluid);
     return melting(input, fluid.result(amount), temperature, IMeltingRecipe.calcTime(temperature, timeFactor));

@@ -42,7 +42,7 @@ public class TinkerStationPartSwappingBuilder extends AbstractRecipeBuilder<Tink
 
   /** Adds an extra ingredient requirement */
   public TinkerStationPartSwappingBuilder addExtraRequirement(Ingredient ingredient) {
-    return addExtraRequirement(SizedIngredient.of(ingredient));
+    return addExtraRequirement(new SizedIngredient(ingredient, 1));
   }
 
   /** Adds an extra ingredient requirement */

@@ -17,7 +17,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
@@ -441,7 +441,7 @@ public class SmelteryRecipeProvider extends BaseRecipeProvider implements ISmelt
       .save(consumer, location(folder + "duct_retextured"));
 
     // controllers
-    Ingredient similarTanks = NoContainerIngredient.of(TinkerSmeltery.searedTank.get(TankType.FUEL_GAUGE), TinkerSmeltery.searedTank.get(TankType.INGOT_GAUGE));
+    Ingredient similarTanks = NoContainerIngredient.of(TinkerSmeltery.searedTank.get(TankType.FUEL_GAUGE), TinkerSmeltery.searedTank.get(TankType.INGOT_GAUGE)).toVanilla();
     ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, TinkerSmeltery.searedMelter)
                        .define('G', similarTanks)
                        .define('B', TinkerSmeltery.searedBrick)
@@ -892,7 +892,7 @@ public class SmelteryRecipeProvider extends BaseRecipeProvider implements ISmelt
       .save(consumer, location(folder + "duct_retextured"));
 
     // controllers
-    Ingredient similarTanks = NoContainerIngredient.of(TinkerSmeltery.scorchedTank.get(TankType.INGOT_GAUGE), TinkerSmeltery.scorchedTank.get(TankType.FUEL_GAUGE));
+    Ingredient similarTanks = NoContainerIngredient.of(TinkerSmeltery.scorchedTank.get(TankType.INGOT_GAUGE), TinkerSmeltery.scorchedTank.get(TankType.FUEL_GAUGE)).toVanilla();
     ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, TinkerSmeltery.scorchedAlloyer)
                        .define('G', similarTanks)
                        .define('B', TinkerSmeltery.scorchedBrick)
@@ -1184,19 +1184,19 @@ public class SmelteryRecipeProvider extends BaseRecipeProvider implements ISmelt
     String waterFolder = folder + "water/";
     ItemCastingRecipeBuilder.basinRecipe(Blocks.MUD)
                             .setFluidAndTime(new FluidStack(Fluids.WATER, FluidValues.BOTTLE))
-                            .setCast(new BlockTagIngredient(BlockTags.CONVERTABLE_TO_MUD), true)
+                            .setCast(new BlockTagIngredient(BlockTags.CONVERTABLE_TO_MUD).toVanilla(), true)
                             .save(consumer, location(waterFolder + "mud"));
-    ItemCastingRecipeBuilder.tableRecipe(ItemOutput.fromStack(PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER)))
+    ItemCastingRecipeBuilder.tableRecipe(ItemOutput.fromStack(PotionContents.createItemStack(Items.POTION, Potions.WATER)))
                             .setFluid(MantleTags.Fluids.WATER, FluidValues.BOTTLE * 2)
                             .setCoolingTime(1)
                             .setCast(Items.GLASS_BOTTLE, true)
                             .save(consumer, location(waterFolder + "bottle"));
-    ItemCastingRecipeBuilder.tableRecipe(ItemOutput.fromStack(PotionUtils.setPotion(new ItemStack(Items.SPLASH_POTION), Potions.WATER)))
+    ItemCastingRecipeBuilder.tableRecipe(ItemOutput.fromStack(PotionContents.createItemStack(Items.SPLASH_POTION, Potions.WATER)))
                             .setFluid(MantleTags.Fluids.WATER, FluidValues.BOTTLE * 2)
                             .setCoolingTime(1)
                             .setCast(MantleTags.Items.SPLASH_BOTTLE, true)
                             .save(consumer, location(waterFolder + "splash"));
-    ItemCastingRecipeBuilder.tableRecipe(ItemOutput.fromStack(PotionUtils.setPotion(new ItemStack(Items.LINGERING_POTION), Potions.WATER)))
+    ItemCastingRecipeBuilder.tableRecipe(ItemOutput.fromStack(PotionContents.createItemStack(Items.LINGERING_POTION, Potions.WATER)))
                             .setFluid(MantleTags.Fluids.WATER, FluidValues.BOTTLE * 2)
                             .setCoolingTime(1)
                             .setCast(MantleTags.Items.LINGERING_BOTTLE, true)

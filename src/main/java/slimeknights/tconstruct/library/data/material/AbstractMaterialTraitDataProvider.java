@@ -54,7 +54,7 @@ public abstract class AbstractMaterialTraitDataProvider extends GenericDataProvi
     }
 
     // generate
-    return allOf(allMaterialTraits.entrySet().stream().map(entry -> saveJson(cache, entry.getKey(), entry.getValue().build())));
+    return allOf(allMaterialTraits.entrySet().stream().map(entry -> saveJson(cache, entry.getKey().getLocation(), entry.getValue().build())));
   }
 
 

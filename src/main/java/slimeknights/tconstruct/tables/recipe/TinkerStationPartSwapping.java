@@ -149,11 +149,11 @@ public class TinkerStationPartSwapping extends MaterialSwappingRecipe implements
 
 
   @Override
-  public List<NamedRecipe<IDisplayToolTinkering>> getRecipes(ResourceLocation id, HolderLookup.Provider provider) {
+  public List<NamedRecipe<IDisplayToolTinkering>> getRecipes(ResourceLocation id, Provider provider) {
     return RecipeHelper.named(id, displayRecipes(provider));
   }
 /** Lazily loaded list of display recipes for JEI */
-  private List<IDisplayToolTinkering> displayRecipes(HolderLookup.Provider access) {
+  private List<IDisplayToolTinkering> displayRecipes(Provider access) {
     if (multiRecipes == null) {
       IMaterialRegistry registry = MaterialRegistry.getInstance();
       Collection<IMaterial> materials = registry.getVisibleMaterials();

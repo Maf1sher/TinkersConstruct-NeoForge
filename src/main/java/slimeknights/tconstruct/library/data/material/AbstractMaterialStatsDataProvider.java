@@ -52,7 +52,7 @@ public abstract class AbstractMaterialStatsDataProvider extends GenericDataProvi
     }
     // does not ensure we have materials for all stats, we may be adding stats for another mod
     // generate finally
-    return allOf(allMaterialStats.entrySet().stream().map(entry -> saveJson(cache, entry.getKey(), entry.getValue().serialize())));
+    return allOf(allMaterialStats.entrySet().stream().map(entry -> saveJson(cache, entry.getKey().getLocation(), entry.getValue().serialize())));
   }
 
 
@@ -118,7 +118,7 @@ public abstract class AbstractMaterialStatsDataProvider extends GenericDataProvi
     @SuppressWarnings("unchecked")
     private static <T extends IMaterialStats> JsonObject encodeStats(IMaterialStats stats, MaterialStatType<T> type) {
       JsonObject json = new JsonObject();
-      type.getLoadable().serialize((T)stats, json);
+      type.getLoadable().serializeInto((T)stats, json, slimeknights.mantle.util.typed.TypedMap.EMPTY);
       return json;
     }
 

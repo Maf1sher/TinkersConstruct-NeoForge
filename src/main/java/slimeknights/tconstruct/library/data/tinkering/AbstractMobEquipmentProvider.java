@@ -116,7 +116,7 @@ public abstract class AbstractMobEquipmentProvider extends GenericDataProvider {
       json.add("equip", MobEquipment.LIST_LOADABLE.serialize(equipment.build()));
       // serialize conditions
       if (conditions.length > 0) {
-        json.add("conditions", JsonHelper.serialize(ICondition.LIST_CODEC, conditions));
+        json.add("conditions", JsonHelper.serialize(ICondition.LIST_CODEC, List.of(conditions)));
       }
       return json;
     }

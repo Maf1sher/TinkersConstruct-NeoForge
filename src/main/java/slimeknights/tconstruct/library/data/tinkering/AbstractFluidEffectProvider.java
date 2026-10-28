@@ -345,7 +345,7 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
       }
       FluidEffects effects = new FluidEffects(ingredient, blockEffects, entityEffects, hidden);
       try {
-        FluidEffects.LOADABLE.serialize(effects, json);
+        FluidEffects.LOADABLE.serializeInto(effects, json, slimeknights.mantle.util.typed.TypedMap.EMPTY);
       } catch (Exception e) {
         throw new RuntimeException("Error serializing fluid effect ID " + id + " with value " + effects, e);
       }

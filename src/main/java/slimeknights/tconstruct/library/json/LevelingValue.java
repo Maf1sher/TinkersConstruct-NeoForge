@@ -75,7 +75,7 @@ public record LevelingValue(float flat, float eachLevel) {
   /** @deprecated use {@link #LOADABLE} with {@link RecordLoadable#serialize(Object, JsonObject)} (JsonObject)} */
   @Deprecated(forRemoval = true)
   public JsonObject serialize(JsonObject json) {
-    LOADABLE.serialize(this, json);
+    LOADABLE.serializeInto(this, json, slimeknights.mantle.util.typed.TypedMap.EMPTY);
     return json;
   }
 

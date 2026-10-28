@@ -54,14 +54,6 @@ public record EffectImmunityModule(Holder<MobEffect> effect, LevelingInt maxLeve
     this(effect, ANY_LEVEL);
   }
 
-  public EffectImmunityModule(Supplier<? extends MobEffect> effect, LevelingInt maxLevel) {
-    this(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effect.get()), maxLevel);
-  }
-
-  public EffectImmunityModule(Supplier<? extends MobEffect> effect) {
-    this(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effect.get()));
-  }
-
   @Override
   public RecordLoadable<EffectImmunityModule> getLoader() {
     return LOADER;

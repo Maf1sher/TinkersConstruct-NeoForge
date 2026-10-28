@@ -40,11 +40,7 @@ import java.util.stream.Collectors;
 
 /** Recipe to dye travelers gear */
 public class ArmorDyeingRecipe implements ITinkerStationRecipe, MultiNamedRecipe<IDisplayModifierRecipe> {
-  @Getter
-  private final ResourceLocation id;
-
-  public ArmorDyeingRecipe(ResourceLocation id) {
-    this.id = id;
+  public ArmorDyeingRecipe() {
     ModifierRecipeLookup.addRecipeModifier(null, TinkerModifiers.dyed);
   }
 
@@ -97,10 +93,10 @@ public class ArmorDyeingRecipe implements ITinkerStationRecipe, MultiNamedRecipe
       if (!stack.isEmpty()) {
         DyeColor dye = DyeColor.getColor(stack);
         if (dye != null) {
-          float[] color = dye.getTextureDiffuseColors();
-          int r = (int)(color[0] * 255);
-          int g = (int)(color[1] * 255);
-          int b = (int)(color[2] * 255);
+          int color = dye.getTextureDiffuseColor();
+          int r = (color >> 16) & 0xFF;
+          int g = (color >> 8) & 0xFF;
+          int b = color & 0xFF;
           brightness += Math.max(r, Math.max(g, b));
           nr += r;
           ng += g;
@@ -145,11 +141,11 @@ public class ArmorDyeingRecipe implements ITinkerStationRecipe, MultiNamedRecipe
 
 
   @Override
-  public List<NamedRecipe<IDisplayModifierRecipe>> getRecipes(ResourceLocation id, HolderLookup.Provider provider) {
-    return RecipeHelper.named(id, displayRecipes(provider));
+  public List<NamedRecipe<IDisplayModifierRecipe>> getRecipes(ResourceLocation id, Provider provider) {
+    return RecipeHelper.named(id, displayRecipes(id, provider));
   }
 /** Lazily loaded list of display recipes for JEI */
-  private List<IDisplayModifierRecipe> displayRecipes(HolderLookup.Provider access) {
+  private List<IDisplayModifierRecipe> displayRecipes(ResourceLocation id, Provider access) {
     if (displayRecipes == null) {
       List<ItemStack> toolInputs = RegistryHelper.getTagValueStream(BuiltInRegistries.ITEM, TinkerTags.Items.DYEABLE)
         .map(item -> {
@@ -160,7 +156,6 @@ public class ArmorDyeingRecipe implements ITinkerStationRecipe, MultiNamedRecipe
           return stack;
         }).toList();
       if (!toolInputs.isEmpty()) {
-        ResourceLocation id = getId();
         displayRecipes = Arrays.stream(DyeColor.values()).map(dye -> new DisplayRecipe(id, toolInputs, dye)).collect(Collectors.toList());
       } else {
         displayRecipes = List.of();

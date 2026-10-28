@@ -56,10 +56,10 @@ public class TipClearingCastingRecipe extends ModifierPotionCastingRecipe {
 
   @Override
   public List<NamedRecipe<IDisplayableCastingRecipe>> getRecipes(ResourceLocation id, HolderLookup.Provider provider) {
-    return RecipeHelper.named(id, displayRecipes(provider));
+    return RecipeHelper.named(id, displayRecipes(id, provider));
   }
 /** Lazily loaded list of display recipes for JEI */
-  private List<IDisplayableCastingRecipe> displayRecipes(HolderLookup.Provider access) {
+  private List<IDisplayableCastingRecipe> displayRecipes(ResourceLocation id, HolderLookup.Provider access) {
     if (displayRecipes == null) {
       List<FluidStack> fluids = java.util.Arrays.asList(fluid.getFluids());
       List<String> potions = getPotionIds();
@@ -68,7 +68,7 @@ public class TipClearingCastingRecipe extends ModifierPotionCastingRecipe {
       displayRecipes = Arrays.stream(bottle.getItems()).map(stack -> {
         // start with just the tool with the modifier
         ItemStack withModifier = addModifier(stack);
-        return DisplayCastingRecipe.from(this)
+        return DisplayCastingRecipe.from(id, this)
           .casts(addPotion(withModifier, potions)).consumed()
           .result(withModifier).unlinkOutput()
           .fluids(fluids).coolingTime(coolingTime).build();

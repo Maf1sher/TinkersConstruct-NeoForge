@@ -19,11 +19,6 @@ public record LoadableFinishedRecipe<T extends Recipe<?>>(RecordLoadable<T> load
     output.accept(id, recipe, advancement);
   }
 
-  /** One-liner to accept a new recipe */
-  public static <T extends Recipe<?>> void save(RecipeOutput output, RecordLoadable<T> loader, T recipe) {
-    new LoadableFinishedRecipe<>(loader, recipe).save(output, recipe.getId(), null);
-  }
-
   /** One-liner to accept a recipe with its optional advancement. */
   public static <T extends Recipe<?>> void save(RecipeOutput output, ResourceLocation id, RecordLoadable<T> loader, T recipe, @Nullable AdvancementHolder advancement) {
     new LoadableFinishedRecipe<>(loader, recipe).save(output, id, advancement);

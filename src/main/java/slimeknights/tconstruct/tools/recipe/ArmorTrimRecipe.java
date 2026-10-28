@@ -47,11 +47,7 @@ public class ArmorTrimRecipe implements ITinkerStationRecipe, MultiNamedRecipe<I
   protected static final String KEY_INVALID_PATTERN = TConstruct.makeTranslationKey("recipe", "modifier.armor_trim.invalid_pattern");
 
 
-  @Getter
-  private final ResourceLocation id;
-
-  public ArmorTrimRecipe(ResourceLocation id) {
-    this.id = id;
+  public ArmorTrimRecipe() {
     ModifierRecipeLookup.addRecipeModifier(null, TinkerModifiers.trim);
   }
 
@@ -149,18 +145,17 @@ public class ArmorTrimRecipe implements ITinkerStationRecipe, MultiNamedRecipe<I
   @SuppressWarnings("deprecation")
 
   @Override
-  public List<NamedRecipe<IDisplayModifierRecipe>> getRecipes(ResourceLocation id, HolderLookup.Provider provider) {
-    return RecipeHelper.named(id, displayRecipes(provider));
+  public List<NamedRecipe<IDisplayModifierRecipe>> getRecipes(ResourceLocation id, Provider provider) {
+    return RecipeHelper.named(id, displayRecipes(id, provider));
   }
 /** Lazily loaded list of display recipes for JEI */
-  private List<IDisplayModifierRecipe> displayRecipes(HolderLookup.Provider access) {
+  private List<IDisplayModifierRecipe> displayRecipes(ResourceLocation id, Provider access) {
     if (displayRecipes == null) {
       List<ItemStack> trims = RegistryHelper.getTagValueStream(BuiltInRegistries.ITEM, ItemTags.TRIM_TEMPLATES)
                                             .map(ItemStack::new).toList();
       List<ItemStack> toolInputs = RegistryHelper.getTagValueStream(BuiltInRegistries.ITEM, TinkerTags.Items.TRIM)
                                                  .map(IModifiableDisplay::getDisplayStack).toList();
       if (!trims.isEmpty() && !toolInputs.isEmpty()) {
-        ResourceLocation id = getId();
         // one recipe per material
         // TODO: worth using just a single material? focus link material to output tool?
         displayRecipes = access.lookupOrThrow(Registries.TRIM_MATERIAL).listElements()
@@ -194,8 +189,8 @@ public class ArmorTrimRecipe implements ITinkerStationRecipe, MultiNamedRecipe<I
       this.material = holder;
       toolWithoutModifier = tools;
       this.trim = trim;
-      TrimMaterial material = holder.get();
-      this.materialItem = List.of(new ItemStack(material.ingredient().get()));
+      TrimMaterial material = holder.value();
+      this.materialItem = List.of(new ItemStack(material.ingredient().value()));
       this.variant = material.description().plainCopy();
 
       String materialName = holder.key().location().toString();

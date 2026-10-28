@@ -5,7 +5,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CustomRecipe;
@@ -48,14 +48,14 @@ public class ModifierRepairCraftingRecipe extends CustomRecipe implements IModif
   @Getter
   private final int repairAmount;
   public ModifierRepairCraftingRecipe(ResourceLocation idIn, ModifierId modifier, Ingredient ingredient, int repairAmount) {
-    super(idIn, CraftingBookCategory.EQUIPMENT);
+    super(CraftingBookCategory.EQUIPMENT);
     this.modifier = modifier;
     this.ingredient = ingredient;
     this.repairAmount = repairAmount;
   }
 
   @Override
-  public boolean matches(CraftingContainer inv, Level world) {
+  public boolean matches(CraftingInput inv, Level world) {
     ToolFound inputs = OverslimeCraftingTableRecipe.findTool(inv, TOOLS, ingredient);
     if (inputs == null) {
       return false;
@@ -66,10 +66,10 @@ public class ModifierRepairCraftingRecipe extends CustomRecipe implements IModif
   }
 
   @Override
-  public ItemStack assemble(CraftingContainer inv, HolderLookup.Provider access) {
+  public ItemStack assemble(CraftingInput inv, HolderLookup.Provider access) {
     ToolFound inputs = OverslimeCraftingTableRecipe.findTool(inv, TOOLS, ingredient);
     if (inputs == null) {
-      TConstruct.LOG.error("Recipe repair on {} failed to find items after matching", getId());
+      TConstruct.LOG.error("Recipe repair on {} failed to find items after matching", modifier);
       return ItemStack.EMPTY;
     }
 
@@ -91,7 +91,7 @@ public class ModifierRepairCraftingRecipe extends CustomRecipe implements IModif
   }
 
   @Override
-  public NonNullList<ItemStack> getRemainingItems(CraftingContainer inv) {
+  public NonNullList<ItemStack> getRemainingItems(CraftingInput inv) {
     // step 1: find out how much we need to repair
     ToolFound inputs = OverslimeCraftingTableRecipe.findTool(inv, TOOLS, ingredient);
     int repairPerItem = 0;
@@ -130,9 +130,9 @@ public class ModifierRepairCraftingRecipe extends CustomRecipe implements IModif
   private List<IDisplayCraftingTinkering> displayRecipes;
 
   @Override
-  public List<IDisplayCraftingTinkering> getFilteredRecipes(RegistryAccess access) {
+  public List<IDisplayCraftingTinkering> getFilteredRecipes(ResourceLocation id, RegistryAccess access) {
     if (displayRecipes == null) {
-      displayRecipes = List.of(new ModifierRepairTinkerStationRecipe.DisplayRecipe(getId(), this, true));
+      displayRecipes = List.of(new ModifierRepairTinkerStationRecipe.DisplayRecipe(id, this, true));
     }
     return displayRecipes;
   }

@@ -5,6 +5,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
@@ -12,7 +13,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionContents;
-import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
@@ -84,7 +84,7 @@ public class PotionCastingRecipe implements ICastingRecipe, MultiNamedRecipe<IDi
 
   @Override
   public boolean matches(ICastingContainer inv, Level level) {
-    return bottle.test(inv.getStack()) && fluid.test(inv.getFluid());
+    return bottle.test(inv.getStack()) && fluid.test(inv.getFluidStack());
   }
 
   @Override
@@ -110,7 +110,7 @@ public class PotionCastingRecipe implements ICastingRecipe, MultiNamedRecipe<IDi
   @Override
   public ItemStack assemble(ICastingContainer inv, HolderLookup.Provider access) {
     ItemStack result = new ItemStack(this.result);
-    result.setTag(inv.getFluidTag());
+    DataComponentHelper.copy(result, inv.getFluidStack(), DataComponents.POTION_CONTENTS);
     return result;
   }
 
@@ -122,16 +122,15 @@ public class PotionCastingRecipe implements ICastingRecipe, MultiNamedRecipe<IDi
 
   @Override
   public List<NamedRecipe<IDisplayableCastingRecipe>> getRecipes(ResourceLocation id, HolderLookup.Provider provider) {
-    return RecipeHelper.named(id, displayRecipes(provider));
+    return RecipeHelper.named(id, displayRecipes(id, provider));
   }
 /** Lazily loaded list of display recipes for JEI */
-  private List<IDisplayableCastingRecipe> displayRecipes(HolderLookup.Provider access) {
+  private List<IDisplayableCastingRecipe> displayRecipes(ResourceLocation id, HolderLookup.Provider access) {
     if (displayRecipes == null) {
       Collection<Potion> potions = BuiltInRegistries.POTION.stream().toList();
       List<ItemStack> results = new ArrayList<>(potions.size());
       // first, make all the potion items
       for (Potion potion : potions) {
-        if (potion == Potions.EMPTY) continue;
         results.add(PotionContents.createItemStack(this.result, BuiltInRegistries.POTION.wrapAsHolder(potion)));
       }
       // next, it's time to do the fluids
@@ -147,7 +146,7 @@ public class PotionCastingRecipe implements ICastingRecipe, MultiNamedRecipe<IDi
           displayFluids.add(FluidTagHelper.withTag(fluid.getFluid(), fluid.getAmount(), DataComponentHelper.getCustomData(result)));
         }
       }
-      this.displayRecipes = List.of(DisplayCastingRecipe.from(this)
+      this.displayRecipes = List.of(DisplayCastingRecipe.from(id, this)
         .cast(bottle).consumed()
         .fluids(List.copyOf(displayFluids))
         .results(List.copyOf(displayResults)).linkFluidsToOutput()
@@ -179,7 +178,6 @@ public class PotionCastingRecipe implements ICastingRecipe, MultiNamedRecipe<IDi
   @SuppressWarnings("deprecation")
   public static List<String> getPotionIds() {
     return BuiltInRegistries.POTION.holders()
-      .filter(holder -> !holder.is(Potions.EMPTY_ID))
       .map(holder -> holder.key().location().toString())
       .toList();
   }

@@ -17,7 +17,6 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ArmorItem;
@@ -49,7 +48,6 @@ import slimeknights.mantle.data.predicate.entity.HasEnchantmentEntityPredicate;
 import slimeknights.mantle.data.predicate.entity.HasMobEffectPredicate;
 import slimeknights.mantle.data.predicate.entity.EntityPredicate;
 import slimeknights.mantle.data.predicate.entity.LivingEntityPredicate;
-import slimeknights.mantle.data.predicate.entity.MobTypePredicate;
 import slimeknights.mantle.data.predicate.fluid.FluidPredicate;
 import slimeknights.mantle.data.predicate.item.ItemPredicate;
 import slimeknights.mantle.recipe.condition.TagFilledCondition;
@@ -600,15 +598,15 @@ public class ModifierProvider extends AbstractModifierProvider implements ICondi
     // we instead do +0.75, +1.5, +2.25, +3, +3.75
     buildModifier(ModifierIds.sharpness).addModule(StatBoostModule.add(ToolStats.ATTACK_DAMAGE).eachLevel(0.75f)).levelDisplay(new UniqueForLevels(5, true));
     buildModifier(ModifierIds.swiftstrike).addModule(StatBoostModule.multiplyBase(ToolStats.ATTACK_SPEED).eachLevel(0.05f)).levelDisplay(new UniqueForLevels(5));
-    buildModifier(ModifierIds.smite).addModule(ConditionalMeleeDamageModule.builder().target(new MobTypePredicate(MobType.UNDEAD)).eachLevel(2.0f));
-    buildModifier(ModifierIds.antiaquatic).addModule(ConditionalMeleeDamageModule.builder().target(new MobTypePredicate(MobType.WATER)).eachLevel(2.0f));
+    buildModifier(ModifierIds.smite).addModule(ConditionalMeleeDamageModule.builder().target(LivingEntityPredicate.tag(EntityTypeTags.SENSITIVE_TO_SMITE)).eachLevel(2.0f));
+    buildModifier(ModifierIds.antiaquatic).addModule(ConditionalMeleeDamageModule.builder().target(LivingEntityPredicate.tag(EntityTypeTags.SENSITIVE_TO_IMPALING)).eachLevel(2.0f));
     buildModifier(ModifierIds.cooling).addModule(ConditionalMeleeDamageModule.builder().target(LivingEntityPredicate.fallback(EntityPredicate.FIRE_IMMUNE)).eachLevel(1.6f));
-    IJsonPredicate<LivingEntity> baneSssssPredicate = LivingEntityPredicate.or(new MobTypePredicate(MobType.ARTHROPOD), LivingEntityPredicate.tag(TinkerTags.EntityTypes.CREEPERS));
+    IJsonPredicate<LivingEntity> baneSssssPredicate = LivingEntityPredicate.or(LivingEntityPredicate.tag(EntityTypeTags.SENSITIVE_TO_BANE_OF_ARTHROPODS), LivingEntityPredicate.tag(TinkerTags.EntityTypes.CREEPERS));
     buildModifier(ModifierIds.baneOfSssss)
       .addModule(ConditionalMeleeDamageModule.builder().target(baneSssssPredicate).eachLevel(2.0f))
       .addModule(MobEffectModule.builder(MobEffects.MOVEMENT_SLOWDOWN).level(RandomLevelingValue.flat(4)).time(RandomLevelingValue.random(20, 10)).target(baneSssssPredicate).buildWeapon(), ModifierHooks.MELEE_HIT, ModifierHooks.MONSTER_MELEE_HIT);
     buildModifier(ModifierIds.killager).addModule(ConditionalMeleeDamageModule.builder().target(LivingEntityPredicate.or(
-      new MobTypePredicate(MobType.ILLAGER),
+      LivingEntityPredicate.tag(EntityTypeTags.ILLAGER),
       LivingEntityPredicate.LOADER.tag(TinkerTags.EntityTypes.KILLAGERS))).eachLevel(2.0f));
     MobEffectModule.Builder pierceBuilder = MobEffectModule.builder(TinkerEffects.pierce).applyBeforeMelee(true)
       // apply effect for 4 seconds, canceling 1 armor per level
@@ -852,9 +850,9 @@ public class ModifierProvider extends AbstractModifierProvider implements ICondi
       .addModule(BlockDamageSourceModule.source(new DamageTypePredicate(DamageTypes.HOT_FLOOR)).build())
       .addModule(ReplaceBlockWalkerModule.builder().replaceAlways(BlockPropertiesPredicate.block(Blocks.WATER).matches(LiquidBlock.LEVEL, 0).build(), Blocks.FROSTED_ICE.defaultBlockState()).amount(2, 1));
     buildModifier(ModifierIds.snowdrift).priority(90).levelDisplay(ModifierLevelDisplay.NO_LEVELS).addModule(CoverGroundWalkerModule.block(Blocks.SNOW).amount(0.5f, 1));
-    buildModifier(ModifierIds.bouncy).levelDisplay(ModifierLevelDisplay.NO_LEVELS).addModule(AttributeModule.builder(TinkerAttributes.BOUNCY.get(), Operation.ADD_VALUE).tooltipStyle(TooltipStyle.NONE).flat(1));
+    buildModifier(ModifierIds.bouncy).levelDisplay(ModifierLevelDisplay.NO_LEVELS).addModule(AttributeModule.builder(TinkerAttributes.BOUNCY, Operation.ADD_VALUE).tooltipStyle(TooltipStyle.NONE).flat(1));
     buildModifier(ModifierIds.bounce).addModule(new ProjectileBounceModule(new LevelingInt(-1, 2)));
-    buildModifier(ModifierIds.doubleJump).levelDisplay(new UniqueForLevels(4, false)).addModule(AttributeModule.builder(TinkerAttributes.JUMP_COUNT.get(), Operation.ADD_VALUE).slots(ARMOR_SLOTS).tooltipStyle(TooltipStyle.NONE).eachLevel(1));
+    buildModifier(ModifierIds.doubleJump).levelDisplay(new UniqueForLevels(4, false)).addModule(AttributeModule.builder(TinkerAttributes.JUMP_COUNT, Operation.ADD_VALUE).slots(ARMOR_SLOTS).tooltipStyle(TooltipStyle.NONE).eachLevel(1));
     // shield
     buildModifier(ModifierIds.blocking).levelDisplay(ModifierLevelDisplay.NO_LEVELS).addModule(BlockingModule.INSTANCE);
     buildModifier(ModifierIds.blockade)
@@ -1104,7 +1102,7 @@ public class ModifierProvider extends AbstractModifierProvider implements ICondi
       .levelDisplay(ModifierLevelDisplay.SINGLE_LEVEL)
       // goes from -15% to -25%
       .addModule(AttributeModule.builder(Attributes.GRAVITY.value(), Operation.ADD_MULTIPLIED_TOTAL).tooltipStyle(TooltipStyle.PERCENT).amount(-0.05f, -0.1f))
-      .addModule(AttributeModule.builder(TinkerAttributes.SAFE_FALL_DISTANCE.get(), Operation.ADD_VALUE).eachLevel(1));
+      .addModule(AttributeModule.builder(TinkerAttributes.SAFE_FALL_DISTANCE, Operation.ADD_VALUE).eachLevel(1));
     buildModifier(ModifierIds.godspeed)
       .levelDisplay(ModifierLevelDisplay.SINGLE_LEVEL)
       // goes from +2.5% to +4%
@@ -1261,9 +1259,9 @@ public class ModifierProvider extends AbstractModifierProvider implements ICondi
             .constant(1.5f).variable(LEVEL).power()
           .divide()
         .subtract().build());
-    buildModifier(ModifierIds.consecrated).addModule(ProtectionModule.builder().attacker(new MobTypePredicate(MobType.UNDEAD)).eachLevel(1.25f));
+    buildModifier(ModifierIds.consecrated).addModule(ProtectionModule.builder().attacker(LivingEntityPredicate.tag(EntityTypeTags.SENSITIVE_TO_SMITE)).eachLevel(1.25f));
     buildModifier(ModifierIds.preserved).addModules(StatBoostModule.multiplyBase(ToolStats.DURABILITY).eachLevel(0.15f), RepairModule.builder().eachLevel(0.15f));
-    buildModifier(ModifierIds.holy).addModule(ConditionalPowerModule.builder().target(new MobTypePredicate(MobType.UNDEAD)).eachLevel(0.75f));
+    buildModifier(ModifierIds.holy).addModule(ConditionalPowerModule.builder().target(LivingEntityPredicate.tag(EntityTypeTags.SENSITIVE_TO_SMITE)).eachLevel(0.75f));
 
     // traits - tier 3
     buildModifier(ModifierIds.overcast)

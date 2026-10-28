@@ -49,13 +49,13 @@ public class CastDuplicationRecipe extends ItemCastingRecipe implements MultiNam
 
   @Override
   public List<NamedRecipe<IDisplayableCastingRecipe>> getRecipes(ResourceLocation id, HolderLookup.Provider provider) {
-    return RecipeHelper.named(id, displayRecipes(provider));
+    return RecipeHelper.named(id, displayRecipes(id, provider));
   }
 /** Lazily loaded list of display recipes for JEI */
-  private List<IDisplayableCastingRecipe> displayRecipes(HolderLookup.Provider access) {
+  private List<IDisplayableCastingRecipe> displayRecipes(ResourceLocation id, HolderLookup.Provider access) {
     if (displayRecipes == null) {
       List<ItemStack> casts = List.of(getCast().getItems());
-      displayRecipes = List.of(DisplayCastingRecipe.from(this)
+      displayRecipes = List.of(DisplayCastingRecipe.from(id, this)
         .casts(casts).results(casts).linkCastToOutput()
         .fluids(java.util.Arrays.asList(fluid.getFluids()))
         .coolingTime(coolingTime)

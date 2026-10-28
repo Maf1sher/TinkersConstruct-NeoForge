@@ -93,9 +93,9 @@ public final class DisplayCastingRecipe implements IDisplayableCastingRecipe {
     return new Builder(type);
   }
 
-  /** Creates a new builder instance with the type and ID from the given recipe */
-  public static Builder from(ICastingRecipe recipe) {
-    return type(recipe.getType()).id(recipe.getId());
+  /** Creates a new builder instance with the type of the given recipe and the given recipe ID */
+  public static Builder from(ResourceLocation id, ICastingRecipe recipe) {
+    return type(recipe.getType()).id(id);
   }
 
   @Setter

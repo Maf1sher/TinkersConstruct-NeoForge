@@ -512,7 +512,7 @@ public class ModifierRecipeProvider extends BaseRecipeProvider {
                                     .save(consumer, wrap(ModifierIds.sharpness, upgradeFolder, "_from_shard"));
     IncrementalModifierRecipeBuilder.modifier(ModifierIds.sharpness)
                                     .setTools(TinkerTags.Items.MELEE)
-                                    .setInput(Tags.Items.STORAGE_BLOCKS_QUARTZ, 4, 36)
+                                    .setInput(TinkerTags.Items.STORAGE_BLOCKS_QUARTZ, 4, 36)
                                     .setLeftover(new ItemStack(Items.QUARTZ))
                                     .setMaxLevel(5)
                                     .disallowCrystal()
@@ -748,7 +748,7 @@ public class ModifierRecipeProvider extends BaseRecipeProvider {
       .save(consumer, prefix(ModifierIds.collecting, upgradeFolder));
 
     // throwing
-    Ingredient bowLimb = MaterialIngredient.of(TinkerToolParts.bowLimb.get());
+    Ingredient bowLimb = MaterialIngredient.of(TinkerToolParts.bowLimb.get()).toVanilla();
     ModifierRecipeBuilder.modifier(ModifierIds.throwing)
       .setTools(IntersectionIngredient.of(
         Ingredient.of(TinkerTags.Items.DURABILITY),
@@ -757,7 +757,7 @@ public class ModifierRecipeProvider extends BaseRecipeProvider {
       ))
       .addInput(bowLimb)
       .addInput(TinkerMaterials.cinderslime.getIngotTag())
-      .addInput(MaterialIngredient.of(TinkerToolParts.bowGrip.get()))
+      .addInput(MaterialIngredient.of(TinkerToolParts.bowGrip.get()).toVanilla())
       .setSlots(SlotType.ABILITY, 1)
       .setMaxLevel(1).checkTraitLevel()
       .saveSalvage(consumer, prefix(ModifierIds.throwing, abilitySalvage))
@@ -1030,7 +1030,7 @@ public class ModifierRecipeProvider extends BaseRecipeProvider {
                          .setMaxLevel(1).checkTraitLevel()
                          .saveSalvage(consumer, prefix(ModifierIds.zoom, upgradeSalvage))
                          .save(consumer, prefix(ModifierIds.zoom, upgradeFolder));
-    Ingredient tanks = NoContainerIngredient.of(TinkerTags.Items.TANKS);
+    Ingredient tanks = NoContainerIngredient.of(TinkerTags.Items.TANKS).toVanilla();
     ModifierRecipeBuilder.modifier(ModifierIds.slurping)
                          .addInput(Items.GLASS_BOTTLE)
                          .addInput(tanks)
@@ -1630,11 +1630,11 @@ public class ModifierRecipeProvider extends BaseRecipeProvider {
                          .save(consumer, prefix(ModifierIds.writable, slotlessFolder));
     ModifierRecipeBuilder.modifier(ModifierIds.harmonious)
                          .setTools(TinkerTags.Items.BONUS_SLOTS)
-                         .addInput(ItemTags.MUSIC_DISCS)
+                         .addInput(Tags.Items.MUSIC_DISCS)
                          .setMaxLevel(1)
                          .save(consumer, prefix(ModifierIds.harmonious, slotlessFolder));
     Ingredient bonusNoSkull = DifferenceIngredient.of(Ingredient.of(TinkerTags.Items.BONUS_SLOTS), Ingredient.of(TinkerTags.Items.SKULLS));
-    SizedIngredient standardSkulls = SizedIngredients.of(DifferenceIngredient.of(Ingredient.of(Tags.Items.SKULLS), Ingredient.of(Items.DRAGON_HEAD)));
+    SizedIngredient standardSkulls = SizedIngredients.of(DifferenceIngredient.of(Ingredient.of(ItemTags.SKULLS), Ingredient.of(Items.DRAGON_HEAD)));
     ModifierRecipeBuilder.modifier(ModifierIds.recapitated)
       .setTools(bonusNoSkull)
       .addInput(standardSkulls)
@@ -1705,7 +1705,7 @@ public class ModifierRecipeProvider extends BaseRecipeProvider {
       .disallowCrystal()
       .save(consumer, wrap(ModifierIds.rebalanced, slotlessFolder, "_" + SlotType.ABILITY.getName()));
     SwappableModifierRecipeBuilder.modifier(ModifierIds.rebalanced, "traits")
-      .setTools(ToolHookIngredient.of(TinkerTags.Items.BONUS_SLOTS, ToolHooks.REBALANCED_TRAIT))
+      .setTools(ToolHookIngredient.of(TinkerTags.Items.BONUS_SLOTS, ToolHooks.REBALANCED_TRAIT).toVanilla())
       .addInput(TinkerMaterials.manyullyn.getNuggetTag())
       .addInput(Items.END_CRYSTAL)
       .addInput(TinkerMaterials.manyullyn.getNuggetTag())
@@ -1714,7 +1714,7 @@ public class ModifierRecipeProvider extends BaseRecipeProvider {
       .disallowCrystal()
       .save(consumer, wrap(ModifierIds.rebalanced, slotlessFolder, "_traits"));
     ModifierRecipeBuilder.modifier(ModifierIds.redirected)
-      .setTools(ToolHookIngredient.of(TinkerTags.Items.AMMO, ToolHooks.REBALANCED_TRAIT))
+      .setTools(ToolHookIngredient.of(TinkerTags.Items.AMMO, ToolHooks.REBALANCED_TRAIT).toVanilla())
       .addInput(Items.DRAGON_BREATH)
       .save(consumer, prefix(ModifierIds.redirected, slotlessFolder));
 
@@ -1749,8 +1749,8 @@ public class ModifierRecipeProvider extends BaseRecipeProvider {
       .save(consumer, location(worktableFolder + "remove_modifier_sponge"));
     ModifierRemovalRecipeBuilder.removal()
       .addInput(CompoundIngredient.of(
-        FluidContainerIngredient.fromFluid(TinkerFluids.venom),
-        FluidContainerIngredient.withDisplay(TinkerFluids.venom.ingredient(), FluidValues.BOTTLE, TinkerFluids.venomBottle))
+        FluidContainerIngredient.fromFluid(TinkerFluids.venom).toVanilla(),
+        FluidContainerIngredient.withDisplay(TinkerFluids.venom.ingredient(), FluidValues.BOTTLE, TinkerFluids.venomBottle).toVanilla())
       )
       .modifierPredicate(removable)
       .save(consumer, location(worktableFolder + "remove_modifier_venom"));
@@ -1809,11 +1809,11 @@ public class ModifierRecipeProvider extends BaseRecipeProvider {
     IJsonPredicate<ModifierId> blacklist = ModifierPredicate.tag(TinkerTags.Modifiers.INVISIBLE_INK_BLACKLIST).inverted();
     ModifierSetWorktableRecipeBuilder.setAdding(hiddenModifiers)
                                      .modifierPredicate(blacklist)
-                                     .addInput(FluidContainerIngredient.withDisplay(TinkerFluids.skySlime.ingredient(), FluidValues.BOTTLE, TinkerFluids.slimeBottle.get(SlimeType.SKY)))
+                                     .addInput(FluidContainerIngredient.withDisplay(TinkerFluids.skySlime.ingredient(), FluidValues.BOTTLE, TinkerFluids.slimeBottle.get(SlimeType.SKY)).toVanilla())
                                      .save(consumer, location(worktableFolder + "invisible_ink_adding"));
     ModifierSetWorktableRecipeBuilder.setRemoving(hiddenModifiers)
                                      .modifierPredicate(blacklist)
-                                     .addInput(FluidContainerIngredient.withDisplay(FluidIngredient.single(Fluids.MILK), FluidType.BUCKET_VOLUME, Items.MILK_BUCKET))
+                                     .addInput(FluidContainerIngredient.withDisplay(FluidIngredient.tag(Fluids.MILK), FluidType.BUCKET_VOLUME, Items.MILK_BUCKET).toVanilla())
                                      .save(consumer, location(worktableFolder + "invisible_ink_removing"));
 
     // swapping hands
@@ -1920,10 +1920,10 @@ public class ModifierRecipeProvider extends BaseRecipeProvider {
 
     // cosmetics //
     ResourceLocation dyeing = location(folder + "dyeing");
-    consumer.accept(dyeing, new ArmorDyeingRecipe(dyeing), null);
+    consumer.accept(dyeing, new ArmorDyeingRecipe(), null);
     ResourceLocation trim = location(folder + "trim");
-    consumer.accept(trim, new ArmorTrimRecipe(trim), null);
-    LoadableFinishedRecipe.save(consumer, BannerModifierRecipe.LOADER, new BannerModifierRecipe(location(folder + "banner"), Ingredient.of(TinkerFluids.slimeBottle.get(SlimeType.SKY))));
+    consumer.accept(trim, new ArmorTrimRecipe(), null);
+    LoadableFinishedRecipe.save(consumer, location(folder + "banner"), BannerModifierRecipe.LOADER, new BannerModifierRecipe(location(folder + "banner"), Ingredient.of(TinkerFluids.slimeBottle.get(SlimeType.SKY))));
 
     // slimesuit //
     RecipeOutput slimeEmbellishmentConsumer = consumer.withConditions(new TagFilledCondition<>(TinkerTags.Items.EMBELLISHMENT_SLIME));

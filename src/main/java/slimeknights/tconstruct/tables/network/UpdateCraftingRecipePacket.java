@@ -5,6 +5,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import slimeknights.tconstruct.library.utils.RecipeHelper;
@@ -24,9 +25,9 @@ public class UpdateCraftingRecipePacket implements TinkerBlockEntityPayload<Craf
 
   private final BlockPos pos;
   private final ResourceLocation recipe;
-  public UpdateCraftingRecipePacket(BlockPos pos, CraftingRecipe recipe) {
+  public UpdateCraftingRecipePacket(BlockPos pos, RecipeHolder<CraftingRecipe> recipe) {
     this.pos = pos;
-    this.recipe = recipe.getId();
+    this.recipe = recipe.id();
   }
 
   public UpdateCraftingRecipePacket(RegistryFriendlyByteBuf buffer) {
@@ -54,7 +55,7 @@ public class UpdateCraftingRecipePacket implements TinkerBlockEntityPayload<Craf
   public void handleBlockEntity(IPayloadContext context, CraftingStationBlockEntity be) {
     Level level = be.getLevel();
     assert level != null;
-    CraftingRecipe recipe = RecipeHelper.getRecipe(level.getRecipeManager(), this.recipe, CraftingRecipe.class).orElse(null);
+    RecipeHolder<CraftingRecipe> recipe = RecipeHelper.getRecipeHolder(level.getRecipeManager(), this.recipe, CraftingRecipe.class).orElse(null);
     if (recipe != null) {
       be.updateRecipe(recipe);
     } else {

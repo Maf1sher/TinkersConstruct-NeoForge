@@ -42,6 +42,11 @@ public class CastingContainerWrapper implements ICastingContainer {
     return DataComponentHelper.getCustomData(fluid);
   }
 
+  @Override
+  public FluidStack getFluidStack() {
+    return fluid.copy();
+  }
+
   /** Uses the input for input (default) */
   public void useInput() {
     switchSlots = false;

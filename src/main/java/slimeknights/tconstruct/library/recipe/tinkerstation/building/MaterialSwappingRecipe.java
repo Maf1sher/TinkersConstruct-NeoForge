@@ -42,6 +42,7 @@ import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.library.tools.part.IMaterialItem;
 
 import java.util.BitSet;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.IntPredicate;
 import java.util.stream.IntStream;
@@ -299,7 +300,7 @@ public abstract class MaterialSwappingRecipe implements ITinkerStationRecipe {
         slot--;
       }
       if (slot < extraRequirements.size()) {
-        return extraRequirements.get(slot).getItems();
+        return Arrays.asList(extraRequirements.get(slot).getItems());
       }
       return List.of();
     }

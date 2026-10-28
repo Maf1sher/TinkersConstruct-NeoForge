@@ -43,14 +43,14 @@ public class ItemNameIngredient implements ICustomIngredient {
         if (item.isJsonObject()) {
           throw new IllegalStateException("Unexpected object for 'item' in name ingredient");
         }
-        return of(ResourceLocation.parse(item.getAsString()));
+        return ItemNameIngredient.of(ResourceLocation.parse(item.getAsString()));
       }
       if (json.has("items")) {
         JsonElement items = json.get("items");
         if (!items.isJsonArray()) {
           throw new IllegalStateException("Unexpected value for 'items' in name ingredient");
         }
-        return of(items.getAsJsonArray().asList().stream().map(element -> ResourceLocation.parse(element.getAsString())).toArray(ResourceLocation[]::new));
+        return ItemNameIngredient.of(items.getAsJsonArray().asList().stream().map(element -> ResourceLocation.parse(element.getAsString())).toArray(ResourceLocation[]::new));
       }
       throw new IllegalStateException("Missing 'item' or 'items' in name ingredient");
     }
@@ -107,9 +107,9 @@ public class ItemNameIngredient implements ICustomIngredient {
       throw new IllegalArgumentException("At least one item name required");
     }
     if (names.length == 1) {
-      return new Ingredient(of(names[0]));
+      return new Ingredient(ItemNameIngredient.of(names[0]));
     }
-    return CompoundIngredient.of(Arrays.stream(names).map(name -> new Ingredient(of(name))).toArray(Ingredient[]::new));
+    return CompoundIngredient.of(Arrays.stream(names).map(name -> new Ingredient(ItemNameIngredient.of(name))).toArray(Ingredient[]::new));
   }
 
   @Override

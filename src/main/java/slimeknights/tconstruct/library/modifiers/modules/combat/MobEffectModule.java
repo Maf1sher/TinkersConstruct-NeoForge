@@ -70,7 +70,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNullElse;
@@ -118,11 +117,6 @@ public interface MobEffectModule extends ModifierModule, ConditionalModule<ITool
   /** Creates a builder instance */
   static MobEffectModule.Builder builder(Holder<MobEffect> effect) {
     return new Builder(effect);
-  }
-
-  /** Creates a builder instance */
-  static MobEffectModule.Builder builder(Supplier<? extends MobEffect> effect) {
-    return new Builder(effect.get());
   }
 
   /** Builder for this modifier in datagen */

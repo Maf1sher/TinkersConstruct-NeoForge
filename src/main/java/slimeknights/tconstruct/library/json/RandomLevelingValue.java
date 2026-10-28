@@ -34,7 +34,7 @@ public record RandomLevelingValue(float flat, float perLevel, float randomBonus)
   @Deprecated(forRemoval = true)
   public JsonObject serialize() {
     JsonObject json = new JsonObject();
-    LOADABLE.serialize(this, json);
+    LOADABLE.serializeInto(this, json, slimeknights.mantle.util.typed.TypedMap.EMPTY);
     return json;
   }
 

@@ -94,7 +94,7 @@ public abstract class AbstractModifierProvider extends GenericDataProvider {
     addModifiers();
     return allOf(composableModifiers.entrySet().stream().map(entry -> {
       try {
-        return saveJson(cache, entry.getKey(), entry.getValue().serialize());
+        return saveJson(cache, entry.getKey().getLocation(), entry.getValue().serialize());
       } catch (RuntimeException e) {
         throw new RuntimeException("Failed to serialize modifier " + entry.getKey(), e);
       }

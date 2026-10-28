@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.library.recipe.ingredient;
 
+import com.google.gson.JsonObject;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.network.RegistryFriendlyByteBuf;

@@ -39,7 +39,7 @@ public class IncrementalModifierRecipe extends AbstractModifierRecipe {
   protected static final LoadableField<Ingredient,IncrementalModifierRecipe> INPUT_FIELD = Loadables.ITEM_INGREDIENT_NONEMPTY.requiredField("input", r -> r.input);
   protected static final LoadableField<Integer,IncrementalModifierRecipe> AMOUNT_FIELD = IntLoadable.FROM_ONE.defaultField("amount_per_item", 1, true, r -> r.amountPerInput);
   protected static final LoadableField<Integer,IncrementalModifierRecipe> NEEDED_FIELD = IntLoadable.FROM_ONE.requiredField("needed_per_level", r -> r.neededPerLevel);
-  protected static final LoadableField<ItemOutput,IncrementalModifierRecipe> LEFTOVER_FIELD = ItemOutput.Loadable.OPTIONAL_STACK.emptyField("leftover", r -> r.leftover);
+  protected static final LoadableField<ItemOutput,IncrementalModifierRecipe> LEFTOVER_FIELD = ItemOutput.Loadable.OPTIONAL_STACK.defaultField("leftover", ItemOutput.EMPTY, false, r -> r.leftover);
   public static final RecordLoadable<IncrementalModifierRecipe> LOADER = RecordLoadable.create(
     ContextKey.ID.requiredField(), INPUT_FIELD, AMOUNT_FIELD, NEEDED_FIELD,
     TOOLS_FIELD, MAX_TOOL_SIZE_FIELD, RESULT_FIELD, LEVEL_FIELD, SLOTS_FIELD,

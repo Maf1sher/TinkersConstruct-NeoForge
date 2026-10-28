@@ -15,6 +15,7 @@ import slimeknights.tconstruct.library.recipe.tinkerstation.ITinkerStationRecipe
 import slimeknights.tconstruct.library.tools.SlotType.SlotCount;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -93,7 +94,7 @@ public class DisplayModifierRecipe implements IDisplayModifierRecipe {
 
   /** Resolves a list of sized ingredients into a list of item stack lists */
   private static List<List<ItemStack>> resolve(List<SizedIngredient> ingredients) {
-    return ingredients.stream().map(SizedIngredient::getMatchingStacks).toList();
+    return ingredients.stream().map(ingredient -> List.of(ingredient.getItems())).toList();
   }
 
   /** Builder for creating a display recipe */

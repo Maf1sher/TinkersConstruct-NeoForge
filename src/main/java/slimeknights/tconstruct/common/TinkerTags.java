@@ -243,6 +243,8 @@ public class TinkerTags {
     public static final TagKey<Item> STAINED_GLASS_PANES = common("stained_glass_panes");
     /** Common chestplate tag, NeoForge only provides the full armor tag */
     public static final TagKey<Item> ARMORS_CHESTPLATES = common("armors/chestplates");
+    /** Common quartz storage block tag, no longer provided by NeoForge */
+    public static final TagKey<Item> STORAGE_BLOCKS_QUARTZ = common("storage_blocks/quartz");
     public static final TagKey<Item> GLASS_PANES_SILICA = common("glass_panes/silica");
 
     /** Compat: allows other mods to add normal stone variants which can be used to create stone tools.

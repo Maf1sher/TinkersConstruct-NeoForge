@@ -57,6 +57,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -260,7 +261,7 @@ public class PartBuilderToolRecycle implements IPartBuilderRecipe, MultiNamedRec
       // if we have a parts override, might as well only compute this map once
       Object2IntMap<IMaterialItem> partsOverride = parts.isEmpty() ? Object2IntMaps.emptyMap() : getDisplayParts(parts);
       List<ItemStack> patternItems = List.of(this.pattern.getItems());
-      displayRecipes = toolRequirement.getItems().stream()
+      displayRecipes = Arrays.stream(toolRequirement.getItems())
         .<IDisplayPartBuilderRecipe>flatMap(stack -> {
           // if we have a parts override, use that instead of the tool parts
           Object2IntMap<IMaterialItem> parts = !partsOverride.isEmpty() ? partsOverride : getDisplayParts(ToolPartsHook.parts(IModifiable.getToolDefinition(stack.getItem())));
@@ -311,7 +312,6 @@ public class PartBuilderToolRecycle implements IPartBuilderRecipe, MultiNamedRec
       return patterns.get(0);
     }
 
-    @Override
     public ResourceLocation getId() {
       return id;
     }

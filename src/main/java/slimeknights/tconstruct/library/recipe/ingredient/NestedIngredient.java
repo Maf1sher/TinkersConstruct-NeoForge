@@ -113,9 +113,9 @@ public abstract class NestedIngredient implements ICustomIngredient {
       String id = GsonHelper.convertToString(element, key);
       if (id.startsWith("#")) {
         ResourceLocation location = ResourceLocation.parse(id.substring(1));
-        return new Ingredient.TagValue(TagKey.create(Registries.ITEM, location));
+        return Ingredient.fromValues(Stream.of(new Ingredient.TagValue(TagKey.create(Registries.ITEM, location))));
       }
-      return new Ingredient.ItemValue(new ItemStack(Loadables.ITEM.convert(element, key, TypedMap.EMPTY)));
+      return Ingredient.fromValues(Stream.of(new Ingredient.ItemValue(new ItemStack(Loadables.ITEM.convert(element, key, TypedMap.EMPTY)))));
     }
     if (element.isJsonArray()) {
       // array form: each entry is a vanilla style value object

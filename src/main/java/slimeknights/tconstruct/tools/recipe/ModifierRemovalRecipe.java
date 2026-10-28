@@ -36,6 +36,7 @@ import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -47,7 +48,7 @@ public class ModifierRemovalRecipe extends AbstractWorktableRecipe {
 
   protected static final LoadableField<String,ModifierRemovalRecipe> NAME_FIELD = StringLoadable.DEFAULT.defaultField("name", "modifiers", true, r -> r.name);
   protected static final LoadableField<SizedIngredient,ModifierRemovalRecipe> TOOLS_FIELD = Loadables.SIZED_ITEM_INGREDIENT.defaultField("tools", DEFAULT_TOOLS, true, r -> r.sizedTool);
-  protected static final LoadableField<List<ItemStack>,ModifierRemovalRecipe> LEFTOVERS_FIELD = ItemStackLoadable.REQUIRED_STACK_NBT.list(0).defaultField("leftovers", List.of(), r -> r.leftovers);
+  protected static final LoadableField<List<ItemStack>,ModifierRemovalRecipe> LEFTOVERS_FIELD = ItemStackLoadable.REQUIRED_STACK_DATA.list(0).defaultField("leftovers", List.of(), r -> r.leftovers);
   protected static final LoadableField<IJsonPredicate<ModifierId>,ModifierRemovalRecipe> MODIFIER_PREDICATE_FIELD = ModifierPredicate.LOADER.defaultField("modifier_predicate", false, r -> r.modifierPredicate);
 
   /** Recipe loadable */
@@ -64,7 +65,7 @@ public class ModifierRemovalRecipe extends AbstractWorktableRecipe {
   private List<ModifierEntry> displayModifiers;
 
   public ModifierRemovalRecipe(ResourceLocation id, String name, SizedIngredient toolRequirement, List<SizedIngredient> inputs, List<ItemStack> leftovers, IJsonPredicate<ModifierId> modifierPredicate) {
-    super(id, toolRequirement.getIngredient(), inputs);
+    super(id, toolRequirement.ingredient(), inputs);
     this.name = name;
     this.title = Component.translatable(getBaseKey() + "." + name);
     this.sizedTool = toolRequirement;
@@ -174,7 +175,7 @@ public class ModifierRemovalRecipe extends AbstractWorktableRecipe {
   @Override
   public List<ItemStack> getInputTools() {
     if (tools == null) {
-      tools = sizedTool.getItems().stream().map(stack -> {
+      tools = Arrays.stream(sizedTool.getItems()).map(stack -> {
         ItemStack tool = IModifiableDisplay.getDisplayStack(stack.getItem());
         if (stack.getCount() > 1) {
           tool = tool.copyWithCount(stack.getCount());

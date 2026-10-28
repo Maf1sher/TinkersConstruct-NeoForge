@@ -37,6 +37,7 @@ import net.neoforged.neoforge.registries.RegisterEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredItem;
+import net.neoforged.neoforge.fluids.crafting.FluidIngredientType;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import slimeknights.mantle.data.predicate.block.BlockPredicate;
 import slimeknights.mantle.data.predicate.damage.DamageSourcePredicate;
@@ -69,6 +70,7 @@ import slimeknights.tconstruct.library.json.predicate.HarvestTierPredicate;
 import slimeknights.tconstruct.library.json.predicate.HasMobEffectPredicate;
 import slimeknights.tconstruct.library.json.predicate.TinkerPredicate;
 import slimeknights.tconstruct.library.recipe.ingredient.BlockTagIngredient;
+import slimeknights.tconstruct.library.recipe.ingredient.FluidNameIngredient;
 import slimeknights.tconstruct.library.recipe.ingredient.InstrumentIngredient;
 import slimeknights.tconstruct.library.recipe.ingredient.ItemNameIngredient;
 import slimeknights.tconstruct.library.recipe.ingredient.MaterialIngredient;
@@ -207,6 +209,9 @@ public final class TinkerCommons extends TinkerModule {
       Registry.register(registry, TConstruct.getResource("tag_intersection_present"), TagIntersectionPresentCondition.CODEC);
       Registry.register(registry, TConstruct.getResource("tag_difference_present"), TagDifferencePresentCondition.CODEC);
       Registry.register(registry, TConstruct.getResource("tag_not_empty"), TagNotEmptyCondition.CODEC);
+    } else if (event.getRegistryKey() == NeoForgeRegistries.Keys.FLUID_INGREDIENT_TYPES) {
+      Registry<FluidIngredientType<?>> registry = event.getRegistry(NeoForgeRegistries.Keys.FLUID_INGREDIENT_TYPES);
+      Registry.register(registry, FluidNameIngredient.ID, (FluidIngredientType<?>) FluidNameIngredient.TYPE);
     } else if (event.getRegistryKey() == NeoForgeRegistries.Keys.INGREDIENT_TYPES) {
       // custom ingredient types; JSON "type" keys stay identical to the legacy Forge serializer IDs
       Registry<IngredientType<?>> registry = event.getRegistry(NeoForgeRegistries.Keys.INGREDIENT_TYPES);

@@ -61,7 +61,6 @@ import java.util.stream.IntStream;
  * @see CraftingTableRepairKitRecipe
  * @see slimeknights.mantle.recipe.helper.SimpleFinishedRecipe
  */
-@RequiredArgsConstructor
 public class TinkerStationRepairRecipe implements ITinkerStationRecipe, MultiNamedRecipe<IDisplayCraftingTinkering> {
   public static final Component TITLE = TConstruct.makeTranslation("recipe", "tool_repair");
   private static final Component TOOLTIP = TConstruct.makeTranslation("recipe", "tool_repair.tooltip");
@@ -70,9 +69,6 @@ public class TinkerStationRepairRecipe implements ITinkerStationRecipe, MultiNam
   protected static final RecipeResult<LazyToolStack> FULLY_REPAIRED = RecipeResult.failure(REPAIRED);
   /** No action int consumer for recipe result */
   private static final IntConsumer NO_ACTION = i -> {};
-
-  @Getter
-  private final ResourceLocation id;
 
   /**
    * Gets the material for the given slot
@@ -265,10 +261,10 @@ public class TinkerStationRepairRecipe implements ITinkerStationRecipe, MultiNam
 
   @Override
   public List<NamedRecipe<IDisplayCraftingTinkering>> getRecipes(ResourceLocation id, HolderLookup.Provider provider) {
-    return RecipeHelper.named(id, displayRecipes(provider));
+    return RecipeHelper.named(id, displayRecipes(id, provider));
   }
 /** Lazily loaded list of display recipes for JEI */
-  private List<IDisplayCraftingTinkering> displayRecipes(HolderLookup.Provider access) {
+  private List<IDisplayCraftingTinkering> displayRecipes(ResourceLocation id, HolderLookup.Provider access) {
     if (displayRecipes == null) {
       CompoundTag stats = StatsNBT.builder().set(ToolStats.DURABILITY, 1000).build().serializeToNBT();
       MaterialNBT displayMaterials = new MaterialNBT(IntStream.range(0, 5).mapToObj(i -> MaterialVariant.of(ToolBuildHandler.getRenderMaterial(i))).toList());
@@ -279,7 +275,7 @@ public class TinkerStationRepairRecipe implements ITinkerStationRecipe, MultiNam
       Set<Item> dynamicTools = new HashSet<>();
       List<ItemStack> dynamicToolStacks = new ArrayList<>();
       for (Holder<Item> holder : BuiltInRegistries.ITEM.getTagOrEmpty(TinkerTags.Items.DURABILITY)) {
-        if (holder.isBound() && holder.get() instanceof IModifiable modifiable) {
+        if (holder.isBound() && holder.value() instanceof IModifiable modifiable) {
           CompoundTag tag = new CompoundTag();
           ToolStack tool = ToolStack.from(modifiable.asItem(), modifiable.getToolDefinition(), tag);
           // assign display materials if needed

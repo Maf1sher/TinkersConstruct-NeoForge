@@ -205,10 +205,10 @@ public class ToolCastingRecipe extends PartSwapCastingRecipe implements MultiNam
 
   @Override
   public List<NamedRecipe<IDisplayableCastingRecipe>> getRecipes(ResourceLocation id, HolderLookup.Provider provider) {
-    return RecipeHelper.named(id, displayRecipes(provider));
+    return RecipeHelper.named(id, displayRecipes(id, provider));
   }
 /** Lazily loaded list of display recipes for JEI */
-  private List<IDisplayableCastingRecipe> displayRecipes(HolderLookup.Provider access) {
+  private List<IDisplayableCastingRecipe> displayRecipes(ResourceLocation id, HolderLookup.Provider access) {
     if (multiRecipes == null) {
       List<MaterialStatsId> requirements = ToolMaterialHook.stats(result.getToolDefinition());
       if (requirements.size() < castPurpose.minMaterials) {
@@ -250,7 +250,7 @@ public class ToolCastingRecipe extends PartSwapCastingRecipe implements MultiNam
             } else {
               tools = castSwap.getOutputs();
             }
-            displayRecipes.add(DisplayCastingRecipe.from(this)
+            displayRecipes.add(DisplayCastingRecipe.from(id, this)
               .casts(casts).consumed(isConsumed())
               .fluids(castSwap.getFluids()).results(tools)
               .coolingTime(maxCoolingTime).materialCasting(false)

@@ -4,8 +4,12 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import slimeknights.mantle.data.loadable.Loadables;
@@ -65,16 +69,23 @@ public class TippedToolTransformRecipe extends ToolBuildingRecipe {
             break;
           }
         }
-        // if we found one, set its NBT into the result tool
+        // if we found one, set its potion ID into the result tool
         if (!stack.isEmpty()) {
-          CompoundTag tag = DataComponentHelper.getCustomData(stack);
-          if (tag != null && tag.contains(PotionUtils.TAG_POTION, Tag.TAG_STRING)) {
-            tool.getPersistentData().putString(modifier, tag.getString(PotionUtils.TAG_POTION));
+          ResourceLocation potion = getPotionId(stack);
+          if (potion != null) {
+            tool.getPersistentData().putString(modifier.getId().getLocation(), potion.toString());
           }
         }
       }
     }
     return result;
+  }
+
+  /** Gets the potion ID from the stack's potion contents, or null if it has none */
+  @Nullable
+  private static ResourceLocation getPotionId(ItemStack stack) {
+    PotionContents contents = stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+    return contents.potion().flatMap(Holder::unwrapKey).map(ResourceKey::location).orElse(null);
   }
 
   @Override
@@ -83,10 +94,10 @@ public class TippedToolTransformRecipe extends ToolBuildingRecipe {
       ItemStack result = super.getDisplayOutput().get(0);
       displayOutput = Arrays.stream(ingredients.get(0).getItems())
         .map(stack -> {
-          CompoundTag tag = DataComponentHelper.getCustomData(stack);
-          if (tag != null) {
+          ResourceLocation potion = getPotionId(stack);
+          if (potion != null) {
             ItemStack copy = result.copy();
-            ToolStack.from(copy).getPersistentData().putString(modifier, tag.getString(PotionUtils.TAG_POTION));
+            ToolStack.from(copy).getPersistentData().putString(modifier.getId().getLocation(), potion.toString());
             return copy;
           }
           return result;

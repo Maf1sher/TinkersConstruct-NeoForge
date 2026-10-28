@@ -213,7 +213,7 @@ public class ModifierRecipe extends AbstractModifierRecipe {
   @Override
   public List<ItemStack> getDisplayItems(int slot) {
     if (slot >= 0 && slot < inputs.size()) {
-      return inputs.get(slot).getItems();
+      return List.of(inputs.get(slot).getItems());
     }
     return List.of();
   }

@@ -267,7 +267,6 @@ public class PartRecipe implements IPartBuilderRecipe, MultiNamedRecipe<IDisplay
     private final List<ItemStack> patternItems;
     private final List<ItemStack> hiddenInputs;
 
-    @Override
     public ResourceLocation getId() {
       return id;
     }

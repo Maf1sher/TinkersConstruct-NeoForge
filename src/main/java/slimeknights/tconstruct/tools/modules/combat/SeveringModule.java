@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.tools.modules.combat;
 
 import net.minecraft.world.entity.Entity;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -50,7 +51,7 @@ public enum SeveringModule implements ModifierModule, ProcessLootModifierHook {
     Entity entity = context.getParamOrNull(LootContextParams.THIS_ENTITY);
     if (entity != null) {
       // ensure no head so far
-      if (generatedLoot.stream().noneMatch(stack -> stack.is(Tags.Items.SKULLS))) {
+      if (generatedLoot.stream().noneMatch(stack -> stack.is(ItemTags.SKULLS))) {
         // find proper recipe
         Level world = context.getLevel();
         List<SeveringRecipe> recipes = SeveringRecipeCache.findRecipe(world.getRecipeManager(), entity.getType());

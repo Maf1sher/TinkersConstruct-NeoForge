@@ -189,11 +189,11 @@ public class ToolsRecipeProvider extends BaseRecipeProvider implements IMaterial
     String travelersFolder = armorFolder + "travelers/";
     // fake ingot allows things like bronze and pewter to craft it even if their ingot form is not registered
     Function<MaterialStatsId,Ingredient> travelersMaterial = type -> CompoundIngredient.of(
-      MaterialValueIngredient.of(MaterialPredicate.and(MaterialPredicate.or(MaterialPredicate.CASTABLE, MaterialPredicate.COMPOSITE), new MaterialStatTypePredicate(type)), 1),
-      MaterialIngredient.of(TinkerToolParts.fakeIngot, new MaterialStatTypePredicate(type))
+      MaterialValueIngredient.of(MaterialPredicate.and(MaterialPredicate.or(MaterialPredicate.CASTABLE, MaterialPredicate.COMPOSITE), new MaterialStatTypePredicate(type)), 1).toVanilla(),
+      MaterialIngredient.of(TinkerToolParts.fakeIngot, new MaterialStatTypePredicate(type)).toVanilla()
     );
     IJsonPredicate<MaterialVariantId> travelersCuirass = new MaterialStatTypePredicate(StatlessMaterialStats.CUIRASS.getIdentifier());
-    Ingredient cuirass = MaterialValueIngredient.of(travelersCuirass, 1);
+    Ingredient cuirass = MaterialValueIngredient.of(travelersCuirass, 1).toVanilla();
     MaterialsConsumerBuilder.shaped("cl").shapedRecipe(RecipeCategory.COMBAT, TinkerTools.travelersGear.get(ArmorItem.Type.HELMET))
       .pattern("l l")
       .pattern("glg")
@@ -235,7 +235,7 @@ public class ToolsRecipeProvider extends BaseRecipeProvider implements IMaterial
       .pattern("scs")
       .pattern("lcl")
       .define('l', cuirass)
-      .define('c', MaterialValueIngredient.of(new MaterialStatTypePredicate(StatlessMaterialStats.SHIELD_CORE.getIdentifier()), 1))
+      .define('c', MaterialValueIngredient.of(new MaterialStatTypePredicate(StatlessMaterialStats.SHIELD_CORE.getIdentifier()), 1).toVanilla())
       .define('s', Tags.Items.RODS_WOODEN)
       .unlockedBy("has_item", has(Tags.Items.LEATHERS))
       .save(consumer, location(travelersFolder + "shield"));
@@ -468,7 +468,7 @@ public class ToolsRecipeProvider extends BaseRecipeProvider implements IMaterial
       .save(consumer, location(partFolder + "fake_storage_block_composite"));
     // ingot to block
     MaterialsConsumerBuilder.shaped("#").shapedRecipe(RecipeCategory.MISC, TinkerToolParts.fakeStorageBlock)
-      .define('#', MaterialIngredient.of(TinkerToolParts.fakeIngot.get(), new MaterialHasPartPredicate(TinkerToolParts.fakeStorageBlockItem.get())))
+      .define('#', MaterialIngredient.of(TinkerToolParts.fakeIngot.get(), new MaterialHasPartPredicate(TinkerToolParts.fakeStorageBlockItem.get())).toVanilla())
       .pattern("###")
       .pattern("###")
       .pattern("###")
@@ -476,7 +476,7 @@ public class ToolsRecipeProvider extends BaseRecipeProvider implements IMaterial
       .save(consumer, location(partFolder + "fake_ingot_to_block"));
     // block to ingot
     ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, TinkerToolParts.fakeIngot, 9)
-      .requires(MaterialIngredient.of(TinkerToolParts.fakeStorageBlock, new MaterialHasPartPredicate(TinkerToolParts.fakeIngot.get())))
+      .requires(MaterialIngredient.of(TinkerToolParts.fakeStorageBlock, new MaterialHasPartPredicate(TinkerToolParts.fakeIngot.get())).toVanilla())
       .unlockedBy("has_item", has(TinkerToolParts.fakeStorageBlock))
       .save(MaterialsConsumerBuilder.shapeless(1).build(consumer), location(partFolder + "fake_block_to_ingots"));
 

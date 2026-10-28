@@ -211,9 +211,6 @@ public record AttributeModule(String unique, Holder<Attribute> attribute, Operat
   }
 
   /** Creates a new builder instance from an attribute supplier */
-  public static Builder builder(Supplier<Attribute> attribute, Operation operation) {
-    return builder(attribute.get(), operation);
-  }
 
   @Accessors(fluent = true)
   public static class Builder extends VariableFormula.Builder<Builder,AttributeModule,ToolVariable> {

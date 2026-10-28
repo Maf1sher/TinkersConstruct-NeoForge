@@ -42,7 +42,7 @@ public class ModifierMaterialRepairRecipe extends TinkerStationRepairRecipe impl
   @Getter
   private final MaterialStatsId statType;
   public ModifierMaterialRepairRecipe(ResourceLocation id, ModifierId modifier, MaterialId repairMaterialID, MaterialStatsId statType) {
-    super(id);
+    super();
     this.modifier = modifier;
     this.repairMaterial = LazyMaterial.of(repairMaterialID);
     this.statType = statType;

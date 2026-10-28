@@ -21,9 +21,9 @@ public record OptionallyNestedLoadable<T>(Loadable<T> loadable, String objectKey
   }
 
   @Override
-  public JsonElement serialize(T object) {
+  public JsonElement serialize(T object, TypedMap context) {
     // don't bother using the key when serializing, someone else will if needed
-    return loadable.serialize(object);
+    return loadable.serialize(object, context);
   }
 
   @Override
@@ -32,7 +32,7 @@ public record OptionallyNestedLoadable<T>(Loadable<T> loadable, String objectKey
   }
 
   @Override
-  public void encode(RegistryFriendlyByteBuf buffer, T value) {
-    loadable.encode(buffer, value);
+  public void encode(RegistryFriendlyByteBuf buffer, T value, TypedMap context) {
+    loadable.encode(buffer, value, context);
   }
 }

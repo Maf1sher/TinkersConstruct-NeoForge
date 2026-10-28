@@ -83,10 +83,10 @@ public class MaterialCastingRecipe extends AbstractMaterialCastingRecipe impleme
 
   @Override
   public List<NamedRecipe<IDisplayableCastingRecipe>> getRecipes(ResourceLocation id, HolderLookup.Provider provider) {
-    return RecipeHelper.named(id, displayRecipes(provider));
+    return RecipeHelper.named(id, displayRecipes(id, provider));
   }
 /** Lazily loaded list of display recipes for JEI */
-  private List<IDisplayableCastingRecipe> displayRecipes(HolderLookup.Provider access) {
+  private List<IDisplayableCastingRecipe> displayRecipes(ResourceLocation id, HolderLookup.Provider access) {
     if (multiRecipes == null) {
       List<MaterialFluidRecipe> recipes = MaterialCastingLookup.getSortedCastingFluids();
       List<FluidStack> fluids = new ArrayList<>(recipes.size());
@@ -117,7 +117,7 @@ public class MaterialCastingRecipe extends AbstractMaterialCastingRecipe impleme
       if (fluids.isEmpty()) {
         multiRecipes = List.of();
       } else {
-        multiRecipes = List.of(DisplayCastingRecipe.from(this)
+        multiRecipes = List.of(DisplayCastingRecipe.from(id, this)
           .cast(getCast()).consumed(isConsumed())
           .fluids(List.copyOf(fluids))
           .results(List.copyOf(results))

@@ -213,7 +213,7 @@ public class MaterialIngredient extends NestedIngredient {
       items = items.flatMap(stack -> MaterialRecipeCache.getAllVariants().stream()
         .filter(material::matches)
         .map(mat -> IMaterialItem.withMaterial(stack, mat))
-        .filter(stack -> stack.has(net.minecraft.core.component.DataComponents.CUSTOM_DATA)));
+        .filter(variant -> variant.has(net.minecraft.core.component.DataComponents.CUSTOM_DATA)));
       materialStacks = items.distinct().toArray(ItemStack[]::new);
     }
     return Arrays.stream(materialStacks);

@@ -43,7 +43,7 @@ public class TypeAwareRecipeSerializer<T extends Recipe<?>> extends LoadableReci
   /** Context field to fetch a type aware serializer from the recipe context */
   @SuppressWarnings("unchecked")
   public static final RecordField<TypeAwareRecipeSerializer<?>,Recipe<?>> TYPED_SERIALIZER =
-    (RecordField<TypeAwareRecipeSerializer<?>,Object>) LoadableRecipeSerializer.SERIALIZER.mappedField((value, error) -> {
+    (RecordField<TypeAwareRecipeSerializer<?>,Recipe<?>>) (RecordField<?,?>) LoadableRecipeSerializer.SERIALIZER.mappedField((value, error) -> {
       if (value instanceof TypeAwareRecipeSerializer<?> aware) {
         return aware;
       }

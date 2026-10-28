@@ -52,7 +52,7 @@ public class PartBuilderToolRecycleBuilder extends AbstractRecipeBuilder<PartBui
   @SuppressWarnings("deprecation")
   @Override
   public void save(RecipeOutput output) {
-    save(output, BuiltInRegistries.ITEM.getKey(tools.getItems().get(0).getItem()));
+    save(output, BuiltInRegistries.ITEM.getKey(tools.getItems()[0].getItem()));
   }
 
   @Override

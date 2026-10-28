@@ -2,7 +2,7 @@ package slimeknights.tconstruct.library.recipe.modifiers;
 
 import lombok.Getter;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Container;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -26,7 +26,7 @@ import slimeknights.tconstruct.tools.TinkerModifiers;
 /**
  * Shared logic for main types of salvage recipes
  */
-public class ModifierSalvage implements ICustomOutputRecipe<Container> {
+public class ModifierSalvage implements ICustomOutputRecipe<CraftingInput> {
   public static final RecordLoadable<ModifierSalvage> LOADER = RecordLoadable.create(
     ContextKey.ID.requiredField(),
     Loadables.ITEM_INGREDIENT_NONEMPTY.requiredField("tools", r -> r.toolIngredient),
@@ -90,7 +90,7 @@ public class ModifierSalvage implements ICustomOutputRecipe<Container> {
   /** @deprecated Use {@link #matches(ItemStack, IToolStackView, int)} */
   @Deprecated
   @Override
-  public boolean matches(Container inv, Level level) {
+  public boolean matches(CraftingInput inv, Level level) {
     return false;
   }
 

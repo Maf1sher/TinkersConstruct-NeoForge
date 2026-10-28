@@ -81,7 +81,7 @@ public abstract class AbstractWorktableRecipe implements IModifierWorktableRecip
     if (slot < 0 || slot >= inputs.size()) {
       return List.of();
     }
-    return inputs.get(slot).getItems();
+    return List.of(inputs.get(slot).getItems());
   }
 
   @Override

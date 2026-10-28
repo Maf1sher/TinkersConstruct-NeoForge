@@ -156,6 +156,11 @@ public class ComposableModifier extends BasicModifier {
       return translationKey("modifier." + modifier.toLanguageKey());
     }
 
+    /** Overrides the description key prefix using the given modifier ID. */
+    public Builder translationKey(ResourceId modifier) {
+      return translationKey(modifier.getLocation());
+    }
+
 
     /* Tooltip display */
 

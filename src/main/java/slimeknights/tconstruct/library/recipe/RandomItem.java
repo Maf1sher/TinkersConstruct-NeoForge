@@ -3,9 +3,7 @@ package slimeknights.tconstruct.library.recipe;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import io.netty.handler.codec.DecoderException;
 import lombok.RequiredArgsConstructor;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
@@ -65,9 +63,6 @@ public abstract class RandomItem {
   /** Serializes this object to JSON */
   public abstract JsonElement serialize();
 
-  /** Writes this object to the packet buffer */
-  public abstract void write(FriendlyByteBuf buffer);
-
   /**
    * Reads a random item from JSON
    * @param element  JSON element
@@ -103,23 +98,6 @@ public abstract class RandomItem {
     }
     // constant tag most likely
     return constant(result);
-  }
-
-  /** Reads the object from the packet buffer */
-  public static RandomItem read(FriendlyByteBuf buffer) {
-    ItemOutput result = ItemOutput.read(buffer);
-    RandomType type = buffer.readEnum(RandomType.class);
-    switch (type) {
-      case RANGE -> {
-        int min = buffer.readVarInt();
-        return range(result, min);
-      }
-      case CHANCE -> {
-        float chance = buffer.readFloat();
-        return chance(result, chance);
-      }
-    }
-    throw new DecoderException("Invalid random type " + type + " for RandomItem");
   }
 
   /** Item that outputs with a uniform range */
@@ -160,13 +138,6 @@ public abstract class RandomItem {
       object.remove("count");
       return object;
     }
-
-    @Override
-    public void write(FriendlyByteBuf buffer) {
-      result.write(buffer);
-      buffer.writeEnum(RandomType.RANGE);
-      buffer.writeVarInt(minCount);
-    }
   }
 
   /** Item that outputs with a percent chance */
@@ -203,15 +174,5 @@ public abstract class RandomItem {
       object.addProperty("chance", chance);
       return object;
     }
-
-    @Override
-    public void write(FriendlyByteBuf buffer) {
-      result.write(buffer);
-      buffer.writeEnum(RandomType.CHANCE);
-      buffer.writeFloat(chance);
-    }
   }
-
-  /** Enum of types for packet writing */
-  private enum RandomType { RANGE, CHANCE }
 }

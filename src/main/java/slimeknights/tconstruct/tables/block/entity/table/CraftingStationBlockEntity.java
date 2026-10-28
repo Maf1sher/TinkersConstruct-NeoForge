@@ -9,7 +9,9 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -21,14 +23,13 @@ import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
 import slimeknights.tconstruct.shared.inventory.ConfigurableInvWrapperCapability;
 import slimeknights.tconstruct.tables.TinkerTables;
-import slimeknights.tconstruct.tables.block.entity.inventory.CraftingContainerWrapper;
 import slimeknights.tconstruct.tables.block.entity.inventory.LazyResultContainer;
 import slimeknights.tconstruct.tables.block.entity.inventory.LazyResultContainer.ILazyCrafter;
 import slimeknights.tconstruct.tables.menu.CraftingStationContainerMenu;
 import slimeknights.tconstruct.tables.network.UpdateCraftingRecipePacket;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
+import java.util.List;
 
 public class CraftingStationBlockEntity extends RetexturedTableBlockEntity implements ILazyCrafter {
   public static final Component UNCRAFTABLE = TConstruct.makeTranslation("gui", "crafting_station.uncraftable");
@@ -36,17 +37,13 @@ public class CraftingStationBlockEntity extends RetexturedTableBlockEntity imple
 
   /** Last crafted crafting recipe */
   @Nullable
-  private CraftingRecipe lastRecipe;
+  private RecipeHolder<CraftingRecipe> lastRecipe;
   /** Result inventory, lazy loads results */
   @Getter
   private final LazyResultContainer craftingResult;
-  /** Crafting inventory for the recipe calls */
-  private final CraftingContainerWrapper craftingInventory;
-
   public CraftingStationBlockEntity(BlockPos pos, BlockState state) {
     super(TinkerTables.craftingStationTile.get(), pos, state, NAME, 9);
     this.itemHandler = new ConfigurableInvWrapperCapability(this, false, false);
-    this.craftingInventory = new CraftingContainerWrapper(this, 3, 3);
     this.craftingResult = new LazyResultContainer(this);
   }
 
@@ -54,6 +51,15 @@ public class CraftingStationBlockEntity extends RetexturedTableBlockEntity imple
   @Override
   public AbstractContainerMenu createMenu(int menuId, Inventory playerInventory, Player playerEntity) {
     return new CraftingStationContainerMenu(menuId, playerInventory, this);
+  }
+
+  /** Creates a snapshot of the crafting grid for vanilla recipe matching */
+  private CraftingInput createCraftingInput() {
+    NonNullList<ItemStack> items = NonNullList.withSize(9, ItemStack.EMPTY);
+    for (int i = 0; i < 9; i++) {
+      items.set(i, this.getItem(i));
+    }
+    return CraftingInput.of(3, 3, items);
   }
 
   @Override
@@ -70,21 +76,22 @@ public class CraftingStationBlockEntity extends RetexturedTableBlockEntity imple
     }
     // assume empty unless we learn otherwise
     ItemStack result = ItemStack.EMPTY;
+    CraftingInput input = createCraftingInput();
     if (!this.level.isClientSide && this.level.getServer() != null) {
       RecipeManager manager = this.level.getServer().getRecipeManager();
 
       // first, try the cached recipe
       CommonHooks.setCraftingPlayer(player);
-      CraftingRecipe recipe = lastRecipe;
+      RecipeHolder<CraftingRecipe> recipe = lastRecipe;
       // if it does not match, find a new recipe
       // note we intentionally have no player access during matches, that could lead to an unstable recipe
-      if (recipe == null || !recipe.matches(this.craftingInventory, this.level)) {
-        recipe = manager.getRecipeFor(RecipeType.CRAFTING, this.craftingInventory, this.level).orElse(null);
+      if (recipe == null || !recipe.value().matches(input, this.level)) {
+        recipe = manager.getRecipeFor(RecipeType.CRAFTING, input, this.level).orElse(null);
       }
 
       // if we have a recipe, fetch its result
       if (recipe != null) {
-        result = recipe.assemble(this.craftingInventory, level.registryAccess());
+        result = recipe.value().assemble(input, level.registryAccess());
 
         // sync if the recipe is different
         if (recipe != lastRecipe) {
@@ -94,9 +101,9 @@ public class CraftingStationBlockEntity extends RetexturedTableBlockEntity imple
       }
       CommonHooks.setCraftingPlayer(null);
     }
-    else if (this.lastRecipe != null && this.lastRecipe.matches(this.craftingInventory, this.level)) {
+    else if (this.lastRecipe != null && this.lastRecipe.value().matches(input, this.level)) {
       CommonHooks.setCraftingPlayer(player);
-      result = this.lastRecipe.assemble(this.craftingInventory, level.registryAccess());
+      result = this.lastRecipe.value().assemble(input, level.registryAccess());
       CommonHooks.setCraftingPlayer(null);
     }
     return result;
@@ -109,10 +116,11 @@ public class CraftingStationBlockEntity extends RetexturedTableBlockEntity imple
    */
   public ItemStack getResultForPlayer(Player player) {
     CommonHooks.setCraftingPlayer(player);
-    CraftingRecipe recipe = this.lastRecipe; // local variable just to prevent race conditions if the field changes, though that is unlikely
+    RecipeHolder<CraftingRecipe> recipe = this.lastRecipe; // local variable just to prevent race conditions if the field changes, though that is unlikely
+    CraftingInput input = createCraftingInput();
 
     // try matches again now that we have player access
-    if (recipe == null || this.level == null || !recipe.matches(craftingInventory, level)) {
+    if (recipe == null || this.level == null || !recipe.value().matches(input, level)) {
       CommonHooks.setCraftingPlayer(null);
       return ItemStack.EMPTY;
     }
@@ -136,7 +144,7 @@ public class CraftingStationBlockEntity extends RetexturedTableBlockEntity imple
 //      }
 //    }
 
-    ItemStack result = recipe.assemble(craftingInventory, level.registryAccess());
+    ItemStack result = recipe.value().assemble(input, level.registryAccess());
     CommonHooks.setCraftingPlayer(null);
     return result;
   }
@@ -148,23 +156,23 @@ public class CraftingStationBlockEntity extends RetexturedTableBlockEntity imple
    * @param amount  Number of times crafted
    */
   public void takeResult(Player player, ItemStack result, int amount) {
-    CraftingRecipe recipe = this.lastRecipe; // local variable just to prevent race conditions if the field changes, though that is unlikely
+    RecipeHolder<CraftingRecipe> recipe = this.lastRecipe; // local variable just to prevent race conditions if the field changes, though that is unlikely
     if (recipe == null || this.level == null) {
       return;
     }
 
     // fire crafting events
-    if (!recipe.isSpecial()) {
+    if (!recipe.value().isSpecial()) {
       // unlock the recipe if it was not unlocked, so it shows in the recipe book
-      player.awardRecipes(Collections.singleton(recipe));
+      player.awardRecipes(List.<RecipeHolder<?>>of(recipe));
     }
     result.onCraftedBy(this.level, player, amount);
-    EventHooks.firePlayerCraftingEvent(player, result, this.craftingInventory);
+    EventHooks.firePlayerCraftingEvent(player, result, this);
 
     // update all slots in the inventory
     // remove remaining items
     CommonHooks.setCraftingPlayer(player);
-    NonNullList<ItemStack> remaining = recipe.getRemainingItems(craftingInventory);
+    NonNullList<ItemStack> remaining = recipe.value().getRemainingItems(createCraftingInput());
     CommonHooks.setCraftingPlayer(null);
     for (int i = 0; i < remaining.size(); ++i) {
       ItemStack original = this.getItem(i);
@@ -232,7 +240,7 @@ public class CraftingStationBlockEntity extends RetexturedTableBlockEntity imple
    * Updates the recipe from the server
    * @param recipe  New recipe
    */
-  public void updateRecipe(CraftingRecipe recipe) {
+  public void updateRecipe(RecipeHolder<CraftingRecipe> recipe) {
     this.lastRecipe = recipe;
     this.craftingResult.clearContent();
   }

@@ -162,7 +162,7 @@ public class FixedMaterialSwappingRecipe extends MaterialSwappingRecipe implemen
     if (multiRecipes == null) {
       ItemStack[] tools = this.tools.getItems();
       MaterialVariant material = MaterialVariant.of(this.material);
-      List<ItemStack> inputs = ingredient.getItems();
+      List<ItemStack> inputs = Arrays.asList(ingredient.getItems());
       Component variantText = MaterialTooltipCache.getDisplayName(this.material);
       // need 1 recipe per index we can swap into
       multiRecipes = Arrays.stream(indices).filter(VALID_SLOT).<IDisplayToolTinkering>mapToObj(i -> {

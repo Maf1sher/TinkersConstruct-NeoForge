@@ -44,7 +44,7 @@ public record MergingListField<T,P>(LoadableField<T,T> field, String key, Functi
   }
 
   @Override
-  public void serialize(P parent, JsonObject json) {
+  public void serializeInto(P parent, JsonObject json, TypedMap context) {
     List<T> objects = getter.apply(parent);
     if (json.has(key)) {
       JsonArray array = GsonHelper.getAsJsonArray(json, key);
@@ -54,7 +54,7 @@ public record MergingListField<T,P>(LoadableField<T,T> field, String key, Functi
       }
       for (int i = 0; i < size; i++) {
         JsonObject element = GsonHelper.convertToJsonObject(array.get(i), key + '[' + i + ']');
-        field.serialize(objects.get(i), element);
+        field.serializeInto(objects.get(i), element, context);
       }
     }
   }
