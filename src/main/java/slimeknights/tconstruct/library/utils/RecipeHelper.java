@@ -11,7 +11,9 @@ import slimeknights.mantle.recipe.MultiNamedRecipe;
 import slimeknights.tconstruct.library.recipe.display.DisplayRecipe;
 import slimeknights.mantle.recipe.NamedRecipe;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
@@ -56,9 +58,20 @@ public class RecipeHelper {
     return DisplayRecipe.of(id, recipes);
   }
 
-  /** Wraps a list of recipes in display recipes using IDs supplied by the recipe. */
+  /** Wraps a list of recipes in display recipes using IDs supplied by the recipe, deriving suffixes for duplicate IDs. */
   public static <T> List<DisplayRecipe<T>> hold(Function<T,ResourceLocation> idGetter, List<T> recipes) {
-    return recipes.stream().map(recipe -> new DisplayRecipe<>(idGetter.apply(recipe), recipe)).toList();
+    Set<ResourceLocation> seen = new HashSet<>();
+    List<DisplayRecipe<T>> wrapped = new java.util.ArrayList<>(recipes.size());
+    for (T recipe : recipes) {
+      ResourceLocation id = idGetter.apply(recipe);
+      ResourceLocation unique = id;
+      int duplicate = 0;
+      while (!seen.add(unique)) {
+        unique = id.withSuffix("/" + (++duplicate));
+      }
+      wrapped.add(new DisplayRecipe<>(unique, recipe));
+    }
+    return wrapped;
   }
 
   /** Gets the recipe holder with the given ID, filtering to the passed type for safety */
