@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.plugin.jei.modifiers;
 
+import slimeknights.tconstruct.library.recipe.display.DisplayRecipe;
 import mezz.jei.api.gui.placement.HorizontalAlignment;
 import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
 import mezz.jei.api.helpers.IGuiHelper;

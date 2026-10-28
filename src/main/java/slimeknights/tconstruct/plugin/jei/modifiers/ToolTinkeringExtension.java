@@ -1,11 +1,11 @@
 package slimeknights.tconstruct.plugin.jei.modifiers;
 
-import lombok.RequiredArgsConstructor;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.ICraftingGridHelper;
 import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
+import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
@@ -14,6 +14,7 @@ import mezz.jei.api.recipe.category.extensions.vanilla.crafting.ICraftingCategor
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import org.jetbrains.annotations.Nullable;
 import slimeknights.tconstruct.library.recipe.tinkerstation.IDisplayCraftingTinkering;
@@ -26,6 +27,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static slimeknights.mantle.plugin.jei.MantleJEIConstants.getCraftingIndex;
@@ -33,8 +35,7 @@ import static slimeknights.tconstruct.plugin.jei.modifiers.AbstractTinkerStation
 import static slimeknights.tconstruct.plugin.jei.modifiers.AbstractTinkerStationCategory.TOOL_SLOT;
 
 /** Crafting extension to display tinkers anvil recipes in the crafting table. Used for some recipes that work in both the tinker station and crafting table. */
-@RequiredArgsConstructor
-public class ToolTinkeringExtension implements ICraftingCategoryExtension {
+public class ToolTinkeringExtension implements ICraftingCategoryExtension<IDisplayCraftingTinkering> {
   @Nullable
   private static IDrawable information, errorArrow;
 
@@ -45,16 +46,14 @@ public class ToolTinkeringExtension implements ICraftingCategoryExtension {
     errorArrow = helper.createDrawable(AbstractTinkerStationCategory.BACKGROUND_LOC, 144, 33, 22, 17);
   }
 
-  private final IDisplayCraftingTinkering recipe;
-
-  @Nullable
   @Override
-  public ResourceLocation getRegistryName() {
-    return recipe.getId();
+  public Optional<ResourceLocation> getRegistryName(RecipeHolder<IDisplayCraftingTinkering> holder) {
+    return Optional.of(holder.id());
   }
 
   @Override
-  public void setRecipe(IRecipeLayoutBuilder builder, ICraftingGridHelper craftingGridHelper, IFocusGroup focuses) {
+  public void setRecipe(RecipeHolder<IDisplayCraftingTinkering> holder, IRecipeLayoutBuilder builder, ICraftingGridHelper craftingGridHelper, IFocusGroup focuses) {
+    IDisplayCraftingTinkering recipe = holder.value();
     RecipeLayout layout = RecipeLayout.fromRecipe(recipe, focuses, recipe.getInputCount());
     // put tool at index 0, other inputs at 1+
     List<List<ItemStack>> inputs = layout.inputs();
@@ -102,7 +101,8 @@ public class ToolTinkeringExtension implements ICraftingCategoryExtension {
   }
 
   @Override
-  public void onDisplayedIngredientsUpdate(List<IRecipeSlotDrawable> recipeSlots, IFocusGroup focuses) {
+  public void onDisplayedIngredientsUpdate(RecipeHolder<IDisplayCraftingTinkering> holder, List<IRecipeSlotDrawable> recipeSlots, IFocusGroup focuses) {
+    IDisplayCraftingTinkering recipe = holder.value();
     // handle dynamic hook
     if (recipe.isSlotsDynamic()) {
       List<IRecipeSlotDrawable> inputs = new ArrayList<>(5);
@@ -120,7 +120,8 @@ public class ToolTinkeringExtension implements ICraftingCategoryExtension {
   }
 
   @Override
-  public void createRecipeExtras(IRecipeExtrasBuilder builder, ICraftingGridHelper craftingGridHelper, IFocusGroup focuses) {
+  public void createRecipeExtras(RecipeHolder<IDisplayCraftingTinkering> holder, IRecipeExtrasBuilder builder, IRecipeSlotsView recipeSlotsView, ICraftingGridHelper craftingGridHelper, IFocusGroup focuses) {
+    IDisplayCraftingTinkering recipe = holder.value();
     // add title and tooltip via an icon
     if (information != null) {
       builder.addDrawableWidget(information).setPosition(56, 0).setTooltip(recipe.getInformation());

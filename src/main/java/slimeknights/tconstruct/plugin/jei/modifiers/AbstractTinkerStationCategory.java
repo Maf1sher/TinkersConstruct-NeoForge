@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.plugin.jei.modifiers;
 
+import slimeknights.tconstruct.library.recipe.display.DisplayRecipe;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -40,7 +41,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /** Common logic between {@link ModifierRecipeCategory} and {@link ToolTinkeringCategory} */
-public abstract class AbstractTinkerStationCategory<T extends IDisplayTinkerStationRecipe> extends AbstractRecipeCategory<T> {
+public abstract class AbstractTinkerStationCategory<T extends IDisplayTinkerStationRecipe> extends AbstractRecipeCategory<DisplayRecipe<T>> {
   protected static final ResourceLocation BACKGROUND_LOC = TConstruct.getResource("textures/gui/jei/tinker_station.png");
   protected static final String TOOL_SLOT = "tool_with";
   protected static final String RESULT_TOOL_SLOT = "tool_without";
@@ -55,7 +56,7 @@ public abstract class AbstractTinkerStationCategory<T extends IDisplayTinkerStat
    * @param title       Category title
    * @param icon        Category icon
    */
-  public AbstractTinkerStationCategory(IGuiHelper helper, RecipeType<T> recipeType, Component title, IDrawable icon) {
+  public AbstractTinkerStationCategory(IGuiHelper helper, RecipeType<DisplayRecipe<T>> recipeType, Component title, IDrawable icon) {
     super(recipeType, title, icon, 128, 77);
     this.slotIcons = new IDrawable[6];
     for (int i = 0; i < 6; i++) {
@@ -67,8 +68,8 @@ public abstract class AbstractTinkerStationCategory<T extends IDisplayTinkerStat
 
   @Nullable
   @Override
-  public ResourceLocation getRegistryName(T recipe) {
-    return recipe.getRecipeId();
+  public ResourceLocation getRegistryName(DisplayRecipe<T> holder) {
+    return holder.id();
   }
 
   @Nullable
@@ -102,7 +103,12 @@ public abstract class AbstractTinkerStationCategory<T extends IDisplayTinkerStat
   }
 
   @Override
-  public void createRecipeExtras(IRecipeExtrasBuilder builder, T recipe, IFocusGroup focuses) {
+  public void createRecipeExtras(IRecipeExtrasBuilder builder, DisplayRecipe<T> holder, IFocusGroup focuses) {
+    createRecipeExtras(builder, holder.value(), focuses);
+  }
+
+  /** Adds the recipe extras for the given recipe value */
+  protected void createRecipeExtras(IRecipeExtrasBuilder builder, T recipe, IFocusGroup focuses) {
     builder.addRecipeArrowWidget().setPosition(71, 33);
 
     Component levelText = getVariantText(recipe);
@@ -194,7 +200,12 @@ public abstract class AbstractTinkerStationCategory<T extends IDisplayTinkerStat
   }
 
   @Override
-  public void setRecipe(IRecipeLayoutBuilder builder, T recipe, IFocusGroup focuses) {
+  public void setRecipe(IRecipeLayoutBuilder builder, DisplayRecipe<T> holder, IFocusGroup focuses) {
+    setRecipe(builder, holder.value(), focuses);
+  }
+
+  /** Sets the recipe for the given recipe value */
+  protected void setRecipe(IRecipeLayoutBuilder builder, T recipe, IFocusGroup focuses) {
     // always grab all 5 slots for simplicity
     RecipeLayout layout = RecipeLayout.fromRecipe(recipe, focuses, 5);
 
@@ -243,7 +254,12 @@ public abstract class AbstractTinkerStationCategory<T extends IDisplayTinkerStat
   }
 
   @Override
-  public void onDisplayedIngredientsUpdate(T recipe, List<IRecipeSlotDrawable> recipeSlots, IFocusGroup focuses) {
+  public void onDisplayedIngredientsUpdate(DisplayRecipe<T> holder, List<IRecipeSlotDrawable> recipeSlots, IFocusGroup focuses) {
+    onDisplayedIngredientsUpdate(holder.value(), recipeSlots, focuses);
+  }
+
+  /** Handles dynamic display updates for the given recipe value */
+  protected void onDisplayedIngredientsUpdate(T recipe, List<IRecipeSlotDrawable> recipeSlots, IFocusGroup focuses) {
     // handle dynamic hook
     if (recipe.isSlotsDynamic()) {
       recipe.onDisplayUpdate(

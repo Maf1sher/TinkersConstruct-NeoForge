@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.plugin.jei.melting;
 
-import mezz.jei.api.forge.ForgeTypes;
+import slimeknights.tconstruct.library.recipe.display.DisplayRecipe;
+import mezz.jei.api.neoforge.NeoForgeTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.helpers.IGuiHelper;
@@ -29,7 +30,8 @@ public class FoundryCategory extends AbstractMeltingCategory {
   }
 
   @Override
-  public void setRecipe(IRecipeLayoutBuilder builder, IDisplayableMeltingRecipe recipe, IFocusGroup focuses) {
+  public void setRecipe(IRecipeLayoutBuilder builder, DisplayRecipe<IDisplayableMeltingRecipe> holder, IFocusGroup focuses) {
+    IDisplayableMeltingRecipe recipe = holder.value();
     // input
     List<ItemStack> inputs = recipe.getInputs();
     IRecipeSlotBuilder inputSlot = builder.addInputSlot(24, 18).addItemStacks(inputs);
@@ -64,6 +66,6 @@ public class FoundryCategory extends AbstractMeltingCategory {
     builder.addSlot(RecipeIngredientRole.RENDER_ONLY, 4, 4)
            .addRichTooltipCallback(FUEL_TOOLTIP)
            .setFluidRenderer(1, false, 12, 32)
-           .addIngredients(ForgeTypes.FLUID_STACK, MeltingFuelHandler.getUsableFuels(recipe.getTemperature()));
+           .addIngredients(NeoForgeTypes.FLUID_STACK, MeltingFuelHandler.getUsableFuels(recipe.getTemperature()));
   }
 }

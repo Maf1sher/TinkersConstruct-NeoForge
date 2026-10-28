@@ -7,8 +7,11 @@ import java.util.List;
 
 /** Logic to show {@link ShapelessMaterialsRecipe} in JEI */
 public class ShapelessMaterialsExtension extends MaterialsCraftingExtension<ShapelessMaterialsRecipe> {
-  ShapelessMaterialsExtension(ShapelessMaterialsRecipe recipe) {
-    super(recipe);
+  public ShapelessMaterialsExtension() {}
+
+  /** {@return Instance of the shapeless extension} */
+  public static ShapelessMaterialsExtension shapeless() {
+    return new ShapelessMaterialsExtension();
   }
 
   /** Gets the material slots for the given recipe */

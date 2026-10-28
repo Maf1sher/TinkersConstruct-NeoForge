@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.AxisDirection;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -57,10 +58,10 @@ public class ImmersiveEngineeringPlugin {
     private final boolean runEntity;
 
     @Override
-    public void applyToBlock(Level world, HitResult mop, @Nullable Player shooter, ItemStack thrower, Fluid fluid) {}
+    public void applyToBlock(Level world, HitResult mop, @Nullable Player shooter, @Nullable Entity entity, ItemStack thrower, Fluid fluid) {}
 
     @Override
-    public void applyToEntity(LivingEntity target, @Nullable Player shooter, ItemStack thrower, Fluid fluid) {}
+    public void applyToEntity(LivingEntity target, @Nullable Player shooter, @Nullable Entity entity, ItemStack thrower, Fluid fluid) {}
 
     /** Consumes the fluid projectiles used for this action */
     private static void consumeProjectiles(List<ChemthrowerShotEntity> projectiles, float consumed, double projectileValue) {
@@ -76,7 +77,7 @@ public class ImmersiveEngineeringPlugin {
     }
 
     @Override
-    public void applyToEntity(LivingEntity target, @Nullable Player shooter, ItemStack thrower, FluidStack fluid) {
+    public void applyToEntity(LivingEntity target, @Nullable Player shooter, @Nullable Entity entity, ItemStack thrower, FluidStack fluid) {
       // skip for the block tag
       if (!runEntity) {
         return;
@@ -109,7 +110,7 @@ public class ImmersiveEngineeringPlugin {
     }
 
     @Override
-    public void applyToBlock(Level world, HitResult mop, @Nullable Player shooter, ItemStack thrower, FluidStack fluid) {
+    public void applyToBlock(Level world, HitResult mop, @Nullable Player shooter, @Nullable Entity entity, ItemStack thrower, FluidStack fluid) {
       // skip for the entity tag or wrongly passed hit types
       if (!runBlock || mop.getType() != Type.BLOCK) {
         return;

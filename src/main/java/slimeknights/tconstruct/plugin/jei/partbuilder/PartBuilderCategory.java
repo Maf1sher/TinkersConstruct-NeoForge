@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.plugin.jei.partbuilder;
 
+import slimeknights.tconstruct.library.recipe.display.DisplayRecipe;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
@@ -30,7 +31,7 @@ import slimeknights.tconstruct.tables.TinkerTables;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PartBuilderCategory extends AbstractRecipeCategory<IDisplayPartBuilderRecipe> {
+public class PartBuilderCategory extends AbstractRecipeCategory<DisplayRecipe<IDisplayPartBuilderRecipe>> {
   private static final ResourceLocation BACKGROUND_LOC = TConstruct.getResource("textures/gui/jei/tinker_station.png");
   private static final Component TITLE = TConstruct.makeTranslation("jei", "part_builder.title");
   private static final Component REUSABLE = TConstruct.makeTranslation("jei", "part_builder.reusable").withStyle(ChatFormatting.GRAY);
@@ -52,7 +53,8 @@ public class PartBuilderCategory extends AbstractRecipeCategory<IDisplayPartBuil
   }
 
   @Override
-  public void createRecipeExtras(IRecipeExtrasBuilder builder, IDisplayPartBuilderRecipe recipe, IFocusGroup focuses) {
+  public void createRecipeExtras(IRecipeExtrasBuilder builder, DisplayRecipe<IDisplayPartBuilderRecipe> holder, IFocusGroup focuses) {
+    IDisplayPartBuilderRecipe recipe = holder.value();
     builder.addRecipeArrowWidget().setPosition(66, 15);
     Component title = recipe.getDisplayTitle();
     if (title != null && recipe.getMaterials().isEmpty()) {
@@ -68,7 +70,8 @@ public class PartBuilderCategory extends AbstractRecipeCategory<IDisplayPartBuil
   }
 
   @Override
-  public void setRecipe(IRecipeLayoutBuilder builder, IDisplayPartBuilderRecipe recipe, IFocusGroup focuses) {
+  public void setRecipe(IRecipeLayoutBuilder builder, DisplayRecipe<IDisplayPartBuilderRecipe> holder, IFocusGroup focuses) {
+    IDisplayPartBuilderRecipe recipe = holder.value();
     // focus
     MaterialVariant focusMaterial = MaterialVariant.UNKNOWN;
     ItemStack focusStack = ItemStack.EMPTY;
@@ -137,8 +140,8 @@ public class PartBuilderCategory extends AbstractRecipeCategory<IDisplayPartBuil
   }
 
   @Override
-  public ResourceLocation getRegistryName(IDisplayPartBuilderRecipe recipe) {
-    return recipe.getId();
+  public ResourceLocation getRegistryName(DisplayRecipe<IDisplayPartBuilderRecipe> holder) {
+    return holder.id();
   }
 
   /** Tooltip for the pattern showing the cost */

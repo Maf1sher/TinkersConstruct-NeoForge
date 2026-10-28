@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.plugin.jei.modifiers;
 
+import slimeknights.tconstruct.library.recipe.display.DisplayRecipe;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -19,7 +20,7 @@ import slimeknights.tconstruct.tables.TinkerTables;
 
 import java.util.List;
 
-public class ModifierWorktableCategory extends AbstractRecipeCategory<IModifierWorktableRecipe> {
+public class ModifierWorktableCategory extends AbstractRecipeCategory<DisplayRecipe<IModifierWorktableRecipe>> {
   private static final ResourceLocation BACKGROUND_LOC = TConstruct.getResource("textures/gui/jei/tinker_station.png");
   private static final Component TITLE = TConstruct.makeTranslation("jei", "modifier_worktable.title");
 
@@ -38,7 +39,8 @@ public class ModifierWorktableCategory extends AbstractRecipeCategory<IModifierW
   }
 
   @Override
-  public void createRecipeExtras(IRecipeExtrasBuilder builder, IModifierWorktableRecipe recipe, IFocusGroup focuses) {
+  public void createRecipeExtras(IRecipeExtrasBuilder builder, DisplayRecipe<IModifierWorktableRecipe> holder, IFocusGroup focuses) {
+    IModifierWorktableRecipe recipe = holder.value();
     builder.addText(recipe.getTitle(), 115, 9)
       .setPosition(3, 2)
       .setColor(0x404040);
@@ -46,7 +48,8 @@ public class ModifierWorktableCategory extends AbstractRecipeCategory<IModifierW
   }
 
   @Override
-  public void setRecipe(IRecipeLayoutBuilder builder, IModifierWorktableRecipe recipe, IFocusGroup focuses) {
+  public void setRecipe(IRecipeLayoutBuilder builder, DisplayRecipe<IModifierWorktableRecipe> holder, IFocusGroup focuses) {
+    IModifierWorktableRecipe recipe = holder.value();
     // tools
     List<ItemStack> tools = recipe.getInputTools();
     IRecipeSlotBuilder toolSlot = builder.addSlot(recipe.isToolInput() ? RecipeIngredientRole.INPUT : RecipeIngredientRole.CATALYST, 23, 16)
@@ -75,7 +78,7 @@ public class ModifierWorktableCategory extends AbstractRecipeCategory<IModifierW
   }
 
   @Override
-  public ResourceLocation getRegistryName(IModifierWorktableRecipe recipe) {
-    return recipe.getId();
+  public ResourceLocation getRegistryName(DisplayRecipe<IModifierWorktableRecipe> holder) {
+    return holder.id();
   }
 }

@@ -2,7 +2,7 @@ package slimeknights.tconstruct.plugin.jei.casting;
 
 import lombok.Getter;
 import mezz.jei.api.constants.VanillaTypes;
-import mezz.jei.api.forge.ForgeTypes;
+import mezz.jei.api.neoforge.NeoForgeTypes;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
@@ -11,6 +11,7 @@ import mezz.jei.api.runtime.IIngredientManager;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.tconstruct.library.recipe.casting.IDisplayableCastingRecipe;
+import slimeknights.tconstruct.library.recipe.display.DisplayRecipe;
 import slimeknights.tconstruct.library.recipe.display.FilteredRecipe;
 import slimeknights.tconstruct.plugin.jei.util.manager.FluidRecipeCache;
 import slimeknights.tconstruct.plugin.jei.util.manager.ItemRecipeCache;
@@ -18,25 +19,25 @@ import slimeknights.tconstruct.plugin.jei.util.manager.ItemRecipeCache;
 import java.util.List;
 
 /** Plugin handling filterable casting recipes. */
-public class CastingRecipeManager implements ISimpleRecipeManagerPlugin<IDisplayableCastingRecipe> {
+public class CastingRecipeManager implements ISimpleRecipeManagerPlugin<DisplayRecipe<IDisplayableCastingRecipe>> {
   @Getter
-  private final List<IDisplayableCastingRecipe> allRecipes;
-  private final ItemRecipeCache<IDisplayableCastingRecipe> inputItemCache, outputItemCache;
-  private final FluidRecipeCache<IDisplayableCastingRecipe> fluidCache;
+  private final List<DisplayRecipe<IDisplayableCastingRecipe>> allRecipes;
+  private final ItemRecipeCache<DisplayRecipe<IDisplayableCastingRecipe>, IDisplayableCastingRecipe> inputItemCache, outputItemCache;
+  private final FluidRecipeCache<DisplayRecipe<IDisplayableCastingRecipe>, IDisplayableCastingRecipe> fluidCache;
 
-  public CastingRecipeManager(IIngredientManager ingredientManager, List<IDisplayableCastingRecipe> recipes) {
-    this.allRecipes = FilteredRecipe.alwaysVisible(recipes);
+  public CastingRecipeManager(IIngredientManager ingredientManager, List<DisplayRecipe<IDisplayableCastingRecipe>> recipes) {
+    this.allRecipes = FilteredRecipe.alwaysVisibleHolders(recipes);
     IIngredientHelper<ItemStack> itemHelper = ingredientManager.getIngredientHelper(VanillaTypes.ITEM_STACK);
-    IIngredientHelper<FluidStack> fluidHelper = ingredientManager.getIngredientHelper(ForgeTypes.FLUID_STACK);
-    inputItemCache = new ItemRecipeCache<>(itemHelper, recipes, false);
-    outputItemCache = new ItemRecipeCache<>(itemHelper, recipes, true);
-    fluidCache = new FluidRecipeCache<>(fluidHelper, recipes, false);
+    IIngredientHelper<FluidStack> fluidHelper = ingredientManager.getIngredientHelper(NeoForgeTypes.FLUID_STACK);
+    inputItemCache = new ItemRecipeCache<>(itemHelper, recipes, DisplayRecipe::value, false);
+    outputItemCache = new ItemRecipeCache<>(itemHelper, recipes, DisplayRecipe::value, true);
+    fluidCache = new FluidRecipeCache<>(fluidHelper, recipes, DisplayRecipe::value, false);
   }
 
   @Override
   public boolean isHandledInput(ITypedIngredient<?> input) {
     IIngredientType<?> type = input.getType();
-    return type == VanillaTypes.ITEM_STACK || type == ForgeTypes.FLUID_STACK;
+    return type == VanillaTypes.ITEM_STACK || type == NeoForgeTypes.FLUID_STACK;
   }
 
   @Override
@@ -45,12 +46,12 @@ public class CastingRecipeManager implements ISimpleRecipeManagerPlugin<IDisplay
   }
 
   @Override
-  public List<IDisplayableCastingRecipe> getRecipesForInput(ITypedIngredient<?> input) {
+  public List<DisplayRecipe<IDisplayableCastingRecipe>> getRecipesForInput(ITypedIngredient<?> input) {
     ITypedIngredient<ItemStack> item = input.cast(VanillaTypes.ITEM_STACK);
     if (item != null) {
       return inputItemCache.filterRecipes(item.getIngredient());
     }
-    ITypedIngredient<FluidStack> fluid = input.cast(ForgeTypes.FLUID_STACK);
+    ITypedIngredient<FluidStack> fluid = input.cast(NeoForgeTypes.FLUID_STACK);
     if (fluid != null) {
       return fluidCache.filterRecipes(fluid.getIngredient());
     }
@@ -58,7 +59,7 @@ public class CastingRecipeManager implements ISimpleRecipeManagerPlugin<IDisplay
   }
 
   @Override
-  public List<IDisplayableCastingRecipe> getRecipesForOutput(ITypedIngredient<?> output) {
+  public List<DisplayRecipe<IDisplayableCastingRecipe>> getRecipesForOutput(ITypedIngredient<?> output) {
     ITypedIngredient<ItemStack> item = output.cast(VanillaTypes.ITEM_STACK);
     if (item != null) {
       return outputItemCache.filterRecipes(item.getIngredient());

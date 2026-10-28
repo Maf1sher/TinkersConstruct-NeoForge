@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.plugin.jei;
 
+import slimeknights.tconstruct.library.recipe.display.DisplayRecipe;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -20,7 +21,7 @@ import slimeknights.tconstruct.library.recipe.molding.MoldingRecipe;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 /** Recipe category for molding casts */
-public class MoldingRecipeCategory extends AbstractRecipeCategory<MoldingRecipe> {
+public class MoldingRecipeCategory extends AbstractRecipeCategory<DisplayRecipe<MoldingRecipe>> {
   private static final ResourceLocation BACKGROUND_LOC = TConstruct.getResource("textures/gui/jei/casting.png");
   private static final Component TITLE = TConstruct.makeTranslation("jei", "molding.title");
   private static final Component TOOLTIP_PATTERN_CONSUMED = Component.translatable(TConstruct.makeTranslationKey("jei", "molding.pattern_consumed"));
@@ -36,7 +37,8 @@ public class MoldingRecipeCategory extends AbstractRecipeCategory<MoldingRecipe>
   }
 
   @Override
-  public void createRecipeExtras(IRecipeExtrasBuilder builder, MoldingRecipe recipe, IFocusGroup focuses) {
+  public void createRecipeExtras(IRecipeExtrasBuilder builder, DisplayRecipe<MoldingRecipe> holder, IFocusGroup focuses) {
+    MoldingRecipe recipe = holder.value();
     builder.addRecipeArrowWidget().setPosition(24, 23);
     builder.addDrawableWidget(recipe.getPattern().isEmpty() ? upArrow : downArrow).setPosition(8, 17);
     IDrawable block = recipe.getType() == TinkerRecipeTypes.MOLDING_BASIN.get() ? basin : table;
@@ -49,7 +51,8 @@ public class MoldingRecipeCategory extends AbstractRecipeCategory<MoldingRecipe>
   }
 
   @Override
-  public void setRecipe(IRecipeLayoutBuilder builder, MoldingRecipe recipe, IFocusGroup focuses) {
+  public void setRecipe(IRecipeLayoutBuilder builder, DisplayRecipe<MoldingRecipe> holder, IFocusGroup focuses) {
+    MoldingRecipe recipe = holder.value();
     // basic input output
     builder.addInputSlot(3, 24).addIngredients(recipe.getMaterial());
     RegistryAccess access = SafeClientAccess.getRegistryAccess();
@@ -73,7 +76,7 @@ public class MoldingRecipeCategory extends AbstractRecipeCategory<MoldingRecipe>
   }
 
   @Override
-  public ResourceLocation getRegistryName(MoldingRecipe recipe) {
-    return recipe.getId();
+  public ResourceLocation getRegistryName(DisplayRecipe<MoldingRecipe> holder) {
+    return holder.id();
   }
 }

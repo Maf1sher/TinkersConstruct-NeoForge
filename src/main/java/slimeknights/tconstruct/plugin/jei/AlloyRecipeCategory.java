@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.plugin.jei;
 
+import slimeknights.tconstruct.library.recipe.display.DisplayRecipe;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -19,7 +20,7 @@ import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import java.awt.Color;
 import java.util.List;
 import java.util.function.Function;
-import mezz.jei.api.forge.ForgeTypes;
+import mezz.jei.api.neoforge.NeoForgeTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.drawable.IDrawableAnimated.StartDirection;
@@ -35,7 +36,7 @@ import mezz.jei.api.recipe.category.AbstractRecipeCategory;
 /**
  * Alloy recipe category for JEI display
  */
-public class AlloyRecipeCategory extends AbstractRecipeCategory<AlloyRecipe> {
+public class AlloyRecipeCategory extends AbstractRecipeCategory<DisplayRecipe<AlloyRecipe>> {
   private static final ResourceLocation BACKGROUND_LOC = TConstruct.getResource("textures/gui/jei/alloy.png");
   private static final Component TITLE = TConstruct.makeTranslation("jei", "alloy.title");
   private static final Component CATALYST = TConstruct.makeTranslation("jei", "alloy.catalyst").withStyle(ChatFormatting.ITALIC);
@@ -67,7 +68,8 @@ public class AlloyRecipeCategory extends AbstractRecipeCategory<AlloyRecipe> {
   }
 
   @Override
-  public void createRecipeExtras(IRecipeExtrasBuilder builder, AlloyRecipe recipe, IFocusGroup focuses) {
+  public void createRecipeExtras(IRecipeExtrasBuilder builder, DisplayRecipe<AlloyRecipe> holder, IFocusGroup focuses) {
+    AlloyRecipe recipe = holder.value();
     builder.addDrawableWidget(arrow).setPosition(90, 21);
     builder.addText(Component.translatable(KEY_TEMPERATURE, recipe.getTemperature()), 139, 9)
       .setPosition(33, 5)
@@ -76,7 +78,8 @@ public class AlloyRecipeCategory extends AbstractRecipeCategory<AlloyRecipe> {
   }
 
   @Override
-  public void draw(AlloyRecipe recipe, IRecipeSlotsView slots, GuiGraphics graphics, double mouseX, double mouseY) {
+  public void draw(DisplayRecipe<AlloyRecipe> holder, IRecipeSlotsView slots, GuiGraphics graphics, double mouseX, double mouseY) {
+    AlloyRecipe recipe = holder.value();
     background.draw(graphics);
   }
 
@@ -103,7 +106,8 @@ public class AlloyRecipeCategory extends AbstractRecipeCategory<AlloyRecipe> {
   }
 
   @Override
-  public void setRecipe(IRecipeLayoutBuilder builder, AlloyRecipe recipe, IFocusGroup focuses) {
+  public void setRecipe(IRecipeLayoutBuilder builder, DisplayRecipe<AlloyRecipe> holder, IFocusGroup focuses) {
+    AlloyRecipe recipe = holder.value();
     // inputs
     int maxAmount = CategoryUtil.drawMultipleFluids(builder, ingredient -> ingredient.catalyst() ? RecipeIngredientRole.CATALYST : RecipeIngredientRole.INPUT,
                                        19, 11, 48, 32, recipe.getInputs(), recipe.getOutput().getAmount(),
@@ -114,18 +118,18 @@ public class AlloyRecipeCategory extends AbstractRecipeCategory<AlloyRecipe> {
     builder.addOutputSlot(137, 11)
            .addRichTooltipCallback(FluidTooltipCallback.UNITS)
            .setFluidRenderer(maxAmount, false, 16, 32)
-           .addIngredient(ForgeTypes.FLUID_STACK, recipe.getOutput());
+           .addIngredient(NeoForgeTypes.FLUID_STACK, recipe.getOutput());
 
     // fuel
     builder.addSlot(RecipeIngredientRole.RENDER_ONLY, 94, 43)
            .addRichTooltipCallback(FUEL_TOOLTIP)
            .setFluidRenderer(1, false, 16, 16)
            .setOverlay(tank, 0, 0)
-           .addIngredients(ForgeTypes.FLUID_STACK, MeltingFuelHandler.getUsableFuels(recipe.getTemperature()));
+           .addIngredients(NeoForgeTypes.FLUID_STACK, MeltingFuelHandler.getUsableFuels(recipe.getTemperature()));
   }
 
   @Override
-  public ResourceLocation getRegistryName(AlloyRecipe recipe) {
-    return recipe.getId();
+  public ResourceLocation getRegistryName(DisplayRecipe<AlloyRecipe> holder) {
+    return holder.id();
   }
 }

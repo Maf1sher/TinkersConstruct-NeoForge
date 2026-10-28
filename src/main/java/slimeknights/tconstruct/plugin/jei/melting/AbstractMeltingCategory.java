@@ -1,7 +1,8 @@
 package slimeknights.tconstruct.plugin.jei.melting;
 
+import slimeknights.tconstruct.library.recipe.display.DisplayRecipe;
 import lombok.RequiredArgsConstructor;
-import mezz.jei.api.forge.ForgeTypes;
+import mezz.jei.api.neoforge.NeoForgeTypes;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.drawable.IDrawableStatic;
@@ -37,7 +38,7 @@ import java.awt.Color;
 import java.util.List;
 
 /** Shared logic between melting and foundry */
-public abstract class AbstractMeltingCategory extends AbstractRecipeCategory<IDisplayableMeltingRecipe> {
+public abstract class AbstractMeltingCategory extends AbstractRecipeCategory<DisplayRecipe<IDisplayableMeltingRecipe>> {
   public static final ResourceLocation BACKGROUND_LOC = TConstruct.getResource("textures/gui/jei/melting.png");
   protected static final String KEY_COOLING_TIME = TConstruct.makeTranslationKey("jei", "melting.time");
   protected static final String KEY_TEMPERATURE = TConstruct.makeTranslationKey("jei", "temperature");
@@ -59,7 +60,7 @@ public abstract class AbstractMeltingCategory extends AbstractRecipeCategory<IDi
   protected final IDrawableStatic tankOverlay;
   protected final IDrawableStatic plus;
 
-  public AbstractMeltingCategory(IGuiHelper helper, RecipeType<IDisplayableMeltingRecipe> recipeType, Component title, IDrawable icon) {
+  public AbstractMeltingCategory(IGuiHelper helper, RecipeType<DisplayRecipe<IDisplayableMeltingRecipe>> recipeType, Component title, IDrawable icon) {
     super(recipeType, title, icon, 132, 40);
     this.background = helper.createDrawable(BACKGROUND_LOC, 0, 0, 132, 40);
     this.tankOverlay = helper.createDrawable(BACKGROUND_LOC, 132, 0, 32, 32);
@@ -69,7 +70,8 @@ public abstract class AbstractMeltingCategory extends AbstractRecipeCategory<IDi
   }
 
   @Override
-  public void createRecipeExtras(IRecipeExtrasBuilder builder, IDisplayableMeltingRecipe recipe, IFocusGroup focuses) {
+  public void createRecipeExtras(IRecipeExtrasBuilder builder, DisplayRecipe<IDisplayableMeltingRecipe> holder, IFocusGroup focuses) {
+    IDisplayableMeltingRecipe recipe = holder.value();
     IRecipeSlotDrawable fluid = null;
     if (recipe.isTimeDynamic() || recipe.isTemperatureDynamic()) {
       fluid = CategoryUtil.findSlot(builder.getRecipeSlots().getSlots(), FLUID_SLOT);
@@ -101,7 +103,8 @@ public abstract class AbstractMeltingCategory extends AbstractRecipeCategory<IDi
   }
 
   @Override
-  public void draw(IDisplayableMeltingRecipe recipe, IRecipeSlotsView slots, GuiGraphics graphics, double mouseX, double mouseY) {
+  public void draw(DisplayRecipe<IDisplayableMeltingRecipe> holder, IRecipeSlotsView slots, GuiGraphics graphics, double mouseX, double mouseY) {
+    IDisplayableMeltingRecipe recipe = holder.value();
     background.draw(graphics);
   }
 
@@ -130,15 +133,15 @@ public abstract class AbstractMeltingCategory extends AbstractRecipeCategory<IDi
   }
 
   @Override
-  public ResourceLocation getRegistryName(IDisplayableMeltingRecipe recipe) {
-    return recipe.getRecipeId();
+  public ResourceLocation getRegistryName(DisplayRecipe<IDisplayableMeltingRecipe> holder) {
+    return holder.id();
   }
 
   /** Handles the tooltip for the arrow */
   private record MeltingArrowTooltip(IDisplayableMeltingRecipe recipe, IRecipeSlotDrawable fluidSlot) implements IRecipeWidgetTooltipCallback {
     @Override
     public void onTooltip(ITooltipBuilder tooltip) {
-      FluidStack fluid = fluidSlot.getDisplayedIngredient(ForgeTypes.FLUID_STACK).orElse(FluidStack.EMPTY);
+      FluidStack fluid = fluidSlot.getDisplayedIngredient(NeoForgeTypes.FLUID_STACK).orElse(FluidStack.EMPTY);
       tooltip.add(Component.translatable(KEY_COOLING_TIME, recipe.getTime(fluid) / 4));
     }
   }
@@ -147,7 +150,7 @@ public abstract class AbstractMeltingCategory extends AbstractRecipeCategory<IDi
   private record TemperatureWidget(ScreenPosition getPosition, int width, IDisplayableMeltingRecipe recipe, IRecipeSlotDrawable fluidSlot, Font font) implements IRecipeWidget {
     @Override
     public void drawWidget(GuiGraphics graphics, double mouseX, double mouseY) {
-      FluidStack fluid = fluidSlot.getDisplayedIngredient(ForgeTypes.FLUID_STACK).orElse(FluidStack.EMPTY);
+      FluidStack fluid = fluidSlot.getDisplayedIngredient(NeoForgeTypes.FLUID_STACK).orElse(FluidStack.EMPTY);
       Component temperature = Component.translatable(KEY_TEMPERATURE, recipe.getTemperature(fluid));
       graphics.drawString(font, temperature, (width - font.width(temperature)) / 2, 0, Color.GRAY.getRGB(), false);
     }

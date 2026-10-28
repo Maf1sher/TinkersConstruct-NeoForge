@@ -38,7 +38,7 @@ public class DefaultEntityMeltingRecipe extends EntityMeltingRecipe {
       }
       unusedTypes.add(type);
     }
-    return EntityIngredient.of(unusedTypes);
+    return EntityIngredient.of(List.copyOf(unusedTypes));
   }
 
   private final Lazy<EntityIngredient> entities;

@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.plugin.jei.transfer;
 
+import slimeknights.tconstruct.library.recipe.display.DisplayRecipe;
 import lombok.Getter;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
@@ -25,13 +26,13 @@ import java.util.Optional;
 
 /** Implements recipe transfer in the tinker station. */
 @Internal
-public class TinkerStationTransferInfo<T> implements IRecipeTransferInfo<TinkerStationContainerMenu,T>, IRecipeTransferHandler<TinkerStationContainerMenu,T> {
+public class TinkerStationTransferInfo<T> implements IRecipeTransferInfo<TinkerStationContainerMenu,DisplayRecipe<T>>, IRecipeTransferHandler<TinkerStationContainerMenu,DisplayRecipe<T>> {
   @Getter
-  private final RecipeType<T> recipeType;
+  private final RecipeType<DisplayRecipe<T>> recipeType;
   private final IRecipeTransferHandlerHelper handlerHelper;
-  private final IRecipeTransferHandler<TinkerStationContainerMenu,T> handler;
+  private final IRecipeTransferHandler<TinkerStationContainerMenu,DisplayRecipe<T>> handler;
 
-  public TinkerStationTransferInfo(RecipeType<T> recipeType, IRecipeTransferHandlerHelper handlerHelper) {
+  public TinkerStationTransferInfo(RecipeType<DisplayRecipe<T>> recipeType, IRecipeTransferHandlerHelper handlerHelper) {
     this.recipeType = recipeType;
     this.handlerHelper = handlerHelper;
     this.handler = handlerHelper.createUnregisteredRecipeTransferHandler(this);
@@ -48,13 +49,13 @@ public class TinkerStationTransferInfo<T> implements IRecipeTransferInfo<TinkerS
   }
 
   @Override
-  public boolean canHandle(TinkerStationContainerMenu container, T recipe) {
+  public boolean canHandle(TinkerStationContainerMenu container, DisplayRecipe<T> recipe) {
     return true;
   }
 
   @Nullable
   @Override
-  public IRecipeTransferError transferRecipe(TinkerStationContainerMenu container, T recipe, IRecipeSlotsView recipeSlotsView, Player player, boolean maxTransfer, boolean doTransfer) {
+  public IRecipeTransferError transferRecipe(TinkerStationContainerMenu container, DisplayRecipe<T> recipe, IRecipeSlotsView recipeSlotsView, Player player, boolean maxTransfer, boolean doTransfer) {
     // must have server support
     if (!handlerHelper.recipeTransferHasServerSupport()) {
       return handlerHelper.createUserErrorWithTooltip(Component.translatable("jei.tooltip.error.recipe.transfer.no.server"));
@@ -76,12 +77,12 @@ public class TinkerStationTransferInfo<T> implements IRecipeTransferInfo<TinkerS
   }
 
   @Override
-  public List<Slot> getRecipeSlots(TinkerStationContainerMenu container, T recipe) {
+  public List<Slot> getRecipeSlots(TinkerStationContainerMenu container, DisplayRecipe<T> recipe) {
     return container.getInputSlots();
   }
 
   @Override
-  public List<Slot> getInventorySlots(TinkerStationContainerMenu container, T recipe) {
+  public List<Slot> getInventorySlots(TinkerStationContainerMenu container, DisplayRecipe<T> recipe) {
     List<Slot> slots = new ArrayList<>();
     // skip over inputs, output slot, tool slot, armor, and offhand
     int start = container.getInputSlots().size() + 3 + ArmorItem.Type.values().length;

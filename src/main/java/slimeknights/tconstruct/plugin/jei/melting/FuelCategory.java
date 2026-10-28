@@ -1,8 +1,9 @@
 package slimeknights.tconstruct.plugin.jei.melting;
 
+import slimeknights.tconstruct.library.recipe.display.DisplayRecipe;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import mezz.jei.api.forge.ForgeTypes;
+import mezz.jei.api.neoforge.NeoForgeTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawableStatic;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
@@ -33,7 +34,7 @@ import static slimeknights.tconstruct.plugin.jei.melting.AbstractMeltingCategory
 import static slimeknights.tconstruct.plugin.jei.melting.AbstractMeltingCategory.KEY_TEMPERATURE;
 
 /** Category showing smeltery fuels */
-public class FuelCategory extends AbstractRecipeCategory<MeltingFuel> {
+public class FuelCategory extends AbstractRecipeCategory<DisplayRecipe<MeltingFuel>> {
   private static final Component TITLE = TConstruct.makeTranslation("jei", "fuel.title");
   private static final Component SOLID = TConstruct.makeTranslation("jei", "fuel.solid");
   private static final Component LASTS = TConstruct.makeTranslation("jei", "fuel.duration.lasts");
@@ -46,12 +47,13 @@ public class FuelCategory extends AbstractRecipeCategory<MeltingFuel> {
   }
 
   @Override
-  public void setRecipe(IRecipeLayoutBuilder builder, MeltingFuel recipe, IFocusGroup focuses) {
+  public void setRecipe(IRecipeLayoutBuilder builder, DisplayRecipe<MeltingFuel> holder, IFocusGroup focuses) {
+    MeltingFuel recipe = holder.value();
     List<FluidStack> fluids = recipe.getInputs();
     // no fluids mean this is the solid fuel info
     if (!fluids.isEmpty()) {
       builder.addInputSlot(4, 4)
-        .addIngredients(ForgeTypes.FLUID_STACK, fluids)
+        .addIngredients(NeoForgeTypes.FLUID_STACK, fluids)
         .setFluidRenderer(100, false, 12, 32)
         .setBackground(fuelBar, -1, -1)
         .setSlotName(FUEL_SLOT);
@@ -70,7 +72,8 @@ public class FuelCategory extends AbstractRecipeCategory<MeltingFuel> {
   }
 
   @Override
-  public void createRecipeExtras(IRecipeExtrasBuilder builder, MeltingFuel recipe, IFocusGroup focuses) {
+  public void createRecipeExtras(IRecipeExtrasBuilder builder, DisplayRecipe<MeltingFuel> holder, IFocusGroup focuses) {
+    MeltingFuel recipe = holder.value();
     List<FluidStack> fluids = recipe.getInputs();
     Component title = SOLID;
     IRecipeSlotView fuel = CategoryUtil.findSlot(builder.getRecipeSlots().getSlots(), FUEL_SLOT);
@@ -101,7 +104,7 @@ public class FuelCategory extends AbstractRecipeCategory<MeltingFuel> {
 
     @Override
     public void drawWidget(GuiGraphics graphics, double mouseX, double mouseY) {
-      FluidStack fluid = fuel.getDisplayedIngredient(ForgeTypes.FLUID_STACK).orElse(FluidStack.EMPTY);
+      FluidStack fluid = fuel.getDisplayedIngredient(NeoForgeTypes.FLUID_STACK).orElse(FluidStack.EMPTY);
       if (!fluid.isEmpty()) {
         graphics.drawString(font, LASTS, 0, 0, Color.GRAY.getRGB(), false);
         Component string = Component.translatable(KEY_DURATION, duration, fluid.getAmount());

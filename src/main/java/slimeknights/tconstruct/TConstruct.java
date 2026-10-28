@@ -52,7 +52,6 @@ import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability.Tin
 import slimeknights.tconstruct.library.tools.definition.ToolDefinitionLoader;
 import slimeknights.tconstruct.library.tools.layout.StationSlotLayoutLoader;
 import slimeknights.tconstruct.library.utils.Util;
-import slimeknights.tconstruct.plugin.DietPlugin;
 import slimeknights.tconstruct.plugin.DummmmmmyPlugin;
 import slimeknights.tconstruct.plugin.ImmersiveEngineeringPlugin;
 import slimeknights.tconstruct.plugin.craftingtweaks.CraftingTweaksPlugin;
@@ -141,9 +140,6 @@ public class TConstruct {
     }
     if (modList.isLoaded("jsonthings")) {
       JsonThingsPlugin.onConstruct(bus);
-    }
-    if (modList.isLoaded("diet")) {
-      DietPlugin.onConstruct();
     }
     if (modList.isLoaded("craftingtweaks")) {
       CraftingTweaksPlugin.onConstruct();

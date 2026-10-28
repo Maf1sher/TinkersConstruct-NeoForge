@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.plugin.jei;
 
+import slimeknights.tconstruct.library.recipe.display.DisplayRecipe;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
@@ -39,7 +40,7 @@ import static slimeknights.tconstruct.library.recipe.tinkerstation.building.Tool
 import static slimeknights.tconstruct.library.recipe.tinkerstation.building.ToolBuildingRecipe.X_OFFSET;
 import static slimeknights.tconstruct.library.recipe.tinkerstation.building.ToolBuildingRecipe.Y_OFFSET;
 
-public class ToolBuildingCategory extends AbstractRecipeCategory<ToolBuildingRecipe> {
+public class ToolBuildingCategory extends AbstractRecipeCategory<DisplayRecipe<ToolBuildingRecipe>> {
   private static final ResourceLocation BACKGROUND_LOC = TConstruct.getResource("textures/gui/jei/tinker_station.png");
   private static final Component TITLE = TConstruct.makeTranslation("jei", "tinkering.tool_building");
   private static final Component ANVIL = TConstruct.makeTranslation("jei", "tinkering.tool_building.anvil");
@@ -62,7 +63,8 @@ public class ToolBuildingCategory extends AbstractRecipeCategory<ToolBuildingRec
   }
 
   @Override
-  public void createRecipeExtras(IRecipeExtrasBuilder builder, ToolBuildingRecipe recipe, IFocusGroup focuses) {
+  public void createRecipeExtras(IRecipeExtrasBuilder builder, DisplayRecipe<ToolBuildingRecipe> holder, IFocusGroup focuses) {
+    ToolBuildingRecipe recipe = holder.value();
     builder.addRecipeArrowWidget().setPosition(74, 22);
     if (recipe.requiresAnvil()) {
       builder.addDrawableWidget(anvil).setPosition(76, 44).setTooltip(ANVIL);
@@ -70,7 +72,8 @@ public class ToolBuildingCategory extends AbstractRecipeCategory<ToolBuildingRec
   }
 
   @Override
-  public void setRecipe(IRecipeLayoutBuilder builder, ToolBuildingRecipe recipe, IFocusGroup focuses) {
+  public void setRecipe(IRecipeLayoutBuilder builder, DisplayRecipe<ToolBuildingRecipe> holder, IFocusGroup focuses) {
+    ToolBuildingRecipe recipe = holder.value();
     List<List<ItemStack>> toolParts = recipe.getAllToolParts();
     List<List<ItemStack>> partsAndExtras = Stream.concat(
       toolParts.stream(),
@@ -135,7 +138,8 @@ public class ToolBuildingCategory extends AbstractRecipeCategory<ToolBuildingRec
   }
 
   @Override
-  public void onDisplayedIngredientsUpdate(ToolBuildingRecipe recipe, List<IRecipeSlotDrawable> recipeSlots, IFocusGroup focuses) {
+  public void onDisplayedIngredientsUpdate(DisplayRecipe<ToolBuildingRecipe> holder, List<IRecipeSlotDrawable> recipeSlots, IFocusGroup focuses) {
+    ToolBuildingRecipe recipe = holder.value();
     // no input slots means we may be using a focus link instead, either way no work to do
     IRecipeSlotDrawable resultSlot = CategoryUtil.findSlot(recipeSlots, RESULT_SLOT);
     List<IRecipeSlotDrawable> inputSlots = CategoryUtil.filterSlots(recipeSlots, PART_SLOT_PREFIX);
@@ -158,7 +162,8 @@ public class ToolBuildingCategory extends AbstractRecipeCategory<ToolBuildingRec
   }
 
   @Override
-  public void draw(ToolBuildingRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
+  public void draw(DisplayRecipe<ToolBuildingRecipe> holder, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
+    ToolBuildingRecipe recipe = holder.value();
     // first, draw the item background
     ItemStack outputStack = recipe.getOutput() instanceof IModifiableDisplay modifiable ? modifiable.getRenderTool() : recipe.getOutput().asItem().getDefaultInstance();
     PoseStack renderPose = graphics.pose();
@@ -191,7 +196,7 @@ public class ToolBuildingCategory extends AbstractRecipeCategory<ToolBuildingRec
   }
 
   @Override
-  public ResourceLocation getRegistryName(ToolBuildingRecipe recipe) {
-    return recipe.getId();
+  public ResourceLocation getRegistryName(DisplayRecipe<ToolBuildingRecipe> holder) {
+    return holder.id();
   }
 }

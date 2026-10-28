@@ -65,7 +65,7 @@ public class SlotIngredientHelper implements IIngredientHelper<SlotCount> {
     if (slots.count() <= 0) {
       return ItemStack.EMPTY;
     }
-    return CreativeSlotItem.withSlot(new ItemStack(TinkerModifiers.creativeSlotItem, slots.count()), slots.type());
+    return CreativeSlotItem.withSlot(new ItemStack(TinkerModifiers.creativeSlotItem.get(), slots.count()), slots.type());
   }
 
   @Override

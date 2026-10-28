@@ -18,6 +18,7 @@ import slimeknights.tconstruct.library.recipe.melting.IDisplayableMeltingRecipe;
 import slimeknights.tconstruct.library.recipe.modifiers.adding.IDisplayModifierRecipe;
 import slimeknights.tconstruct.library.recipe.modifiers.severing.SeveringRecipe;
 import slimeknights.tconstruct.library.recipe.molding.MoldingRecipe;
+import slimeknights.tconstruct.library.recipe.display.DisplayRecipe;
 import slimeknights.tconstruct.library.recipe.partbuilder.IDisplayPartBuilderRecipe;
 import slimeknights.tconstruct.library.recipe.partbuilder.Pattern;
 import slimeknights.tconstruct.library.recipe.tinkerstation.IDisplayToolTinkering;
@@ -81,31 +82,33 @@ public class TConstructJEIConstants {
   };
 
   // casting
-  public static final RecipeType<IDisplayableCastingRecipe> CASTING_BASIN = type("casting_basin", IDisplayableCastingRecipe.class);
-  public static final RecipeType<IDisplayableCastingRecipe> CASTING_TABLE = type("casting_table", IDisplayableCastingRecipe.class);
-  public static final RecipeType<MoldingRecipe> MOLDING = type("molding", MoldingRecipe.class);
+  public static final RecipeType<DisplayRecipe<IDisplayableCastingRecipe>> CASTING_BASIN = type("casting_basin");
+  public static final RecipeType<DisplayRecipe<IDisplayableCastingRecipe>> CASTING_TABLE = type("casting_table");
+  public static final RecipeType<DisplayRecipe<MoldingRecipe>> MOLDING = type("molding");
 
   // melting
-  public static final RecipeType<IDisplayableMeltingRecipe> MELTING = type("melting", IDisplayableMeltingRecipe.class);
-  public static final RecipeType<EntityMeltingRecipe> ENTITY_MELTING = type("entity_melting", EntityMeltingRecipe.class);
-  public static final RecipeType<AlloyRecipe> ALLOY = type("alloy", AlloyRecipe.class);
-  public static final RecipeType<IDisplayableMeltingRecipe> FOUNDRY = type("foundry", IDisplayableMeltingRecipe.class);
-  public static final RecipeType<MeltingFuel> FUEL = type("fuel", MeltingFuel.class);
+  public static final RecipeType<DisplayRecipe<IDisplayableMeltingRecipe>> MELTING = type("melting");
+  public static final RecipeType<DisplayRecipe<EntityMeltingRecipe>> ENTITY_MELTING = type("entity_melting");
+  public static final RecipeType<DisplayRecipe<AlloyRecipe>> ALLOY = type("alloy");
+  public static final RecipeType<DisplayRecipe<IDisplayableMeltingRecipe>> FOUNDRY = type("foundry");
+  public static final RecipeType<DisplayRecipe<MeltingFuel>> FUEL = type("fuel");
 
   // tinker station
-  public static final RecipeType<IDisplayModifierRecipe> MODIFIERS = type("modifiers", IDisplayModifierRecipe.class);
-  public static final RecipeType<SeveringRecipe> SEVERING = type("severing", SeveringRecipe.class);
-  public static final RecipeType<ToolBuildingRecipe> TOOL_BUILDING = type("tool_recipes", ToolBuildingRecipe.class);
-  public static final RecipeType<IDisplayToolTinkering> TOOL_MODIFICATION = type("tool_modification", IDisplayToolTinkering.class);
+  public static final RecipeType<DisplayRecipe<IDisplayModifierRecipe>> MODIFIERS = type("modifiers");
+  public static final RecipeType<DisplayRecipe<SeveringRecipe>> SEVERING = type("severing");
+  public static final RecipeType<DisplayRecipe<ToolBuildingRecipe>> TOOL_BUILDING = type("tool_recipes");
+  public static final RecipeType<DisplayRecipe<IDisplayToolTinkering>> TOOL_MODIFICATION = type("tool_modification");
 
   // part builder
-  public static final RecipeType<IDisplayMaterialRecipe> MATERIALS = type("materials", IDisplayMaterialRecipe.class);
-  public static final RecipeType<IDisplayPartBuilderRecipe> PART_BUILDER = type("part_builder", IDisplayPartBuilderRecipe.class);
+  public static final RecipeType<DisplayRecipe<IDisplayMaterialRecipe>> MATERIALS = type("materials");
+  public static final RecipeType<DisplayRecipe<IDisplayPartBuilderRecipe>> PART_BUILDER = type("part_builder");
 
   // modifier workstation
-  public static final RecipeType<IModifierWorktableRecipe> MODIFIER_WORKTABLE = type("worktable", IModifierWorktableRecipe.class);
+  public static final RecipeType<DisplayRecipe<IModifierWorktableRecipe>> MODIFIER_WORKTABLE = type("worktable");
 
-  private static <T> RecipeType<T> type(String name, Class<T> clazz) {
-    return RecipeType.create(TConstruct.MOD_ID, name, clazz);
+  /** Creates a recipe type for display recipes, keeping the recipe IDs available to JEI. */
+  @SuppressWarnings("unchecked")
+  private static <T> RecipeType<DisplayRecipe<T>> type(String name) {
+    return RecipeType.create(TConstruct.MOD_ID, name, (Class<DisplayRecipe<T>>) (Class<?>) DisplayRecipe.class);
   }
 }

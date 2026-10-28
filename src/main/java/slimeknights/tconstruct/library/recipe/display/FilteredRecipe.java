@@ -38,6 +38,24 @@ public interface FilteredRecipe {
     return filtered.size() < recipes.size() ? filtered : recipes;
   }
 
+  /** Gets a list of display recipes that are always shown in JEI. */
+  static <T extends FilteredRecipe> List<DisplayRecipe<T>> unfilteredHolders(List<DisplayRecipe<T>> recipes) {
+    List<DisplayRecipe<T>> filtered = recipes.stream().filter(r -> !r.value().isFiltered()).toList();
+    return filtered.size() < recipes.size() ? filtered : recipes;
+  }
+
+  /** Gets a list of display recipes that support dynamic filtering. */
+  static <T extends FilteredRecipe> List<DisplayRecipe<T>> filteredHolders(List<DisplayRecipe<T>> recipes) {
+    List<DisplayRecipe<T>> filtered = recipes.stream().filter(r -> r.value().isFiltered()).toList();
+    return filtered.size() < recipes.size() ? filtered : recipes;
+  }
+
+  /** Gets a list of always visible display recipes from the list of filterable recipes. */
+  static <T extends FilteredRecipe> List<DisplayRecipe<T>> alwaysVisibleHolders(List<DisplayRecipe<T>> recipes) {
+    List<DisplayRecipe<T>> filtered = recipes.stream().filter(r -> r.value().showUnfocused()).toList();
+    return filtered.size() < recipes.size() ? filtered : recipes;
+  }
+
   /** Gets a list of always visible recipes from the list of filterable recipes. */
   static <T extends FilteredRecipe> List<T> alwaysVisible(List<T> recipes) {
     List<T> filtered = recipes.stream().filter(FilteredRecipe::showUnfocused).toList();

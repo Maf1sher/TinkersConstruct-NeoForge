@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.plugin.jei.entity;
 
+import slimeknights.tconstruct.library.recipe.display.DisplayRecipe;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IIngredientAcceptor;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
@@ -21,7 +22,7 @@ import slimeknights.tconstruct.tools.TinkerTools;
 
 import java.util.List;
 
-public class SeveringCategory extends AbstractRecipeCategory<SeveringRecipe> {
+public class SeveringCategory extends AbstractRecipeCategory<DisplayRecipe<SeveringRecipe>> {
   public static final ResourceLocation BACKGROUND_LOC = TConstruct.getResource("textures/gui/jei/tinker_station.png");
   private static final Component TITLE = TConstruct.makeTranslation("jei", "severing.title");
 
@@ -33,12 +34,14 @@ public class SeveringCategory extends AbstractRecipeCategory<SeveringRecipe> {
   }
 
   @Override
-  public void createRecipeExtras(IRecipeExtrasBuilder builder, SeveringRecipe recipe, IFocusGroup focuses) {
+  public void createRecipeExtras(IRecipeExtrasBuilder builder, DisplayRecipe<SeveringRecipe> holder, IFocusGroup focuses) {
+    SeveringRecipe recipe = holder.value();
     builder.addRecipeArrowWidget().setPosition(42, 10);
   }
 
   @Override
-  public void setRecipe(IRecipeLayoutBuilder builder, SeveringRecipe recipe, IFocusGroup focuses) {
+  public void setRecipe(IRecipeLayoutBuilder builder, DisplayRecipe<SeveringRecipe> holder, IFocusGroup focuses) {
+    SeveringRecipe recipe = holder.value();
     EntityIngredient input = recipe.getIngredient();
     IIngredientAcceptor<?> entities = builder.addInputSlot(3, 3)
            .setCustomRenderer(MantleJEIConstants.ENTITY_TYPE, entityRenderer)
@@ -53,7 +56,7 @@ public class SeveringCategory extends AbstractRecipeCategory<SeveringRecipe> {
   }
 
   @Override
-  public ResourceLocation getRegistryName(SeveringRecipe recipe) {
-    return recipe.getId();
+  public ResourceLocation getRegistryName(DisplayRecipe<SeveringRecipe> holder) {
+    return holder.id();
   }
 }
