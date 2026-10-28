@@ -1,0 +1,9 @@
+{
+  "type": "tconstruct:entity_melting",
+  "damage": 2,
+  "entity": "#tconstruct:meltable/skeleton",
+  "result": {
+    "amount": 100,
+    "fluid": "minecraft:milk"
+  }
+}

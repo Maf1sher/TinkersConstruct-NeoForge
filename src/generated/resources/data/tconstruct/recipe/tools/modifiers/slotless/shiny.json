@@ -1,0 +1,23 @@
+{
+  "type": "tconstruct:modifier",
+  "allow_crystal": true,
+  "inputs": [
+    {
+      "type": "neoforge:compound",
+      "children": [
+        {
+          "item": "minecraft:enchanted_golden_apple"
+        },
+        {
+          "item": "minecraft:nether_star"
+        }
+      ],
+      "count": 1
+    }
+  ],
+  "level": 1,
+  "result": "tconstruct:shiny",
+  "tools": {
+    "tag": "tconstruct:modifiable"
+  }
+}

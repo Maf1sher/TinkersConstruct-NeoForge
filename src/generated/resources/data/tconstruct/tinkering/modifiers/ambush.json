@@ -34,8 +34,14 @@
           "condition_type": "tconstruct:full_health",
           "entity_type": "tconstruct:conditional",
           "fallback": 1.0,
-          "if_false": 0.0,
-          "if_true": 1.0,
+          "if_false": {
+            "type": "tconstruct:constant",
+            "value": 0.0
+          },
+          "if_true": {
+            "type": "tconstruct:constant",
+            "value": 1.0
+          },
           "which": "attacker"
         },
         "target_full": {
@@ -43,8 +49,14 @@
           "condition_type": "tconstruct:full_health",
           "entity_type": "tconstruct:conditional",
           "fallback": 0.6,
-          "if_false": 0.0,
-          "if_true": 0.6,
+          "if_false": {
+            "type": "tconstruct:constant",
+            "value": 0.0
+          },
+          "if_true": {
+            "type": "tconstruct:constant",
+            "value": 0.6
+          },
           "which": "target"
         }
       }

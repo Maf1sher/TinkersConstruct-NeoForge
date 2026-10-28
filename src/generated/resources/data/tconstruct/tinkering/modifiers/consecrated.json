@@ -4,8 +4,8 @@
     {
       "type": "tconstruct:protection",
       "attacker": {
-        "type": "mantle:mob_type",
-        "mobs": "minecraft:undead"
+        "type": "mantle:tag",
+        "tag": "minecraft:sensitive_to_smite"
       },
       "damage_source": "mantle:can_protect",
       "each_level": 1.25

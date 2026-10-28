@@ -9,8 +9,8 @@
         "type": "mantle:or",
         "predicates": [
           {
-            "type": "mantle:mob_type",
-            "mobs": "minecraft:illager"
+            "type": "mantle:tag",
+            "tag": "minecraft:illager"
           },
           {
             "type": "mantle:tag",

@@ -23,15 +23,27 @@
           "if_false": {
             "type": "tconstruct:conditional",
             "condition_type": "mantle:raining_at",
-            "if_false": 0.0,
-            "if_true": 4.0
+            "if_false": {
+              "type": "tconstruct:constant",
+              "value": 0.0
+            },
+            "if_true": {
+              "type": "tconstruct:constant",
+              "value": 4.0
+            }
           },
           "if_true": {
             "type": "tconstruct:conditional",
             "condition_type": "mantle:has_enchantment",
             "enchantment": "minecraft:aqua_affinity",
-            "if_false": 40.0,
-            "if_true": 8.0
+            "if_false": {
+              "type": "tconstruct:constant",
+              "value": 40.0
+            },
+            "if_true": {
+              "type": "tconstruct:constant",
+              "value": 8.0
+            }
           }
         }
       }

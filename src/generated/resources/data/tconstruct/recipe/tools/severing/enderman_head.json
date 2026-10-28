@@ -1,0 +1,7 @@
+{
+  "type": "tconstruct:severing",
+  "entity": "minecraft:enderman",
+  "looting_bonus": 0.01,
+  "per_level_chance": 0.05,
+  "result": "tconstruct:enderman_head"
+}

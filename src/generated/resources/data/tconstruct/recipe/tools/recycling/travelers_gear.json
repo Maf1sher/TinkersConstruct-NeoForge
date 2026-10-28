@@ -1,0 +1,28 @@
+{
+  "type": "tconstruct:part_builder_tool_recycling",
+  "parts": [
+    "tconstruct:repair_kit",
+    "tconstruct:repair_kit"
+  ],
+  "pattern": {
+    "item": "tconstruct:venom_bottle"
+  },
+  "tools": {
+    "type": "neoforge:compound",
+    "children": [
+      {
+        "item": "tconstruct:travelers_helmet"
+      },
+      {
+        "item": "tconstruct:travelers_chestplate"
+      },
+      {
+        "item": "tconstruct:travelers_leggings"
+      },
+      {
+        "item": "tconstruct:travelers_boots"
+      }
+    ],
+    "count": 1
+  }
+}

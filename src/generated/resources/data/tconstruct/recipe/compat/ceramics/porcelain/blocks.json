@@ -1,0 +1,76 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "ceramics"
+    }
+  ],
+  "type": "tconstruct:melting",
+  "ingredient": [
+    {
+      "tag": "ceramics:porcelain_block"
+    },
+    {
+      "tag": "ceramics:rainbow_porcelain"
+    },
+    {
+      "type": "neoforge:compound",
+      "children": [
+        {
+          "type": "tconstruct:item_name",
+          "item": "ceramics:porcelain_bricks"
+        },
+        {
+          "type": "tconstruct:item_name",
+          "item": "ceramics:porcelain_bricks_stairs"
+        },
+        {
+          "type": "tconstruct:item_name",
+          "item": "ceramics:porcelain_bricks_wall"
+        },
+        {
+          "type": "tconstruct:item_name",
+          "item": "ceramics:monochrome_bricks"
+        },
+        {
+          "type": "tconstruct:item_name",
+          "item": "ceramics:monochrome_bricks_stairs"
+        },
+        {
+          "type": "tconstruct:item_name",
+          "item": "ceramics:monochrome_bricks_wall"
+        },
+        {
+          "type": "tconstruct:item_name",
+          "item": "ceramics:marine_bricks"
+        },
+        {
+          "type": "tconstruct:item_name",
+          "item": "ceramics:marine_bricks_stairs"
+        },
+        {
+          "type": "tconstruct:item_name",
+          "item": "ceramics:marine_bricks_wall"
+        },
+        {
+          "type": "tconstruct:item_name",
+          "item": "ceramics:rainbow_bricks"
+        },
+        {
+          "type": "tconstruct:item_name",
+          "item": "ceramics:rainbow_bricks_stairs"
+        },
+        {
+          "type": "tconstruct:item_name",
+          "item": "ceramics:rainbow_bricks_wall"
+        }
+      ]
+    }
+  ],
+  "result": {
+    "amount": 1000,
+    "fluid": "tconstruct:molten_porcelain"
+  },
+  "temperature": 700,
+  "time": 114
+}

@@ -6,7 +6,7 @@
       "attribute": "tconstruct:generic.chrysophilite",
       "each_level": 1.0,
       "flat": 1.0,
-      "operation": "addition"
+      "operation": "add_value"
     },
     {
       "type": "tconstruct:volatile_flag",

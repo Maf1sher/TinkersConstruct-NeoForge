@@ -2,7 +2,7 @@
   "type": "mantle:empty_item",
   "conditions": [
     {
-      "type": "forge:item_exists",
+      "type": "neoforge:item_exists",
       "item": "twilightforest:fiery_blood"
     }
   ],
@@ -11,6 +11,7 @@
     "fluid": "tconstruct:fiery_liquid"
   },
   "input": {
+    "type": "tconstruct:item_name",
     "item": "twilightforest:fiery_blood"
   }
 }

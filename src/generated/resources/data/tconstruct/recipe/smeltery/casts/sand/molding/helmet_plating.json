@@ -1,0 +1,16 @@
+{
+  "type": "tconstruct:molding_table",
+  "material": {
+    "tag": "tconstruct:casts/sand"
+  },
+  "pattern": [
+    {
+      "item": "tconstruct:helmet_plating_dummy"
+    },
+    {
+      "type": "tconstruct:material",
+      "item": "tconstruct:helmet_plating"
+    }
+  ],
+  "result": "tconstruct:helmet_plating_sand_cast"
+}

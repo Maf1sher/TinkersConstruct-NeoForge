@@ -1,0 +1,41 @@
+{
+  "type": "tconstruct:remove_modifier",
+  "inputs": [
+    {
+      "type": "neoforge:compound",
+      "children": [
+        {
+          "type": "mantle:fluid_container",
+          "amount": 1000,
+          "display": {
+            "id": "tconstruct:venom_bucket"
+          },
+          "fluid": {
+            "tag": "tconstruct:venom"
+          }
+        },
+        {
+          "type": "mantle:fluid_container",
+          "amount": 250,
+          "display": {
+            "id": "tconstruct:venom_bottle"
+          },
+          "fluid": {
+            "tag": "tconstruct:venom"
+          }
+        }
+      ],
+      "count": 1
+    }
+  ],
+  "modifier_predicate": {
+    "type": "mantle:inverted",
+    "inverted_type": "tconstruct:tag",
+    "tag": "tconstruct:remove_blacklist"
+  },
+  "name": "modifiers",
+  "tools": {
+    "count": 1,
+    "tag": "tconstruct:modifiable"
+  }
+}
