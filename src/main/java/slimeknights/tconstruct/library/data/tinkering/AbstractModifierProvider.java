@@ -7,8 +7,9 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
 
 import net.neoforged.neoforge.common.conditions.ICondition;
-import slimeknights.mantle.util.JsonHelper;
 import slimeknights.mantle.data.GenericDataProvider;
+import slimeknights.mantle.util.JsonHelper;
+import slimeknights.mantle.util.typed.TypedMap;
 import slimeknights.tconstruct.library.json.JsonRedirect;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.modifiers.ModifierManager;
@@ -89,12 +90,18 @@ public abstract class AbstractModifierProvider extends GenericDataProvider {
     return conditionalRedirect(id, null);
   }
 
+  /** Context used when serializing modifier JSON, provides registries to codec-based fields */
+  protected TypedMap serializationContext() {
+    return TypedMap.EMPTY;
+  }
+
   @Override
   public CompletableFuture<?> run(CachedOutput cache) {
     addModifiers();
+    TypedMap context = serializationContext();
     return allOf(composableModifiers.entrySet().stream().map(entry -> {
       try {
-        return saveJson(cache, entry.getKey().getLocation(), entry.getValue().serialize());
+        return saveJson(cache, entry.getKey().getLocation(), entry.getValue().serialize(context));
       } catch (RuntimeException e) {
         throw new RuntimeException("Failed to serialize modifier " + entry.getKey(), e);
       }
@@ -104,10 +111,10 @@ public abstract class AbstractModifierProvider extends GenericDataProvider {
   /** Result for composable too */
   private record Composable(@Nullable ComposableModifier.Builder builder, @Nullable ICondition condition, JsonRedirect[] redirects) {
     /** Writes this result to JSON */
-    public JsonObject serialize() {
+    public JsonObject serialize(TypedMap context) {
       JsonObject json;
       if (builder != null) {
-        json = ComposableModifier.LOADER.serialize(builder.build()).getAsJsonObject();
+        json = ComposableModifier.LOADER.serialize(builder.build(), context).getAsJsonObject();
       } else {
         json = new JsonObject();
       }

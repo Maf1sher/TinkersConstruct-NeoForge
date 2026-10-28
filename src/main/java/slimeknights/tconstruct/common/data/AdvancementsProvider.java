@@ -31,7 +31,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -127,7 +126,7 @@ public class AdvancementsProvider extends GenericDataProvider {
   private record ConditionalAdvancement(ResourceLocation id, Advancement.Builder builder, ICondition condition) {}
 
   public AdvancementsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-    super(output, Target.DATA_PACK, "advancements");
+    super(output, Target.DATA_PACK, "advancement");
     this.registries = registries;
   }
 
@@ -603,7 +602,7 @@ public class AdvancementsProvider extends GenericDataProvider {
     Set<ResourceLocation> set = Sets.newHashSet();
     List<AdvancementHolder> advancements = new ArrayList<>();
     List<ConditionalAdvancement> conditionals = new ArrayList<>();
-    var ops = RegistryOps.create(JsonOps.INSTANCE, lookup);
+    var ops = lookup.createSerializationContext(JsonOps.INSTANCE);
     this.advancementConsumer = advancement -> {
       if (!set.add(advancement.id())) {
         throw new IllegalStateException("Duplicate advancement " + advancement.id());

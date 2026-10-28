@@ -1,15 +1,11 @@
 package slimeknights.tconstruct;
 
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.core.RegistrySetBuilder;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
@@ -75,12 +71,10 @@ import slimeknights.tconstruct.world.TinkerWorld;
 import slimeknights.tconstruct.world.data.WorldgenProvider;
 
 import java.util.Locale;
-import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 /**
  * TConstruct, the tool mod. Craft your tools with style, then modify until the original is gone!
@@ -162,28 +156,10 @@ public class TConstruct {
     StationSlotLayoutLoader.init();
   }
 
-  /** Combines a static registry lookup with a datapack lookup, preferring static registries so their holders stay valid */
-  private static HolderLookup.Provider combineLookups(HolderLookup.Provider statics, HolderLookup.Provider datapack) {
-    return new HolderLookup.Provider() {
-      @Override
-      public Stream<ResourceKey<? extends Registry<?>>> listRegistries() {
-        return Stream.concat(statics.listRegistries(), datapack.listRegistries()).distinct();
-      }
-
-      @Override
-      public <T> Optional<HolderLookup.RegistryLookup<T>> lookup(ResourceKey<? extends Registry<? extends T>> key) {
-        // datapack registries also exist as empty static stubs; only prefer a static registry that has entries
-        Optional<HolderLookup.RegistryLookup<T>> staticLookup = statics.lookup(key).filter(lookup -> lookup.listElements().findAny().isPresent());
-        return staticLookup.isPresent() ? staticLookup : datapack.lookup(key);
-      }
-    };
-  }
-
   static void gatherData(final GatherDataEvent event) {
     DataGenerator generator = event.getGenerator();
     PackOutput packOutput = generator.getPackOutput();
     ExistingFileHelper existingFileHelper = event.getExistingFileHelper();
-    CompletableFuture<Provider> lookupProvider = event.getLookupProvider();
     boolean server = event.includeServer();
 
     // its sometimes cleaner to splitup different registry sets to their own classes, combine them here into a single provider
@@ -192,9 +168,9 @@ public class TConstruct {
     WorldgenProvider.register(registrySetBuilder);
     TrimMaterialProvider.register(registrySetBuilder);
     event.createDatapackRegistryObjects(registrySetBuilder, Set.of(MOD_ID));
-    // combine the static registries (item holders must come from these) with the datapack entries (structures, damage types, trim materials)
-    lookupProvider = event.getLookupProvider().thenApply(datapack ->
-      combineLookups(RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY), datapack));
+    // re-read the provider after registering the datapack objects: the patched provider contains both the static
+    // registries and the datapack entries, and its serialization context keeps the correct holder owners
+    CompletableFuture<Provider> lookupProvider = event.getLookupProvider();
 
     // tags
     BlockTagProvider blockTags = new BlockTagProvider(packOutput, lookupProvider, existingFileHelper);

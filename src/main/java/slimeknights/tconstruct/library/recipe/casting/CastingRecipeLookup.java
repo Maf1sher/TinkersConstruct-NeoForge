@@ -55,9 +55,12 @@ public class CastingRecipeLookup {
 
   /** Marks the given item output as castable */
   public static void registerCastable(ItemOutput output) {
+    // name outputs only exist at datagen and have no item or tag to register
+    if (output instanceof ItemNameOutput) {
+      return;
+    }
     output.getValueOrTag().ifRight(CastingRecipeLookup::registerCastable);
-    // item name output fails here, but that only happens at datagen so just ignore that
-    if (!output.isEmpty() && !(output instanceof ItemNameOutput)) {
+    if (!output.isEmpty()) {
       registerCastable(output.get().getItem());
     }
   }

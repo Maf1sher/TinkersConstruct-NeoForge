@@ -1,9 +1,7 @@
 package slimeknights.tconstruct.library.recipe.data;
 
 import com.mojang.datafixers.util.Either;
-import lombok.RequiredArgsConstructor;
 import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -16,21 +14,23 @@ import javax.annotation.Nullable;
  * Extension of {@link ItemOutput} for datagen of recipes for compat. Should never be used in an actual recipe.
  * Replaces the removed Mantle helper of the same name.
  */
-@RequiredArgsConstructor(staticName = "unused")
 public class ItemNameOutput extends ItemOutput {
   private final ResourceLocation name;
   private final int count;
-  @Nullable
-  private final CompoundTag nbt;
+
+  private ItemNameOutput(ResourceLocation name, int count) {
+    this.name = name;
+    this.count = count;
+  }
 
   /**
-   * Creates an output for the given item with no NBT
+   * Creates an output for the given item
    * @param name   Item name
    * @param count  Count
    * @return  Output
    */
   public static ItemNameOutput fromName(ResourceLocation name, int count) {
-    return fromName(name, count, null);
+    return new ItemNameOutput(name, count);
   }
 
   /**
@@ -42,17 +42,6 @@ public class ItemNameOutput extends ItemOutput {
     return fromName(name, 1);
   }
 
-  /**
-   * Creates an output for the given item with an NBT
-   * @param name   Item name
-   * @param count  Count
-   * @param nbt    Output NBT, may be null
-   * @return  Output
-   */
-  public static ItemNameOutput fromName(ResourceLocation name, int count, @Nullable CompoundTag nbt) {
-    return new ItemNameOutput(name, count, nbt);
-  }
-
   @Override
   public ItemStack get() {
     throw new UnsupportedOperationException("Cannot get the item stack from a item name output");
@@ -61,6 +50,11 @@ public class ItemNameOutput extends ItemOutput {
   @Override
   public Either<Item, TagKey<Item>> getValueOrTag() {
     throw new UnsupportedOperationException("Cannot resolve the item from an item name output");
+  }
+
+  @Override
+  public ResourceLocation getName() {
+    return name;
   }
 
   @Override

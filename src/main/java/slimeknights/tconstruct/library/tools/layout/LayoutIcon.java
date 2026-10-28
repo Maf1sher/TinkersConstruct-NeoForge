@@ -12,6 +12,7 @@ import com.google.gson.JsonSerializer;
 import com.google.gson.JsonSyntaxException;
 import io.netty.handler.codec.DecoderException;
 import lombok.RequiredArgsConstructor;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import com.mojang.serialization.JsonOps;
@@ -104,12 +105,16 @@ public abstract class LayoutIcon {
 
     @Override
     public JsonObject toJson() {
+      // 1.21.1 item format replaces the old "item"/"nbt" keys; custom data is written as a component
       JsonObject json = new JsonObject();
-      // 1.21.1 item format from ItemStack.CODEC replaces the old "item"/"nbt" keys
       json.add("id", Loadables.ITEM.serialize(stack.getItem()));
       int count = stack.getCount();
       if (count != 1) {
         json.addProperty("count", count);
+      }
+      DataComponentPatch components = stack.getComponentsPatch();
+      if (!components.isEmpty()) {
+        json.add("components", JsonHelper.serialize(DataComponentPatch.CODEC, components));
       }
       return json;
     }

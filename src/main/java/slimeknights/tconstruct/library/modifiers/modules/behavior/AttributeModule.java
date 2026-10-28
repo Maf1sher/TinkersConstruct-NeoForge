@@ -79,7 +79,7 @@ public record AttributeModule(String unique, Holder<Attribute> attribute, Operat
 
   /** Converts a list of slots to an array of modifier IDs at each index */
   public static ResourceLocation[] slotsToIds(String name, Collection<EquipmentSlot> slots) {
-    ResourceLocation[] slotIds = new ResourceLocation[6];
+    ResourceLocation[] slotIds = new ResourceLocation[EquipmentSlot.values().length];
     for (EquipmentSlot slot : slots) {
       slotIds[slot.getFilterFlag()] = getModifierId(name, slot);
     }

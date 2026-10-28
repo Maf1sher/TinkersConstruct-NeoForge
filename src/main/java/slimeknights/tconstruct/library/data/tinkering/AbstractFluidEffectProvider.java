@@ -23,10 +23,11 @@ import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
 import net.neoforged.neoforge.common.conditions.OrCondition;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
-import slimeknights.mantle.util.JsonHelper;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
 import slimeknights.mantle.data.predicate.entity.EntityPredicate;
+import slimeknights.mantle.util.JsonHelper;
+import slimeknights.mantle.util.typed.TypedMap;
 import slimeknights.mantle.data.predicate.entity.LivingEntityPredicate;
 import slimeknights.mantle.recipe.condition.TagFilledCondition;
 import slimeknights.mantle.registration.object.FluidObject;
@@ -69,10 +70,16 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
   /** Adds the fluids to the map */
   protected abstract void addFluids();
 
+  /** Context used when serializing fluid effect JSON, provides registries to codec-based fields */
+  protected TypedMap serializationContext() {
+    return TypedMap.EMPTY;
+  }
+
   @Override
   public CompletableFuture<?> run(CachedOutput cache) {
     addFluids();
-    return allOf(entries.entrySet().stream().map(entry -> saveJson(cache, entry.getKey(), entry.getValue().build(entry.getKey()))));
+    TypedMap context = serializationContext();
+    return allOf(entries.entrySet().stream().map(entry -> saveJson(cache, entry.getKey(), entry.getValue().build(entry.getKey(), context))));
   }
 
   /* Helpers */
@@ -335,7 +342,7 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
 
     /** Builds the instance */
     @CheckReturnValue
-    private JsonObject build(ResourceLocation id) {
+    private JsonObject build(ResourceLocation id, TypedMap context) {
       JsonObject json = new JsonObject();
       if (!conditions.isEmpty()) {
         json.add("conditions", JsonHelper.serialize(ICondition.LIST_CODEC, conditions));
@@ -345,7 +352,7 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
       }
       FluidEffects effects = new FluidEffects(ingredient, blockEffects, entityEffects, hidden);
       try {
-        FluidEffects.LOADABLE.serializeInto(effects, json, slimeknights.mantle.util.typed.TypedMap.EMPTY);
+        FluidEffects.LOADABLE.serializeInto(effects, json, context);
       } catch (Exception e) {
         throw new RuntimeException("Error serializing fluid effect ID " + id + " with value " + effects, e);
       }

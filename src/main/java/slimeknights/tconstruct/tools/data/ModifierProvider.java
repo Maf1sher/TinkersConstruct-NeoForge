@@ -39,6 +39,7 @@ import net.neoforged.neoforge.common.ItemAbilities;
 import net.neoforged.neoforge.common.conditions.IConditionBuilder;
 import net.neoforged.neoforge.fluids.FluidType;
 import slimeknights.mantle.client.TooltipKey;
+import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
 import slimeknights.mantle.data.predicate.block.BlockPredicate;
 import slimeknights.mantle.data.predicate.block.BlockPropertiesPredicate;
@@ -52,6 +53,7 @@ import slimeknights.mantle.data.predicate.entity.LivingEntityPredicate;
 import slimeknights.mantle.data.predicate.fluid.FluidPredicate;
 import slimeknights.mantle.data.predicate.item.ItemPredicate;
 import slimeknights.mantle.recipe.condition.TagFilledCondition;
+import slimeknights.mantle.util.typed.TypedMap;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.Sounds;
 import slimeknights.tconstruct.common.TinkerDamageTypes;
@@ -280,6 +282,7 @@ import slimeknights.tconstruct.tools.modules.ranged.common.ProjectilePlaceGlowMo
 import slimeknights.tconstruct.tools.modules.ranged.common.PunchModule;
 import slimeknights.tconstruct.tools.modules.ranged.common.ReversePunchModule;
 
+import javax.annotation.Nullable;
 import java.util.concurrent.CompletableFuture;
 
 import static slimeknights.tconstruct.common.TinkerTags.Items.ARMOR;
@@ -296,6 +299,9 @@ public class ModifierProvider extends AbstractModifierProvider implements ICondi
   private final CompletableFuture<HolderLookup.Provider> registries;
   /** Enchantment lookup, available once {@link #run(CachedOutput)} starts */
   private HolderLookup.RegistryLookup<Enchantment> enchantments;
+  /** Registry lookup for the serialization context, available once {@link #run(CachedOutput)} starts */
+  @Nullable
+  private TypedMap serializerContext;
 
   public ModifierProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> registries) {
     super(packOutput);
@@ -306,8 +312,14 @@ public class ModifierProvider extends AbstractModifierProvider implements ICondi
   public CompletableFuture<?> run(CachedOutput cache) {
     return registries.thenCompose(lookup -> {
       this.enchantments = lookup.lookupOrThrow(Registries.ENCHANTMENT);
+      this.serializerContext = ContextKey.lookupContext(lookup).build();
       return super.run(cache);
     });
+  }
+
+  @Override
+  protected TypedMap serializationContext() {
+    return this.serializerContext == null ? super.serializationContext() : this.serializerContext;
   }
 
   /** Resolves an enchantment holder for datagen */

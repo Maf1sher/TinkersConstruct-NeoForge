@@ -1,12 +1,12 @@
 package slimeknights.tconstruct.library.recipe.casting.container;
 
 import lombok.AllArgsConstructor;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
+import slimeknights.tconstruct.common.data.FakeRegistryEntry;
 import slimeknights.tconstruct.common.recipe.LoadableFinishedRecipe;
 import slimeknights.tconstruct.library.recipe.helper.TypeAwareRecipeSerializer;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
@@ -80,7 +80,7 @@ public class ContainerFillingRecipeBuilder extends AbstractRecipeBuilder<Contain
   @Override
   public void save(RecipeOutput output, ResourceLocation id) {
     LoadableFinishedRecipe.save(output, id, ContainerFillingRecipe.LOADER,
-      new ContainerFillingRecipe(recipeSerializer, id, group, fluidAmount, BuiltInRegistries.ITEM.get(result)),
+      new ContainerFillingRecipe(recipeSerializer, id, group, fluidAmount, FakeRegistryEntry.item(result)),
       buildOptionalAdvancement(output, id, "casting"));
   }
 }
