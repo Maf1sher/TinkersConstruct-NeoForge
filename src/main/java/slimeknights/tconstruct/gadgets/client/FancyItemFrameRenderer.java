@@ -35,9 +35,9 @@ public class FancyItemFrameRenderer<T extends FancyItemFrameEntity> extends Item
   static {
     for (FrameType type : FrameType.values()) {
       String name = type == FrameType.REVERSED_GOLD ? FrameType.GOLD.getSerializedName() : type.getSerializedName();
-      // 1.21 requires model resource locations, so resolve the frame blockstates with the map variant
-      LOCATIONS_MODEL.put(type, new ModelResourceLocation(TConstruct.getResource(name + "_frame"), "map=false"));
-      LOCATIONS_MODEL_MAP.put(type, new ModelResourceLocation(TConstruct.getResource(name + "_frame"), "map=true"));
+      // frame models are side-loaded, so they use standalone model resource locations
+      LOCATIONS_MODEL.put(type, ModelResourceLocation.standalone(TConstruct.getResource("block/frame/" + name)));
+      LOCATIONS_MODEL_MAP.put(type, ModelResourceLocation.standalone(TConstruct.getResource("block/frame/" + name + "_map")));
     }
   }
 
