@@ -10,6 +10,8 @@ import org.jetbrains.annotations.Nullable;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerModule;
 
+import java.util.Objects;
+
 /** Capability logic */
 public class PiggybackCapability {
   /** Capability queried on players */
@@ -21,6 +23,14 @@ public class PiggybackCapability {
     "piggyback", () -> AttachmentType.builder(holder -> new PiggybackHandler((Player) holder)).build());
 
   private PiggybackCapability() {}
+
+  /**
+   * Forces class initialization so the attachment type is registered before the attachment deferred register is
+   * attached to the mod bus. Called from {@link TinkerModule#initRegisters}.
+   */
+  public static void init() {
+    Objects.requireNonNull(DATA);
+  }
 
   /** Registers the capability provider so players can answer piggyback queries */
   public static void register(RegisterCapabilitiesEvent event) {

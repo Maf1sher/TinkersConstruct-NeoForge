@@ -43,10 +43,14 @@ import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.registration.BlockDeferredRegisterExtension;
 import slimeknights.tconstruct.common.registration.FluidDeferredRegisterExtension;
 import slimeknights.tconstruct.common.registration.ItemDeferredRegisterExtension;
+import slimeknights.tconstruct.gadgets.capability.PiggybackCapability;
 import slimeknights.tconstruct.library.materials.MaterialRegistry;
 import slimeknights.tconstruct.library.materials.definition.IMaterial;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
+import slimeknights.tconstruct.library.tools.capability.EntityModifierCapability;
+import slimeknights.tconstruct.library.tools.capability.PersistentDataCapability;
+import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -106,6 +110,11 @@ public abstract class TinkerModule {
     // datapacks
     RECIPE_SERIALIZERS.register(bus);
     GLOBAL_LOOT_MODIFIERS.register(bus);
+    // capability classes register their attachment types in static initializers, so force them to load first
+    TinkerDataCapability.init();
+    PersistentDataCapability.init();
+    EntityModifierCapability.init();
+    PiggybackCapability.init();
     ATTACHMENTS.register(bus);
     LOOT_CONDITIONS.register(bus);
     LOOT_FUNCTIONS.register(bus);

@@ -12,6 +12,8 @@ import slimeknights.tconstruct.common.network.SyncPersistentDataPacket;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 
+import java.util.Objects;
+
 /**
  * Capability to store persistent NBT data on an entity. For players, this is automatically synced to the client on load, but not during gameplay.
  * Persists after death, will reassess if we need some data to not persist death
@@ -22,6 +24,14 @@ public class PersistentDataCapability {
   /** Persistent entity data used by modifiers, including projectile state. */
   public static final DeferredHolder<AttachmentType<?>, AttachmentType<ModDataNBT>> DATA = TinkerModule.ATTACHMENTS.register(
     "persistent_data", () -> AttachmentType.serializable(ModDataNBT::new).copyOnDeath().build());
+
+  /**
+   * Forces class initialization so the attachment type is registered before the attachment deferred register is
+   * attached to the mod bus. Called from {@link TinkerModule#initRegisters}.
+   */
+  public static void init() {
+    Objects.requireNonNull(DATA);
+  }
 
   /** Gets the data or warns if its missing */
   public static ModDataNBT getOrWarn(Entity entity) {

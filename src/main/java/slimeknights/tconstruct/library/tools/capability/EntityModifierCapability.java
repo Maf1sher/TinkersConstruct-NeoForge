@@ -13,6 +13,7 @@ import slimeknights.tconstruct.library.tools.nbt.ModifierNBT;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 /** Capability to allow an entity to store modifiers, used on projectiles fired from modifiable items */
@@ -41,6 +42,14 @@ public class EntityModifierCapability {
   /** Attachment storing projectile modifiers, serialized so entity state round-trips like the old capability */
   public static final DeferredHolder<AttachmentType<?>, AttachmentType<Attachment>> DATA = TinkerModule.ATTACHMENTS.register(
     "entity_modifiers", () -> AttachmentType.serializable(Attachment::new).build());
+
+  /**
+   * Forces class initialization so the attachment type is registered before the attachment deferred register is
+   * attached to the mod bus. Called from {@link TinkerModule#initRegisters}.
+   */
+  public static void init() {
+    Objects.requireNonNull(DATA);
+  }
 
   /** Gets the capability for the entity. Always returns a mutable instance, unlike the old capability that could be missing. */
   public static EntityModifiers getCapability(Entity entity) {

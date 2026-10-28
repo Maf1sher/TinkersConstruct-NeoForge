@@ -13,6 +13,7 @@ import slimeknights.tconstruct.common.TinkerModule;
 import javax.annotation.Nullable;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -26,6 +27,14 @@ public class TinkerDataCapability {
   /** Non-persistent data attachment used by armor and transient modifier hooks. */
   public static final DeferredHolder<AttachmentType<?>, AttachmentType<Holder>> DATA = TinkerModule.ATTACHMENTS.register(
     "modifier_data", () -> AttachmentType.builder(Holder::new).build());
+
+  /**
+   * Forces class initialization so the attachment type is registered before the attachment deferred register is
+   * attached to the mod bus. Called from {@link TinkerModule#initRegisters}.
+   */
+  public static void init() {
+    Objects.requireNonNull(DATA);
+  }
 
   /** Gets the transient modifier data for an entity. */
   public static Holder getData(Entity entity) {
