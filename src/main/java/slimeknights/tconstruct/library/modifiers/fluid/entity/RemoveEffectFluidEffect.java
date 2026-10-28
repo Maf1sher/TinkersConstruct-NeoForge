@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.library.modifiers.fluid.entity;
 
+import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffect;
@@ -14,7 +15,7 @@ import slimeknights.tconstruct.library.modifiers.fluid.FluidEffectContext;
 import slimeknights.tconstruct.library.modifiers.fluid.FluidEffectContext.Entity;
 
 /** Spilling effect to remove a specific effect */
-public record RemoveEffectFluidEffect(MobEffect effect) implements FluidEffect<FluidEffectContext.Entity> {
+public record RemoveEffectFluidEffect(Holder<MobEffect> effect) implements FluidEffect<FluidEffectContext.Entity> {
   public static final RecordLoadable<RemoveEffectFluidEffect> LOADER = RecordLoadable.create(Loadables.MOB_EFFECT.requiredField("effect", e -> e.effect), RemoveEffectFluidEffect::new);
 
   @Override
@@ -36,6 +37,6 @@ public record RemoveEffectFluidEffect(MobEffect effect) implements FluidEffect<F
 
   @Override
   public Component getDescription(RegistryAccess registryAccess) {
-    return FluidEffect.makeTranslation(getLoader(), effect.getDisplayName());
+    return FluidEffect.makeTranslation(getLoader(), effect.value().getDisplayName());
   }
 }

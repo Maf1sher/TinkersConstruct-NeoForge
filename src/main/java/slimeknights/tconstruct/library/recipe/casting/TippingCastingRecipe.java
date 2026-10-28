@@ -15,6 +15,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import slimeknights.mantle.recipe.MultiNamedRecipe;
 import slimeknights.mantle.recipe.NamedRecipe;
+import slimeknights.tconstruct.library.fluid.FluidTagHelper;
 import slimeknights.tconstruct.library.utils.RecipeHelper;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.field.LoadableField;
@@ -40,7 +41,7 @@ public class TippingCastingRecipe extends ModifierPotionCastingRecipe {
 
   protected static final LoadableField<Ingredient, ModifierPotionCastingRecipe> TOOL_FIELD = ModifierPotionCastingRecipe.TOOL_FIELD;
   public static final RecordLoadable<TippingCastingRecipe> LOADER = RecordLoadable.create(
-    LoadableRecipeSerializer.TYPED_SERIALIZER.requiredField(), ContextKey.ID.requiredField(), LoadableRecipeSerializer.RECIPE_GROUP,
+    TypeAwareRecipeSerializer.TYPED_SERIALIZER.requiredField(), ContextKey.ID.requiredField(), LoadableRecipeSerializer.RECIPE_GROUP,
     TOOL_FIELD, FLUID_FIELD, COOLING_TIME_FIELD, MODIFIER_FIELD, TippingCastingRecipe::new);
 
   public TippingCastingRecipe(TypeAwareRecipeSerializer<?> serializer, ResourceLocation id, String group, Ingredient tool, SizedFluidIngredient fluid, int coolingTime, ModifierId modifier) {
@@ -92,7 +93,7 @@ public class TippingCastingRecipe extends ModifierPotionCastingRecipe {
       // next, make 1 copy of the potion fluid with NBT list per potion fluid
       List<FluidStack> basePotions = java.util.Arrays.asList(this.fluid.getFluids());
       List<FluidStack> fluids = basePotions.stream()
-        .flatMap(fluid -> potionNBT.stream().map(nbt -> new FluidStack(fluid.getFluid(), fluid.getAmount(), nbt)))
+        .flatMap(fluid -> potionNBT.stream().map(nbt -> FluidTagHelper.withTag(fluid.getFluid(), fluid.getAmount(), nbt)))
         .toList();
 
       // finally, create 1 recipe per input tool

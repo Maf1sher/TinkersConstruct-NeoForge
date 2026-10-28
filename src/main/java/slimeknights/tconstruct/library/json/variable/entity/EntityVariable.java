@@ -3,6 +3,7 @@ package slimeknights.tconstruct.library.json.variable.entity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.mantle.data.predicate.entity.EntityPredicate;
 import slimeknights.mantle.data.predicate.entity.LivingEntityPredicate;
 import slimeknights.mantle.data.registry.GenericLoaderRegistry;
 import slimeknights.mantle.data.registry.GenericLoaderRegistry.IHaveLoader;
@@ -52,7 +53,7 @@ public interface EntityVariable extends IHaveLoader {
     if (entity.isInWater() || entity.wasEyeInWater) {
       return 2;
     }
-    if (LivingEntityPredicate.RAINING.matches(entity)) {
+    if (LivingEntityPredicate.fallback(EntityPredicate.RAINING).matches(entity)) {
       return 1;
     }
     return 0;

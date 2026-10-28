@@ -28,7 +28,7 @@ public abstract class AbstractMobEquipmentProvider extends GenericDataProvider {
   private final String modId;
 
   public AbstractMobEquipmentProvider(PackOutput output, String modId) {
-    super(output, Target.DATA_PACK, MobEquipmentManager.FOLDER, JsonHelper.DEFAULT_GSON);
+    super(output, Target.DATA_PACK, MobEquipmentManager.FOLDER);
     this.modId = modId;
   }
 

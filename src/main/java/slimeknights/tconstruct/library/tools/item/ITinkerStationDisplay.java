@@ -2,6 +2,7 @@ package slimeknights.tconstruct.library.tools.item;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -45,7 +46,7 @@ public interface ITinkerStationDisplay extends ItemLike {
    * @param slot   Slot with attributes
    * @return  Attribute map
    */
-  default Multimap<Attribute,AttributeModifier> getAttributeModifiers(IToolStackView tool, EquipmentSlot slot) {
+  default Multimap<Holder<Attribute>, AttributeModifier> getAttributeModifiers(IToolStackView tool, EquipmentSlot slot) {
     return ImmutableMultimap.of();
   }
 }

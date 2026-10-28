@@ -223,7 +223,7 @@ public class BlockTagProvider extends BlockTagsProvider {
 
     // wood
     this.tag(TinkerTags.Blocks.SLIMY_LOGS)
-        .addTags(TinkerWorld.greenheart.getLogBlockTag(), TinkerWorld.skyroot.getLogBlockTag(), TinkerWorld.bloodshroom.getLogBlockTag(), TinkerWorld.enderbark.getLogBlockTag());
+        .addTags(TinkerWorld.greenheart.getLogTag().block(), TinkerWorld.skyroot.getLogTag().block(), TinkerWorld.bloodshroom.getLogTag().block(), TinkerWorld.enderbark.getLogTag().block());
     this.tag(TinkerTags.Blocks.SLIMY_PLANKS).add(TinkerWorld.greenheart.get(), TinkerWorld.skyroot.get(), TinkerWorld.bloodshroom.get(), TinkerWorld.enderbark.get());
     this.tag(BlockTags.PLANKS).addTag(TinkerTags.Blocks.SLIMY_PLANKS);
     this.tag(BlockTags.LOGS).addTag(TinkerTags.Blocks.SLIMY_LOGS);
@@ -664,7 +664,7 @@ public class BlockTagProvider extends BlockTagsProvider {
     this.tag(BlockTags.WOODEN_SLABS).add(object.getSlab());
     this.tag(BlockTags.WOODEN_STAIRS).add(object.getStairs());
     // logs
-    this.tag(object.getLogBlockTag()).add(object.getLog(), object.getStrippedLog(), object.getWood(), object.getStrippedWood());
+    this.tag(object.getLogTag().block()).add(object.getLog(), object.getStrippedLog(), object.getWood(), object.getStrippedWood());
 
     // doors
     this.tag(BlockTags.WOODEN_FENCES).add(object.getFence());
@@ -679,7 +679,7 @@ public class BlockTagProvider extends BlockTagsProvider {
 
     if (doesBurn) {
       // regular logs is handled by slimy logs tag
-      this.tag(BlockTags.LOGS_THAT_BURN).addTag(object.getLogBlockTag());
+      this.tag(BlockTags.LOGS_THAT_BURN).addTag(object.getLogTag().block());
     }
 
     // signs

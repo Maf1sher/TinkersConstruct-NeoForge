@@ -69,7 +69,7 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
   private boolean addMaterialsRun = false;
 
   public AbstractMaterialDataProvider(PackOutput packOutput) {
-    super(packOutput, Target.DATA_PACK, MaterialManager.FOLDER, MaterialManager.GSON);
+    super(packOutput, Target.DATA_PACK, MaterialManager.FOLDER);
   }
 
   /**

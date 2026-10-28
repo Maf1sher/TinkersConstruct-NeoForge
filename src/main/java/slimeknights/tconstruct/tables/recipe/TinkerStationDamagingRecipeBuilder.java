@@ -6,6 +6,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import slimeknights.tconstruct.common.recipe.LoadableFinishedRecipe;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
 
 /** Builder for tinker station damaging recipes */

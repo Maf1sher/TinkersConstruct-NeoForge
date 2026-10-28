@@ -10,6 +10,8 @@ import net.minecraft.world.level.ItemLike;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
 import net.neoforged.neoforge.common.crafting.SizedIngredient;
+import slimeknights.tconstruct.library.recipe.ingredient.SizedIngredients;
+import slimeknights.tconstruct.common.recipe.LoadableFinishedRecipe;
 import slimeknights.tconstruct.library.recipe.tinkerstation.building.ToolMaterialSwappingRecipe;
 
 import java.util.ArrayList;
@@ -45,7 +47,7 @@ public class TinkerStationPartSwappingBuilder extends AbstractRecipeBuilder<Tink
 
   /** Adds an extra ingredient requirement */
   public TinkerStationPartSwappingBuilder addExtraRequirement(ItemLike... items) {
-    return addExtraRequirement(SizedIngredient.fromItems(items));
+    return addExtraRequirement(SizedIngredients.of(items));
   }
 
   @Override

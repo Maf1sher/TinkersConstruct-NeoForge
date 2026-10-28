@@ -2,9 +2,9 @@ package slimeknights.tconstruct.smeltery.block.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
@@ -263,7 +263,7 @@ public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlo
    * Updates the tank from an NBT tag, used in the block
    * @param nbt  tank NBT
    */
-  public void updateTank(CompoundTag nbt) {
+  public void updateTank(HolderLookup.Provider registries, CompoundTag nbt) {
     if (nbt.isEmpty()) {
       tank.setFluid(FluidStack.EMPTY);
     } else {
@@ -275,7 +275,7 @@ public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlo
   @Override
   public void loadAdditional(CompoundTag tag, Provider registries) {
     tank.setCapacity(getCapacity(getBlockState().getBlock()));
-    updateTank(tag.getCompound(NBTTags.TANK));
+    updateTank(registries, tag.getCompound(NBTTags.TANK));
     lastRedstone = tag.getBoolean(TAG_REDSTONE);
     super.loadAdditional(tag, registries);
   }

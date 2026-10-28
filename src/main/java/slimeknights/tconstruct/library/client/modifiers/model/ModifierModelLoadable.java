@@ -4,8 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.client.resources.model.Material;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import slimeknights.mantle.data.loadable.Loadable;
@@ -86,12 +86,12 @@ public enum ModifierModelLoadable implements Loadable<ModifierModel> {
   }
 
   @Override
-  public ModifierModel decode(FriendlyByteBuf buffer, TypedMap context) {
+  public ModifierModel decode(RegistryFriendlyByteBuf buffer, TypedMap context) {
     return ModifierModel.LOADER.decode(buffer, context);
   }
 
   @Override
-  public void encode(FriendlyByteBuf buffer, ModifierModel value) {
+  public void encode(RegistryFriendlyByteBuf buffer, ModifierModel value) {
     ModifierModel.LOADER.encode(buffer, value);
   }
 }

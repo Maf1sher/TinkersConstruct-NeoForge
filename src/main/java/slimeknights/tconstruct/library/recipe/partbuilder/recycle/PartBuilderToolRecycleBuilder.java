@@ -10,6 +10,8 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
 import net.neoforged.neoforge.common.crafting.SizedIngredient;
+import slimeknights.tconstruct.library.recipe.ingredient.SizedIngredients;
+import slimeknights.tconstruct.common.recipe.LoadableFinishedRecipe;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.fluids.TinkerFluids;
 import slimeknights.tconstruct.library.tools.part.IMaterialItem;
@@ -33,7 +35,7 @@ public class PartBuilderToolRecycleBuilder extends AbstractRecipeBuilder<PartBui
 
   /** Creates a builder for the given tool */
   public static PartBuilderToolRecycleBuilder tool(ItemLike tool) {
-    return tools(SizedIngredient.fromItems(tool));
+    return tools(SizedIngredients.of(tool));
   }
 
   /** Adds a part override to the builder. Order matches up to material indices */
@@ -50,7 +52,7 @@ public class PartBuilderToolRecycleBuilder extends AbstractRecipeBuilder<PartBui
   @SuppressWarnings("deprecation")
   @Override
   public void save(RecipeOutput output) {
-    save(output, BuiltInRegistries.ITEM.getKey(tools.getMatchingStacks().get(0).getItem()));
+    save(output, BuiltInRegistries.ITEM.getKey(tools.getItems().get(0).getItem()));
   }
 
   @Override

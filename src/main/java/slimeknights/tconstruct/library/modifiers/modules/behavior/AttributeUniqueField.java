@@ -2,7 +2,7 @@ package slimeknights.tconstruct.library.modifiers.modules.behavior;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import slimeknights.mantle.data.loadable.field.ContextKey;
@@ -38,12 +38,12 @@ public record AttributeUniqueField<P>(String key, Function<P,String> getter) imp
   }
 
   @Override
-  public String decode(FriendlyByteBuf buffer, TypedMap typedMap) {
+  public String decode(RegistryFriendlyByteBuf buffer, TypedMap typedMap) {
     return buffer.readUtf();
   }
 
   @Override
-  public void encode(FriendlyByteBuf buffer, P parent) {
+  public void encode(RegistryFriendlyByteBuf buffer, P parent) {
     buffer.writeUtf(getter.apply(parent));
   }
 }

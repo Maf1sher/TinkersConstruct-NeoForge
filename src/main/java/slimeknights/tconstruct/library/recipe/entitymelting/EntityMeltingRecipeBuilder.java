@@ -7,6 +7,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
 import slimeknights.mantle.recipe.helper.FluidOutput;
+import slimeknights.tconstruct.common.recipe.LoadableFinishedRecipe;
 import slimeknights.mantle.recipe.ingredient.EntityIngredient;
 
 

@@ -58,7 +58,7 @@ public class ModifierRecipeCategory extends AbstractTinkerStationCategory<IDispl
 
   private final IDrawable requirements, incremental;
   public ModifierRecipeCategory(IGuiHelper helper) {
-    super(helper, TConstructJEIConstants.MODIFIERS, TITLE, helper.createDrawableItemStack(CreativeSlotItem.withSlot(new ItemStack(TinkerModifiers.creativeSlotItem), SlotType.UPGRADE)));
+    super(helper, TConstructJEIConstants.MODIFIERS, TITLE, helper.createDrawableItemStack(CreativeSlotItem.withSlot(new ItemStack(TinkerModifiers.creativeSlotItem.get()), SlotType.UPGRADE)));
     this.requirements = helper.createDrawable(BACKGROUND_LOC, 128, 17, 16, 16);
     this.incremental = helper.createDrawable(BACKGROUND_LOC, 128, 33, 16, 16);
   }

@@ -61,6 +61,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import slimeknights.mantle.client.model.util.ColoredBlockModel;
 import slimeknights.mantle.data.loadable.Loadables;
+import slimeknights.tconstruct.library.fluid.FluidTagHelper;
 import slimeknights.tconstruct.TConstruct;
 
 import javax.annotation.Nullable;
@@ -96,7 +97,7 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
       } else {
         fluid = Loadables.FLUID.convert(fluidElement, "fluid");
       }
-      fluidStack = new FluidStack(fluid, FluidType.BUCKET_VOLUME, tag);
+      fluidStack = FluidTagHelper.withTag(fluid, FluidType.BUCKET_VOLUME, tag);
     }
     boolean flipGas = GsonHelper.getAsBoolean(json, "flip_gas", true);
     return new FluidContainerModel(fluidStack, flipGas);

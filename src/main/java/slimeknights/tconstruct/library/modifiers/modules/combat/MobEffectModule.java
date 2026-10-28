@@ -7,6 +7,7 @@ import lombok.experimental.Accessors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -115,7 +116,7 @@ public interface MobEffectModule extends ModifierModule, ConditionalModule<ITool
 
 
   /** Creates a builder instance */
-  static MobEffectModule.Builder builder(MobEffect effect) {
+  static MobEffectModule.Builder builder(Holder<MobEffect> effect) {
     return new Builder(effect);
   }
 
@@ -131,7 +132,7 @@ public interface MobEffectModule extends ModifierModule, ConditionalModule<ITool
   class Builder extends ModuleBuilder.Stack<Builder> {
     // general fields
     /** Effect to apply. */
-    private final MobEffect effect;
+    private final Holder<MobEffect> effect;
     /** Entity getting the effect. */
     private IJsonPredicate<LivingEntity> target = LivingEntityPredicate.ANY;
     /** Entity using the weapon. Unused for non-combat effects. */
@@ -217,7 +218,7 @@ public interface MobEffectModule extends ModifierModule, ConditionalModule<ITool
   }
 
   /** Represents a mob effect applied via a modifier. Meant to be nested inside a modifier module. */
-  record ModifierMobEffect(MobEffect effect, RandomLevelingValue level, RandomLevelingValue time, IJsonPredicate<LivingEntity> target, @Nullable List<Item> curativeItems) {
+  record ModifierMobEffect(Holder<MobEffect> effect, RandomLevelingValue level, RandomLevelingValue time, IJsonPredicate<LivingEntity> target, @Nullable List<Item> curativeItems) {
     public static final RecordLoadable<ModifierMobEffect> LOADER = RecordLoadable.create(
       Loadables.MOB_EFFECT.requiredField("effect", ModifierMobEffect::effect),
       RandomLevelingValue.LOADABLE.requiredField("level", ModifierMobEffect::level),

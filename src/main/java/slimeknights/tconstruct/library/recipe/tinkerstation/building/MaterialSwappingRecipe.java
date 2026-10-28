@@ -299,7 +299,7 @@ public abstract class MaterialSwappingRecipe implements ITinkerStationRecipe {
         slot--;
       }
       if (slot < extraRequirements.size()) {
-        return extraRequirements.get(slot).getMatchingStacks();
+        return extraRequirements.get(slot).getItems();
       }
       return List.of();
     }

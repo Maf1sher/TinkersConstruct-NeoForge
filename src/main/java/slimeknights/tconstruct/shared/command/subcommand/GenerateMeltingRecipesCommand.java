@@ -172,7 +172,7 @@ public class GenerateMeltingRecipesCommand {
       // don't bother with results that have NBT unless its a damagable item, in which case we ignore NBT and hope for the best
       // also skip anything already meltable
       Item result = resultStack.getItem();
-      if (resultStack.isEmpty() || (DataComponentHelper.hasCustomData(resultStack) && !result.canBeDepleted()) || !melt.matches(result) || MeltingRecipeLookup.canMelt(result)) {
+      if (resultStack.isEmpty() || (DataComponentHelper.hasCustomData(resultStack) && !resultStack.isDamageableItem()) || !melt.matches(result) || MeltingRecipeLookup.canMelt(result)) {
         continue;
       }
       List<MeltingResult> fluids = new ArrayList<>();
@@ -282,7 +282,7 @@ public class GenerateMeltingRecipesCommand {
           builder.addByproduct(fluids.get(i).toOutput());
         }
         // mark it damagable if its true
-        if (result.canBeDepleted()) {
+        if (new ItemStack(result).isDamageableItem()) {
           // we don't know the proper unit size, but 10mb is pretty likely
           builder.setDamagable(10);
         }

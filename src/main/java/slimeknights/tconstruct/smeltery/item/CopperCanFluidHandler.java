@@ -8,6 +8,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
+import slimeknights.tconstruct.library.fluid.FluidTagHelper;
 import slimeknights.tconstruct.library.recipe.FluidValues;
 
 import javax.annotation.Nonnull;
@@ -62,7 +63,7 @@ public class CopperCanFluidHandler implements IFluidHandlerItem {
     if (fluid == Fluids.EMPTY) {
       return FluidStack.EMPTY;
     }
-    return new FluidStack(getFluid(), getCapacity(), getFluidTag());
+    return FluidTagHelper.withTag(getFluid(), getCapacity(), getFluidTag());
   }
 
 
@@ -97,7 +98,7 @@ public class CopperCanFluidHandler implements IFluidHandlerItem {
       return FluidStack.EMPTY;
     }
     // make sure NBT matches the requested NBT
-    FluidStack output = new FluidStack(fluid, capacity, getFluidTag());
+    FluidStack output = FluidTagHelper.withTag(fluid, capacity, getFluidTag());
     if (!FluidStack.areFluidStackTagsEqual(resource, output)) {
       return FluidStack.EMPTY;
     }
@@ -122,7 +123,7 @@ public class CopperCanFluidHandler implements IFluidHandlerItem {
       return FluidStack.EMPTY;
     }
     // output 1 ingot
-    FluidStack output = new FluidStack(fluid, capacity, getFluidTag());
+    FluidStack output = FluidTagHelper.withTag(fluid, capacity, getFluidTag());
     if (action.execute()) {
       CopperCanItem.setFluid(container, FluidStack.EMPTY);
     }

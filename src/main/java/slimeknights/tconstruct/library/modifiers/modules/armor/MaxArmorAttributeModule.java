@@ -7,6 +7,8 @@ import lombok.experimental.Accessors;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -40,11 +42,10 @@ import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.UUID;
 import java.util.function.Supplier;
 
 /** Module that sets an attribute value on the entity based on the largest level equipped. TODO: tooltip value on max piece. */
-public record MaxArmorAttributeModule(String unique, Attribute attribute, Operation operation, LevelingValue amount, UUID uuid, ComputableDataKey<ModifierMaxLevel> maxLevel, boolean allowBroken, @Nullable TagKey<Item> heldTag, TooltipStyle tooltipStyle, ModifierCondition<IToolStackView> condition) implements EquipmentChangeModifierHook, ModifierModule, MaxArmorLevelModule, TooltipModifierHook {
+public record MaxArmorAttributeModule(String unique, net.minecraft.core.Holder<Attribute> attribute, Operation operation, LevelingValue amount, ResourceLocation id, ComputableDataKey<ModifierMaxLevel> maxLevel, boolean allowBroken, @Nullable TagKey<Item> heldTag, TooltipStyle tooltipStyle, ModifierCondition<IToolStackView> condition) implements EquipmentChangeModifierHook, ModifierModule, MaxArmorLevelModule, TooltipModifierHook {
   public static final RecordLoadable<MaxArmorAttributeModule> LOADER = RecordLoadable.create(
     new AttributeUniqueField<>(MaxArmorAttributeModule::unique),
     Loadables.ATTRIBUTE.requiredField("attribute", MaxArmorAttributeModule::attribute),
@@ -60,8 +61,8 @@ public record MaxArmorAttributeModule(String unique, Attribute attribute, Operat
   @Internal
   public MaxArmorAttributeModule {}
 
-  private MaxArmorAttributeModule(String unique, Attribute attribute, Operation operation, LevelingValue amount, boolean allowBroken, @Nullable TagKey<Item> heldTag, TooltipStyle tooltipStyle, ModifierCondition<IToolStackView> condition) {
-    this(unique, attribute, operation, amount, UUID.nameUUIDFromBytes(unique.getBytes()), MaxArmorLevelModule.createKey(Loadables.ATTRIBUTE.getKey(attribute)), allowBroken, heldTag, tooltipStyle, condition);
+  private MaxArmorAttributeModule(String unique, net.minecraft.core.Holder<Attribute> attribute, Operation operation, LevelingValue amount, boolean allowBroken, @Nullable TagKey<Item> heldTag, TooltipStyle tooltipStyle, ModifierCondition<IToolStackView> condition) {
+    this(unique, attribute, operation, amount, AttributeModule.getModifierId(unique, EquipmentSlot.MAINHAND), MaxArmorLevelModule.createKey(attribute.unwrapKey().map(key -> key.location()).orElse(null)), allowBroken, heldTag, tooltipStyle, condition);
   }
 
   @Override
@@ -78,10 +79,10 @@ public record MaxArmorAttributeModule(String unique, Attribute attribute, Operat
   public void updateValue(IToolStackView tool, ModifierEntry modifier, EquipmentChangeContext context, Holder data, float newLevel, float oldLevel) {
     AttributeInstance instance = context.getEntity().getAttribute(attribute);
     if (instance != null) {
-      instance.removeModifier(uuid);
+      instance.removeModifier(id);
       float attributeValue = amount.computeForLevel(newLevel);
       if (attributeValue != 0) {
-        instance.addTransientModifier(new AttributeModifier(uuid, unique, attributeValue, operation));
+        instance.addTransientModifier(new AttributeModifier(id, attributeValue, operation));
       }
     }
   }
@@ -91,20 +92,25 @@ public record MaxArmorAttributeModule(String unique, Attribute attribute, Operat
     if (MaxArmorLevelModule.shouldAddTooltip(this, tool, modifier, player)) {
       float value = amount.computeForLevel(modifier.getEffectiveLevel());
       if (value != 0) {
-        AttributeModule.addTooltip(modifier.getModifier(), attribute, operation, tooltipStyle, value, uuid, player, tooltip);
+        AttributeModule.addTooltip(modifier.getModifier(), attribute, operation, tooltipStyle, value, id, player, tooltip);
       }
     }
   }
 
 
   /* Builder */
-  
-  public static Builder builder(Attribute attribute, Operation operation) {
+
+  public static Builder builder(net.minecraft.core.Holder<Attribute> attribute, Operation operation) {
     return new Builder(attribute, operation);
   }
 
+  /** Creates a new builder instance from a raw attribute */
+  public static Builder builder(Attribute attribute, Operation operation) {
+    return new Builder(BuiltInRegistries.ATTRIBUTE.wrapAsHolder(attribute), operation);
+  }
+
   public static Builder builder(Supplier<Attribute> attribute, Operation operation) {
-    return new Builder(attribute.get(), operation);
+    return builder(attribute.get(), operation);
   }
 
 
@@ -112,7 +118,7 @@ public record MaxArmorAttributeModule(String unique, Attribute attribute, Operat
   @Accessors(fluent = true)
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   public static class Builder extends ModuleBuilder.Stack<Builder> implements LevelingValue.Builder<MaxArmorAttributeModule> {
-    private final Attribute attribute;
+    private final net.minecraft.core.Holder<Attribute> attribute;
     private final Operation operation;
     protected String unique = "";
     private boolean allowBroken = false;

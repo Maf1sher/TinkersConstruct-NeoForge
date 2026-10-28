@@ -17,6 +17,7 @@ import net.neoforged.neoforge.common.crafting.CompoundIngredient;
 import net.neoforged.neoforge.common.crafting.DifferenceIngredient;
 import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
+import slimeknights.tconstruct.library.recipe.ingredient.SizedIngredients;
 import slimeknights.tconstruct.library.recipe.ingredient.ItemNameIngredient;
 import slimeknights.mantle.recipe.helper.ItemOutput;
 import slimeknights.mantle.recipe.ingredient.item.PotionDisplayIngredient;
@@ -152,36 +153,36 @@ public class ToolsRecipeProvider extends BaseRecipeProvider implements IMaterial
                        .pattern(" I ")
                        .pattern(" W ")
                        .define('C', TinkerWorld.skyGeode)
-                       .define('W', TinkerWorld.skyroot.getLogItemTag())
+                       .define('W', TinkerWorld.skyroot.getLogTag().item())
                        .define('I', TinkerMaterials.roseGold.getIngotTag())
-                       .unlockedBy("has_wood", has(TinkerWorld.skyroot.getLogItemTag()))
+                       .unlockedBy("has_wood", has(TinkerWorld.skyroot.getLogTag().item()))
                        .save(consumer, prefix(TinkerTools.skyStaff, folder));
     ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, TinkerTools.earthStaff)
                        .pattern("CWC")
                        .pattern(" I ")
                        .pattern(" W ")
                        .define('C', TinkerWorld.earthGeode)
-                       .define('W', TinkerWorld.greenheart.getLogItemTag())
+                       .define('W', TinkerWorld.greenheart.getLogTag().item())
                        .define('I', TinkerMaterials.cobalt.getIngotTag())
-                       .unlockedBy("has_wood", has(TinkerWorld.greenheart.getLogItemTag()))
+                       .unlockedBy("has_wood", has(TinkerWorld.greenheart.getLogTag().item()))
                        .save(consumer, prefix(TinkerTools.earthStaff, folder));
     ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, TinkerTools.ichorStaff)
                        .pattern("CWC")
                        .pattern(" I ")
                        .pattern(" W ")
                        .define('C', TinkerWorld.ichorGeode)
-                       .define('W', TinkerWorld.bloodshroom.getLogItemTag())
+                       .define('W', TinkerWorld.bloodshroom.getLogTag().item())
                        .define('I', TinkerMaterials.queensSlime.getIngotTag())
-                       .unlockedBy("has_wood", has(TinkerWorld.bloodshroom.getLogItemTag()))
+                       .unlockedBy("has_wood", has(TinkerWorld.bloodshroom.getLogTag().item()))
                        .save(consumer, prefix(TinkerTools.ichorStaff, folder));
     ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, TinkerTools.enderStaff)
                        .pattern("CWC")
                        .pattern(" I ")
                        .pattern(" W ")
                        .define('C', TinkerWorld.enderGeode)
-                       .define('W', TinkerWorld.enderbark.getLogItemTag())
+                       .define('W', TinkerWorld.enderbark.getLogTag().item())
                        .define('I', Tags.Items.INGOTS_NETHERITE)
-                       .unlockedBy("has_wood", has(TinkerWorld.enderbark.getLogItemTag()))
+                       .unlockedBy("has_wood", has(TinkerWorld.enderbark.getLogTag().item()))
                        .save(consumer, prefix(TinkerTools.enderStaff, folder));
 
     // travelers gear
@@ -349,15 +350,15 @@ public class ToolsRecipeProvider extends BaseRecipeProvider implements IMaterial
     String folder = "tools/recycling/";
 
     // main recycling recipe - uses tool definition for parts list
-    PartBuilderToolRecycleBuilder.tools(new SizedIngredient(DifferenceIngredient.of(Ingredient.of(TinkerTags.Items.MULTIPART_TOOL), Ingredient.of(TinkerTags.Items.UNRECYCLABLE))))
+    PartBuilderToolRecycleBuilder.tools(SizedIngredients.of(DifferenceIngredient.of(Ingredient.of(TinkerTags.Items.MULTIPART_TOOL), Ingredient.of(TinkerTags.Items.UNRECYCLABLE))))
         .save(consumer, location(folder + "general"));
     // daggers want to enforce stack size 2 when recycling to prevent dupes
-    PartBuilderToolRecycleBuilder.tools(SizedIngredient.fromItems(2, TinkerTools.dagger))
+    PartBuilderToolRecycleBuilder.tools(SizedIngredients.of(2, TinkerTools.dagger))
       .save(consumer, location(folder + "dagger"));
 
     // travelers gear has a part for the plating, but that would be a dupe in all cases other than boot plating
     // plus, the boots plating won't let you recover travelers gear, so just recycle to repair kit
-    PartBuilderToolRecycleBuilder.tools(SizedIngredient.fromItems(TinkerTools.travelersGear.values().toArray(Item[]::new)))
+    PartBuilderToolRecycleBuilder.tools(SizedIngredients.of(TinkerTools.travelersGear.values().toArray(Item[]::new)))
       // repair kit cost matches exactly
       .part(TinkerToolParts.repairKit)
       // no good alternative to cuirass, so just do repair kit again. Means you can't choose it but you can get it
@@ -447,7 +448,7 @@ public class ToolsRecipeProvider extends BaseRecipeProvider implements IMaterial
       .part(TinkerToolParts.toolHandle)
       .part(TinkerToolParts.bowGrip)
       .save(consumer, location(folder + "swasher"));
-    PartBuilderToolRecycleBuilder.tools(new SizedIngredient(ItemNameIngredient.from(TinkerTools.minotaurAxe.getId())))
+    PartBuilderToolRecycleBuilder.tools(SizedIngredients.of(ItemNameIngredient.from(TinkerTools.minotaurAxe.getId())))
       .part(TinkerToolParts.smallAxeHead)
       .part(TinkerToolParts.repairKit)
       .part(TinkerToolParts.toolHandle)

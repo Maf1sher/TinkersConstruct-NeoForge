@@ -2,8 +2,8 @@ package slimeknights.tconstruct.smeltery.block.entity.component;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -134,11 +134,11 @@ public class TankBlockEntity extends SmelteryComponentBlockEntity implements ITa
    * Updates the tank from an NBT tag, used in the block
    * @param nbt  tank NBT
    */
-  public void updateTank(CompoundTag nbt) {
+  public void updateTank(HolderLookup.Provider registries, CompoundTag nbt) {
     if (nbt.isEmpty()) {
       tank.setFluid(FluidStack.EMPTY);
     } else {
-      tank.readFromNBT(nbt);
+      tank.readFromNBT(registries, nbt);
       updateLight(this, tank);
     }
   }
@@ -151,7 +151,7 @@ public class TankBlockEntity extends SmelteryComponentBlockEntity implements ITa
   @Override
   public void loadAdditional(CompoundTag tag, Provider registries) {
     tank.setCapacity(getCapacity(getBlockState().getBlock()));
-    updateTank(tag.getCompound(NBTTags.TANK));
+    updateTank(registries, tag.getCompound(NBTTags.TANK));
     super.loadAdditional(tag, registries);
   }
 
@@ -160,7 +160,7 @@ public class TankBlockEntity extends SmelteryComponentBlockEntity implements ITa
     super.saveSynced(tag, registries);
     // want tank on the client on world load
     if (!tank.isEmpty()) {
-      tag.put(NBTTags.TANK, tank.writeToNBT(new CompoundTag()));
+      tag.put(NBTTags.TANK, tank.writeToNBT(registries, new CompoundTag()));
     }
   }
 

@@ -33,7 +33,7 @@ public class SelfDestructiveModifier extends SingleLevelModifier implements Keyb
   @Override
   public boolean startInteract(IToolStackView tool, ModifierEntry modifier, Player player, EquipmentSlot slot, TooltipKey keyModifier) {
     if (player.isShiftKeyDown()) {
-      player.addEffect(new MobEffectInstance(TinkerEffects.selfDestructing.get(), 30, 2 * modifier.intEffectiveLevel()));
+      player.addEffect(new MobEffectInstance(TinkerEffects.selfDestructing, 30, 2 * modifier.intEffectiveLevel()));
       player.playSound(SoundEvents.CREEPER_PRIMED, 1.0F, 0.5F);
       return true;
     }
@@ -42,12 +42,12 @@ public class SelfDestructiveModifier extends SingleLevelModifier implements Keyb
 
   @Override
   public void stopInteract(IToolStackView tool, ModifierEntry modifier, Player player, EquipmentSlot slot) {
-    player.removeEffect(TinkerEffects.selfDestructing.get());
+    player.removeEffect(TinkerEffects.selfDestructing);
   }
 
   @Override
   public void onUnequip(IToolStackView tool, ModifierEntry modifier, EquipmentChangeContext context) {
-    context.getEntity().removeEffect(TinkerEffects.selfDestructing.get());
+    context.getEntity().removeEffect(TinkerEffects.selfDestructing);
   }
 
   /** Internal potion effect handling the explosion */
@@ -55,7 +55,7 @@ public class SelfDestructiveModifier extends SingleLevelModifier implements Keyb
     public SelfDestructiveEffect() {
       super(MobEffectCategory.HARMFUL, 0x59D24A, true);
       // make the player slow
-      addAttributeModifier(Attributes.MOVEMENT_SPEED, "68ee3026-1d50-4eb4-914e-a8b05fbfdb71", -0.9f, Operation.ADD_MULTIPLIED_TOTAL);
+      addAttributeModifier(Attributes.MOVEMENT_SPEED, TConstruct.getResource("self_destructive.movement_speed"), -0.9f, Operation.ADD_MULTIPLIED_TOTAL);
     }
 
     @Override

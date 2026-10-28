@@ -26,7 +26,7 @@ public abstract class AbstractModifierProvider extends GenericDataProvider {
   private final Map<ModifierId,Composable> composableModifiers = new HashMap<>();
 
   public AbstractModifierProvider(PackOutput packOutput) {
-    super(packOutput, Target.DATA_PACK, ModifierManager.FOLDER, ModifierManager.GSON);
+    super(packOutput, Target.DATA_PACK, ModifierManager.FOLDER);
   }
 
   /**

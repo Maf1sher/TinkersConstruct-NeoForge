@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.library.modifiers.modules.interaction.edible;
 
+import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -22,14 +23,14 @@ import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import java.util.List;
 
 /** Module for making eating a tool remove a specific effect. */
-public record EdibleRemoveEffectModule(MobEffect effect, IJsonPredicate<LivingEntity> holder, ModifierCondition<IToolStackView> condition) implements ModifierModule, EdibleEffectHook, ConditionalModule<IToolStackView> {
+public record EdibleRemoveEffectModule(Holder<MobEffect> effect, IJsonPredicate<LivingEntity> holder, ModifierCondition<IToolStackView> condition) implements ModifierModule, EdibleEffectHook, ConditionalModule<IToolStackView> {
   private static final List<ModuleHook<?>> DEFAULT_HOOKS = HookProvider.<EdibleRemoveEffectModule>defaultHooks(ModifierHooks.EDIBLE_EFFECT);
   public static final RecordLoadable<EdibleRemoveEffectModule> LOADER = RecordLoadable.create(
     Loadables.MOB_EFFECT.requiredField("effect", EdibleRemoveEffectModule::effect),
     LivingEntityPredicate.LOADER.defaultField("holder", EdibleRemoveEffectModule::holder),
     ModifierCondition.TOOL_FIELD, EdibleRemoveEffectModule::new);
 
-  public EdibleRemoveEffectModule(MobEffect effect) {
+  public EdibleRemoveEffectModule(Holder<MobEffect> effect) {
     this(effect, LivingEntityPredicate.ANY, ModifierCondition.ANY_TOOL);
   }
 

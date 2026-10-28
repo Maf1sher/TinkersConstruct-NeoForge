@@ -111,7 +111,7 @@ public class DuctBlockEntity extends SmelteryFluidIO implements MenuProvider {
   public void loadAdditional(CompoundTag tags, Provider registries) {
     super.loadAdditional(tags, registries);
     if (tags.contains(TAG_ITEM, Tag.TAG_COMPOUND)) {
-      itemHandler.readFromNBT(tags.getCompound(TAG_ITEM));
+      itemHandler.readFromNBT(registries, tags.getCompound(TAG_ITEM));
     }
   }
 
@@ -126,6 +126,6 @@ public class DuctBlockEntity extends SmelteryFluidIO implements MenuProvider {
   @Override
   public void saveSynced(CompoundTag tags, Provider registries) {
     super.saveSynced(tags, registries);
-    tags.put(TAG_ITEM, itemHandler.writeToNBT());
+    tags.put(TAG_ITEM, itemHandler.writeToNBT(registries, new CompoundTag()));
   }
 }

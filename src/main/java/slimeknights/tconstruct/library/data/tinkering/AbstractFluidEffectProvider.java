@@ -26,6 +26,7 @@ import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import slimeknights.mantle.util.JsonHelper;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
+import slimeknights.mantle.data.predicate.entity.EntityPredicate;
 import slimeknights.mantle.data.predicate.entity.LivingEntityPredicate;
 import slimeknights.mantle.recipe.condition.TagFilledCondition;
 import slimeknights.mantle.registration.object.FluidObject;
@@ -314,12 +315,12 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
 
     /** Adds fire damage to the builder */
     public Builder fireDamage(float amount) {
-      return addDamage(LivingEntityPredicate.FIRE_IMMUNE.inverted(), amount, TinkerDamageTypes.FLUID_FIRE);
+      return addDamage(LivingEntityPredicate.fallback(EntityPredicate.FIRE_IMMUNE).inverted(), amount, TinkerDamageTypes.FLUID_FIRE);
     }
 
     /** Adds fire damage to the builder */
     public Builder coldDamage(float amount) {
-      return addDamage(LivingEntityPredicate.CAN_FREEZE, amount, TinkerDamageTypes.FLUID_COLD);
+      return addDamage(LivingEntityPredicate.fallback(EntityPredicate.CAN_FREEZE), amount, TinkerDamageTypes.FLUID_COLD);
     }
 
     /** Adds fire damage to the builder */

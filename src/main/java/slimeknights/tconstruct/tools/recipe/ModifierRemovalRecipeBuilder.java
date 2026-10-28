@@ -12,6 +12,8 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
 import net.neoforged.neoforge.common.crafting.SizedIngredient;
+import slimeknights.tconstruct.library.recipe.ingredient.SizedIngredients;
+import slimeknights.tconstruct.common.recipe.LoadableFinishedRecipe;
 import slimeknights.tconstruct.library.json.predicate.modifier.ModifierPredicate;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.recipe.worktable.AbstractSizedIngredientRecipeBuilder;
@@ -58,7 +60,7 @@ public class ModifierRemovalRecipeBuilder extends AbstractSizedIngredientRecipeB
    * Sets the tool requirement for this recipe
    */
   public ModifierRemovalRecipeBuilder setTools(Ingredient ingredient) {
-    return setTools(new SizedIngredient(ingredient));
+    return setTools(SizedIngredients.of(ingredient));
   }
 
   /**

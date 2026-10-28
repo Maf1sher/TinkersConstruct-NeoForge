@@ -43,7 +43,7 @@ public class GeneratorPartTextureJsonGenerator extends GenericDataProvider {
   }
 
   public GeneratorPartTextureJsonGenerator(PackOutput packOutput, String modId, AbstractPartSpriteProvider spriteProvider, StatOverride overrides) {
-    super(packOutput, Target.RESOURCE_PACK, "tinkering", GSON);
+    super(packOutput, Target.RESOURCE_PACK, "tinkering");
     this.modId = modId;
     this.spriteProvider = spriteProvider;
     this.overrides = overrides;

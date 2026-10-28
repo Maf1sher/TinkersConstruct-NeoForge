@@ -15,6 +15,7 @@ import slimeknights.mantle.data.loadable.primitive.StringLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
 import net.neoforged.neoforge.common.crafting.SizedIngredient;
+import slimeknights.tconstruct.library.recipe.ingredient.SizedIngredients;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.json.predicate.modifier.ModifierPredicate;
 import slimeknights.tconstruct.library.modifiers.Modifier;
@@ -42,7 +43,7 @@ public class ModifierRemovalRecipe extends AbstractWorktableRecipe {
   public static final String BASE_KEY = TConstruct.makeTranslationKey("recipe", "remove_modifier");
   private static final Component DESCRIPTION = TConstruct.makeTranslation("recipe", "remove_modifier.description");
   private static final Component NO_MODIFIERS = TConstruct.makeTranslation("recipe", "remove_modifier.no_modifiers");
-  public static final SizedIngredient DEFAULT_TOOLS = new SizedIngredient(AbstractWorktableRecipe.DEFAULT_TOOLS);
+  public static final SizedIngredient DEFAULT_TOOLS = SizedIngredients.of(AbstractWorktableRecipe.DEFAULT_TOOLS);
 
   protected static final LoadableField<String,ModifierRemovalRecipe> NAME_FIELD = StringLoadable.DEFAULT.defaultField("name", "modifiers", true, r -> r.name);
   protected static final LoadableField<SizedIngredient,ModifierRemovalRecipe> TOOLS_FIELD = Loadables.SIZED_ITEM_INGREDIENT.defaultField("tools", DEFAULT_TOOLS, true, r -> r.sizedTool);
@@ -173,7 +174,7 @@ public class ModifierRemovalRecipe extends AbstractWorktableRecipe {
   @Override
   public List<ItemStack> getInputTools() {
     if (tools == null) {
-      tools = sizedTool.getMatchingStacks().stream().map(stack -> {
+      tools = sizedTool.getItems().stream().map(stack -> {
         ItemStack tool = IModifiableDisplay.getDisplayStack(stack.getItem());
         if (stack.getCount() > 1) {
           tool = tool.copyWithCount(stack.getCount());

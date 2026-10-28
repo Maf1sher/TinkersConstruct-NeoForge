@@ -17,6 +17,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
+import slimeknights.tconstruct.library.fluid.FluidTagHelper;
 import slimeknights.mantle.util.DataComponentHelper;
 
 /** Particle data for a fluid particle */
@@ -38,7 +39,7 @@ public class FluidParticleData implements ParticleOptions {
       if (reader.canRead() && reader.peek() == '{') {
         nbt = new TagParser(reader).readStruct();
       }
-      return new FluidParticleData(type, new FluidStack(fluid, FluidType.BUCKET_VOLUME, nbt));
+      return new FluidParticleData(type, FluidTagHelper.withTag(fluid, FluidType.BUCKET_VOLUME, nbt));
     }
 
     @Override

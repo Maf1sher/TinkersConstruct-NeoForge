@@ -45,7 +45,7 @@ public abstract class AbstractStationSlotLayoutProvider extends GenericDataProvi
   private final Map<ResourceLocation,SerializeLayout> allLayouts = new HashMap<>();
 
   public AbstractStationSlotLayoutProvider(PackOutput packOutput) {
-    super(packOutput, Target.DATA_PACK, StationSlotLayoutLoader.FOLDER, StationSlotLayoutLoader.GSON);
+    super(packOutput, Target.DATA_PACK, StationSlotLayoutLoader.FOLDER);
   }
 
   /**

@@ -2,8 +2,8 @@ package slimeknights.tconstruct.library.json.field;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.network.FriendlyByteBuf;
 import slimeknights.mantle.data.loadable.Loadable;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import slimeknights.mantle.util.typed.TypedMap;
 
 /** Wrapper around a loadable making it optionally load from an object key. If used with a record loadable, will condition on the object key being present */
@@ -27,12 +27,12 @@ public record OptionallyNestedLoadable<T>(Loadable<T> loadable, String objectKey
   }
 
   @Override
-  public T decode(FriendlyByteBuf buffer, TypedMap context) {
+  public T decode(RegistryFriendlyByteBuf buffer, TypedMap context) {
     return loadable.decode(buffer, context);
   }
 
   @Override
-  public void encode(FriendlyByteBuf buffer, T value) {
+  public void encode(RegistryFriendlyByteBuf buffer, T value) {
     loadable.encode(buffer, value);
   }
 }

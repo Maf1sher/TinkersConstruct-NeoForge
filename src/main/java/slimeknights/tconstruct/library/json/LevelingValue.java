@@ -1,10 +1,10 @@
 package slimeknights.tconstruct.library.json;
 
 import com.google.gson.JsonObject;
-import net.minecraft.network.FriendlyByteBuf;
 import slimeknights.mantle.data.loadable.primitive.FloatLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.tconstruct.TConstruct;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 
 /**
@@ -88,15 +88,15 @@ public record LevelingValue(float flat, float eachLevel) {
 
   /* Network */
 
-  /** @deprecated use {@link #LOADABLE} with {@link slimeknights.mantle.data.loadable.Loadable#encode(FriendlyByteBuf, Object)} */
+  /** @deprecated use {@link #LOADABLE} with {@link slimeknights.mantle.data.loadable.Loadable#encode(RegistryFriendlyByteBuf, Object)} */
   @Deprecated(forRemoval = true)
-  public void toNetwork(FriendlyByteBuf buffer) {
+  public void toNetwork(RegistryFriendlyByteBuf buffer) {
     LOADABLE.encode(buffer, this);
   }
 
-  /** @deprecated use {@link #LOADABLE} with {@link slimeknights.mantle.data.loadable.Loadable#decode(FriendlyByteBuf)} */
+  /** @deprecated use {@link #LOADABLE} with {@link slimeknights.mantle.data.loadable.Loadable#decode(RegistryFriendlyByteBuf)} */
   @Deprecated(forRemoval = true)
-  public static LevelingValue fromNetwork(FriendlyByteBuf buffer) {
+  public static LevelingValue fromNetwork(RegistryFriendlyByteBuf buffer) {
     return LOADABLE.decode(buffer);
   }
 

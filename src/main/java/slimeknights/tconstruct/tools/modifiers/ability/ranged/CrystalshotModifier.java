@@ -19,7 +19,7 @@ import javax.annotation.Nullable;
 public class CrystalshotModifier extends NoLevelsModifier {
   @Override
   protected void registerHooks(Builder hookBuilder) {
-    hookBuilder.addModule(new InfinityModule(new ItemStack(TinkerTools.crystalshotItem), CrystalshotItem.TAG_VARIANT,4, false));
+    hookBuilder.addModule(new InfinityModule(new ItemStack(TinkerTools.crystalshotItem.get()), CrystalshotItem.TAG_VARIANT,4, false));
   }
 
   @Override

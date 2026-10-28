@@ -11,6 +11,7 @@ import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
 import slimeknights.mantle.recipe.helper.ItemOutput;
 import slimeknights.mantle.recipe.ingredient.EntityIngredient;
 
+import slimeknights.tconstruct.common.recipe.LoadableFinishedRecipe;
 import javax.annotation.Nullable;
 
 /** Builder for entity melting recipes */

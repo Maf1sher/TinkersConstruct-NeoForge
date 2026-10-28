@@ -310,10 +310,10 @@ public class ItemTagProvider extends ItemTagsProvider {
     this.copy(BlockTags.WOODEN_SLABS, ItemTags.WOODEN_SLABS);
     this.copy(BlockTags.WOODEN_STAIRS, ItemTags.WOODEN_STAIRS);
     // logs
-    this.copy(TinkerWorld.greenheart.getLogBlockTag(), TinkerWorld.greenheart.getLogItemTag());
-    this.copy(TinkerWorld.skyroot.getLogBlockTag(), TinkerWorld.skyroot.getLogItemTag());
-    this.copy(TinkerWorld.bloodshroom.getLogBlockTag(), TinkerWorld.bloodshroom.getLogItemTag());
-    this.copy(TinkerWorld.enderbark.getLogBlockTag(), TinkerWorld.enderbark.getLogItemTag());
+    this.copy(TinkerWorld.greenheart.getLogTag().block(), TinkerWorld.greenheart.getLogTag().item());
+    this.copy(TinkerWorld.skyroot.getLogTag().block(), TinkerWorld.skyroot.getLogTag().item());
+    this.copy(TinkerWorld.bloodshroom.getLogTag().block(), TinkerWorld.bloodshroom.getLogTag().item());
+    this.copy(TinkerWorld.enderbark.getLogTag().block(), TinkerWorld.enderbark.getLogTag().item());
     this.copy(BlockTags.LOGS, ItemTags.LOGS);
     // no burnable woods presently
     //this.copy(BlockTags.LOGS_THAT_BURN, ItemTags.LOGS_THAT_BURN);
@@ -745,7 +745,7 @@ public class ItemTagProvider extends ItemTagsProvider {
         .add(object.asItem(), object.getSlab().asItem(), object.getStairs().asItem(),
              object.getFence().asItem(), object.getFenceGate().asItem(), object.getDoor().asItem(), object.getTrapdoor().asItem(),
              object.getPressurePlate().asItem(), object.getButton().asItem())
-        .addTag(object.getLogItemTag());
+        .addTag(object.getLogTag().item());
   }
 
   /**

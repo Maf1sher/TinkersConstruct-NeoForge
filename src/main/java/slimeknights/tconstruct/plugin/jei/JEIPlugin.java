@@ -592,10 +592,10 @@ public class JEIPlugin implements IModPlugin {
     List<ItemStack> showItems = new ArrayList<>();
     Consumer<ItemStack> showItem = showItems::add;
     // shown via the modifiers
-    removeItems.add(new ItemStack(TinkerModifiers.modifierCrystal));
+    removeItems.add(new ItemStack(TinkerModifiers.modifierCrystal.get()));
     ModifierCrystalItem.addVariants(removeItem);
     // shown via modifier slots
-    removeItems.add(new ItemStack(TinkerModifiers.creativeSlotItem));
+    removeItems.add(new ItemStack(TinkerModifiers.creativeSlotItem.get()));
     TinkerModifiers.creativeSlotItem.get().addVariants(removeItem);
 
     // tool config filters to 1 material, easiest to just remove all then add back the 1

@@ -168,7 +168,7 @@ public class AlloyRecipe implements ICustomOutputRecipe<IAlloyTank> {
         fluid = inv.getFluidInTank(index);
         int amount = ingredient.fluid.amount();
         drainAmount += amount;
-        drainFluids[index] = new FluidStack(fluid, amount);
+        drainFluids[index] = fluid.copyWithAmount(amount);
       }
     }
 

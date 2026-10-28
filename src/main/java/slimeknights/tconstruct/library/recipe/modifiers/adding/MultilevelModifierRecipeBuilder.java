@@ -7,6 +7,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.neoforged.neoforge.common.crafting.SizedIngredient;
+import slimeknights.tconstruct.library.recipe.ingredient.SizedIngredients;
+import slimeknights.tconstruct.common.recipe.LoadableFinishedRecipe;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
 
 import java.util.ArrayList;
@@ -47,7 +49,7 @@ public class MultilevelModifierRecipeBuilder extends AbstractMultilevelModifierR
    * @return  Builder instance
    */
   public MultilevelModifierRecipeBuilder addInput(Ingredient ingredient) {
-    return addInput(new SizedIngredient(ingredient));
+    return addInput(SizedIngredients.of(ingredient));
   }
 
   /**
@@ -57,7 +59,7 @@ public class MultilevelModifierRecipeBuilder extends AbstractMultilevelModifierR
    * @return  Builder instance
    */
   public MultilevelModifierRecipeBuilder addInput(ItemLike item, int amount) {
-    return addInput(SizedIngredient.fromItems(amount, item));
+    return addInput(SizedIngredients.of(amount, item));
   }
 
   /**
@@ -76,7 +78,7 @@ public class MultilevelModifierRecipeBuilder extends AbstractMultilevelModifierR
    * @return  Builder instance
    */
   public MultilevelModifierRecipeBuilder addInput(TagKey<Item> tag, int amount) {
-    return addInput(SizedIngredient.fromTag(tag, amount));
+    return addInput(SizedIngredients.of(tag, amount));
   }
 
   /**

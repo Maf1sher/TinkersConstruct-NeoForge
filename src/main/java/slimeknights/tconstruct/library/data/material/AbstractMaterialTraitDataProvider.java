@@ -33,7 +33,7 @@ public abstract class AbstractMaterialTraitDataProvider extends GenericDataProvi
   private final AbstractMaterialDataProvider materials;
 
   public AbstractMaterialTraitDataProvider(PackOutput packOutput, AbstractMaterialDataProvider materials) {
-    super(packOutput, Target.DATA_PACK, MaterialTraitsManager.FOLDER, MaterialTraitsManager.GSON);
+    super(packOutput, Target.DATA_PACK, MaterialTraitsManager.FOLDER);
     this.materials = materials;
   }
 

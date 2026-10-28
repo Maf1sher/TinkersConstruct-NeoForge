@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
+import slimeknights.tconstruct.common.recipe.LoadableFinishedRecipe;
 import slimeknights.tconstruct.library.recipe.worktable.AbstractSizedIngredientRecipeBuilder;
 
 
@@ -13,7 +14,7 @@ public class ModifierSortingRecipeBuilder extends AbstractSizedIngredientRecipeB
 
   @Override
   public void save(RecipeOutput output) {
-    save(output, BuiltInRegistries.ITEM.getKey((inputs.get(0).getMatchingStacks().get(0).getItem())));
+    save(output, BuiltInRegistries.ITEM.getKey((inputs.get(0).getItems().get(0).getItem())));
   }
 
   @Override

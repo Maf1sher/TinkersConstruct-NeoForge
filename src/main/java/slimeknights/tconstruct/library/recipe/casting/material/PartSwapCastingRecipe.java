@@ -53,7 +53,7 @@ import java.util.stream.IntStream;
  */
 public class PartSwapCastingRecipe extends AbstractMaterialCastingRecipe implements MultiNamedRecipe<IDisplayableCastingRecipe> {
   public static final RecordLoadable<PartSwapCastingRecipe> LOADER = RecordLoadable.create(
-    LoadableRecipeSerializer.TYPED_SERIALIZER.requiredField(),
+    TypeAwareRecipeSerializer.TYPED_SERIALIZER.requiredField(),
     ContextKey.ID.requiredField(), LoadableRecipeSerializer.RECIPE_GROUP,
     Loadables.ITEM_INGREDIENT.requiredField("tools", AbstractCastingRecipe::getCast),
     ITEM_COST_FIELD,

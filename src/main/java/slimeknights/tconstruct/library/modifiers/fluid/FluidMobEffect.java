@@ -2,6 +2,7 @@ package slimeknights.tconstruct.library.modifiers.fluid;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.network.chat.Component;
+import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -13,6 +14,7 @@ import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.common.TinkerCures;
 import slimeknights.tconstruct.library.modifiers.fluid.block.MobEffectCloudFluidEffect;
 import slimeknights.tconstruct.library.modifiers.fluid.entity.MobEffectFluidEffect;
 
@@ -28,7 +30,7 @@ import java.util.stream.Collectors;
  * @param time    Potion time in ticks, scales with fluid amount. Set to {@link MobEffectInstance#INFINITE_DURATION} for infinite.
  * @param curativeItems  Items allowed to cure the effect
  */
-public record FluidMobEffect(MobEffect effect, int time, int level, @Nullable List<Item> curativeItems) {
+public record FluidMobEffect(Holder<MobEffect> effect, int time, int level, @Nullable List<Item> curativeItems) {
   private static final String TRANSLATION_ROOT = TConstruct.makeTranslationKey("fluid_effect", "mob_effect.");
   public static final RecordLoadable<FluidMobEffect> LOADABLE = RecordLoadable.create(
     Loadables.MOB_EFFECT.requiredField("effect", e -> e.effect),
@@ -37,7 +39,7 @@ public record FluidMobEffect(MobEffect effect, int time, int level, @Nullable Li
     Loadables.ITEM.list(0).nullableField("curative_items", e -> e.curativeItems),
     FluidMobEffect::new);
 
-  public FluidMobEffect(MobEffect effect, int time, int level) {
+  public FluidMobEffect(Holder<MobEffect> effect, int time, int level) {
     this(effect, time, level, null);
   }
 
@@ -55,7 +57,10 @@ public record FluidMobEffect(MobEffect effect, int time, int level, @Nullable Li
   public MobEffectInstance effectWithTime(int time) {
     MobEffectInstance instance = new MobEffectInstance(effect, time, this.level - 1);
     if (curativeItems != null) {
-      instance.setCurativeItems(curativeItems.stream().map(ItemStack::new).collect(Collectors.toList()));
+      instance.getCures().clear();
+      for (Item item : curativeItems) {
+        instance.getCures().add(TinkerCures.forItem(new ItemStack(item)));
+      }
     }
     return instance;
   }
@@ -154,19 +159,19 @@ public record FluidMobEffect(MobEffect effect, int time, int level, @Nullable Li
     private Builder() {}
 
     /** Adds an effect to the builder with the passed cures. If none are passed, effect will have no cure*/
-    public Builder effectCure(MobEffect effect, int time, int level, Item... curativeItems) {
+    public Builder effectCure(Holder<MobEffect> effect, int time, int level, Item... curativeItems) {
       effects.add(new FluidMobEffect(effect, time, level, List.of(curativeItems)));
       return this;
     }
 
     /** Adds an effect to the builder with default cures */
-    public Builder effect(MobEffect effect, int time, int level) {
+    public Builder effect(Holder<MobEffect> effect, int time, int level) {
       effects.add(new FluidMobEffect(effect, time, level, null));
       return this;
     }
 
     /** Adds an effect to the builder */
-    public Builder effect(MobEffect effect, int time) {
+    public Builder effect(Holder<MobEffect> effect, int time) {
       return effect(effect, time, 1);
     }
 

@@ -122,7 +122,7 @@ public class AntigravityEffect extends TinkerEffect {
   private void onLivingJump(LivingJumpEvent event) {
     // handles jumping down instead of up
     LivingEntity entity = event.getEntity();
-    if (entity.hasEffect(this) && entity.getAttributeValue(Attributes.GRAVITY) < 0) {
+    if (entity.hasEffect(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(this)) && entity.getAttributeValue(Attributes.GRAVITY) < 0) {
       Vec3 movement = entity.getDeltaMovement();
       entity.setDeltaMovement(movement.x, -movement.y, movement.z);
     }
@@ -133,7 +133,7 @@ public class AntigravityEffect extends TinkerEffect {
     // must be on the ground, not swimming, not on a ladder, and have antigravity to jump
     // jump reversal is handled in ModifierEvents to ensure ordering between that and the attribute boost
     if (player.verticalCollision && !player.verticalCollisionBelow && !player.isInWaterOrBubble()
-      && player.hasEffect(this) && player.getAttributeValue(Attributes.GRAVITY) < 0 && !player.onClimbable()) {
+      && player.hasEffect(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(this)) && player.getAttributeValue(Attributes.GRAVITY) < 0 && !player.onClimbable()) {
       player.jumpFromGround();
       return true;
     }

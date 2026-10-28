@@ -309,7 +309,7 @@ public class ThrownShuriken extends Projectile implements ToolProjectile, Projec
   @Override
   public void addAdditionalSaveData(CompoundTag tag) {
     super.addAdditionalSaveData(tag);
-    tag.put(KEY_STACK, this.stack.save(new CompoundTag()));
+    tag.put(KEY_STACK, this.stack.save(this.level().registryAccess(), new CompoundTag()));
     tag.putFloat(KEY_WATER_INERTIA, this.entityData.get(WATER_INERTIA));
     if (!this.tasks.isEmpty()) {
       tag.put(KEY_TASKS, this.tasks.serialize());

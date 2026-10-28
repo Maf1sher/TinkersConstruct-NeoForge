@@ -48,7 +48,7 @@ public class TastyModifier extends Modifier implements ProcessLootModifierHook {
       int looting = context.getLootingModifier();
       if (RANDOM.nextInt(48 / modifier.intEffectiveLevel()) <= looting) {
         // bacon
-        generatedLoot.add(new ItemStack(TinkerCommons.bacon));
+        generatedLoot.add(new ItemStack(TinkerCommons.bacon.get()));
       }
     }
   }

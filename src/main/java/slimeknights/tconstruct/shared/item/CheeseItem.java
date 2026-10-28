@@ -2,6 +2,7 @@ package slimeknights.tconstruct.shared.item;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
@@ -10,6 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.EffectCures;
 import slimeknights.tconstruct.TConstruct;
 
 import javax.annotation.Nullable;
@@ -27,8 +29,8 @@ public class CheeseItem extends Item {
     if (!living.level().isClientSide) {
       Collection<MobEffectInstance> effects = living.getActiveEffects();
       if (!effects.isEmpty()) {
-        // don't remove effects that are not milk removable
-        List<MobEffect> removable = effects.stream().filter(effect -> effect.getCurativeItems().stream().anyMatch(item -> item.is(Items.MILK_BUCKET))).map(MobEffectInstance::getEffect).toList();
+        // pick a random active effect that milk can cure
+        List<Holder<MobEffect>> removable = effects.stream().filter(effect -> effect.getCures().contains(EffectCures.MILK)).map(MobEffectInstance::getEffect).toList();
         if (!removable.isEmpty()) {
           living.removeEffect(removable.get(living.getRandom().nextInt(removable.size())));
         }
