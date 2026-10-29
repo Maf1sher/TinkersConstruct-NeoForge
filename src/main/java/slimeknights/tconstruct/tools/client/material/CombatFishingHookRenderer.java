@@ -168,7 +168,8 @@ public class CombatFishingHookRenderer extends EntityRenderer<CombatFishingHook>
     public static final MaterialTexture EMPTY = new MaterialTexture(BASE, -1, 0);
 
     public MaterialTexture(ResourceLocation texture, int color, int luminosity) {
-      this(RenderType.entityCutout(texture), luminosity,
+      // no cull: the bobber quad keeps the 1.20.1 180 degree Y rotation, which flips its winding into a back face
+      this(RenderType.entityCutoutNoCull(texture), luminosity,
         color >> 24 & 255,
         color >> 16 & 255,
         color >> 8 & 255,
