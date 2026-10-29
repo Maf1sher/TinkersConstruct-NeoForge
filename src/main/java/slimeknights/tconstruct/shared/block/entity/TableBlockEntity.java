@@ -39,6 +39,15 @@ public abstract class TableBlockEntity extends InventoryBlockEntity {
     super(tileEntityTypeIn, pos, state, name, false, inventorySize, maxStackSize);
   }
 
+  /* Menus */
+
+  @Override
+  public boolean shouldTriggerClientSideContainerClosingOnOpen() {
+    // switching station tabs opens the neighboring station's menu; skipping the client-side close
+    // packet (NeoForge only) prevents the screen change from recentering the mouse cursor
+    return false;
+  }
+
   /* Syncing */
 
   @Override
