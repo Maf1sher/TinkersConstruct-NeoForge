@@ -121,7 +121,7 @@ public record ShearsModule(float flatBonus, float perLevelBonus, float expandedB
     LootingContext context = new LootingContext(player, target, null, Util.getSlotType(hand));
     ItemStack held = player.getItemInHand(hand);
     int vanillaLooting = player.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).get(Enchantments.LOOTING)
-      .map(lootingEnchantment -> EnchantmentHelper.getItemEnchantmentLevel(lootingEnchantment, held)).orElse(0);
+      .map(lootingEnchantment -> EnchantmentHelper.getTagEnchantmentLevel(lootingEnchantment, held)).orElse(0);
     int looting = LootingModifierHook.getLooting(tool, context, vanillaLooting);
     looting = ArmorLootingModifierHook.getLooting(tool, context, looting);
     Level world = player.getCommandSenderWorld();

@@ -57,7 +57,7 @@ public enum SeveringModule implements ModifierModule, ProcessLootModifierHook {
     ItemStack held = killer.getItemBySlot(slotType);
     LootingContext lootingContext = new LootingContext(killer, target, context.getParamOrNull(LootContextParams.DAMAGE_SOURCE), slotType);
     int vanillaLooting = world.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).get(Enchantments.LOOTING)
-      .map(enchantment -> EnchantmentHelper.getItemEnchantmentLevel(enchantment, held)).orElse(0);
+      .map(enchantment -> EnchantmentHelper.getTagEnchantmentLevel(enchantment, held)).orElse(0);
     IToolStackView tool = held.is(TinkerTags.Items.MODIFIABLE) ? ToolStack.from(held) : null;
     int level = tool != null ? LootingModifierHook.getLooting(tool, lootingContext, vanillaLooting) : vanillaLooting;
     return ArmorLootingModifierHook.getLooting(tool, lootingContext, level);

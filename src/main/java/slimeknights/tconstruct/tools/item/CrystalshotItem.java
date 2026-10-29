@@ -50,7 +50,7 @@ public class CrystalshotItem extends ArrowItem {
     // 1.21.1 moved the Forge item hook to ArrowItem; keep the old Infinity behavior
     return entity.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT)
       .get(Enchantments.INFINITY)
-      .map(infinity -> EnchantmentHelper.getItemEnchantmentLevel(infinity, bow) > 0)
+      .map(infinity -> EnchantmentHelper.getTagEnchantmentLevel(infinity, bow) > 0)
       .orElse(false);
   }
 

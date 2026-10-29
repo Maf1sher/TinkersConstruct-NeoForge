@@ -60,7 +60,9 @@ public interface EnchantmentModifierHook {
    * @return  Enchantment level
    */
   static int getEnchantmentLevel(ItemStack stack, Holder<Enchantment> enchantment) {
-    int level = EnchantmentHelper.getItemEnchantmentLevel(enchantment, stack);
+    // read the stored level directly; EnchantmentHelper.getItemEnchantmentLevel delegates to ItemStack#getEnchantmentLevel,
+    // which calls back into Item#getEnchantmentLevel and would recurse infinitely for modifiable tools
+    int level = EnchantmentHelper.getTagEnchantmentLevel(enchantment, stack);
     IToolStackView tool = ToolStack.from(stack);
     for (ModifierEntry entry : tool.getModifierList()) {
       level = entry.getHook(ModifierHooks.ENCHANTMENTS).updateEnchantmentLevel(tool, entry, enchantment, level);
