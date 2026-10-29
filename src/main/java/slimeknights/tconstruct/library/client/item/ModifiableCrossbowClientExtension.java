@@ -22,8 +22,8 @@ public class ModifiableCrossbowClientExtension extends ModifiableItemClientExten
   public ArmPose getArmPose(LivingEntity living, InteractionHand hand, ItemStack stack) {
     if (!living.swinging) {
       CompoundTag tag = DataComponentHelper.getCustomData(stack);
-      // must have ammo in persistent data
-      if (tag != null && tag.getCompound(ToolStack.TAG_PERSISTENT_MOD_DATA).contains(ModifiableCrossbowItem.KEY_CROSSBOW_AMMO.toString(), CompoundTag.TAG_COMPOUND)) {
+      // must have ammo in persistent data; an empty compound can be left behind by older saves
+      if (tag != null && !tag.getCompound(ToolStack.TAG_PERSISTENT_MOD_DATA).getCompound(ModifiableCrossbowItem.KEY_CROSSBOW_AMMO.toString()).isEmpty()) {
         return ArmPose.CROSSBOW_HOLD;
       }
     }

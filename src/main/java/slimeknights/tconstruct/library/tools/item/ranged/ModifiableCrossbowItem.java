@@ -4,9 +4,9 @@ import lombok.Getter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -21,6 +21,7 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.AbstractArrow.Pickup;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -317,6 +318,8 @@ public class ModifiableCrossbowItem extends ModifiableLauncherItem {
       // clear the ammo, damage the bow
       tool.getPersistentData().remove(KEY_CROSSBOW_AMMO);
       ToolDamageUtil.damageAnimated(tool, damage, living, hand);
+      // damage may be prevented by modifiers, so always send the loaded state change to the client
+      syncAmmoData(living, hand);
 
       // stats
       if (living instanceof ServerPlayer serverPlayer) {
@@ -339,7 +342,7 @@ public class ModifiableCrossbowItem extends ModifiableLauncherItem {
     // any reason we shouldn't load?
     // specifically: broken, not fully charged, already have ammo
     ModDataNBT persistentData = tool.getPersistentData();
-    if (tool.isBroken() || getUseDuration(bow, living) - chargeRemaining < persistentData.getInt(KEY_DRAWTIME) || persistentData.contains(KEY_CROSSBOW_AMMO, Tag.TAG_COMPOUND)) {
+    if (tool.isBroken() || getUseDuration(bow, living) - chargeRemaining < persistentData.getInt(KEY_DRAWTIME) || !persistentData.getCompound(KEY_CROSSBOW_AMMO).isEmpty()) {
       return;
     }
 
@@ -349,14 +352,32 @@ public class ModifiableCrossbowItem extends ModifiableLauncherItem {
     if (!ammo.isEmpty()) {
       level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.CROSSBOW_LOADING_END, SoundSource.PLAYERS, 1.0F, 1.0F / (level.getRandom().nextFloat() * 0.5F + 1.0F) + 0.2F);
       if (!level.isClientSide) {
-        CompoundTag ammoNBT = new CompoundTag();
-        ammo.save(level.registryAccess(), ammoNBT);
+        // 1.21.1 returns the saved tag instead of mutating the prefix, keep the result or the ammo is stored empty
+        CompoundTag ammoNBT = (CompoundTag) ammo.save(level.registryAccess(), new CompoundTag());
         persistentData.put(KEY_CROSSBOW_AMMO, ammoNBT);
         // if the crossbow broke during loading, fire immediately
         if (tool.isBroken()) {
           fireCrossbow(tool, living, player != null && player.getAbilities().instabuild, living.getUsedItemHand(), ammoNBT);
         }
+        // the use action is ending, clear transient keys before the stack is sent (vanilla clears them after releaseUsing)
+        persistentData.remove(KEY_DRAWTIME);
+        persistentData.remove(KEY_DRAWBACK_AMMO);
+        // update the component so the client sees the loaded ammo; in-place NBT edits are not detected by slot sync
+        syncAmmoData(living, living.getUsedItemHand());
       }
+    }
+  }
+
+  /**
+   * Sends the stack to the client after an ammo change. In-place persistent data edits mutate the tag shared with the menu's
+   * remote slot, so vanilla slot sync sees no difference and would leave the client showing stale ammo.
+   */
+  private static void syncAmmoData(LivingEntity living, InteractionHand hand) {
+    if (living instanceof ServerPlayer player) {
+      ItemStack stack = living.getItemInHand(hand);
+      int slot = hand == InteractionHand.MAIN_HAND ? InventoryMenu.USE_ROW_SLOT_START + player.getInventory().selected : InventoryMenu.SHIELD_SLOT;
+      player.inventoryMenu.setRemoteSlot(slot, stack);
+      player.connection.send(new ClientboundContainerSetSlotPacket(player.inventoryMenu.containerId, player.inventoryMenu.incrementStateId(), slot, stack.copy()));
     }
   }
 
