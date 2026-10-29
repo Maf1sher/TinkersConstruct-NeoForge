@@ -20,7 +20,7 @@ public class CeramicsOptionalRecipeProvider implements DataProvider {
   private final PackOutput.PathProvider recipePathProvider;
 
   public CeramicsOptionalRecipeProvider(PackOutput output) {
-    this.recipePathProvider = output.createPathProvider(PackOutput.Target.DATA_PACK, "recipes");
+    this.recipePathProvider = output.createPathProvider(PackOutput.Target.DATA_PACK, "recipe");
   }
 
   @Override
