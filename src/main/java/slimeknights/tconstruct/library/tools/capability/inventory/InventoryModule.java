@@ -171,8 +171,7 @@ public class InventoryModule implements ModifierModule, InventoryModifierHook, V
             if (stack.isEmpty()) {
               list.remove(i);
             } else {
-              compound.getAllKeys().clear();
-              writeStack(stack, slot, compound, registries);
+              list.set(i, writeStack(stack, slot, new CompoundTag(), registries));
             }
             return;
           // try to keep the stacks in order by inserting after the last slot smaller than the target
@@ -265,12 +264,13 @@ public class InventoryModule implements ModifierModule, InventoryModifierHook, V
    * @param slot   Target slot
    * @param compound  Tag to write to, use new for new tag
    * @param registries  Registry lookup for components on the stack
-   * @return Tag written to, same as {@code compound}.
+   * @return New tag containing the stack and slot; 1.21 copies the prefix, so use this value
    */
   public static CompoundTag writeStack(ItemStack stack, int slot, CompoundTag compound, HolderLookup.Provider registries) {
-    stack.save(registries, compound);
-    compound.putInt(TAG_SLOT, slot);
-    return compound;
+    // 1.21 save returns a new tag instead of mutating the prefix, so keep the result
+    CompoundTag written = (CompoundTag) stack.save(registries, compound);
+    written.putInt(TAG_SLOT, slot);
+    return written;
   }
 
   @Override

@@ -242,7 +242,8 @@ public record SmeltingModule(RecipeType<? extends AbstractCookingRecipe> recipeT
                   i--;
                 } else {
                   // shrink stack
-                  InventoryModule.writeStack(stack, slot, entry, level.registryAccess());
+                  entry = InventoryModule.writeStack(stack, slot, new CompoundTag(), level.registryAccess());
+                  list.set(i, entry);
                   // update time to cook again
                   entry.putInt(TAG_TIME, recipe.getCookingTime());
                 }
