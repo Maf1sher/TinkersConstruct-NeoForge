@@ -30,9 +30,9 @@ public class CraftingStationContainerMenu extends TabbedContainerMenu<CraftingSt
       tile.syncRecipe(inv.player);
 
       // add crafting slots first, as each added slot will clear the result cache
-      for (int row = 0; row < 3; row++) {
-        for (int col = 0; col < 3; col++) {
-          this.addSlot(new Slot(tile, col + row * 3, 30 + col * 18, 17 + row * 18));
+      for (int row = 0; row < CraftingStationBlockEntity.GRID_HEIGHT; row++) {
+        for (int col = 0; col < CraftingStationBlockEntity.GRID_WIDTH; col++) {
+          this.addSlot(new Slot(tile, col + row * CraftingStationBlockEntity.GRID_WIDTH, 30 + col * 18, 17 + row * 18));
         }
       }
       // add result slot, will fetch result cache

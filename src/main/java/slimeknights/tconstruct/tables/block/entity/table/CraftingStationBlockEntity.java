@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -23,6 +24,7 @@ import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
 import slimeknights.tconstruct.shared.inventory.ConfigurableInvWrapperCapability;
 import slimeknights.tconstruct.tables.TinkerTables;
+import slimeknights.tconstruct.tables.block.entity.inventory.CraftingContainerWrapper;
 import slimeknights.tconstruct.tables.block.entity.inventory.LazyResultContainer;
 import slimeknights.tconstruct.tables.block.entity.inventory.LazyResultContainer.ILazyCrafter;
 import slimeknights.tconstruct.tables.menu.CraftingStationContainerMenu;
@@ -30,10 +32,15 @@ import slimeknights.tconstruct.tables.network.UpdateCraftingRecipePacket;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class CraftingStationBlockEntity extends RetexturedTableBlockEntity implements ILazyCrafter {
   public static final Component UNCRAFTABLE = TConstruct.makeTranslation("gui", "crafting_station.uncraftable");
   private static final Component NAME = TConstruct.makeTranslation("gui", "crafting_station");
+  /** Dimensions of the crafting grid, also used by the menu and the consumption logic */
+  public static final int GRID_WIDTH = 3;
+  public static final int GRID_HEIGHT = 3;
+  public static final int GRID_SIZE = GRID_WIDTH * GRID_HEIGHT;
 
   /** Last crafted crafting recipe */
   @Nullable
@@ -41,9 +48,12 @@ public class CraftingStationBlockEntity extends RetexturedTableBlockEntity imple
   /** Result inventory, lazy loads results */
   @Getter
   private final LazyResultContainer craftingResult;
+  /** Crafting inventory for the recipe calls */
+  private final CraftingContainerWrapper craftingInventory;
   public CraftingStationBlockEntity(BlockPos pos, BlockState state) {
-    super(TinkerTables.craftingStationTile.get(), pos, state, NAME, 9);
+    super(TinkerTables.craftingStationTile.get(), pos, state, NAME, GRID_SIZE);
     this.itemHandler = new ConfigurableInvWrapperCapability(this, false, false);
+    this.craftingInventory = new CraftingContainerWrapper(this, GRID_WIDTH, GRID_HEIGHT);
     this.craftingResult = new LazyResultContainer(this);
   }
 
@@ -55,11 +65,7 @@ public class CraftingStationBlockEntity extends RetexturedTableBlockEntity imple
 
   /** Creates a snapshot of the crafting grid for vanilla recipe matching */
   private CraftingInput createCraftingInput() {
-    NonNullList<ItemStack> items = NonNullList.withSize(9, ItemStack.EMPTY);
-    for (int i = 0; i < 9; i++) {
-      items.set(i, this.getItem(i));
-    }
-    return CraftingInput.of(3, 3, items);
+    return this.craftingInventory.asCraftInput();
   }
 
   /* Crafting */
@@ -162,32 +168,57 @@ public class CraftingStationBlockEntity extends RetexturedTableBlockEntity imple
       player.awardRecipes(List.<RecipeHolder<?>>of(recipe));
     }
     result.onCraftedBy(this.level, player, amount);
-    EventHooks.firePlayerCraftingEvent(player, result, this);
+    EventHooks.firePlayerCraftingEvent(player, result, this.craftingInventory);
 
     // update all slots in the inventory
-    // remove remaining items
+    // the recipe input is cropped to the used area, so remap its indices back onto the full grid
+    CraftingInput.Positioned positioned = this.craftingInventory.asPositionedCraftInput();
     CommonHooks.setCraftingPlayer(player);
-    NonNullList<ItemStack> remaining = recipe.value().getRemainingItems(createCraftingInput());
+    NonNullList<ItemStack> remaining = recipe.value().getRemainingItems(positioned.input());
     CommonHooks.setCraftingPlayer(null);
-    for (int i = 0; i < remaining.size(); ++i) {
-      ItemStack original = this.getItem(i);
-      ItemStack newStack = remaining.get(i);
+    consumeCraftingInput(this, positioned, remaining, stack -> {
+      if (!player.getInventory().add(stack)) {
+        player.drop(stack, false);
+      }
+    });
+  }
 
-      // if empty or size 1, set directly (decreases by 1)
-      if (original.isEmpty() || original.getCount() == 1) {
-        this.setItem(i, newStack);
-      }
-      else if (ItemStack.isSameItemSameComponents(original, newStack)) {
-        // if matching, merge (decreasing by 1
-        newStack.grow(original.getCount() - 1);
-        this.setItem(i, newStack);
-      }
-      else {
-        // directly update the slot
-        this.setItem(i, original.copyWithCount(original.getCount() - 1));
-        // otherwise, drop the item as the player
-        if (!newStack.isEmpty() && !player.getInventory().add(newStack)) {
-          player.drop(newStack, false);
+  /**
+   * Consumes one item from each slot used by the crafting recipe, applying remaining items such as empty buckets.
+   * The crafting input is cropped to the bounding box of used slots, so its indices do not match the grid slots.
+   * @param grid        Crafting grid to update
+   * @param positioned  Positioned crafting input used to match the recipe
+   * @param remaining   Remaining items for the cropped input
+   * @param leftover    Sink for items that do not fit back into the grid
+   */
+  static void consumeCraftingInput(Container grid, CraftingInput.Positioned positioned, NonNullList<ItemStack> remaining, Consumer<ItemStack> leftover) {
+    CraftingInput input = positioned.input();
+    int left = positioned.left();
+    int top = positioned.top();
+    int width = input.width();
+    for (int row = 0; row < input.height(); row++) {
+      for (int col = 0; col < width; col++) {
+        int index = col + row * width;
+        int slot = (left + col) + (top + row) * GRID_WIDTH;
+        ItemStack original = grid.getItem(slot);
+        ItemStack newStack = remaining.get(index);
+
+        // if empty or size 1, set directly (decreases by 1)
+        if (original.isEmpty() || original.getCount() == 1) {
+          grid.setItem(slot, newStack);
+        }
+        else if (ItemStack.isSameItemSameComponents(original, newStack)) {
+          // if matching, merge (decreasing by 1)
+          newStack.grow(original.getCount() - 1);
+          grid.setItem(slot, newStack);
+        }
+        else {
+          // directly update the slot
+          grid.setItem(slot, original.copyWithCount(original.getCount() - 1));
+          // otherwise, give the item to the player
+          if (!newStack.isEmpty()) {
+            leftover.accept(newStack);
+          }
         }
       }
     }
