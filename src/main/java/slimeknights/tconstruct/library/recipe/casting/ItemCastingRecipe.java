@@ -55,7 +55,8 @@ public class ItemCastingRecipe extends AbstractCastingRecipe implements IDisplay
 
   @Override
   public boolean matches(ICastingContainer inv, Level worldIn) {
-    return getCast().test(inv.getStack()) && fluid.test(inv.getFluidStack());
+    // the casting tank fills in small increments, so match fluid identity and read the amount from getFluidAmount
+    return getCast().test(inv.getStack()) && TinkerFluidIngredients.matchesFluid(fluid, inv.getFluidStack());
   }
 
   @Override

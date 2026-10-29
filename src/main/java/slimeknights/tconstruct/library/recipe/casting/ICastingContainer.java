@@ -44,4 +44,13 @@ public interface ICastingContainer extends SingleItemInput {
   default FluidStack getFluidStack() {
     return FluidTagHelper.withTag(getFluid(), 1, getFluidTag());
   }
+
+  /**
+   * The casting container is only empty when both the item and the fluid slots are empty. The recipe manager skips the
+   * lookup entirely for empty inputs, which would otherwise hide cast-less recipes such as block casting.
+   */
+  @Override
+  default boolean isEmpty() {
+    return getStack().isEmpty() && getFluidStack().isEmpty();
+  }
 }
