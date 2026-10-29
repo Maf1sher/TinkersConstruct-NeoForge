@@ -23,7 +23,8 @@ public final class TagUtil {
    */
   @Nullable
   public static BlockPos readOptionalPos(CompoundTag parent, String key, BlockPos offset) {
-    if (parent.contains(key, Tag.TAG_COMPOUND)) {
+    // 1.21 writes block positions as int arrays; the compound form was removed with NbtUtils#writeBlockPos
+    if (parent.contains(key, Tag.TAG_INT_ARRAY)) {
       return NbtUtils.readBlockPos(parent, key).map(pos -> pos.offset(offset)).orElse(null);
     }
     return null;
