@@ -92,6 +92,8 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
   private ResourceLocation recipeName;
   /** Cache recipe to reduce time during recipe lookups. Not saved to Tag */
   private RecipeHolder<ICastingRecipe> lastCastingRecipe;
+  /** True if a failed recipe lookup for fluid already in the tank was retried since the contents last changed */
+  private boolean attemptedRecipeRecovery = false;
   /** Last recipe output for client side display */
   private ItemStack lastOutput = null;
   /** If true, this block is allowed to cast without a cast */
@@ -275,10 +277,13 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
 
   /** Handles cooling the casting recipe */
   private void serverTick(Level level, BlockPos pos) {
-    // no recipe
-    // TODO: should consider the case where the tank has fluid, but there is no current recipe
-    // would like to avoid doing a recipe lookup every tick, so need some way to handle the case of no recipe found, ideally without fluid voiding
+    // no recipe: if the tank still holds fluid, try once to find a recipe again (a datapack reload may have
+    // removed the saved one) so the table does not sit on the fluid forever
     if (currentRecipe == null) {
+      if (!attemptedRecipeRecovery) {
+        attemptedRecipeRecovery = true;
+        recoverRecipe();
+      }
       return;
     }
     // fully filled
@@ -442,6 +447,7 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
     currentRecipeId = null;
     recipeName = null;
     lastOutput = null;
+    attemptedRecipeRecovery = false;
     castingInventory.setFluid(FluidStack.EMPTY);
     tank.reset();
     onContentsChanged();
@@ -449,6 +455,8 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
 
   /** Called when tank contents change */
   public void onContentsChanged() {
+    // contents changed, so a previous failed recipe lookup may succeed now
+    attemptedRecipeRecovery = false;
     // start timer
     FluidStack fluidStack = tank.getFluid();
     if (fluidStack.getAmount() >= tank.getCapacity() && currentRecipe != null) {
@@ -546,6 +554,26 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
   /* Tag */
 
   /**
+   * Retries the casting recipe lookup for fluid that is already in the tank. Used when the saved recipe is missing or
+   * no longer matches, so a table that lost its recipe does not keep the fluid stuck forever.
+   */
+  private void recoverRecipe() {
+    if (level == null || level.isClientSide || currentRecipe != null || recipeName != null || tank.isEmpty()) {
+      return;
+    }
+    FluidStack fluid = tank.getFluid();
+    int capacity = initNewCasting(fluid, FluidAction.EXECUTE);
+    if (capacity > 0) {
+      tank.setCapacity(capacity);
+      if (fluid.getAmount() >= capacity) {
+        castingInventory.setFluid(fluid);
+        coolingTime = Math.max(0, currentRecipe.getCoolingTime(castingInventory));
+      }
+      setChangedFast();
+    }
+  }
+
+  /**
    * Loads a recipe in from its name and updates the tank capacity
    * @param level  Nonnull level instance
    * @param name   Recipe name to load
@@ -555,16 +583,20 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
     FluidStack fluid = tank.getFluid();
     if(!fluid.isEmpty()) {
       // fetch recipe by name
-      RecipeHelper.getRecipeHolder(level.getRecipeManager(), name, ICastingRecipe.class).ifPresent(holder -> {
-        ICastingRecipe recipe = holder.value();
+      Optional<RecipeHolder<ICastingRecipe>> holder = RecipeHelper.getRecipeHolder(level.getRecipeManager(), name, ICastingRecipe.class);
+      if (holder.isPresent()) {
+        ICastingRecipe recipe = holder.get().value();
         this.currentRecipe = recipe;
-        this.currentRecipeId = holder.id();
+        this.currentRecipeId = holder.get().id();
         castingInventory.setFluid(fluid);
         tank.setCapacity(recipe.getFluidAmount(castingInventory));
         if (fluid.getAmount() >= tank.getCapacity()) {
           coolingTime = recipe.getCoolingTime(castingInventory);
         }
-      });
+      } else {
+        // the recipe is gone, so fall back to matching the fluid against the current recipe list
+        recoverRecipe();
+      }
     }
   }
 
@@ -615,6 +647,8 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
       }
     }
     lastRedstone = tags.getBoolean(TAG_REDSTONE);
+    // no saved recipe (or it failed to load); match the loaded fluid against the recipe list so it can still cast
+    recoverRecipe();
   }
 
   public static class Basin extends CastingBlockEntity {
