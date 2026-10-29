@@ -8,6 +8,7 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.ItemCapability;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
+import slimeknights.mantle.util.DataComponentHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
@@ -16,6 +17,7 @@ import slimeknights.tconstruct.library.tools.capability.ToolCapabilityProvider.I
 import slimeknights.tconstruct.library.tools.nbt.IModDataView;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
+import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -318,16 +320,20 @@ public class ToolFluidCapability extends FluidModifierHookIterator<ModifierEntry
   /** Provider instance for a fluid cap */
   public static class Provider implements IToolCapabilityProvider {
     private final ItemStack stack;
-    private final Supplier<? extends IToolStackView> toolStack;
     public Provider(ItemStack stack, Supplier<? extends IToolStackView> toolStack) {
       this.stack = stack;
-      this.toolStack = toolStack;
     }
 
     @Override
     public Object getCapability(IToolStackView tool, ItemCapability<?, Void> capability) {
       if (capability == Capabilities.FluidHandler.ITEM && tool.getVolatileData().getInt(TOTAL_TANKS) > 0) {
-        return new ToolFluidCapability(stack, toolStack);
+        // detach the custom data: ItemStack#copy keeps the source's CustomData instance, so a handler that mutates the
+        // tool would also change the stack the capability was queried from (e.g. JEI ingredients Create fills while
+        // scanning recipes). IFluidHandlerItem asks callers to use getContainer() for the updated stack, so keep the
+        // source untouched and expose the mutated copy instead.
+        ItemStack container = DataComponentHelper.copyCustomData(stack.copy());
+        ToolStack containerTool = ToolStack.from(container);
+        return new ToolFluidCapability(container, () -> containerTool);
       }
       return null;
     }
