@@ -36,12 +36,15 @@ import java.util.concurrent.CompletableFuture;
  */
 @SuppressWarnings("deprecation")  // I wish IDEA let you declare a deprecation in a source is wrong globally
 public abstract class AbstractStructureRepalleter extends GenericNBTProvider {
+  /** Datapack directory for structure templates, renamed from plural "structures" in 1.21 */
+  private static final String STRUCTURE_DIRECTORY = "structure";
+
   private final Multimap<ResourceLocation,RepaletteTask> structures = HashMultimap.create();
 
   private final ExistingFileHelper existingFileHelper;
   private final String modId;
   public AbstractStructureRepalleter(PackOutput packOutput, ExistingFileHelper existingFileHelper, String modId) {
-    super(packOutput, Target.DATA_PACK, "structures");
+    super(packOutput, Target.DATA_PACK, STRUCTURE_DIRECTORY);
     this.existingFileHelper = existingFileHelper;
     this.modId = modId;
   }
@@ -69,7 +72,7 @@ public abstract class AbstractStructureRepalleter extends GenericNBTProvider {
     for (Entry<ResourceLocation,Collection<RepaletteTask>> entry : structures.asMap().entrySet()) {
       ResourceLocation original = entry.getKey();
 
-      try (InputStream io = existingFileHelper.getResource(original, PackType.SERVER_DATA, ".nbt", "structures").open()) {
+      try (InputStream io = existingFileHelper.getResource(original, PackType.SERVER_DATA, ".nbt", STRUCTURE_DIRECTORY).open()) {
         CompoundTag inputNBT = NbtIo.readCompressed(io, NbtAccounter.unlimitedHeap());
         for (RepaletteTask task : entry.getValue()) {
           // start by fetching the palette, we assume its not randomized

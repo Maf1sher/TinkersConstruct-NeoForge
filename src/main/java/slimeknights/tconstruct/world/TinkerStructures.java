@@ -115,7 +115,7 @@ public final class TinkerStructures extends TinkerModule {
     ExistingFileHelper existingFileHelper = event.getExistingFileHelper();
     boolean server = event.includeServer();
     generator.addProvider(server, new StructureRepalleter(packOutput, existingFileHelper));
-//    generator.addProvider(server, new StructureUpdater(packOutput, existingFileHelper, TConstruct.MOD_ID, Target.DATA_PACK, "structures"));
+//    generator.addProvider(server, new StructureUpdater(packOutput, existingFileHelper, TConstruct.MOD_ID, Target.DATA_PACK, "structure"));
 //    generator.addProvider(event.includeClient(), new StructureUpdater(packOutput, existingFileHelper, TConstruct.MOD_ID, Target.RESOURCE_PACK, "book/structures"));
   }
 }
