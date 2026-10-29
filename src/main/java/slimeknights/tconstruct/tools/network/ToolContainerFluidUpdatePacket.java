@@ -16,12 +16,12 @@ public record ToolContainerFluidUpdatePacket(FluidStack fluid) implements Tinker
   @Override public Type<ToolContainerFluidUpdatePacket> type() { return TYPE; }
 
   public ToolContainerFluidUpdatePacket(RegistryFriendlyByteBuf buffer) {
-    this(FluidStack.STREAM_CODEC.decode(buffer));
+    this(FluidStack.OPTIONAL_STREAM_CODEC.decode(buffer));
   }
 
   @Override
   public void encode(RegistryFriendlyByteBuf buffer) {
-    FluidStack.STREAM_CODEC.encode(buffer, fluid);
+    FluidStack.OPTIONAL_STREAM_CODEC.encode(buffer, fluid);
   }
 
   @Override

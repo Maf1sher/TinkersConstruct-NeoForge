@@ -9,7 +9,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
 public class FluidDataSerializer implements EntityDataSerializer<FluidStack> {
   @Override
   public StreamCodec<? super RegistryFriendlyByteBuf,FluidStack> codec() {
-    return FluidStack.STREAM_CODEC;
+    return FluidStack.OPTIONAL_STREAM_CODEC;
   }
 
   @Override
