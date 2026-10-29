@@ -36,6 +36,7 @@ import slimeknights.tconstruct.library.recipe.tinkerstation.IMutableTinkerStatio
 import slimeknights.tconstruct.library.recipe.tinkerstation.ITinkerStationContainer;
 import slimeknights.tconstruct.library.recipe.tinkerstation.ITinkerStationRecipe;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
+import slimeknights.tconstruct.library.tools.helper.ToolBuildHandler;
 import slimeknights.tconstruct.library.tools.helper.ToolDamageUtil;
 import slimeknights.tconstruct.library.tools.item.IModifiableDisplay;
 import slimeknights.tconstruct.library.tools.nbt.LazyToolStack;
@@ -183,7 +184,7 @@ public class ModifierRepairTinkerStationRecipe implements ITinkerStationRecipe, 
       toolWithoutModifier = RegistryHelper.getTagValueStream(BuiltInRegistries.ITEM, TinkerTags.Items.DURABILITY)
         .map(item -> {
           if (item instanceof IModifiableDisplay modifiable) {
-            ItemStack stack = modifiable.getRenderTool().copy();
+            ItemStack stack = ToolBuildHandler.copyRenderTool(modifiable);
             CompoundTag tag = DataComponentHelper.getOrCreateCustomData(stack);
             tag.put(ToolStack.TAG_STATS, stats);
             tag.put(ToolStack.TAG_UPGRADES, modifiers);
@@ -197,6 +198,8 @@ public class ModifierRepairTinkerStationRecipe implements ITinkerStationRecipe, 
         .toList();
       toolWithModifier = toolWithoutModifier.stream().map(stack -> {
         stack = stack.copy();
+        // each display stack needs its own tag, otherwise the damage below leaks into the without-modifier display
+        DataComponentHelper.copyCustomData(stack);
         DataComponentHelper.getOrCreateCustomData(stack).putInt(ToolStack.TAG_DAMAGE, 200 - repairAmount);
         return stack;
       }).toList();

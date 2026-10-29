@@ -216,6 +216,8 @@ public interface IDisplayModifierRecipe extends IModifierRecipe, IDisplayTinkerS
   /* Gets a copy of the stack with the given modifiers */
   static ItemStack withModifiers(ItemStack stack, int maxSize, List<ModifierEntry> modifierList, Consumer<ModDataNBT> persistentDataConsumer) {
     ItemStack output = stack.copyWithCount(Math.min(stack.getMaxStackSize(), maxSize));
+    // copyWithCount keeps the source tag, which may be a cached render tool; give the display stack its own tag
+    DataComponentHelper.copyCustomData(output);
     CompoundTag nbt = DataComponentHelper.getOrCreateCustomData(output);
 
     // build modifiers list

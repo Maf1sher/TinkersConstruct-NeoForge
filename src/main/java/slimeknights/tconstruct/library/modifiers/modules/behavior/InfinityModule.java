@@ -67,6 +67,8 @@ public record InfinityModule(ItemStack ammo, String variantTag, int durabilityUs
     // our available count is based on how many arrows we can create from the remaining durability, though round up to be nice
     int count = durabilityUsage <= 0 ? 64 : Math.min(64, (tool.getCurrentDurability() + durabilityUsage - 1) / durabilityUsage);
     ItemStack ammo = this.ammo.copyWithCount(count);
+    // do not modify the module's ammo template through the shared tag
+    DataComponentHelper.copyCustomData(ammo);
     CompoundTag tag = DataComponentHelper.getOrCreateCustomData(ammo);
     // mark the arrow as infinity for the projectile launch hook
     tag.putBoolean(INFINITY, true);

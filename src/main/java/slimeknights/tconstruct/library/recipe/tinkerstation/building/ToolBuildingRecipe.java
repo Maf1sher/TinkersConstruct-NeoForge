@@ -319,10 +319,12 @@ public class ToolBuildingRecipe implements ITinkerStationRecipe {
       }
       // if the materials override did not make a tool successfully, make one now
       if (result == null) {
-        result = output instanceof IModifiableDisplay modifiable ? modifiable.getRenderTool() : output.asItem().getDefaultInstance();
-        // apply output count
-        if (outputCount > 1) {
-          result = result.copyWithCount(outputCount);
+        if (output instanceof IModifiableDisplay modifiable) {
+          // never hand out the cached render tool, recipe viewers may keep or modify the stack
+          result = ToolBuildHandler.copyRenderTool(modifiable);
+          result.setCount(outputCount);
+        } else {
+          result = output.asItem().getDefaultInstance();
         }
       }
       displayOutput = List.of(result);

@@ -16,6 +16,7 @@ import slimeknights.tconstruct.library.materials.stats.MaterialStatsId;
 import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
 import slimeknights.tconstruct.library.tools.definition.module.material.ToolMaterialHook;
 import slimeknights.tconstruct.library.tools.item.IModifiable;
+import slimeknights.tconstruct.library.tools.item.IModifiableDisplay;
 import slimeknights.tconstruct.library.tools.nbt.MaterialIdNBT;
 import slimeknights.tconstruct.library.tools.nbt.MaterialNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
@@ -103,6 +104,20 @@ public final class ToolBuildHandler {
       stack = new MaterialIdNBT(RENDER_MATERIALS).updateStack(stack);
     }
     DataComponentHelper.getOrCreateCustomData(stack).putBoolean(TooltipUtil.KEY_DISPLAY, true);
+    return stack;
+  }
+
+  /**
+   * Copies the given tool's cached render stack for use in a recipe or book display, giving the copy its own custom data tag.
+   * <p>
+   * In 1.21 {@code ItemStack#copy()} keeps the source {@code CustomData} instance, so writing stats or damage to a plain
+   * copy would corrupt the cached render stack used by every UI. Always use this method when a display stack is modified.
+   * @param tool  Tool to copy the render stack from
+   * @return  Mutable display stack with an independent tag
+   */
+  public static ItemStack copyRenderTool(IModifiableDisplay tool) {
+    ItemStack stack = tool.getRenderTool().copy();
+    DataComponentHelper.copyCustomData(stack);
     return stack;
   }
 
