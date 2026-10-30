@@ -50,6 +50,28 @@ def buildNumber = System.getenv('BUILD_NUMBER') ?: "DEV.${revision}"
 ext.artifact_version = System.getenv('ARTIFACT_VERSION') ?: "${mod_version}.${buildNumber}"
 version = "${minecraft_version}-${artifact_version}"
 
+// The Mantle artifact version embeds Mantle's git hash, so the pinned mantle_version goes stale
+// after any Mantle commit. Resolve the workspace build output instead, since Tinkers is meant to
+// compile against the Mantle checkout next to it; the pinned value stays as a fallback.
+def mantleJars = fileTree('../Mantle-NeoForge/build/libs') {
+    include 'Mantle-*.jar'
+    exclude '*-sources.jar', '*-javadoc.jar'
+}.files
+def mantleDepVersion = mantle_version
+if (mantleJars.isEmpty()) {
+    logger.warn("No Mantle jar found in ../Mantle-NeoForge/build/libs; build Mantle first or the pinned ${mantle_version} will be used")
+} else {
+    def mantleJar = mantleJars.max { it.lastModified() }
+    def prefix = "Mantle-${minecraft_version}-"
+    if (mantleJar.name.startsWith(prefix) && mantleJar.name.endsWith('.jar')) {
+        def workspaceVersion = mantleJar.name.substring(prefix.length(), mantleJar.name.length() - '.jar'.length())
+        if (workspaceVersion != mantle_version) {
+            logger.lifecycle("Using workspace Mantle ${workspaceVersion} (pinned ${mantle_version})")
+        }
+        mantleDepVersion = workspaceVersion
+    }
+}
+
 println "Java: ${System.getProperty('java.version')}, JVM: ${System.getProperty('java.vm.version')} (${System.getProperty('java.vendor')}), Arch: ${System.getProperty('os.arch')}, Version: ${version}"
 
 java {
@@ -128,7 +150,7 @@ neoForge {
 }
 
 dependencies {
-    implementation "slimeknights.mantle:Mantle:${minecraft_version}-${mantle_version}"
+    implementation "slimeknights.mantle:Mantle:${minecraft_version}-${mantleDepVersion}"
 
     compileOnly "mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"
     compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
