@@ -42,9 +42,12 @@ public class MultitankFuelModule extends FuelModule implements IFluidHandler {
     this.lastPos = NULL_POS;
   }
 
-  /** Called on structure rebuild to clear the gui handler list */
+  /** Called on structure rebuild to clear the gui handler list and any cached fuel handler */
   public void clearFluidListeners() {
     tankHandlers = null;
+    // the cached handler may belong to a tank block that was removed or replaced
+    fluidHandler = null;
+    clearLastListener();
   }
 
   /** Called on servant load to ensure the cached handler is present */
