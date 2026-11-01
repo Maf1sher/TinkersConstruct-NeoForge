@@ -4,6 +4,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.PackOutput.Target;
@@ -24,6 +25,7 @@ import net.neoforged.neoforge.common.conditions.OrCondition;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import slimeknights.mantle.data.GenericDataProvider;
+import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
 import slimeknights.mantle.data.predicate.entity.EntityPredicate;
 import slimeknights.mantle.util.JsonHelper;
@@ -54,17 +56,28 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
+import javax.annotation.Nullable;
+
 import static slimeknights.mantle.Mantle.commonResource;
 
 /** Data provider for spilling fluids */
 @SuppressWarnings("deprecation")  // fluid registry is ours to use, not yours forge
 public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
   private final String modId;
+  @Nullable
+  private final CompletableFuture<HolderLookup.Provider> registries;
+  @Nullable
+  private TypedMap serializerContext;
   private final Map<ResourceLocation,Builder> entries = new HashMap<>();
 
   public AbstractFluidEffectProvider(PackOutput packOutput, String modId) {
+    this(packOutput, modId, null);
+  }
+
+  public AbstractFluidEffectProvider(PackOutput packOutput, String modId, @Nullable CompletableFuture<HolderLookup.Provider> registries) {
     super(packOutput, Target.DATA_PACK, FluidEffectManager.FOLDER);
     this.modId = modId;
+    this.registries = registries;
   }
 
   /** Adds the fluids to the map */
@@ -72,13 +85,23 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
 
   /** Context used when serializing fluid effect JSON, provides registries to codec-based fields */
   protected TypedMap serializationContext() {
-    return TypedMap.EMPTY;
+    return serializerContext == null ? TypedMap.EMPTY : serializerContext;
   }
 
   @Override
   public CompletableFuture<?> run(CachedOutput cache) {
+    if (registries == null) {
+      return runWithContext(cache, serializationContext());
+    }
+    return registries.thenCompose(lookup -> {
+      this.serializerContext = ContextKey.lookupContext(lookup).build();
+      return runWithContext(cache, serializationContext());
+    });
+  }
+
+  /** Serializes the collected entries with the given context */
+  private CompletableFuture<?> runWithContext(CachedOutput cache, TypedMap context) {
     addFluids();
-    TypedMap context = serializationContext();
     return allOf(entries.entrySet().stream().map(entry -> saveJson(cache, entry.getKey(), entry.getValue().build(entry.getKey(), context))));
   }
 

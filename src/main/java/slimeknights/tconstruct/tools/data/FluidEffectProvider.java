@@ -25,7 +25,6 @@ import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
 import net.neoforged.neoforge.fluids.FluidType;
-import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
 import slimeknights.mantle.data.predicate.block.BlockPredicate;
 import slimeknights.mantle.data.predicate.entity.BlockAtEntityPredicate;
@@ -33,7 +32,6 @@ import slimeknights.mantle.data.predicate.entity.HasMobEffectPredicate;
 import slimeknights.mantle.data.predicate.entity.LivingEntityPredicate;
 import slimeknights.tconstruct.library.recipe.ingredient.FluidNameIngredient;
 import slimeknights.mantle.recipe.helper.ItemOutput;
-import slimeknights.mantle.util.typed.TypedMap;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.Sounds;
 import slimeknights.tconstruct.common.TinkerDamageTypes;
@@ -85,7 +83,6 @@ import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import slimeknights.tconstruct.tools.modifiers.traits.skull.StrongBonesModifier;
 import slimeknights.tconstruct.world.block.DirtType;
 
-import javax.annotation.Nullable;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
@@ -93,12 +90,9 @@ public class FluidEffectProvider extends AbstractFluidEffectProvider {
   private final CompletableFuture<HolderLookup.Provider> registries;
   /** Enchantment lookup, available once {@link #run(CachedOutput)} starts */
   private HolderLookup.RegistryLookup<Enchantment> enchantments;
-  /** Registry context for serialization, available once {@link #run(CachedOutput)} starts */
-  @Nullable
-  private TypedMap serializerContext;
 
   public FluidEffectProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> registries) {
-    super(packOutput, TConstruct.MOD_ID);
+    super(packOutput, TConstruct.MOD_ID, registries);
     this.registries = registries;
   }
 
@@ -106,14 +100,8 @@ public class FluidEffectProvider extends AbstractFluidEffectProvider {
   public CompletableFuture<?> run(CachedOutput cache) {
     return registries.thenCompose(lookup -> {
       this.enchantments = lookup.lookupOrThrow(Registries.ENCHANTMENT);
-      this.serializerContext = ContextKey.lookupContext(lookup).build();
       return super.run(cache);
     });
-  }
-
-  @Override
-  protected TypedMap serializationContext() {
-    return this.serializerContext == null ? super.serializationContext() : this.serializerContext;
   }
 
   /** Resolves an enchantment holder for datagen */
