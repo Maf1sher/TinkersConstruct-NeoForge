@@ -1,55 +1,49 @@
-# [Tinkers' Construct](https://slimeknights.github.io/projects/#tinkers-construct)
+# Tinkers' Construct
 
-Tinkers' Construct is a mod about putting tools together in a wide variety of ways, then modifying them until they turn into something else. The tools never disappear and can be named and changed to your heart's desire. Once you make them, they're yours forever. Many different materials can be used to make your tools. Tools can be forged in the part builder, or by melting down metals in the multiblock smeltery.
+![MIT](https://img.shields.io/badge/license-MIT-blue.svg?longCache=true&style=flat)
 
-## Documentation
+Unofficial NeoForge 1.21.1 port of [Tinkers' Construct](https://github.com/SlimeKnights/TinkersConstruct),
+originally by [Slime Knights](https://github.com/SlimeKnights).
 
-For documentation on writing addons or working with Tinkers' Consrtuct datapacks, see the pages on the SlimeKnight's Github.io pages: https://slimeknights.github.io/docs/.
+Tinkers' Construct is a mod about putting tools together in a wide variety of
+ways, then modifying them until they turn into something else. The tools never
+disappear and can be named and changed to your heart's desire. Once you make
+them, they're yours forever. Many different materials can be used to make your
+tools. Tools can be forged in the part builder, or by melting down metals in the
+multiblock smeltery.
 
-For a gameplay overview, see https://slimeknights.github.io/docs/gameplay/tinkers-construct-3/.
+Tinkers' Construct requires [Mantle](https://github.com/Maf1sher/Mantle-NeoForge);
+place both jars in the `mods` folder.
 
-## Setting up a Workspace/Compiling from Source
+## Building
 
-Use a 64-bit Java 21 JDK. Build the workspace Mantle dependency first so its
-exact pinned artifact is available in the sibling `Mantle-NeoForge/build/libs`
-directory:
+Requires JDK 21. Tinkers' Construct builds against Mantle, so clone the
+[Mantle repository](https://github.com/Maf1sher/Mantle-NeoForge) next to this
+one and build it first.
+
+Linux / macOS:
 
 ```bash
-cd ../Mantle-NeoForge
-./gradlew build
-cd ../TinkersConstruct-NeoForge
-./gradlew tasks
+cd Mantle-NeoForge && ./gradlew build
+cd ../TinkersConstruct-NeoForge && ./gradlew build
 ```
 
-The project uses ModDevGradle; available run and data-generation tasks are listed
-by `./gradlew tasks`. Run `./gradlew test` and `./gradlew build` after the source
-port is complete. The Java source still contains Forge 1.20.1 APIs, so a full
-Tinkers' Construct build is not expected to pass yet. The Mantle pin in
-`gradle.properties` identifies the exact workspace commit artifact and must be
-updated when the Mantle checkout changes.
+Windows (Command Prompt or PowerShell):
 
-## Issue reporting
-Please include the following:
+```bat
+cd Mantle-NeoForge && gradlew.bat build
+cd ..\TinkersConstruct-NeoForge && gradlew.bat build
+```
 
-* Minecraft version
-* Tinkers' Construct version
-* NeoForge version/build and Java version
-* Versions of any mods potentially related to the issue 
-* Any relevant screenshots are greatly appreciated.
-* For crashes:
-	* Steps to reproduce
-	* latest.log (the FML log) from the root folder of the client
+The jar is written to `build/libs/TinkersConstruct-1.21.1-*.jar`.
 
-## Licenses
-Code, Textures and binaries are licensed under the [MIT License](https://tldrlegal.com/license/mit-license).
+## Optional add-ons
 
-You are allowed to use the mod in your modpack.
-Any modpack which uses Tinkers' Construct takes **full** responsibility for user support queries. For anyone else, we only support official builds from the main CI server, not custom built jars. We also do not take bug reports for outdated builds of Minecraft.
+- [Tinkers' Integrations and Tweaks](https://github.com/Maf1sher/TCIntegrations-NeoForge)
+  — NeoForge 1.21.1 port of TCIntegrations, adding modpack integrations for other mods.
 
-If you have queries about any license or the above support restrictions, please join [our Discord](https://discord.com/invite/njGrvuh) or reach out via the links on https://slimeknights.github.io/about/.
+## Credits
 
-Any alternate licenses are noted where appropriate.
-
-## Jar Signing
-
-Some jars from our build servers may be signed. Under no circumstances does anyone have permission to verify the signatures on those jars from other mods. The signing is for informational purposes only.
+- Original mod and author: [Slime Knights](https://github.com/SlimeKnights/TinkersConstruct)
+- NeoForge 1.21.1 port: [Maf1sher/TinkersConstruct-NeoForge](https://github.com/Maf1sher/TinkersConstruct-NeoForge)
+- License: MIT (see [LICENSE](LICENSE))
