@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.library.tools.helper;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -116,13 +117,41 @@ public final class ToolBuildHandler {
    * @return  Mutable display stack with an independent tag
    */
   public static ItemStack copyRenderTool(IModifiableDisplay tool) {
-    ItemStack stack = tool.getRenderTool().copy();
-    DataComponentHelper.copyCustomData(stack);
-    return stack;
+    return copyDisplayStack(tool.getRenderTool());
+  }
+
+  /**
+   * Copies a display stack and gives the copy its own custom data tag.
+   * <p>
+   * Recipe viewers hand their ingredient stacks to recipe display code as focuses. In 1.21 {@code ItemStack#copy()} and
+   * {@code ItemStack#copyWithCount(int)} keep the source {@code CustomData} instance, so mutating such a copy would also
+   * modify the stack shown in the ingredient list. Always call this before handing a stack to display code that may
+   * write tool data.
+   * @param stack  Stack to copy
+   * @return  Copy with an independent tag
+   */
+  public static ItemStack copyDisplayStack(ItemStack stack) {
+    if (stack.isEmpty()) {
+      return ItemStack.EMPTY;
+    }
+    ItemStack copy = stack.copy();
+    DataComponentHelper.copyCustomData(copy);
+    return copy;
   }
 
 
   /* Item groups */
+
+  /**
+   * Prepares a creative tab stack. Tinkers stores damage in custom data, but keeps the vanilla damage component in sync
+   * for compatibility. JEI's grindstone recipe maker damages every ingredient stack with that component in place to build
+   * its repair previews, which corrupts the shared creative/search tab stack; leaving the component off display variants
+   * keeps Tinkers tools out of that path while {@link ToolStack#setDamage(int)} adds it back once a tool is really damaged.
+   */
+  private static ItemStack prepareCreativeStack(ItemStack stack) {
+    stack.remove(DataComponents.DAMAGE);
+    return stack;
+  }
 
   /**
    * Adds all sub items to a tool
@@ -134,10 +163,10 @@ public final class ToolBuildHandler {
     boolean hasMaterials = definition.hasMaterials();
     if (!definition.isDataLoaded() || (hasMaterials && !MaterialRegistry.isFullyLoaded())) {
       // not loaded? cannot properly build it
-      tab.accept(new ItemStack(item));
+      tab.accept(prepareCreativeStack(new ItemStack(item)));
     } else if (!hasMaterials) {
       // no parts? just add this item
-      tab.accept(buildItemFromMaterials(item, MaterialNBT.EMPTY));
+      tab.accept(prepareCreativeStack(buildItemFromMaterials(item, MaterialNBT.EMPTY)));
     } else {
       // if a specific material is set, show just that in search
       boolean added = false;
@@ -148,7 +177,7 @@ public final class ToolBuildHandler {
           if (material != IMaterial.UNKNOWN) {
             ItemStack tool = createSingleMaterial(item, MaterialVariant.of(material));
             if (!tool.isEmpty()) {
-              tab.accept(tool);
+              tab.accept(prepareCreativeStack(tool));
               added = true;
             }
           }
@@ -160,7 +189,7 @@ public final class ToolBuildHandler {
           // if we added it and we want a single material, we are done
           ItemStack tool = createSingleMaterial(item, MaterialVariant.of(material));
           if (!tool.isEmpty()) {
-            tab.accept(tool);
+            tab.accept(prepareCreativeStack(tool));
             // if filter is set we wanted just the 1 item
             if (!showOnlyMaterial.isEmpty()) {
               break;

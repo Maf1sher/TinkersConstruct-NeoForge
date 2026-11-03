@@ -403,7 +403,7 @@ public class TinkerStationRepairRecipe implements ITinkerStationRecipe, MultiNam
         return RecipeResult.failure(TinkerStationRepairRecipe.REPAIRED);
       }
       // will handle repairing dynamically as it needs to match the current input stack
-      return RecipeResult.success(focus.copy());
+      return RecipeResult.success(ToolBuildHandler.copyDisplayStack(focus));
     }
 
 

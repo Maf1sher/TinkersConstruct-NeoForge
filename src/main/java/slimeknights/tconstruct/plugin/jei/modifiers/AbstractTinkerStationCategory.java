@@ -93,7 +93,8 @@ public abstract class AbstractTinkerStationCategory<T extends IDisplayTinkerStat
       if (toolSlot != null) {
         ItemStack tool = toolSlot.getDisplayedItemStack().orElse(ItemStack.EMPTY);
         if (!tool.isEmpty()) {
-          RecipeResult<ItemStack> focusUpdate = recipe.onFocused(tool);
+          // the slot may hold a recipe's cached display stack; isolate it before display code can write tool data
+          RecipeResult<ItemStack> focusUpdate = recipe.onFocused(ToolBuildHandler.copyDisplayStack(tool));
           if (focusUpdate.hasError()) {
             arrow.setTooltip(focusUpdate.getMessage());
           }
@@ -137,7 +138,8 @@ public abstract class AbstractTinkerStationCategory<T extends IDisplayTinkerStat
       ItemStack focusStack = ItemStack.EMPTY;
       boolean focusOutput = false;
       if (focus != null) {
-        focusStack = focus.getTypedValue().getIngredient();
+        // never hand the ingredient list's own stack to display code; previews may write tool data while rendering
+        focusStack = ToolBuildHandler.copyDisplayStack(focus.getTypedValue().getIngredient());
         focusOutput = focus.getRole() == RecipeIngredientRole.OUTPUT;
       }
 
@@ -147,7 +149,8 @@ public abstract class AbstractTinkerStationCategory<T extends IDisplayTinkerStat
       // or use the specialized method
       if (!focusOutput && recipe.isTool(focusStack)) {
         // make the stack count as large as the recipe allows. This should also automatically update the size in the result
-        ItemStack toolStack = focusStack.copyWithCount(recipe.getMaxToolSize(focusStack));
+        ItemStack toolStack = ToolBuildHandler.copyDisplayStack(focusStack);
+        toolStack.setCount(recipe.getMaxToolSize(focusStack));
         // ask the recipe if it wishes to adjust sizes
         RecipeResult<ItemStack> focusUpdate = recipe.onFocused(toolStack);
         // on success, update the input to the focus stack and the output to the result

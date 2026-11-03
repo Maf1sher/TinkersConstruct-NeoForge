@@ -23,6 +23,7 @@ import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariant;
 import slimeknights.tconstruct.library.recipe.partbuilder.IDisplayPartBuilderRecipe;
 import slimeknights.tconstruct.library.recipe.partbuilder.Pattern;
+import slimeknights.tconstruct.library.tools.helper.ToolBuildHandler;
 import slimeknights.tconstruct.library.tools.layout.Patterns;
 import slimeknights.tconstruct.plugin.jei.TConstructJEIConstants;
 import slimeknights.tconstruct.plugin.jei.material.MaterialTitleIngredientRenderer;
@@ -79,7 +80,8 @@ public class PartBuilderCategory extends AbstractRecipeCategory<DisplayRecipe<ID
     boolean focusOutput = false;
     IFocus<ItemStack> itemFocus = focuses.getItemStackFocuses().findFirst().orElse(null);
     if (itemFocus != null) {
-      focusStack = itemFocus.getTypedValue().getIngredient();;
+      // never hand the ingredient list's own stack to display code
+      focusStack = ToolBuildHandler.copyDisplayStack(itemFocus.getTypedValue().getIngredient());
       focusOutput = itemFocus.getRole() == RecipeIngredientRole.OUTPUT;
     }
     IFocus<MaterialVariant> materialFocus = focuses.getFocuses(TConstructJEIConstants.MATERIAL_TYPE, RecipeIngredientRole.INPUT).findFirst().orElse(null);

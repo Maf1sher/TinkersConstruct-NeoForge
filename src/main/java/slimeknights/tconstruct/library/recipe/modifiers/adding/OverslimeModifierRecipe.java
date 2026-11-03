@@ -23,6 +23,7 @@ import slimeknights.tconstruct.library.recipe.modifiers.ModifierRecipeLookup;
 import slimeknights.tconstruct.library.recipe.tinkerstation.IMutableTinkerStationContainer;
 import slimeknights.tconstruct.library.recipe.tinkerstation.ITinkerStationContainer;
 import slimeknights.tconstruct.library.recipe.tinkerstation.ITinkerStationRecipe;
+import slimeknights.tconstruct.library.tools.helper.ToolBuildHandler;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.LazyToolStack;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
@@ -159,12 +160,13 @@ public class OverslimeModifierRecipe implements ITinkerStationRecipe, IDisplayMo
       // ensure tools are the proper stack size for without
       int maxSize = shrinkToolSlotBy();
       toolWithoutModifier = Arrays.stream(this.tools.getItems()).map(MAP_TOOL_STACK_FOR_RENDERING).map(stack -> {
-        // only copy if something changes
-        int stackMax = stack.getMaxStackSize();
+        // the mapping may return a cached render tool, so always give the display its own tag
+        ItemStack copy = ToolBuildHandler.copyDisplayStack(stack);
+        int stackMax = copy.getMaxStackSize();
         if (stackMax > 1) {
-          return stack.copyWithCount(Math.min(maxSize, stackMax));
+          copy.setCount(Math.min(maxSize, stackMax));
         }
-        return stack;
+        return copy;
       }).toList();
     }
     return toolWithoutModifier;

@@ -23,6 +23,7 @@ import slimeknights.tconstruct.library.recipe.modifiers.adding.IDisplayModifierR
 import slimeknights.tconstruct.library.recipe.modifiers.adding.OverslimeCraftingTableRecipe;
 import slimeknights.tconstruct.library.recipe.modifiers.adding.OverslimeModifierRecipe;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
+import slimeknights.tconstruct.library.tools.helper.ToolBuildHandler;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.plugin.jei.util.CategoryUtil;
 import slimeknights.tconstruct.tools.TinkerModifiers;
@@ -77,10 +78,13 @@ public class OverslimeRecipeExtension implements ICraftingCategoryExtension<Over
     // if focusing on a tool, make that tool the
     IFocus<ItemStack> focus = focuses.getItemStackFocuses().findFirst().orElse(null);
     if (focus != null && focus.getRole() != RecipeIngredientRole.OUTPUT) {
-      ItemStack focusStack = focus.getTypedValue().getIngredient();
+      // keep the ingredient list's stack out of the preview, as writing the overslime amount would corrupt it
+      ItemStack focusStack = ToolBuildHandler.copyDisplayStack(focus.getTypedValue().getIngredient());
       if (focusStack.is(TinkerTags.Items.DURABILITY) && ModifierUtil.getModifierLevel(focusStack, TinkerModifiers.overslime.getId()) > 0) {
         inputStacks = List.of(List.of(focusStack.copyWithCount(1)), List.of(recipe.getIngredient().getItems()));
-        ItemStack result = focusStack.copyWithCount(1);
+        // input and output need separate tags, otherwise adding overslime below changes the input as well
+        ItemStack result = ToolBuildHandler.copyDisplayStack(focusStack);
+        result.setCount(1);
         ToolStack tool = ToolStack.from(result);
         OverslimeModule.INSTANCE.addAmount(tool, recipe.getRestoreAmount());
         resultStacks = List.of(result);

@@ -28,6 +28,7 @@ import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.recipe.FluidValues;
 import slimeknights.tconstruct.library.recipe.casting.IDisplayableCastingRecipe;
 import slimeknights.tconstruct.library.recipe.display.RecipeSlot;
+import slimeknights.tconstruct.library.tools.helper.ToolBuildHandler;
 import slimeknights.tconstruct.plugin.jei.util.CategoryUtil;
 import slimeknights.tconstruct.plugin.jei.util.FluidTooltipCallback;
 import slimeknights.tconstruct.plugin.jei.util.RecipeSlotWrapper;
@@ -104,7 +105,8 @@ public abstract class AbstractCastingCategory extends AbstractRecipeCategory<Dis
     ItemStack focusStack = ItemStack.EMPTY;
     boolean focusOutput = false;
     if (focus != null) {
-      focusStack = focus.getTypedValue().getIngredient();
+      // never hand the ingredient list's own stack to display code; previews may write tool data while rendering
+      focusStack = ToolBuildHandler.copyDisplayStack(focus.getTypedValue().getIngredient());
       focusOutput = focus.getRole() == RecipeIngredientRole.OUTPUT;
     }
 

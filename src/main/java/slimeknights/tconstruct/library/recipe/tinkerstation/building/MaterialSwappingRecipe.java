@@ -199,9 +199,10 @@ public abstract class MaterialSwappingRecipe implements ITinkerStationRecipe {
   /** Int stream filter to validate the slot index */
   protected static IntPredicate VALID_SLOT = i -> i < MAX_SLOTS;
 
-  /** Creates a new item stack with the given material. Will modify {@code tool}. */
+  /** Creates a new item stack with the given material. Does not modify {@code tool}. */
   public ItemStack withMaterial(ItemStack tool, int index, MaterialVariant material) {
-    return withMaterial(ToolStack.from(tool), index, material);
+    // display inputs may come from a recipe viewer, so never write into their shared custom data
+    return withMaterial(ToolStack.from(ToolBuildHandler.copyDisplayStack(tool)), index, material);
   }
 
   /** Creates a new item stack with the given material. Will modify {@code tool}. */

@@ -450,8 +450,9 @@ public class ToolStack implements IToolStackView {
     }
     this.damage = damage;
     nbt.putInt(TAG_DAMAGE, damage);
-    if (sourceStack != null && sourceStack.getItem() == item && item.isDamageable(sourceStack)) {
+    if (sourceStack != null && sourceStack.getItem() == item) {
       // write the component directly: setDamageValue() would call back into ModifiableItem#setDamage
+      // always write it, since creative display variants intentionally omit the component to stay out of JEI's grindstone repairs
       sourceStack.set(DataComponents.DAMAGE, damage);
     }
   }

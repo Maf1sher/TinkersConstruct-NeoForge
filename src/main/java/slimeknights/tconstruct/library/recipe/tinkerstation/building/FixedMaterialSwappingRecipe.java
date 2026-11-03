@@ -167,8 +167,8 @@ public class FixedMaterialSwappingRecipe extends MaterialSwappingRecipe implemen
       // need 1 recipe per index we can swap into
       multiRecipes = Arrays.stream(indices).filter(VALID_SLOT).<IDisplayToolTinkering>mapToObj(i -> {
         // for each index, use first as the material on input, desired material on output
-        List<ItemStack> withoutMaterial = Arrays.stream(tools).map(stack -> withMaterial(stack.copy(), i, MaterialVariant.of(ToolBuildHandler.getRenderMaterial(i)))).toList();
-        List<ItemStack> withMaterial = Arrays.stream(tools).map(stack -> withMaterial(stack.copy(), i, material)).toList();
+        List<ItemStack> withoutMaterial = Arrays.stream(tools).map(stack -> withMaterial(stack, i, MaterialVariant.of(ToolBuildHandler.getRenderMaterial(i)))).toList();
+        List<ItemStack> withMaterial = Arrays.stream(tools).map(stack -> withMaterial(stack, i, material)).toList();
         return new DisplayRecipe(variantText, i, inputs, withoutMaterial, withMaterial);
       }).toList();
     }
