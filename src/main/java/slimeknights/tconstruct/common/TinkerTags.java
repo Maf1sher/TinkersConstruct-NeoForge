@@ -216,6 +216,10 @@ public class TinkerTags {
     public static final TagKey<Block> STAINED_GLASS = common("stained_glass");
     /** Common stained glass pane tag, no longer provided by NeoForge */
     public static final TagKey<Block> STAINED_GLASS_PANES = common("stained_glass_panes");
+    /** Common amethyst storage block tag, no longer provided by NeoForge */
+    public static final TagKey<Block> STORAGE_BLOCKS_AMETHYST = common("storage_blocks/amethyst");
+    /** Common quartz storage block tag, no longer provided by NeoForge */
+    public static final TagKey<Block> STORAGE_BLOCKS_QUARTZ = common("storage_blocks/quartz");
     // ceramics compat
     @SuppressWarnings("removal")
     public static final TagKey<Block> CISTERN_CONNECTIONS = TagKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath("ceramics", "cistern_connections"));
@@ -243,6 +247,8 @@ public class TinkerTags {
     public static final TagKey<Item> STAINED_GLASS_PANES = common("stained_glass_panes");
     /** Common chestplate tag, NeoForge only provides the full armor tag */
     public static final TagKey<Item> ARMORS_CHESTPLATES = common("armors/chestplates");
+    /** Common amethyst storage block tag, no longer provided by NeoForge */
+    public static final TagKey<Item> STORAGE_BLOCKS_AMETHYST = common("storage_blocks/amethyst");
     /** Common quartz storage block tag, no longer provided by NeoForge */
     public static final TagKey<Item> STORAGE_BLOCKS_QUARTZ = common("storage_blocks/quartz");
     public static final TagKey<Item> GLASS_PANES_SILICA = common("glass_panes/silica");

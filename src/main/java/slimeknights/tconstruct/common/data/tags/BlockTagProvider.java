@@ -93,6 +93,11 @@ public class BlockTagProvider extends BlockTagsProvider {
     addMetalTags(TinkerMaterials.knightmetal, true);
     addMetalTags(TinkerMaterials.knightslime, true);
 
+    // storage blocks no longer provided by NeoForge
+    this.tag(TinkerTags.Blocks.STORAGE_BLOCKS_AMETHYST).add(Blocks.AMETHYST_BLOCK);
+    this.tag(TinkerTags.Blocks.STORAGE_BLOCKS_QUARTZ).add(Blocks.QUARTZ_BLOCK);
+    this.tag(Tags.Blocks.STORAGE_BLOCKS).addTags(TinkerTags.Blocks.STORAGE_BLOCKS_AMETHYST, TinkerTags.Blocks.STORAGE_BLOCKS_QUARTZ);
+
     // glass
     IntrinsicTagAppender<Block> silicaPanes = tag(TinkerTags.Blocks.GLASS_PANES_SILICA);
     this.tag(Tags.Blocks.GLASS_BLOCKS).add(TinkerCommons.soulGlass.get());

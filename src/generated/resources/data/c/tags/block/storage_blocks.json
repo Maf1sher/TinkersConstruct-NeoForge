@@ -13,6 +13,8 @@
     "#c:storage_blocks/soulsteel",
     "#c:storage_blocks/knightmetal",
     "#c:storage_blocks/knightslime",
+    "#c:storage_blocks/amethyst",
+    "#c:storage_blocks/quartz",
     "#c:storage_blocks/raw_cobalt",
     "tconstruct:fake_storage_block"
   ]

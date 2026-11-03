@@ -197,6 +197,8 @@ public class ItemTagProvider extends ItemTagsProvider {
     addMetalTags(TinkerMaterials.knightmetal);
     addMetalTags(TinkerMaterials.knightslime);
     this.copy(Tags.Blocks.STORAGE_BLOCKS, Tags.Items.STORAGE_BLOCKS);
+    copy(TinkerTags.Blocks.STORAGE_BLOCKS_AMETHYST, TinkerTags.Items.STORAGE_BLOCKS_AMETHYST);
+    copy(TinkerTags.Blocks.STORAGE_BLOCKS_QUARTZ, TinkerTags.Items.STORAGE_BLOCKS_QUARTZ);
 
     // glass
     copy(Tags.Blocks.GLASS_BLOCKS, Tags.Items.GLASS_BLOCKS);
