@@ -41,6 +41,8 @@ The jar is written to `build/libs/TinkersConstruct-1.21.1-*.jar`.
 
 - [Tinkers' Integrations and Tweaks](https://github.com/Maf1sher/TCIntegrations-NeoForge)
   — NeoForge 1.21.1 port of TCIntegrations, adding modpack integrations for other mods.
+- [Tinkers' Levelling Addon](https://github.com/Maf1sher/tinkers-levelling-addon-NeoForge)
+  — NeoForge 1.21.1 port of the tool levelling add-on, which adds the Improvable modifier.
 
 ## Credits
 
